@@ -51,9 +51,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back. Here&apos;s your business overview.
+        <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">Northline OS</p>
+        <h1 className="text-2xl font-bold tracking-tight">Command Center</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Live overview of leads, projects, and growth.
         </p>
       </div>
 

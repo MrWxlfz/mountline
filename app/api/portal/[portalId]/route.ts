@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server"
-import { auth } from "@clerk/nextjs/server"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 
 export async function GET(
@@ -13,7 +13,14 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const supabase = await createClient()
+  const user = await currentUser()
+  const email = user?.emailAddresses?.[0]?.emailAddress
+
+  if (!email) {
+    return NextResponse.json({ error: "No email found" }, { status: 403 })
+  }
+
+  const supabase = createAdminClient()
 
   // Fetch the project by portal_id
   const { data: project, error: projectError } = await supabase
@@ -40,22 +47,36 @@ export async function GET(
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
-  // Check if the user has portal access (or is admin via dashboard)
-  const { data: access } = await supabase
-    .from("client_portal_access")
+  // Check access: either a team member OR has portal access for this project
+  const { data: teamMember } = await supabase
+    .from("team_members")
     .select("id")
-    .eq("project_id", project.id)
-    .eq("clerk_user_id", userId)
-    .eq("access_status", "active")
+    .eq("email", email)
+    .eq("status", "active")
     .maybeSingle()
 
-  // For now, allow any authenticated user (admin can always view)
-  // In production, you'd restrict to only users with portal access
-  
+  if (!teamMember) {
+    // Not a team member - check portal access by email
+    const { data: portalAccess } = await supabase
+      .from("client_portal_access")
+      .select("id")
+      .eq("project_id", project.id)
+      .eq("client_email", email)
+      .eq("access_status", "active")
+      .maybeSingle()
+
+    if (!portalAccess) {
+      return NextResponse.json(
+        { error: "You do not have access to this project portal." },
+        { status: 403 }
+      )
+    }
+  }
+
   return NextResponse.json({
     project: {
       ...project,
-      client: project.clients
-    }
+      client: project.clients,
+    },
   })
 }

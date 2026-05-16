@@ -322,8 +322,6 @@ export function ContactSection() {
                 </motion.form>
               )}
             </AnimatePresence>
-          </motion.div>
-        </div>
       </div>
     </section>
   )

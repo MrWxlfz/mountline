@@ -1,14 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-const isDashboardRoute = createRouteMatcher(['/dashboard(.*)'])
 const isPortalRoute = createRouteMatcher(['/portal(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isDashboardRoute(req)) {
-    await auth.protect()
-  }
-
   if (isPortalRoute(req)) {
     const { userId } = await auth()
     if (!userId) {

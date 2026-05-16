@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, LayoutDashboard, ArrowRight } from "lucide-react"
+import { Menu, X, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useUser, UserButton } from "@clerk/nextjs"
 import Link from "next/link"
@@ -80,11 +80,10 @@ export function Navbar() {
               {isLoaded && isSignedIn && (
                 <>
                   <Link
-                    href="/dashboard"
+                    href="/portal"
                     className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-secondary/50"
                   >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
+                    My Portal
                   </Link>
                   <UserButton 
                     afterSignOutUrl="/"
@@ -156,12 +155,11 @@ export function Navbar() {
                   <ThemeToggle />
                   {isLoaded && isSignedIn && (
                     <Link
-                      href="/dashboard"
+                      href="/portal"
                       className="flex items-center justify-center gap-2 flex-1 text-sm font-medium text-muted-foreground hover:text-foreground py-2.5 px-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
+                      My Portal
                     </Link>
                   )}
                 </div>

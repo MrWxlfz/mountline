@@ -1,128 +1,73 @@
 import { auth } from "@clerk/nextjs/server"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { 
-  MessageSquare, 
-  FolderKanban, 
-  TrendingUp,
-  Clock,
-  ArrowUpRight,
-  ArrowDownRight
+  Inbox, FolderKanban, Users, Target,
+  Clock, ArrowUpRight
 } from "lucide-react"
 import Link from "next/link"
 
-async function getStats(userId: string) {
-  const supabase = await createClient()
+async function getStats() {
+  const supabase = createAdminClient()
   
-  // Get leads count
-  const { count: leadsCount } = await supabase
-    .from("leads")
-    .select("*", { count: "exact", head: true })
-  
-  // Get projects count
-  const { count: projectsCount } = await supabase
-    .from("projects")
-    .select("*", { count: "exact", head: true })
-    .eq("clerk_user_id", userId)
-  
-  // Get recent leads
-  const { data: recentLeads } = await supabase
-    .from("leads")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(5)
-  
-  // Get recent activities
-  const { data: recentActivities } = await supabase
-    .from("activities")
-    .select("*")
-    .eq("clerk_user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(5)
+  const [
+    { count: leadsCount },
+    { count: projectsCount },
+    { count: clientsCount },
+    { count: outreachCount },
+    { data: recentLeads },
+    { data: recentProjects }
+  ] = await Promise.all([
+    supabase.from("leads").select("*", { count: "exact", head: true }),
+    supabase.from("projects").select("*", { count: "exact", head: true }),
+    supabase.from("clients").select("*", { count: "exact", head: true }),
+    supabase.from("potential_clients").select("*", { count: "exact", head: true }),
+    supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(5),
+    supabase.from("projects").select("*, clients(business_name)").order("created_at", { ascending: false }).limit(5),
+  ])
 
   return {
     leadsCount: leadsCount || 0,
     projectsCount: projectsCount || 0,
+    clientsCount: clientsCount || 0,
+    outreachCount: outreachCount || 0,
     recentLeads: recentLeads || [],
-    recentActivities: recentActivities || []
+    recentProjects: recentProjects || []
   }
 }
 
 export default async function DashboardPage() {
   const { userId } = await auth()
-  
-  if (!userId) {
-    return null
-  }
+  if (!userId) return null
 
-  const stats = await getStats(userId)
+  const stats = await getStats()
 
   const statCards = [
-    {
-      label: "Total Leads",
-      value: stats.leadsCount,
-      change: "+12%",
-      changeType: "positive" as const,
-      icon: MessageSquare,
-      href: "/dashboard/leads"
-    },
-    {
-      label: "Active Projects",
-      value: stats.projectsCount,
-      change: "+3",
-      changeType: "positive" as const,
-      icon: FolderKanban,
-      href: "/dashboard/projects"
-    },
-    {
-      label: "Conversion Rate",
-      value: "24%",
-      change: "+2.4%",
-      changeType: "positive" as const,
-      icon: TrendingUp,
-      href: "/dashboard/leads"
-    },
-    {
-      label: "Avg Response Time",
-      value: "2.4h",
-      change: "-18min",
-      changeType: "positive" as const,
-      icon: Clock,
-      href: "/dashboard/leads"
-    },
+    { label: "Total Leads", value: stats.leadsCount, icon: Inbox, href: "/dashboard/leads" },
+    { label: "Active Projects", value: stats.projectsCount, icon: FolderKanban, href: "/dashboard/projects" },
+    { label: "Clients", value: stats.clientsCount, icon: Users, href: "/dashboard/clients" },
+    { label: "Outreach Targets", value: stats.outreachCount, icon: Target, href: "/dashboard/outreach" },
   ]
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back. Here&apos;s an overview of your business.
+          Welcome back. Here&apos;s your business overview.
         </p>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stats */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
           <Link
             key={stat.label}
             href={stat.href}
-            className="group p-6 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors"
+            className="group p-5 bg-card rounded-xl border border-border hover:border-foreground/20 transition-colors"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-lg bg-muted">
-                <stat.icon className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div className={`flex items-center gap-1 text-xs font-medium ${
-                stat.changeType === "positive" ? "text-green-500" : "text-red-500"
-              }`}>
-                {stat.changeType === "positive" ? (
-                  <ArrowUpRight className="w-3 h-3" />
-                ) : (
-                  <ArrowDownRight className="w-3 h-3" />
-                )}
-                {stat.change}
-              </div>
+            <div className="flex items-center justify-between mb-3">
+              <stat.icon className="w-5 h-5 text-muted-foreground" />
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <div className="text-2xl font-bold">{stat.value}</div>
             <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -130,72 +75,82 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Two column layout */}
+      {/* Two column */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Leads */}
         <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between p-6 border-b border-border">
+          <div className="flex items-center justify-between p-5 border-b border-border">
             <h2 className="font-semibold">Recent Leads</h2>
-            <Link 
-              href="/dashboard/leads"
-              className="text-sm text-primary hover:underline"
-            >
+            <Link href="/dashboard/leads" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               View all
             </Link>
           </div>
           <div className="divide-y divide-border">
             {stats.recentLeads.length > 0 ? (
               stats.recentLeads.map((lead: any) => (
-                <div key={lead.id} className="flex items-center gap-4 p-4">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <div key={lead.id} className="flex items-center gap-4 px-5 py-3.5">
+                  <div className="w-9 h-9 rounded-full bg-foreground/5 flex items-center justify-center shrink-0">
                     <span className="text-sm font-medium">
                       {lead.name?.charAt(0)?.toUpperCase() || "?"}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{lead.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {lead.email}
-                    </p>
+                    <p className="text-sm font-medium truncate">{lead.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{lead.service_needed || lead.email}</p>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(lead.created_at).toLocaleDateString()}
-                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    lead.status === "new" ? "bg-blue-500/10 text-blue-500" :
+                    lead.status === "contacted" ? "bg-yellow-500/10 text-yellow-500" :
+                    "bg-muted text-muted-foreground"
+                  }`}>
+                    {lead.status || "new"}
+                  </span>
                 </div>
               ))
             ) : (
               <div className="p-8 text-center text-muted-foreground">
-                <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>No leads yet</p>
-                <p className="text-sm">Leads from your contact form will appear here.</p>
+                <Inbox className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p className="text-sm">No leads yet. They&apos;ll show up here once your form gets submissions.</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Projects */}
         <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between p-6 border-b border-border">
-            <h2 className="font-semibold">Recent Activity</h2>
+          <div className="flex items-center justify-between p-5 border-b border-border">
+            <h2 className="font-semibold">Active Projects</h2>
+            <Link href="/dashboard/projects" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              View all
+            </Link>
           </div>
           <div className="divide-y divide-border">
-            {stats.recentActivities.length > 0 ? (
-              stats.recentActivities.map((activity: any) => (
-                <div key={activity.id} className="flex items-start gap-4 p-4">
-                  <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
+            {stats.recentProjects.length > 0 ? (
+              stats.recentProjects.map((project: any) => (
+                <div key={project.id} className="flex items-center gap-4 px-5 py-3.5">
+                  <div className="w-9 h-9 rounded-lg bg-foreground/5 flex items-center justify-center shrink-0">
+                    <FolderKanban className="w-4 h-4 text-muted-foreground" />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm">{activity.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(activity.created_at).toLocaleString()}
+                    <p className="text-sm font-medium truncate">{project.project_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {project.clients?.business_name || "No client"}
                     </p>
                   </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
+                    project.status === "build" ? "bg-blue-500/10 text-blue-500" :
+                    project.status === "review" ? "bg-yellow-500/10 text-yellow-500" :
+                    project.status === "completed" ? "bg-green-500/10 text-green-500" :
+                    "bg-muted text-muted-foreground"
+                  }`}>
+                    {project.status}
+                  </span>
                 </div>
               ))
             ) : (
               <div className="p-8 text-center text-muted-foreground">
-                <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>No activity yet</p>
-                <p className="text-sm">Your recent actions will appear here.</p>
+                <FolderKanban className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p className="text-sm">No projects yet. Create one to get started.</p>
               </div>
             )}
           </div>
@@ -203,38 +158,35 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-card rounded-xl border border-border p-6">
-        <h2 className="font-semibold mb-4">Quick Actions</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Link
-            href="/dashboard/projects/new"
-            className="flex items-center gap-3 p-4 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-          >
-            <FolderKanban className="w-5 h-5 text-primary" />
-            <span className="font-medium">New Project</span>
-          </Link>
-          <Link
-            href="/dashboard/leads"
-            className="flex items-center gap-3 p-4 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-          >
-            <MessageSquare className="w-5 h-5 text-primary" />
-            <span className="font-medium">View Leads</span>
-          </Link>
-          <Link
-            href="/dashboard/team"
-            className="flex items-center gap-3 p-4 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-          >
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <span className="font-medium">Team Settings</span>
-          </Link>
-          <Link
-            href="/dashboard/settings"
-            className="flex items-center gap-3 p-4 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-          >
-            <Clock className="w-5 h-5 text-primary" />
-            <span className="font-medium">Settings</span>
-          </Link>
-        </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Link
+          href="/dashboard/clients"
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
+        >
+          <Users className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium">Add Client</span>
+        </Link>
+        <Link
+          href="/dashboard/projects"
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
+        >
+          <FolderKanban className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium">New Project</span>
+        </Link>
+        <Link
+          href="/dashboard/outreach"
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
+        >
+          <Target className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium">Add Prospect</span>
+        </Link>
+        <Link
+          href="/dashboard/insights"
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
+        >
+          <Clock className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium">View Insights</span>
+        </Link>
       </div>
     </div>
   )

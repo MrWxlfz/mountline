@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { 
   Search, 
   Filter, 
@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 
 async function getLeads() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   const { data: leads, error } = await supabase
     .from("leads")

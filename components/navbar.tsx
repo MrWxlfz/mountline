@@ -105,7 +105,14 @@ export function Navbar() {
                       }}
                     />
                   </>
-                ) : null}
+                ) : (
+                  <Link
+                    href="/client-login"
+                    className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-secondary/50"
+                  >
+                    Client Login
+                  </Link>
+                )}
               </>
             )}
 
@@ -187,7 +194,15 @@ export function Navbar() {
                           Dashboard
                         </Link>
                       </motion.div>
-                    ) : null}
+                    ) : (
+                      <Link
+                        href="/client-login"
+                        className="flex-1 text-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-3 rounded-lg hover:bg-secondary/50"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Client Login
+                      </Link>
+                    )}
                   </>
                 )}
               </div>

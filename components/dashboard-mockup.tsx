@@ -3,25 +3,26 @@
 import type React from "react"
 import { motion } from "framer-motion"
 import {
-  Inbox,
-  CircleUser,
-  Layers,
-  FolderKanban,
-  LayoutGrid,
-  Users,
-  Smartphone,
-  Map,
-  FileText,
+  Layout,
+  Palette,
+  Code2,
+  Rocket,
   ChevronDown,
   ChevronRight,
-  CirclePower,
   Search,
   Plus,
-  Link2,
   MoreHorizontal,
-  Sparkles,
+  FolderOpen,
+  FileText,
+  Globe,
+  Smartphone,
+  PenTool,
+  Layers,
   Settings,
   HelpCircle,
+  MessageSquare,
+  Clock,
+  CheckCircle2,
 } from "lucide-react"
 
 export function DashboardMockup() {
@@ -67,8 +68,10 @@ export function DashboardMockup() {
         {/* Logo */}
         <div className="p-3 border-b border-zinc-800/50">
           <div className="flex items-center gap-2 px-2 py-1.5">
-            <CirclePower className="w-5 h-5 text-white" />
-            <span className="text-white font-semibold text-sm">Sprint</span>
+            <div className="w-6 h-6 bg-white rounded-md flex items-center justify-center">
+              <span className="text-zinc-900 font-bold text-xs">N</span>
+            </div>
+            <span className="text-white font-semibold text-sm">Northline</span>
             <ChevronDown className="w-3.5 h-3.5 text-zinc-500 ml-auto" />
           </div>
         </div>
@@ -77,66 +80,57 @@ export function DashboardMockup() {
         <div className="p-3">
           <div className="flex items-center gap-2 px-2.5 py-1.5 bg-zinc-800/50 rounded-md text-zinc-500 text-xs">
             <Search className="w-3.5 h-3.5" />
-            <span>Search...</span>
+            <span>Search projects...</span>
             <span className="ml-auto text-[10px] bg-zinc-700/50 px-1.5 py-0.5 rounded">⌘K</span>
           </div>
         </div>
 
         {/* Main nav */}
         <div className="px-3 space-y-0.5">
-          <NavItem icon={Inbox} label="Inbox" badge={3} active />
-          <NavItem icon={CircleUser} label="My Issues" />
+          <NavItem icon={Layout} label="Dashboard" active />
+          <NavItem icon={FolderOpen} label="Projects" badge={8} />
+          <NavItem icon={MessageSquare} label="Messages" badge={3} />
         </div>
 
-        {/* Workspace section */}
+        {/* Services section */}
         <div className="mt-5 px-3">
           <div className="px-2 py-1 text-[10px] text-zinc-500 font-medium uppercase tracking-wider flex items-center gap-1">
-            Workspace
+            Services
           </div>
           <div className="space-y-0.5 mt-1">
-            <NavItem icon={Layers} label="Initiatives" hasSubmenu />
-            <NavItem icon={FolderKanban} label="Projects" hasSubmenu />
-            <NavItem icon={LayoutGrid} label="Views" hasSubmenu />
-            <NavItem icon={Users} label="Teams" hasSubmenu />
+            <NavItem icon={PenTool} label="Brand Design" hasSubmenu />
+            <NavItem icon={Globe} label="Web Development" hasSubmenu />
+            <NavItem icon={Smartphone} label="Mobile Apps" hasSubmenu />
+            <NavItem icon={Layers} label="UI/UX Design" hasSubmenu />
           </div>
         </div>
 
-        {/* Favorites section */}
+        {/* Active Projects */}
         <div className="mt-5 px-3">
           <div className="px-2 py-1 text-[10px] text-zinc-500 font-medium uppercase tracking-wider flex items-center gap-1">
-            Favorites
+            Active Projects
           </div>
           <div className="space-y-0.5 mt-1">
-            <NavItem icon={Smartphone} label="Mobile App" color="text-blue-400" />
-            <NavItem icon={Map} label="Q1 Roadmap" color="text-orange-400" />
-            <NavItem icon={FileText} label="API Docs" color="text-emerald-400" />
-          </div>
-        </div>
-
-        {/* Teams section */}
-        <div className="mt-5 px-3 flex-1">
-          <div className="px-2 py-1 text-[10px] text-zinc-500 font-medium uppercase tracking-wider flex items-center gap-1">
-            Your Teams
-          </div>
-          <div className="space-y-0.5 mt-1">
-            <NavItem icon={Sparkles} label="Product" hasSubmenu />
-            <NavItem icon={Settings} label="Engineering" hasSubmenu />
+            <NavItem icon={FileText} label="Fintech App" color="text-blue-400" />
+            <NavItem icon={FileText} label="E-commerce Site" color="text-emerald-400" />
+            <NavItem icon={FileText} label="SaaS Dashboard" color="text-amber-400" />
           </div>
         </div>
 
         {/* Bottom */}
-        <div className="p-3 border-t border-zinc-800/50">
+        <div className="mt-auto p-3 border-t border-zinc-800/50">
+          <NavItem icon={Settings} label="Settings" />
           <NavItem icon={HelpCircle} label="Help & Support" />
         </div>
       </motion.div>
 
-      {/* Inbox List */}
+      {/* Projects List */}
       <motion.div
         className="w-[320px] h-full bg-zinc-900/40 border-r border-zinc-800/50 flex flex-col shrink-0"
         variants={panelVariants}
       >
         <div className="px-4 py-3 border-b border-zinc-800/50 flex items-center justify-between">
-          <h3 className="text-white font-semibold text-sm">Inbox</h3>
+          <h3 className="text-white font-semibold text-sm">Active Projects</h3>
           <div className="flex items-center gap-2">
             <button className="text-zinc-500 hover:text-white transition-colors">
               <Plus className="w-4 h-4" />
@@ -145,69 +139,48 @@ export function DashboardMockup() {
         </div>
 
         <div className="flex-1 overflow-auto scrollbar-hide">
-          <InboxItem
-            id="ENG-135"
-            title="Refactor sonic crawler"
-            subtitle="nan assigned you"
-            time="2h"
-            avatar="https://i.pravatar.cc/32?img=1"
+          <ProjectItem
+            client="TechVault Inc."
+            title="Fintech Mobile App"
+            phase="Development"
+            progress={75}
             status="in-progress"
             active
           />
-          <InboxItem
-            id="LLM"
-            title="LLM Chatbot"
-            subtitle="New project update by raissa"
-            time="1d"
-            avatar="https://i.pravatar.cc/32?img=2"
-            status="todo"
-            isProject
+          <ProjectItem
+            client="Urban Threads"
+            title="E-commerce Redesign"
+            phase="Design Review"
+            progress={45}
+            status="review"
           />
-          <InboxItem
-            id="ENG-159"
-            title="Error uploading images via API"
-            subtitle="SLA breached"
-            time="2d"
-            avatar="https://i.pravatar.cc/32?img=3"
-            status="bug"
+          <ProjectItem
+            client="CloudSync"
+            title="SaaS Dashboard"
+            phase="Discovery"
+            progress={20}
+            status="planning"
           />
-          <InboxItem
-            id="DES-498"
-            title="Redesign users settings..."
-            subtitle="karri mentioned you"
-            time="4h"
-            avatar="https://i.pravatar.cc/32?img=4"
-            status="todo"
+          <ProjectItem
+            client="Wellness Co."
+            title="Brand Identity"
+            phase="Delivery"
+            progress={95}
+            status="complete"
           />
-          <InboxItem
-            id="ENG-160"
-            title="Holtzmann engine is broken"
-            subtitle="You asked to be reminded"
-            time="1w"
-            avatar="https://i.pravatar.cc/32?img=5"
-            status="bug"
+          <ProjectItem
+            client="DataFlow"
+            title="Analytics Platform"
+            phase="Wireframing"
+            progress={30}
+            status="in-progress"
           />
-          <InboxItem
-            title="Sign up flow experiments"
-            subtitle="Added as project member"
-            avatar="https://i.pravatar.cc/32?img=6"
-            status="done"
-            isProject
-          />
-          <InboxItem
-            id="MKT-122"
-            title="Design assets for marketing"
-            subtitle="erin marked as Duplicate"
-            time="1w"
-            avatar="https://i.pravatar.cc/32?img=7"
-            status="done"
-          />
-          <InboxItem
-            title="Homepage v3"
-            subtitle="New project update by paco"
-            avatar="https://i.pravatar.cc/32?img=8"
-            status="todo"
-            isProject
+          <ProjectItem
+            client="GreenLeaf"
+            title="Corporate Website"
+            phase="Development"
+            progress={60}
+            status="in-progress"
           />
         </div>
       </motion.div>
@@ -217,99 +190,68 @@ export function DashboardMockup() {
         {/* Header breadcrumb */}
         <div className="px-5 py-3 border-b border-zinc-800/50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-zinc-500">Engineering</span>
+            <span className="text-zinc-500">Projects</span>
             <span className="text-zinc-600">›</span>
-            <span className="text-emerald-400">Spice harvester</span>
+            <span className="text-blue-400">TechVault Inc.</span>
             <span className="text-zinc-600">›</span>
-            <span className="text-zinc-300">ENG-135</span>
+            <span className="text-zinc-300">Fintech Mobile App</span>
           </div>
           <MoreHorizontal className="w-4 h-4 text-zinc-500" />
         </div>
 
         {/* Content */}
         <div className="flex-1 p-5 overflow-auto scrollbar-hide">
-          <h2 className="text-white text-xl font-semibold mb-5">Refactor sonic crawler</h2>
-
-          {/* Code block */}
-          <div className="bg-zinc-900/80 rounded-lg p-4 text-[11px] font-mono mb-5 border border-zinc-800/50">
-            <div className="space-y-2">
-              <div>
-                <span className="text-zinc-500">Comment.</span>
-                <span className="text-amber-300">documentContent</span>
-                <span className="text-zinc-400"> is defined wrongly. It should be a </span>
-                <span className="text-cyan-300">LazyManyToOne</span>
-                <span className="text-zinc-400"> relation.</span>
-              </div>
-              <div className="mt-3 text-zinc-600">
-                {/* The document content that this comment is associated with. */}
-              </div>
-              <div>
-                <span className="text-purple-400">@ManyToOne</span>
-                <span className="text-zinc-400">(</span>
-                <span className="text-cyan-300">DocumentContent</span>
-                <span className="text-zinc-400">,</span>
-                <span className="text-amber-300">comments</span>
-                <span className="text-zinc-400">,</span>
-                <span className="text-amber-300">cascade</span>
-                <span className="text-zinc-400">:</span>
-                <span className="text-orange-300">true</span>
-                <span className="text-zinc-400">,</span>
-                <span className="text-amber-300">nullable</span>
-                <span className="text-zinc-400">:</span>
-                <span className="text-orange-300">false</span>
-                <span className="text-zinc-400">)</span>
-              </div>
-              <div>
-                <span className="text-blue-400">public </span>
-                <span className="text-amber-300">documentContent</span>
-                <span className="text-zinc-400">?: </span>
-                <span className="text-cyan-300">DocumentContent</span>
-                <span className="text-zinc-400">;</span>
-              </div>
-              <div className="mt-3 text-zinc-400">
-                We would be accessing
-                <span className="text-emerald-400">CachedPromise&lt;DocumentContent&gt;</span>
-                then, and document content would be hydrated.
-              </div>
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <h2 className="text-white text-xl font-semibold mb-1">Fintech Mobile App</h2>
+              <p className="text-zinc-500 text-sm">TechVault Inc. • Started Jan 2024</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">In Progress</span>
             </div>
           </div>
 
-          {/* Meta actions */}
-          <div className="space-y-2 text-sm mb-5">
-            <div className="flex items-center gap-2 text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>Add sub-issues</span>
+          {/* Progress Overview */}
+          <div className="bg-zinc-900/80 rounded-lg p-4 mb-5 border border-zinc-800/50">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-zinc-400 text-sm">Overall Progress</span>
+              <span className="text-white text-sm font-medium">75%</span>
             </div>
-            <div className="flex items-center gap-2 text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors">
-              <Link2 className="w-4 h-4" />
-              <span>Links</span>
+            <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full" style={{ width: "75%" }} />
             </div>
           </div>
 
-          {/* PR reference */}
-          <div className="text-xs text-zinc-500 mb-5">
-            <span className="text-zinc-600">#20319</span>
-            <span> igor/eng-135 add source to insights slice and segment</span>
+          {/* Milestones */}
+          <div className="space-y-3 mb-5">
+            <h3 className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Milestones</h3>
+            <MilestoneItem icon={Palette} title="Brand & Design System" status="complete" />
+            <MilestoneItem icon={Layout} title="UI/UX Design" status="complete" />
+            <MilestoneItem icon={Code2} title="Frontend Development" status="in-progress" />
+            <MilestoneItem icon={Rocket} title="Launch & Deployment" status="pending" />
           </div>
 
-          {/* Activity */}
+          {/* Recent Activity */}
           <div className="pt-4 border-t border-zinc-800/50">
-            <div className="text-xs text-zinc-500 font-medium mb-3 uppercase tracking-wider">Activity</div>
+            <div className="text-xs text-zinc-500 font-medium mb-3 uppercase tracking-wider">Recent Activity</div>
             <div className="space-y-3">
               <ActivityItem
-                avatar="https://i.pravatar.cc/24?img=1"
-                name="nan"
-                action="moved from"
-                from="Backlog"
-                to="In Progress"
-                time="5 months ago"
+                name="Design Team"
+                action="completed"
+                item="Payment flow screens"
+                time="2 hours ago"
               />
               <ActivityItem
-                avatar="https://i.pravatar.cc/24?img=2"
-                name="alex"
-                action="commented on"
-                from="this issue"
-                time="5 months ago"
+                name="Dev Team"
+                action="started"
+                item="Authentication module"
+                time="Yesterday"
+              />
+              <ActivityItem
+                name="Client"
+                action="approved"
+                item="Dashboard wireframes"
+                time="3 days ago"
               />
             </div>
           </div>
@@ -343,7 +285,7 @@ function NavItem({
       <Icon className={`w-4 h-4 ${color || ""}`} />
       <span className="flex-1 text-xs">{label}</span>
       {badge && (
-        <span className="bg-indigo-500/80 text-white text-[10px] min-w-[18px] h-[18px] flex items-center justify-center rounded-full font-medium px-1">
+        <span className="bg-zinc-700 text-zinc-300 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center rounded-full font-medium px-1">
           {badge}
         </span>
       )}
@@ -352,30 +294,26 @@ function NavItem({
   )
 }
 
-function InboxItem({
-  id,
+function ProjectItem({
+  client,
   title,
-  subtitle,
-  time,
-  avatar,
+  phase,
+  progress,
   status,
-  isProject,
   active,
 }: {
-  id?: string
+  client: string
   title: string
-  subtitle?: string
-  time?: string
-  avatar: string
+  phase: string
+  progress: number
   status: string
-  isProject?: boolean
   active?: boolean
 }) {
   const statusColors: Record<string, string> = {
-    "in-progress": "bg-yellow-500",
-    todo: "bg-zinc-600",
-    bug: "bg-red-500",
-    done: "bg-emerald-500",
+    "in-progress": "bg-blue-500",
+    "review": "bg-amber-500",
+    "planning": "bg-zinc-500",
+    "complete": "bg-emerald-500",
   }
 
   return (
@@ -385,51 +323,71 @@ function InboxItem({
       }`}
     >
       <div className="flex items-start gap-3">
-        <img src={avatar || "/placeholder.svg"} alt="" className="w-8 h-8 rounded-full shrink-0 mt-0.5" />
+        <div className={`w-2 h-2 rounded-full mt-1.5 ${statusColors[status] || "bg-zinc-500"}`} />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            {id && <span className="text-zinc-500 text-[10px]">{id}</span>}
-            {isProject && <span className="text-violet-400 text-[10px]">Project</span>}
-            <div className={`w-2 h-2 rounded-full ${statusColors[status] || "bg-zinc-500"}`} />
+          <p className="text-zinc-500 text-[10px] mb-0.5">{client}</p>
+          <p className="text-white text-xs truncate leading-tight mb-1">{title}</p>
+          <div className="flex items-center gap-2">
+            <Clock className="w-3 h-3 text-zinc-600" />
+            <span className="text-zinc-500 text-[10px]">{phase}</span>
+            <span className="text-zinc-600 text-[10px] ml-auto">{progress}%</span>
           </div>
-          <p className="text-white text-xs truncate leading-tight">{title}</p>
-          {subtitle && <p className="text-zinc-500 text-[10px] mt-0.5 truncate">{subtitle}</p>}
         </div>
-        {time && <span className="text-zinc-600 text-[10px] shrink-0">{time}</span>}
       </div>
     </div>
   )
 }
 
+function MilestoneItem({
+  icon: Icon,
+  title,
+  status,
+}: {
+  icon: React.ElementType
+  title: string
+  status: "complete" | "in-progress" | "pending"
+}) {
+  const statusStyles = {
+    complete: "text-emerald-400 bg-emerald-500/10",
+    "in-progress": "text-blue-400 bg-blue-500/10",
+    pending: "text-zinc-500 bg-zinc-800/50",
+  }
+
+  return (
+    <div className="flex items-center gap-3 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800/30">
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${statusStyles[status]}`}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <span className="text-zinc-300 text-sm flex-1">{title}</span>
+      {status === "complete" && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+      {status === "in-progress" && (
+        <span className="text-[10px] text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded">Active</span>
+      )}
+    </div>
+  )
+}
+
 function ActivityItem({
-  avatar,
   name,
   action,
-  from,
-  to,
+  item,
   time,
 }: {
-  avatar: string
   name: string
   action: string
-  from: string
-  to?: string
+  item: string
   time: string
 }) {
   return (
     <div className="flex items-start gap-2">
-      <img src={avatar || "/placeholder.svg"} alt="" className="w-5 h-5 rounded-full" />
+      <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center mt-0.5">
+        <span className="text-[10px] text-zinc-400">{name.charAt(0)}</span>
+      </div>
       <div className="flex-1">
         <p className="text-zinc-400 text-xs">
           <span className="text-white">{name}</span>
           <span className="text-zinc-500"> {action} </span>
-          <span className="text-zinc-300">{from}</span>
-          {to && (
-            <>
-              <span className="text-zinc-500"> to </span>
-              <span className="text-zinc-300">{to}</span>
-            </>
-          )}
+          <span className="text-zinc-300">{item}</span>
         </p>
         <p className="text-zinc-600 text-[10px] mt-0.5">{time}</p>
       </div>

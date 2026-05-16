@@ -22,7 +22,10 @@ export default function NewProjectPage() {
     status: "discovery",
     start_date: "",
     target_launch_date: "",
+    live_url: "",
     preview_url: "",
+    payment_link: "",
+    next_step: "",
     notes: "",
   })
 
@@ -162,6 +165,39 @@ export default function NewProjectPage() {
             onChange={(e) => setForm({ ...form, preview_url: e.target.value })}
             className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
             placeholder="https://preview.acme.northline.dev"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Live URL</label>
+          <input
+            type="url"
+            value={form.live_url}
+            onChange={(e) => setForm({ ...form, live_url: e.target.value })}
+            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+            placeholder="https://acme.com"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Manual Payment Link</label>
+          <input
+            type="url"
+            value={form.payment_link}
+            onChange={(e) => setForm({ ...form, payment_link: e.target.value })}
+            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+            placeholder="https://buy.stripe.com/..."
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Next Step</label>
+          <textarea
+            value={form.next_step}
+            onChange={(e) => setForm({ ...form, next_step: e.target.value })}
+            rows={2}
+            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20 resize-none"
+            placeholder="What should the client know or do next?"
           />
         </div>
 

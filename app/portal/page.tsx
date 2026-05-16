@@ -1,6 +1,8 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
+import type { ReactNode } from "react"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { isNorthlineTeamMember } from "@/lib/auth/team"
 import Link from "next/link"
 import { NorthlineLogo } from "@/components/northline-logo"
 import { FolderKanban } from "lucide-react"
@@ -9,26 +11,34 @@ export default async function PortalIndexPage() {
   const { userId } = await auth()
   if (!userId) redirect("/client-login")
 
+  if (await isNorthlineTeamMember()) {
+    redirect("/dashboard")
+  }
+
   const user = await currentUser()
   const email = user?.emailAddresses?.[0]?.emailAddress
 
-  if (!email) {
-    return (
-      <PortalShell>
-        <p className="text-sm text-muted-foreground">Unable to determine your email. Please contact support.</p>
-      </PortalShell>
-    )
-  }
-
   const supabase = createAdminClient()
 
-  // Find portal access for this user
-  const { data: access } = await supabase
+  const emailAccess = email
+    ? await supabase
+        .from("client_portal_access")
+        .select("*, projects(portal_id, project_name, status)")
+        .eq("client_email", email)
+        .in("access_status", ["active", "invited"])
+        .order("created_at", { ascending: false })
+    : { data: [] }
+
+  const { data: clerkAccess } = await supabase
     .from("client_portal_access")
     .select("*, projects(portal_id, project_name, status)")
-    .eq("client_email", email)
-    .eq("access_status", "active")
+    .eq("clerk_user_id", userId)
+    .in("access_status", ["active", "invited"])
     .order("created_at", { ascending: false })
+
+  const access = [...(emailAccess.data || []), ...(clerkAccess || [])].filter(
+    (item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index,
+  )
 
   // If only one project, redirect directly
   if (access && access.length === 1 && access[0].projects?.portal_id) {
@@ -60,7 +70,7 @@ export default async function PortalIndexPage() {
         <div className="text-center space-y-3">
           <FolderKanban className="w-10 h-10 mx-auto text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">
-            No active projects found for <span className="font-medium text-foreground">{email}</span>.
+            No active projects found for <span className="font-medium text-foreground">{email || "this account"}</span>.
           </p>
           <p className="text-xs text-muted-foreground">
             If you believe this is an error, please contact your project manager.
@@ -74,7 +84,7 @@ export default async function PortalIndexPage() {
   )
 }
 
-function PortalShell({ children }: { children: React.ReactNode }) {
+function PortalShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">

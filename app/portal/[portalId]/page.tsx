@@ -1,16 +1,34 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import type { FormEvent, ReactNode } from "react"
 import { useParams } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
 import { motion } from "framer-motion"
-import { NorthlineLogo } from "@/components/northline-logo"
-import { 
-  ExternalLink, Clock, CheckCircle2, Circle, ArrowRight,
-  Eye, MessageSquare, FileText, Loader2
+import {
+  ArrowRight,
+  CheckCircle2,
+  Circle,
+  CreditCard,
+  ExternalLink,
+  Eye,
+  FileText,
+  Loader2,
+  Lock,
+  MessageSquare,
+  Send,
 } from "lucide-react"
+import { NorthlineLogo } from "@/components/northline-logo"
+import type { SupportMessage } from "@/lib/supabase/types"
 
-type ProjectStatus = "discovery" | "design" | "build" | "review" | "launch" | "support" | "completed"
+type ProjectStatus =
+  | "discovery"
+  | "design"
+  | "build"
+  | "review"
+  | "launch"
+  | "support"
+  | "completed"
 
 interface PortalProject {
   id: string
@@ -21,11 +39,23 @@ interface PortalProject {
   target_launch_date: string | null
   live_url: string | null
   preview_url: string | null
+  payment_link: string | null
+  next_step: string | null
   notes: string | null
   client: {
     business_name: string
     contact_name: string
+    email: string
   } | null
+}
+
+type PortalPayload = {
+  project: PortalProject
+  supportMessages: SupportMessage[]
+  viewer: {
+    email: string | null
+    isTeamMember: boolean
+  }
 }
 
 const STAGES: { key: ProjectStatus; label: string }[] = [
@@ -37,248 +67,408 @@ const STAGES: { key: ProjectStatus; label: string }[] = [
   { key: "support", label: "Support" },
 ]
 
-function getStageIndex(status: ProjectStatus): number {
-  const idx = STAGES.findIndex(s => s.key === status)
-  return idx >= 0 ? idx : 0
+function getStageIndex(status: ProjectStatus) {
+  if (status === "completed") return STAGES.length - 1
+  const index = STAGES.findIndex((stage) => stage.key === status)
+  return index >= 0 ? index : 0
+}
+
+function formatDate(date: string | null) {
+  if (!date) return null
+  return new Date(date).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
 }
 
 export default function PortalPage() {
   const { portalId } = useParams<{ portalId: string }>()
   const { user, isLoaded } = useUser()
-  const [project, setProject] = useState<PortalProject | null>(null)
+  const [payload, setPayload] = useState<PortalPayload | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState("")
+  const [messageState, setMessageState] = useState<"idle" | "sending" | "sent" | "error">("idle")
+  const [messageError, setMessageError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoaded || !portalId) return
 
-    async function fetchProject() {
+    async function fetchPortal() {
+      setLoading(true)
+      setError(null)
+
       try {
         const res = await fetch(`/api/portal/${portalId}`)
+        const data = await res.json()
+
         if (!res.ok) {
-          const data = await res.json()
-          setError(data.error || "Project not found")
+          setError(data.error || "Unable to load this portal.")
           return
         }
-        const data = await res.json()
-        setProject(data.project)
+
+        setPayload(data)
       } catch {
-        setError("Failed to load project")
+        setError("Unable to load this portal.")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchProject()
+    fetchPortal()
   }, [isLoaded, portalId])
 
+  const project = payload?.project
+  const currentStage = useMemo(
+    () => (project ? getStageIndex(project.status) : 0),
+    [project],
+  )
+
+  async function handleSendMessage(e: FormEvent) {
+    e.preventDefault()
+    if (!message.trim() || !portalId) return
+
+    setMessageState("sending")
+    setMessageError(null)
+
+    try {
+      const res = await fetch(`/api/portal/${portalId}/support`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setMessageState("error")
+        setMessageError(data.error || "Message could not be sent.")
+        return
+      }
+
+      setPayload((current) =>
+        current
+          ? {
+              ...current,
+              supportMessages: [...current.supportMessages, data.message],
+            }
+          : current,
+      )
+      setMessage("")
+      setMessageState("sent")
+    } catch {
+      setMessageState("error")
+      setMessageError("Message could not be sent.")
+    }
+  }
+
   if (!isLoaded || loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    )
+    return <PortalState icon={<Loader2 className="w-6 h-6 animate-spin" />} title="Loading portal" />
   }
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <NorthlineLogo size="md" />
-          <h1 className="text-2xl font-bold text-foreground">Project not found</h1>
-          <p className="text-muted-foreground">{error || "This portal link may be invalid or expired."}</p>
-        </div>
-      </div>
+      <PortalState
+        icon={<Lock className="w-6 h-6" />}
+        title={error?.includes("access") ? "Access denied" : "Portal unavailable"}
+        body={error || "This portal link may be invalid or expired."}
+      />
     )
   }
 
-  const currentStage = getStageIndex(project.status)
-  const isCompleted = project.status === "completed"
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <NorthlineLogo size="sm" />
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">
-              {user?.firstName || user?.emailAddresses?.[0]?.emailAddress}
-            </span>
-            <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center text-xs font-medium text-foreground">
-              {(user?.firstName?.[0] || user?.emailAddresses?.[0]?.emailAddress?.[0] || "?").toUpperCase()}
-            </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+          <NorthlineLogo size="sm" showWordmark />
+          <div className="text-right min-w-0">
+            <p className="text-sm font-medium truncate">
+              {project.client?.business_name || project.project_name}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user?.firstName || payload.viewer.email || "Client portal"}
+            </p>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
-        {/* Project title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+        <motion.section
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-2"
+          className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]"
         >
-          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            Client Portal
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-            {project.project_name}
-          </h1>
-          {project.client && (
-            <p className="text-muted-foreground">
-              {project.client.business_name} &middot; {project.package_type || "Custom"}
+          <div className="space-y-4">
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+              Client portal
             </p>
-          )}
-        </motion.div>
-
-        {/* Progress tracker */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-card border border-border rounded-xl p-6 sm:p-8"
-        >
-          <h2 className="text-lg font-semibold text-foreground mb-6">Project Progress</h2>
-          <div className="relative">
-            {/* Progress line */}
-            <div className="absolute top-4 left-4 right-4 h-0.5 bg-border" />
-            <div 
-              className="absolute top-4 left-4 h-0.5 bg-foreground transition-all duration-700"
-              style={{ width: `${isCompleted ? 100 : (currentStage / (STAGES.length - 1)) * 100}%` }}
-            />
-            
-            {/* Steps */}
-            <div className="relative flex justify-between">
-              {STAGES.map((stage, i) => {
-                const isPast = i < currentStage
-                const isCurrent = i === currentStage && !isCompleted
-                const isFuture = i > currentStage && !isCompleted
-
-                return (
-                  <div key={stage.key} className="flex flex-col items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium z-10 transition-colors
-                      ${isPast || isCompleted ? "bg-foreground text-background" : ""}
-                      ${isCurrent ? "bg-foreground text-background ring-4 ring-foreground/20" : ""}
-                      ${isFuture ? "bg-card border-2 border-border text-muted-foreground" : ""}
-                    `}>
-                      {isPast || isCompleted ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : isCurrent ? (
-                        <Circle className="w-4 h-4 fill-current" />
-                      ) : (
-                        <span>{i + 1}</span>
-                      )}
-                    </div>
-                    <span className={`text-xs font-medium hidden sm:block ${
-                      isCurrent ? "text-foreground" : "text-muted-foreground"
-                    }`}>
-                      {stage.label}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Current status message */}
-          <div className="mt-8 p-4 rounded-lg bg-foreground/5 flex items-start gap-3">
-            <Clock className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium text-foreground text-sm">
-                {isCompleted ? "Project completed" : `Currently in ${STAGES[currentStage]?.label}`}
+              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
+                {project.project_name}
+              </h1>
+              <p className="text-base sm:text-lg text-muted-foreground mt-3 max-w-2xl">
+                A private project view for progress, key links, payments, and support.
               </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <StatusBadge status={project.status} />
+            <InfoRow label="Package" value={project.package_type || "Custom"} />
+            <InfoRow label="Started" value={formatDate(project.start_date) || "Not set"} />
+            <InfoRow label="Target launch" value={formatDate(project.target_launch_date) || "Not set"} />
+          </div>
+        </motion.section>
+
+        <section className="rounded-xl border border-border bg-card p-5 sm:p-7">
+          <div className="flex items-center justify-between gap-4 mb-7">
+            <div>
+              <h2 className="text-lg font-semibold">Timeline</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                {isCompleted 
-                  ? "Your project has been delivered. Thank you for choosing northline."
-                  : project.notes || "We're making progress on your project. Check back for updates."
-                }
+                Current project phase and launch path.
               </p>
             </div>
           </div>
-        </motion.div>
 
-        {/* Quick info cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="grid sm:grid-cols-3 gap-4"
-        >
-          {project.preview_url && (
-            <a
-              href={project.preview_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group bg-card border border-border rounded-xl p-5 hover:border-foreground/30 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Eye className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">Preview Site</span>
-              </div>
-              <p className="text-xs text-muted-foreground group-hover:text-foreground/60 transition-colors flex items-center gap-1">
-                View your draft <ExternalLink className="w-3 h-3" />
-              </p>
-            </a>
-          )}
+          <div className="grid gap-3 sm:grid-cols-6">
+            {STAGES.map((stage, index) => {
+              const active = index === currentStage && project.status !== "completed"
+              const complete = index < currentStage || project.status === "completed"
 
-          {project.live_url && (
-            <a
-              href={project.live_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group bg-card border border-border rounded-xl p-5 hover:border-foreground/30 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">Live Site</span>
-              </div>
-              <p className="text-xs text-muted-foreground group-hover:text-foreground/60 transition-colors flex items-center gap-1">
-                Visit your website <ArrowRight className="w-3 h-3" />
-              </p>
-            </a>
-          )}
-
-          <div className="bg-card border border-border rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">Details</span>
-            </div>
-            <div className="space-y-1">
-              {project.start_date && (
-                <p className="text-xs text-muted-foreground">
-                  Started: {new Date(project.start_date).toLocaleDateString()}
-                </p>
-              )}
-              {project.target_launch_date && (
-                <p className="text-xs text-muted-foreground">
-                  Target: {new Date(project.target_launch_date).toLocaleDateString()}
-                </p>
-              )}
-            </div>
+              return (
+                <div
+                  key={stage.key}
+                  className={`rounded-lg border p-4 ${
+                    active
+                      ? "border-blue-500/50 bg-blue-500/10"
+                      : complete
+                        ? "border-border bg-foreground/5"
+                        : "border-border bg-background"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    {complete ? (
+                      <CheckCircle2 className="w-4 h-4 text-blue-400" />
+                    ) : active ? (
+                      <Circle className="w-4 h-4 fill-blue-400 text-blue-400" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-muted-foreground" />
+                    )}
+                    <span className="text-xs text-muted-foreground">{index + 1}</span>
+                  </div>
+                  <p className="text-sm font-medium">{stage.label}</p>
+                </div>
+              )
+            })}
           </div>
+        </section>
 
-          <a
-            href="mailto:hello@northline.dev"
-            className="group bg-card border border-border rounded-xl p-5 hover:border-foreground/30 transition-colors"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <MessageSquare className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">Contact</span>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className="rounded-xl border border-border bg-card p-5 sm:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="w-5 h-5 text-muted-foreground" />
+              <h2 className="font-semibold">Next step</h2>
             </div>
-            <p className="text-xs text-muted-foreground group-hover:text-foreground/60 transition-colors">
-              Questions? Reach out anytime.
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {project.next_step || project.notes || "No next step has been posted yet. Northline will update this when there is a clear action or milestone."}
             </p>
-          </a>
-        </motion.div>
+          </section>
 
-        {/* Footer */}
-        <div className="pt-8 border-t border-border/50 text-center">
-          <p className="text-xs text-muted-foreground">
-            Powered by northline &middot; {new Date().getFullYear()}
-          </p>
+          <section className="rounded-xl border border-border bg-card p-5 sm:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <CreditCard className="w-5 h-5 text-muted-foreground" />
+              <h2 className="font-semibold">Payment</h2>
+            </div>
+            {project.payment_link ? (
+              <a
+                href={project.payment_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:bg-foreground/90 transition-colors"
+              >
+                Pay invoice
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No payment due right now.
+              </p>
+            )}
+          </section>
         </div>
+
+        <section className="grid gap-4 sm:grid-cols-2">
+          <ProjectLinkCard
+            icon={<Eye className="w-5 h-5" />}
+            title="Preview"
+            href={project.preview_url}
+            emptyText="No preview link yet"
+          />
+          <ProjectLinkCard
+            icon={<ExternalLink className="w-5 h-5" />}
+            title="Live site"
+            href={project.live_url}
+            emptyText="No live site yet"
+          />
+        </section>
+
+        <section className="rounded-xl border border-border bg-card p-5 sm:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <MessageSquare className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <h2 className="font-semibold">Support messages</h2>
+              <p className="text-sm text-muted-foreground">
+                Send a simple note to Northline about this project.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-5">
+            {payload.supportMessages.length > 0 ? (
+              payload.supportMessages.map((item) => (
+                <div key={item.id} className="rounded-lg border border-border bg-background p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <p className="text-sm font-medium">
+                      {item.sender_type === "team" ? "Northline" : "Client"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(item.created_at)}
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {item.message}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed border-border p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No support messages yet.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <form onSubmit={handleSendMessage} className="space-y-3">
+            <textarea
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value)
+                if (messageState !== "sending") {
+                  setMessageState("idle")
+                  setMessageError(null)
+                }
+              }}
+              rows={4}
+              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              placeholder="Write a project question or support request..."
+            />
+            {messageState === "error" && messageError && (
+              <p className="text-sm text-red-400">{messageError}</p>
+            )}
+            {messageState === "sent" && (
+              <p className="text-sm text-green-400">Message sent.</p>
+            )}
+            <button
+              type="submit"
+              disabled={messageState === "sending" || !message.trim()}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:bg-foreground/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {messageState === "sending" ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+              Send message
+            </button>
+          </form>
+        </section>
+
+        <footer className="pt-2 text-center">
+          <p className="text-xs text-muted-foreground">
+            Powered by Northline Services
+          </p>
+        </footer>
       </main>
+    </div>
+  )
+}
+
+function PortalState({
+  icon,
+  title,
+  body,
+}: {
+  icon: ReactNode
+  title: string
+  body?: string
+}) {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-md text-center space-y-5">
+        <NorthlineLogo size="md" showWordmark className="justify-center" />
+        <div className="mx-auto w-12 h-12 rounded-full border border-border bg-card flex items-center justify-center text-muted-foreground">
+          {icon}
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          {body && <p className="text-sm text-muted-foreground mt-2">{body}</p>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StatusBadge({ status }: { status: ProjectStatus }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground mb-1">Current status</p>
+      <span className="inline-flex rounded-full bg-blue-500/10 px-3 py-1 text-sm font-medium capitalize text-blue-300 ring-1 ring-blue-500/20">
+        {status}
+      </span>
+    </div>
+  )
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-t border-border pt-3">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium text-right">{value}</span>
+    </div>
+  )
+}
+
+function ProjectLinkCard({
+  icon,
+  title,
+  href,
+  emptyText,
+}: {
+  icon: ReactNode
+  title: string
+  href: string | null
+  emptyText: string
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center gap-3 mb-3 text-muted-foreground">
+        {icon}
+        <h2 className="font-semibold text-foreground">{title}</h2>
+      </div>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline underline-offset-4"
+        >
+          Open link
+          <ExternalLink className="w-4 h-4" />
+        </a>
+      ) : (
+        <p className="text-sm text-muted-foreground">{emptyText}</p>
+      )}
     </div>
   )
 }

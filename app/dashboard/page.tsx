@@ -1,8 +1,8 @@
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { 
-  Inbox, FolderKanban, Users, Target,
-  Clock, ArrowUpRight
+  Inbox, FolderKanban, Users, Globe,
+  ArrowUpRight
 } from "lucide-react"
 import Link from "next/link"
 
@@ -13,14 +13,14 @@ async function getStats() {
     { count: leadsCount },
     { count: projectsCount },
     { count: clientsCount },
-    { count: outreachCount },
+    { count: portalsCount },
     { data: recentLeads },
     { data: recentProjects }
   ] = await Promise.all([
     supabase.from("leads").select("*", { count: "exact", head: true }),
     supabase.from("projects").select("*", { count: "exact", head: true }),
     supabase.from("clients").select("*", { count: "exact", head: true }),
-    supabase.from("potential_clients").select("*", { count: "exact", head: true }),
+    supabase.from("projects").select("*", { count: "exact", head: true }).not("portal_id", "is", null),
     supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(5),
     supabase.from("projects").select("*, clients(business_name)").order("created_at", { ascending: false }).limit(5),
   ])
@@ -29,7 +29,7 @@ async function getStats() {
     leadsCount: leadsCount || 0,
     projectsCount: projectsCount || 0,
     clientsCount: clientsCount || 0,
-    outreachCount: outreachCount || 0,
+    portalsCount: portalsCount || 0,
     recentLeads: recentLeads || [],
     recentProjects: recentProjects || []
   }
@@ -44,7 +44,7 @@ export default async function DashboardPage() {
     { label: "Total Leads", value: stats.leadsCount, icon: Inbox, href: "/dashboard/leads" },
     { label: "Active Projects", value: stats.projectsCount, icon: FolderKanban, href: "/dashboard/projects" },
     { label: "Clients", value: stats.clientsCount, icon: Users, href: "/dashboard/clients" },
-    { label: "Outreach Targets", value: stats.outreachCount, icon: Target, href: "/dashboard/outreach" },
+    { label: "Portals", value: stats.portalsCount, icon: Globe, href: "/dashboard/portals" },
   ]
 
   return (
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
         <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">Northline OS</p>
         <h1 className="text-2xl font-bold tracking-tight">Command Center</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Live overview of leads, projects, and growth.
+          Live overview of leads, clients, projects, and portals.
         </p>
       </div>
 
@@ -174,18 +174,18 @@ export default async function DashboardPage() {
           <span className="text-sm font-medium">New Project</span>
         </Link>
         <Link
-          href="/dashboard/outreach"
+          href="/dashboard/portals"
           className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
         >
-          <Target className="w-5 h-5 text-muted-foreground" />
-          <span className="text-sm font-medium">Add Prospect</span>
+          <Globe className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium">View Portals</span>
         </Link>
         <Link
-          href="/dashboard/insights"
+          href="/dashboard/leads"
           className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
         >
-          <Clock className="w-5 h-5 text-muted-foreground" />
-          <span className="text-sm font-medium">View Insights</span>
+          <Inbox className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium">Review Leads</span>
         </Link>
       </div>
     </div>

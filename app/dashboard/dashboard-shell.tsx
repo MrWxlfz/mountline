@@ -10,14 +10,11 @@ import {
   Users,
   FolderKanban,
   Inbox,
-  Target,
   Settings,
   Menu,
   X,
   ChevronRight,
-  Sparkles,
   Globe,
-  BarChart3,
   ArrowUpRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -29,7 +26,6 @@ const navGroups = [
     items: [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
       { href: "/dashboard/leads", label: "Leads", icon: Inbox },
-      { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
     ],
   },
   {
@@ -38,13 +34,6 @@ const navGroups = [
       { href: "/dashboard/clients", label: "Clients", icon: Users },
       { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
       { href: "/dashboard/portals", label: "Portals", icon: Globe },
-    ],
-  },
-  {
-    label: "Growth",
-    items: [
-      { href: "/dashboard/outreach", label: "Outreach", icon: Target },
-      { href: "/dashboard/insights", label: "AI Insights", icon: Sparkles },
     ],
   },
 ]

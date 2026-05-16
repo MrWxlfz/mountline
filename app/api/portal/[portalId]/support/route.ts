@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getOrCreateSupportThread, getPortalAccess } from "@/lib/portal/access"
 
-export async function GET(
+export async function POST(
   request: Request,
   { params }: { params: Promise<{ portalId: string }> },
 ) {
@@ -24,29 +24,38 @@ export async function GET(
     )
   }
 
+  const body = await request.json()
+  const message = typeof body.message === "string" ? body.message.trim() : ""
+
+  if (!message) {
+    return NextResponse.json({ error: "Message is required" }, { status: 400 })
+  }
+
+  if (message.length > 4000) {
+    return NextResponse.json(
+      { error: "Message must be 4,000 characters or fewer" },
+      { status: 400 },
+    )
+  }
+
   const supabase = createAdminClient()
   const thread = await getOrCreateSupportThread(access.project.id)
 
-  const { data: messages, error: messagesError } = await supabase
+  const { data, error } = await supabase
     .from("support_messages")
+    .insert({
+      thread_id: thread.id,
+      project_id: access.project.id,
+      sender_type: access.isTeamMember ? "team" : "client",
+      sender_email: access.email || "unknown",
+      message,
+    })
     .select("id, created_at, thread_id, project_id, sender_type, sender_email, message")
-    .eq("project_id", access.project.id)
-    .order("created_at", { ascending: true })
+    .single()
 
-  if (messagesError) {
-    return NextResponse.json({ error: messagesError.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({
-    project: {
-      ...access.project,
-      client: access.project.clients,
-    },
-    supportThread: thread,
-    supportMessages: messages || [],
-    viewer: {
-      email: access.email,
-      isTeamMember: access.isTeamMember,
-    },
-  })
+  return NextResponse.json({ message: data })
 }

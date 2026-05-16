@@ -1,10 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/admin"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
+import type { ReactNode } from "react"
 import { 
-  Plus, FolderKanban, ExternalLink, Calendar,
-  Link2
+  Plus, FolderKanban, Calendar, CreditCard, FileText
 } from "lucide-react"
 import Link from "next/link"
+import { ProjectLinkActions } from "./project-link-actions"
 
 const statusColors: Record<string, string> = {
   discovery: "bg-muted text-muted-foreground",
@@ -44,61 +45,63 @@ export default async function ProjectsPage() {
       </div>
 
       {projects && projects.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project: any) => (
-            <div
-              key={project.id}
-              className="bg-card rounded-xl border border-border p-5 hover:border-foreground/20 transition-colors"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
-                  <FolderKanban className="w-5 h-5 text-muted-foreground" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {projects.map((project: any) => {
+            const portalPath = project.portal_id ? `/portal/${project.portal_id}` : null
+
+            return (
+              <div
+                key={project.id}
+                className="bg-card rounded-xl border border-border p-5 hover:border-foreground/20 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center">
+                    <FolderKanban className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
+                    statusColors[project.status] || statusColors.discovery
+                  }`}>
+                    {project.status}
+                  </span>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
-                  statusColors[project.status] || statusColors.discovery
-                }`}>
-                  {project.status}
-                </span>
-              </div>
 
-              <h3 className="font-semibold mb-1">{project.project_name}</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                {project.clients?.business_name || "No client assigned"}
-              </p>
-
-              {project.package_type && (
-                <p className="text-xs text-muted-foreground mb-3">
-                  Package: <span className="text-foreground">{project.package_type}</span>
+                <h3 className="font-semibold mb-1">{project.project_name}</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {project.clients?.business_name || "No client assigned"}
                 </p>
-              )}
 
-              <div className="flex items-center gap-3 pt-3 border-t border-border">
-                {project.portal_id && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Link2 className="w-3 h-3" />
-                    <span className="truncate max-w-[100px]">Portal link</span>
+                <div className="grid gap-2 sm:grid-cols-2 mb-4">
+                  {project.package_type && (
+                    <ProjectMeta icon={<FileText className="w-3 h-3" />} label="Package" value={project.package_type} />
+                  )}
+                  {project.target_launch_date && (
+                    <ProjectMeta
+                      icon={<Calendar className="w-3 h-3" />}
+                      label="Target"
+                      value={new Date(project.target_launch_date).toLocaleDateString()}
+                    />
+                  )}
+                  {project.payment_link && (
+                    <ProjectMeta icon={<CreditCard className="w-3 h-3" />} label="Payment" value="Link added" />
+                  )}
+                </div>
+
+                {project.next_step && (
+                  <div className="rounded-lg bg-muted/40 p-3 mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Next step</p>
+                    <p className="text-sm text-foreground line-clamp-2">{project.next_step}</p>
                   </div>
                 )}
-                {project.target_launch_date && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Calendar className="w-3 h-3" />
-                    <span>{new Date(project.target_launch_date).toLocaleDateString()}</span>
-                  </div>
-                )}
-                {project.live_url && (
-                  <a
-                    href={project.live_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground ml-auto"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    Live
-                  </a>
-                )}
+
+                <ProjectLinkActions
+                  portalPath={portalPath}
+                  previewUrl={project.preview_url}
+                  liveUrl={project.live_url}
+                  paymentLink={project.payment_link}
+                />
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl p-12 text-center">
@@ -116,6 +119,28 @@ export default async function ProjectsPage() {
           </Link>
         </div>
       )}
+
+      <div className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+        TODO: Add a focused project edit screen for status, payment link, next step, and portal access updates.
+      </div>
+    </div>
+  )
+}
+
+function ProjectMeta({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+}) {
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      {icon}
+      <span>{label}:</span>
+      <span className="text-foreground truncate">{value}</span>
     </div>
   )
 }

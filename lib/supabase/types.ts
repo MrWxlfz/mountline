@@ -1,0 +1,63 @@
+export type ProjectStatus =
+  | "discovery"
+  | "design"
+  | "build"
+  | "review"
+  | "launch"
+  | "support"
+  | "completed"
+
+export type Client = {
+  id: string
+  created_at: string
+  business_name: string
+  contact_name: string
+  email: string
+  phone: string | null
+  website: string | null
+  status: string
+  notes: string | null
+}
+
+export type Project = {
+  id: string
+  created_at: string
+  client_id: string | null
+  project_name: string
+  package_type: string | null
+  status: ProjectStatus
+  portal_id: string | null
+  start_date: string | null
+  target_launch_date: string | null
+  live_url: string | null
+  preview_url: string | null
+  payment_link: string | null
+  next_step: string | null
+  notes: string | null
+}
+
+export type ClientPortalAccess = {
+  id: string
+  created_at: string
+  project_id: string
+  client_email: string
+  clerk_user_id: string | null
+  access_status: string
+}
+
+export type SupportThread = {
+  id: string
+  created_at: string
+  project_id: string
+  status: string
+}
+
+export type SupportMessage = {
+  id: string
+  created_at: string
+  thread_id: string
+  project_id: string
+  sender_type: "client" | "team"
+  sender_email: string
+  message: string
+}

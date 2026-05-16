@@ -1,62 +1,67 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
-import { Check, ArrowRight, Star } from "lucide-react"
+import { motion } from "framer-motion"
+import { Check, ArrowRight } from "lucide-react"
 
 const pricingPlans = [
   {
-    name: "Starter",
+    name: "Starter Website",
     price: "$500",
-    priceNote: "Starting at",
-    description: "A clean one-page website for businesses just getting started online.",
+    priceNote: "starting at",
+    description: "For businesses that need a clean one-page site.",
     features: [
       "One-page website",
-      "Mobile-friendly design",
-      "Services and contact sections",
+      "Mobile-first design",
       "Contact or quote form",
       "Basic SEO setup",
       "Launch support",
     ],
-    highlighted: false,
   },
   {
-    name: "Business",
+    name: "Business Website",
     price: "$1,250",
-    priceNote: "Starting at",
-    description: "A complete multi-page site for a stronger online presence.",
+    priceNote: "starting at",
+    description: "For businesses that need stronger structure, trust, and conversion.",
     features: [
-      "Multi-page or advanced single-page",
-      "About, services, contact, FAQ",
+      "Multi-page structure",
+      "Services, about, contact",
       "Gallery and testimonials",
+      "Conversion-focused layout",
       "Analytics-ready setup",
-      "Stronger conversion layout",
       "Launch support",
     ],
     highlighted: true,
   },
   {
+    name: "AI/System Add-ons",
+    price: "Custom",
+    priceNote: "scope varies",
+    description: "For booking, forms, simple automations, or practical AI workflows.",
+    features: [
+      "Quote request systems",
+      "Booking integrations",
+      "Email workflows",
+      "AI-assisted tools",
+      "Spreadsheet connections",
+    ],
+  },
+  {
     name: "Monthly Care",
     price: "$149",
-    priceNote: "Starting at",
+    priceNote: "starting at",
     priceSuffix: "/mo",
-    description: "Ongoing updates handled without chasing a designer.",
+    description: "For updates, edits, and basic support.",
     features: [
       "Small monthly edits",
-      "New photos or service updates",
+      "Photo and content swaps",
       "Seasonal changes",
       "Basic site checks",
       "Priority fixes",
-      "Light content updates",
     ],
-    highlighted: false,
   },
 ]
 
 export function PricingSection() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
-
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
@@ -65,81 +70,58 @@ export function PricingSection() {
   }
 
   return (
-    <section id="pricing" ref={ref} className="py-24 sm:py-32 bg-muted/30 relative overflow-hidden">
-      {/* Background accent */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/[0.02] to-transparent" />
-      
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header - Centered */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center max-w-2xl mx-auto mb-16"
-        >
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <span className="w-8 h-px bg-border-strong" />
-            <span className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
-              Pricing
-            </span>
-            <span className="w-8 h-px bg-border-strong" />
-          </div>
-          
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
-            Simple packages. Clear scope.
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Start with the site your business needs now. Add more when it actually helps.
-          </p>
-        </motion.div>
-
-        {/* Pricing cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <section id="pricing" className="py-24 lg:py-32 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-16 lg:mb-20">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
+          >
+            Pricing
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1] max-w-2xl"
+          >
+            Simple packages.{" "}
+            <span className="text-muted-foreground/50">Clear scope.</span>
+          </motion.h2>
+        </div>
+        
+        {/* Pricing grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {pricingPlans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-              className={`group relative ${plan.highlighted ? "lg:-mt-4 lg:mb-4" : ""}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="group"
             >
-              {/* Popular badge */}
-              {plan.highlighted && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.4, delay: 0.3 }}
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 z-10"
-                >
-                  <span className="inline-flex items-center gap-1.5 bg-foreground text-background text-xs font-medium px-3 py-1.5 rounded-full">
-                    <Star className="w-3 h-3" />
-                    Most popular
-                  </span>
-                </motion.div>
-              )}
-              
-              <div className={`h-full rounded-2xl border overflow-hidden transition-all duration-300 ${
-                plan.highlighted
-                  ? "bg-foreground text-background border-foreground shadow-2xl"
-                  : "bg-card border-border hover:border-border-strong hover:shadow-lg"
+              <div className={`h-full rounded-xl border transition-colors ${
+                plan.highlighted 
+                  ? "border-foreground bg-foreground text-background" 
+                  : "border-border bg-card hover:border-foreground/20"
               }`}>
-                <div className="p-6 sm:p-8">
+                <div className="p-6">
                   {/* Plan name */}
-                  <h3 className={`text-lg font-semibold mb-4 ${
-                    plan.highlighted ? "text-background" : "text-foreground"
+                  <h3 className={`text-sm font-medium uppercase tracking-wider mb-6 ${
+                    plan.highlighted ? "text-background/60" : "text-muted-foreground"
                   }`}>
                     {plan.name}
                   </h3>
                   
                   {/* Price */}
                   <div className="mb-4">
-                    <div className={`text-xs uppercase tracking-wider mb-1 ${
-                      plan.highlighted ? "text-background/60" : "text-muted-foreground"
-                    }`}>
-                      {plan.priceNote}
-                    </div>
                     <div className="flex items-baseline gap-1">
-                      <span className={`text-4xl sm:text-5xl font-bold tracking-tight ${
+                      <span className={`text-4xl font-bold tracking-tight ${
                         plan.highlighted ? "text-background" : "text-foreground"
                       }`}>
                         {plan.price}
@@ -152,6 +134,11 @@ export function PricingSection() {
                         </span>
                       )}
                     </div>
+                    <div className={`text-xs mt-1 ${
+                      plan.highlighted ? "text-background/50" : "text-muted-foreground"
+                    }`}>
+                      {plan.priceNote}
+                    </div>
                   </div>
                   
                   {/* Description */}
@@ -161,22 +148,13 @@ export function PricingSection() {
                     {plan.description}
                   </p>
                   
-                  {/* Divider */}
-                  <div className={`h-px mb-6 ${
-                    plan.highlighted ? "bg-background/10" : "bg-border"
-                  }`} />
-                  
                   {/* Features */}
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                          plan.highlighted ? "bg-background/10" : "bg-accent/10"
-                        }`}>
-                          <Check className={`w-3 h-3 ${
-                            plan.highlighted ? "text-background" : "text-accent"
-                          }`} />
-                        </div>
+                      <li key={feature} className="flex items-start gap-2.5">
+                        <Check className={`w-4 h-4 mt-0.5 shrink-0 ${
+                          plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                        }`} />
                         <span className={`text-sm ${
                           plan.highlighted ? "text-background/80" : "text-muted-foreground"
                         }`}>
@@ -187,42 +165,33 @@ export function PricingSection() {
                   </ul>
                   
                   {/* CTA */}
-                  <motion.button
+                  <button
                     onClick={() => scrollToSection('contact')}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-colors ${
                       plan.highlighted
                         ? "bg-background text-foreground hover:bg-background/90"
-                        : "bg-foreground text-background hover:bg-foreground/90"
+                        : "bg-muted hover:bg-muted/80 text-foreground"
                     }`}
                   >
                     Get started
                     <ArrowRight className="w-4 h-4" />
-                  </motion.button>
+                  </button>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
-
+        
         {/* Bottom note */}
-        <motion.div
+        <motion.p
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="text-center mt-12"
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="text-center text-sm text-muted-foreground mt-12"
         >
-          <p className="text-muted-foreground text-sm">
-            Final pricing depends on scope, content, timeline, and integrations.{" "}
-            <button 
-              onClick={() => scrollToSection('contact')} 
-              className="text-foreground hover:text-accent underline underline-offset-4 transition-colors"
-            >
-              Get a custom quote
-            </button>
-          </p>
-        </motion.div>
+          Final pricing depends on scope, content, timeline, and integrations.
+        </motion.p>
       </div>
     </section>
   )

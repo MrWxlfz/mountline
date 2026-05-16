@@ -1,7 +1,6 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
+import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import {
   Accordion,
@@ -13,38 +12,39 @@ import {
 const faqs = [
   {
     question: "How long does a website take?",
-    answer: "Most starter sites launch in about 1-2 weeks once content is ready. More complex business sites may take 2-3 weeks depending on pages and features."
+    answer: "Most starter sites launch in 7-14 days once content is ready. More complex business sites may take 2-3 weeks depending on pages and features."
   },
   {
-    question: "Do I need a domain already?",
+    question: "Do we need a domain already?",
     answer: "No. northline can help point an existing domain or guide the setup for a new one. We work with common registrars like GoDaddy, Namecheap, and Google Domains."
   },
   {
-    question: "Can northline redesign an existing site?",
+    question: "Can northline redesign our current site?",
     answer: "Yes. We can clean up outdated, confusing, or slow websites and rebuild them into something more useful. We audit your current site first to understand what works and what needs to change."
   },
   {
-    question: "Can you add booking, payments, or forms?",
+    question: "Can you add booking, payments, or quote forms?",
     answer: "Yes, depending on scope. We can prepare or connect tools like Calendly, Stripe, Square, and form systems. The level of integration depends on the package and your specific needs."
+  },
+  {
+    question: "What are AI systems?",
+    answer: "Practical automations that help with repetitive tasks - like organizing quote requests, drafting follow-up emails, routing appointments, or connecting forms to spreadsheets. No hype, just useful tools."
   },
   {
     question: "Do you offer monthly support?",
     answer: "Yes. Monthly care plans are available for updates, small changes, new photos, basic checks, and priority fixes. This is ideal for businesses that want their site maintained without having to think about it."
   },
   {
-    question: "What does the client need to provide?",
+    question: "What do we need to provide?",
     answer: "Usually business details, services, logo if available, photos, contact info, and any examples of sites you like. We guide you through what is needed during the onboarding call."
   },
   {
-    question: "What if I need something custom?",
-    answer: "If your project needs something outside the standard packages, we can discuss a custom scope. Just reach out and we will figure out the right approach together."
+    question: "Do you work outside our local area?",
+    answer: "Yes. northline works with businesses across different regions. Most communication happens via video calls, email, and shared documents - location is not a barrier."
   }
 ]
 
 export function FAQSection() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
-
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
@@ -53,49 +53,47 @@ export function FAQSection() {
   }
 
   return (
-    <section id="faq" ref={ref} className="py-24 sm:py-32 bg-muted/30 relative">
+    <section id="faq" className="py-24 lg:py-32 bg-background">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <span className="w-8 h-px bg-border-strong" />
-            <span className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
-              FAQ
-            </span>
-            <span className="w-8 h-px bg-border-strong" />
-          </div>
-          
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+        <div className="text-center mb-16">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
+          >
+            FAQ
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight leading-[1.1]"
+          >
             Common questions
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Everything you need to know about working with northline.
-          </p>
-        </motion.div>
+          </motion.h2>
+        </div>
 
         {/* FAQ Accordion */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="rounded-2xl border border-border bg-card overflow-hidden"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
         >
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, index) => (
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="border-b border-border last:border-0"
+                className="border-b border-border"
               >
-                <AccordionTrigger className="text-left text-foreground hover:text-accent px-6 py-5 text-base font-medium transition-colors [&[data-state=open]]:text-accent">
+                <AccordionTrigger className="text-left text-foreground hover:text-accent py-6 text-base font-medium transition-colors [&[data-state=open]]:text-accent">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground px-6 pb-5 leading-relaxed">
+                <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -106,9 +104,10 @@ export function FAQSection() {
         {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center mt-10"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          className="text-center mt-12"
         >
           <p className="text-muted-foreground text-sm mb-4">
             Still have questions?

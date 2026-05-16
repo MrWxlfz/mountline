@@ -31,7 +31,7 @@ export function Navbar() {
     { label: "Work", id: "work" },
     { label: "Process", id: "process" },
     { label: "Pricing", id: "pricing" },
-    { label: "FAQ", id: "faq" },
+    { label: "AI Systems", id: "ai-systems" },
     { label: "Contact", id: "contact" },
   ]
 

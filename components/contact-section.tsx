@@ -1,21 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
-import { Check, Loader2, ArrowRight, Send } from "lucide-react"
+import { motion } from "framer-motion"
+import { Check, Loader2, ArrowRight } from "lucide-react"
 
 const budgetOptions = [
   "Under $500",
-  "$500-$1,000",
-  "$1,000-$2,000",
-  "$2,000+",
+  "$500-$1,250",
+  "$1,250-$2,500",
+  "$2,500+",
   "Not sure yet",
 ]
 
 export function ContactSection() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [formState, setFormState] = useState<"idle" | "submitting" | "success">("idle")
   const [formData, setFormData] = useState({
     name: "",
@@ -43,22 +40,21 @@ export function ContactSection() {
 
   if (formState === "success") {
     return (
-      <section id="contact" ref={ref} className="py-24 sm:py-32 bg-background relative">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <section id="contact" className="py-24 lg:py-32 bg-muted/30">
         <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="p-10 rounded-2xl border border-border bg-card"
+            className="p-10 rounded-xl border border-border bg-card"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.4, delay: 0.2, type: "spring" }}
-              className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-6"
+              className="w-16 h-16 rounded-full bg-foreground/5 flex items-center justify-center mx-auto mb-6"
             >
-              <Check className="w-8 h-8 text-emerald-500" />
+              <Check className="w-8 h-8 text-foreground" />
             </motion.div>
             <h3 className="text-xl font-semibold text-foreground mb-3">Request received</h3>
             <p className="text-muted-foreground mb-6">
@@ -77,72 +73,48 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" ref={ref} className="py-24 sm:py-32 bg-background relative">
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-          {/* Left - Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
+    <section id="contact" className="py-24 lg:py-32 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
           >
-            <div className="flex items-center gap-3 mb-6">
-              <span className="w-8 h-px bg-accent" />
-              <span className="text-sm font-medium text-accent tracking-wide uppercase">
-                Get Started
-              </span>
-            </div>
-            
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-6">
-              Request a free website review.
-            </h2>
-            
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Share a few details about your business and current site. The northline team will review what can be improved and get back to you within 24-48 hours.
-            </p>
-            
-            {/* What to expect */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-accent">1</span>
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Share your details</p>
-                  <p className="text-sm text-muted-foreground">Tell us about your business and current website.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-accent">2</span>
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Get a review</p>
-                  <p className="text-sm text-muted-foreground">We will look at your site and identify what can improve.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-accent">3</span>
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Discuss next steps</p>
-                  <p className="text-sm text-muted-foreground">We will share recommendations and quote if needed.</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-          
-          {/* Right - Form */}
-          <motion.form
+            Contact
+          </motion.span>
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            onSubmit={handleSubmit}
-            className="p-6 sm:p-8 rounded-2xl border border-border bg-card"
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1] mb-6"
           >
+            Ready for a site people actually trust?
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-lg text-muted-foreground max-w-2xl mx-auto"
+          >
+            Send a few details and the northline team will review your website, idea, or current online presence.
+          </motion.p>
+        </div>
+
+        {/* Form */}
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          onSubmit={handleSubmit}
+          className="max-w-2xl mx-auto"
+        >
+          <div className="p-6 sm:p-8 rounded-xl border border-border bg-card">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
               {/* Name */}
               <div className="space-y-2">
@@ -156,11 +128,29 @@ export function ContactSection() {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
                   placeholder="Your name"
                 />
               </div>
 
+              {/* Business Name */}
+              <div className="space-y-2">
+                <label htmlFor="businessName" className="block text-sm text-foreground font-medium">
+                  Business Name
+                </label>
+                <input
+                  type="text"
+                  id="businessName"
+                  name="businessName"
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
+                  placeholder="Your business name"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
               {/* Email */}
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm text-foreground font-medium">
@@ -173,32 +163,32 @@ export function ContactSection() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
                   placeholder="you@example.com"
                 />
               </div>
-            </div>
 
-            {/* Business Name */}
-            <div className="mb-5 space-y-2">
-              <label htmlFor="businessName" className="block text-sm text-foreground font-medium">
-                Business Name
-              </label>
-              <input
-                type="text"
-                id="businessName"
-                name="businessName"
-                value={formData.businessName}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
-                placeholder="Your business name"
-              />
+              {/* Phone */}
+              <div className="space-y-2">
+                <label htmlFor="phone" className="block text-sm text-foreground font-medium">
+                  Phone <span className="text-muted-foreground">(optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
             </div>
 
             {/* Current Website */}
             <div className="mb-5 space-y-2">
               <label htmlFor="currentWebsite" className="block text-sm text-foreground font-medium">
-                Current Website <span className="text-muted-foreground">(if any)</span>
+                Current Website <span className="text-muted-foreground">(optional)</span>
               </label>
               <input
                 type="url"
@@ -206,13 +196,29 @@ export function ContactSection() {
                 name="currentWebsite"
                 value={formData.currentWebsite}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
                 placeholder="https://..."
               />
             </div>
 
-            {/* Budget */}
+            {/* Help Needed */}
             <div className="mb-5 space-y-2">
+              <label htmlFor="helpNeeded" className="block text-sm text-foreground font-medium">
+                What do you need help with?
+              </label>
+              <textarea
+                id="helpNeeded"
+                name="helpNeeded"
+                rows={4}
+                value={formData.helpNeeded}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors resize-none"
+                placeholder="Tell us about your project, goals, or questions..."
+              />
+            </div>
+
+            {/* Budget */}
+            <div className="mb-6 space-y-2">
               <label htmlFor="budget" className="block text-sm text-foreground font-medium">
                 Budget Range
               </label>
@@ -221,7 +227,7 @@ export function ContactSection() {
                 name="budget"
                 value={formData.budget}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all appearance-none cursor-pointer"
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-foreground/30 transition-colors appearance-none cursor-pointer"
               >
                 <option value="">Select a range...</option>
                 {budgetOptions.map((option) => (
@@ -232,29 +238,13 @@ export function ContactSection() {
               </select>
             </div>
 
-            {/* Help Needed */}
-            <div className="mb-6 space-y-2">
-              <label htmlFor="helpNeeded" className="block text-sm text-foreground font-medium">
-                What can northline help with?
-              </label>
-              <textarea
-                id="helpNeeded"
-                name="helpNeeded"
-                rows={4}
-                value={formData.helpNeeded}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all resize-none"
-                placeholder="Tell us about your project or questions..."
-              />
-            </div>
-
             {/* Submit */}
             <motion.button
               type="submit"
               disabled={formState === "submitting"}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              className="w-full bg-foreground text-background py-3.5 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-foreground/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-foreground text-background py-3.5 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-foreground/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {formState === "submitting" ? (
                 <>
@@ -263,13 +253,13 @@ export function ContactSection() {
                 </>
               ) : (
                 <>
-                  Send Request
+                  Request review
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </motion.button>
-          </motion.form>
-        </div>
+          </div>
+        </motion.form>
       </div>
     </section>
   )

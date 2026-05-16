@@ -1,202 +1,167 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useRef, useState } from "react"
-import { ArrowUpRight, Monitor, Smartphone, Layers } from "lucide-react"
+import { motion } from "framer-motion"
+import { Monitor, Smartphone, ArrowUpRight } from "lucide-react"
 
 const conceptBuilds = [
   {
-    title: "Premium Auto Detailing",
+    title: "Auto Detailing",
     category: "Full Website",
     description: "Service packages, gallery, online booking, and quote request form for a mobile detailing business.",
-    includes: ["5 pages", "Booking system", "Gallery", "Quote form"],
-    colors: {
-      primary: "#0a0a0a",
-      accent: "#3b82f6",
-      background: "#fafafa"
-    }
+    tags: ["5 pages", "Booking", "Gallery"],
   },
   {
-    title: "Elite Contracting",
+    title: "Contractor Services",
     category: "Full Website",
     description: "Service areas, project portfolio, testimonials, and lead capture for a residential contractor.",
-    includes: ["6 pages", "Portfolio", "Service areas", "Lead form"],
-    colors: {
-      primary: "#1a1a1a",
-      accent: "#f59e0b",
-      background: "#f5f5f4"
-    }
+    tags: ["6 pages", "Portfolio", "Lead form"],
   },
   {
-    title: "FitLife Gym",
+    title: "Local Gym",
     category: "Landing Page",
     description: "Membership tiers, class schedule, trainer profiles, and trial signup for a local fitness center.",
-    includes: ["Single page", "Pricing table", "Schedule", "Trial signup"],
-    colors: {
-      primary: "#0f172a",
-      accent: "#10b981",
-      background: "#f8fafc"
-    }
+    tags: ["Single page", "Pricing", "Signup"],
   },
   {
-    title: "Taco Truck Co.",
+    title: "Restaurant / Food Truck",
     category: "Mini Site",
     description: "Menu display, location schedule, hours, and online ordering links for a food truck business.",
-    includes: ["3 pages", "Menu", "Location", "Order links"],
-    colors: {
-      primary: "#18181b",
-      accent: "#ef4444",
-      background: "#fef2f2"
-    }
+    tags: ["3 pages", "Menu", "Orders"],
+  },
+  {
+    title: "Creator / Startup",
+    category: "Landing Page",
+    description: "Personal brand showcase, services, social links, and contact for creators and consultants.",
+    tags: ["Single page", "Social", "Contact"],
+  },
+  {
+    title: "Home Services",
+    category: "Full Website",
+    description: "Service list, coverage area map, reviews, and quick quote form for home service providers.",
+    tags: ["4 pages", "Map", "Quote form"],
   },
 ]
 
 export function WorkSection() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-
   return (
-    <section id="work" ref={ref} className="py-24 sm:py-32 bg-muted/30 relative overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <svg className="w-full h-full">
-          <defs>
-            <pattern id="work-grid" width="80" height="80" patternUnits="userSpaceOnUse">
-              <path d="M 80 0 L 0 0 0 80" fill="none" className="stroke-foreground" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#work-grid)" />
-        </svg>
-      </div>
-      
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="work" className="py-24 lg:py-32 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="max-w-2xl mb-16"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <Layers className="w-5 h-5 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
-              Sample Work
-            </span>
-          </div>
-          
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
-            Examples of what we build.
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Concept builds that show our design approach. Each tailored to a different industry and goal.
-          </p>
-        </motion.div>
-
-        {/* Work grid - 2x2 bento style */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="mb-16 lg:mb-20">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
+          >
+            Work
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1] max-w-3xl mb-6"
+          >
+            Work concepts built for real businesses.
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-lg text-muted-foreground max-w-xl"
+          >
+            Sample directions that show the kind of online presence northline can create.
+          </motion.p>
+        </div>
+        
+        {/* Work grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {conceptBuilds.map((build, index) => (
             <motion.div
               key={build.title}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-              className="group relative"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="group"
             >
-              <div className="rounded-2xl border border-border bg-card overflow-hidden hover:border-border-strong hover:shadow-xl transition-all duration-500">
+              <div className="rounded-xl border border-border bg-card overflow-hidden hover:border-foreground/20 transition-colors">
                 {/* Preview area */}
-                <div 
-                  className="aspect-[16/10] relative overflow-hidden"
-                  style={{ backgroundColor: build.colors.background }}
-                >
-                  {/* Mock browser elements */}
-                  <div className="absolute top-4 left-4 right-4">
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-white/90 backdrop-blur-sm border border-black/5 shadow-sm">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-red-400" />
-                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                        <div className="w-2 h-2 rounded-full bg-green-400" />
-                      </div>
-                      <div className="flex-1 h-4 rounded bg-gray-100 max-w-[180px] mx-auto" />
+                <div className="aspect-[16/10] relative bg-muted/30 overflow-hidden">
+                  {/* Browser chrome */}
+                  <div className="absolute top-0 left-0 right-0 h-8 bg-muted/50 border-b border-border flex items-center px-3">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 rounded-full bg-foreground/10" />
+                      <div className="w-2 h-2 rounded-full bg-foreground/10" />
+                      <div className="w-2 h-2 rounded-full bg-foreground/10" />
+                    </div>
+                    <div className="flex-1 mx-4">
+                      <div className="h-4 rounded bg-background border border-border max-w-[120px] mx-auto" />
                     </div>
                   </div>
                   
                   {/* Mock website content */}
-                  <div className="absolute inset-x-4 bottom-4 top-16 flex flex-col justify-center items-center gap-3">
-                    {/* Logo */}
-                    <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: build.colors.primary }}
-                    >
-                      <span className="text-white text-xs font-bold">
-                        {build.title.split(" ").map(w => w[0]).join("").slice(0, 2)}
-                      </span>
+                  <div className="absolute inset-0 top-8 p-4 flex flex-col">
+                    {/* Nav */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-16 h-4 rounded bg-foreground/80" />
+                      <div className="flex gap-2">
+                        <div className="w-8 h-2 rounded bg-foreground/20" />
+                        <div className="w-8 h-2 rounded bg-foreground/20" />
+                      </div>
                     </div>
-                    {/* Mock headline */}
-                    <div className="w-3/4 h-5 rounded" style={{ backgroundColor: build.colors.primary + "e6" }} />
-                    <div className="w-1/2 h-3 rounded bg-gray-300" />
-                    {/* Mock CTA */}
-                    <div 
-                      className="w-24 h-8 rounded-lg mt-2 flex items-center justify-center"
-                      style={{ backgroundColor: build.colors.accent }}
-                    >
-                      <span className="text-white text-[10px] font-medium">Get Quote</span>
+                    {/* Hero */}
+                    <div className="flex-1 flex flex-col justify-center items-center gap-2">
+                      <div className="w-3/4 h-4 rounded bg-foreground/60" />
+                      <div className="w-1/2 h-3 rounded bg-foreground/40" />
+                      <div className="w-20 h-6 rounded bg-accent mt-2" />
                     </div>
                   </div>
                   
-                  {/* View overlay on hover */}
-                  <motion.div 
-                    className="absolute inset-0 bg-foreground/80 flex items-center justify-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="flex items-center gap-6">
-                      <div className="flex flex-col items-center gap-2 text-background">
-                        <Monitor className="w-6 h-6" />
-                        <span className="text-xs font-medium">Desktop</span>
-                      </div>
-                      <div className="w-px h-12 bg-background/20" />
-                      <div className="flex flex-col items-center gap-2 text-background">
-                        <Smartphone className="w-6 h-6" />
-                        <span className="text-xs font-medium">Mobile</span>
-                      </div>
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 top-8 bg-foreground/90 flex items-center justify-center gap-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-col items-center gap-1.5 text-background">
+                      <Monitor className="w-5 h-5" />
+                      <span className="text-[10px] font-medium">Desktop</span>
                     </div>
-                  </motion.div>
+                    <div className="flex flex-col items-center gap-1.5 text-background">
+                      <Smartphone className="w-5 h-5" />
+                      <span className="text-[10px] font-medium">Mobile</span>
+                    </div>
+                  </div>
+                  
+                  {/* Concept label */}
+                  <div className="absolute top-10 left-3 px-2 py-0.5 bg-background/90 rounded text-[10px] font-medium text-muted-foreground">
+                    Concept build
+                  </div>
                 </div>
                 
                 {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span 
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: build.colors.accent }}
-                      />
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                        {build.category}
-                      </span>
-                    </div>
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                      {build.category}
+                    </span>
                     <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-accent transition-colors" />
                   </div>
                   
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
                     {build.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                     {build.description}
                   </p>
                   
                   {/* Tags */}
-                  <div className="flex flex-wrap gap-2">
-                    {build.includes.map((item) => (
+                  <div className="flex flex-wrap gap-1.5">
+                    {build.tags.map((tag) => (
                       <span 
-                        key={item} 
-                        className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full border border-border"
+                        key={tag} 
+                        className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full"
                       >
-                        {item}
+                        {tag}
                       </span>
                     ))}
                   </div>

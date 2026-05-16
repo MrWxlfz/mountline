@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { ArrowRight, HelpCircle } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import {
   Accordion,
   AccordionContent,
@@ -53,8 +53,8 @@ export function FAQSection() {
   }
 
   return (
-    <section id="faq" ref={ref} className="py-24 sm:py-32 section-alt">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+    <section id="faq" ref={ref} className="py-24 sm:py-32 bg-muted/30 relative">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -62,21 +62,19 @@ export function FAQSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border mb-6"
-          >
-            <HelpCircle className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">FAQ</span>
-          </motion.div>
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className="w-8 h-px bg-border-strong" />
+            <span className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
+              FAQ
+            </span>
+            <span className="w-8 h-px bg-border-strong" />
+          </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
-            Frequently asked questions
+            Common questions
           </h2>
           <p className="text-lg text-muted-foreground">
-            Common questions about working with northline.
+            Everything you need to know about working with northline.
           </p>
         </motion.div>
 
@@ -85,7 +83,7 @@ export function FAQSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="card-premium overflow-hidden"
+          className="rounded-2xl border border-border bg-card overflow-hidden"
         >
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, index) => (
@@ -112,17 +110,16 @@ export function FAQSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="text-center mt-10"
         >
-          <p className="text-muted-foreground text-sm mb-3">
+          <p className="text-muted-foreground text-sm mb-4">
             Still have questions?
           </p>
           <motion.button
             onClick={() => scrollToSection('contact')}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-2 text-foreground hover:text-accent transition-colors text-sm font-medium"
+            className="group inline-flex items-center gap-2 text-foreground hover:text-accent transition-colors font-medium"
+            whileHover={{ x: 4 }}
           >
             Get in touch
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </motion.button>
         </motion.div>
       </div>

@@ -7,13 +7,15 @@ interface NorthlineLogoProps {
   showWordmark?: boolean
   animated?: boolean
   className?: string
+  inverted?: boolean
 }
 
 export function NorthlineLogo({ 
   size = "md", 
   showWordmark = true,
   animated = false,
-  className = "" 
+  className = "",
+  inverted = false
 }: NorthlineLogoProps) {
   const sizes = {
     sm: { mark: 28, text: "text-base", gap: "gap-2" },
@@ -70,7 +72,7 @@ export function NorthlineLogo({
           {/* Mountain shape - abstract, geometric */}
           <motion.path
             d="M20 8 L32 32 L8 32 Z"
-            className="fill-foreground/10 stroke-foreground"
+            className={inverted ? "fill-primary-foreground/10 stroke-primary-foreground" : "fill-foreground/10 stroke-foreground"}
             strokeWidth="1.5"
             strokeLinejoin="round"
             {...(animated ? { variants: lineVariants, initial: "initial", animate: "animate" } : {})}
@@ -79,7 +81,7 @@ export function NorthlineLogo({
           {/* Upward cutting line - momentum, direction, growth */}
           <motion.path
             d="M20 34 L20 6"
-            className="stroke-accent"
+            className={inverted ? "stroke-accent" : "stroke-accent"}
             strokeWidth="2.5"
             strokeLinecap="round"
             {...(animated ? { 
@@ -93,7 +95,7 @@ export function NorthlineLogo({
           {/* Arrow head at top */}
           <motion.path
             d="M16 12 L20 6 L24 12"
-            className="stroke-accent"
+            className={inverted ? "stroke-accent" : "stroke-accent"}
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -111,7 +113,7 @@ export function NorthlineLogo({
       {showWordmark && (
         <TextWrapper
           {...(animated ? { variants: textVariants, initial: "initial", animate: "animate" } : {})}
-          className={`font-semibold tracking-tight text-foreground lowercase ${s.text}`}
+          className={`font-semibold tracking-tight lowercase ${s.text} ${inverted ? "text-primary-foreground" : "text-foreground"}`}
         >
           northline
         </TextWrapper>

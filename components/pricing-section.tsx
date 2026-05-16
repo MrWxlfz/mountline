@@ -2,14 +2,14 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { Check, ArrowRight, Star, CreditCard } from "lucide-react"
+import { Check, ArrowRight, Star } from "lucide-react"
 
 const pricingPlans = [
   {
-    name: "Starter Website",
+    name: "Starter",
     price: "$500",
     priceNote: "Starting at",
-    description: "For businesses that need a clean, professional one-page website.",
+    description: "A clean one-page website for businesses just getting started online.",
     features: [
       "One-page website",
       "Mobile-friendly design",
@@ -18,33 +18,29 @@ const pricingPlans = [
       "Basic SEO setup",
       "Launch support",
     ],
-    cta: "Get started",
     highlighted: false,
-    gradient: "from-blue-500/10 to-cyan-500/10"
   },
   {
-    name: "Business Website",
+    name: "Business",
     price: "$1,250",
     priceNote: "Starting at",
-    description: "For businesses that need a stronger online presence.",
+    description: "A complete multi-page site for a stronger online presence.",
     features: [
-      "Multi-page or advanced single-page site",
+      "Multi-page or advanced single-page",
       "About, services, contact, FAQ",
-      "Gallery, testimonials, or trust sections",
+      "Gallery and testimonials",
       "Analytics-ready setup",
       "Stronger conversion layout",
       "Launch support",
     ],
-    cta: "Get started",
     highlighted: true,
-    gradient: "from-violet-500/10 to-purple-500/10"
   },
   {
     name: "Monthly Care",
     price: "$149",
     priceNote: "Starting at",
     priceSuffix: "/mo",
-    description: "For businesses that want updates handled without chasing a designer.",
+    description: "Ongoing updates handled without chasing a designer.",
     features: [
       "Small monthly edits",
       "New photos or service updates",
@@ -53,9 +49,7 @@ const pricingPlans = [
       "Priority fixes",
       "Light content updates",
     ],
-    cta: "Learn more",
     highlighted: false,
-    gradient: "from-emerald-500/10 to-teal-500/10"
   },
 ]
 
@@ -71,24 +65,25 @@ export function PricingSection() {
   }
 
   return (
-    <section id="pricing" ref={ref} className="py-24 sm:py-32 section-alt">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Header */}
+    <section id="pricing" ref={ref} className="py-24 sm:py-32 bg-muted/30 relative overflow-hidden">
+      {/* Background accent */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/[0.02] to-transparent" />
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header - Centered */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border mb-6"
-          >
-            <CreditCard className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">Pricing</span>
-          </motion.div>
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className="w-8 h-px bg-border-strong" />
+            <span className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
+              Pricing
+            </span>
+            <span className="w-8 h-px bg-border-strong" />
+          </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             Simple packages. Clear scope.
@@ -99,104 +94,135 @@ export function PricingSection() {
         </motion.div>
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {pricingPlans.map((plan, index) => (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-              className={`relative group ${
-                plan.highlighted
-                  ? "card-premium bg-primary text-primary-foreground ring-2 ring-primary"
-                  : "card-premium"
-              }`}
+              className={`group relative ${plan.highlighted ? "lg:-mt-4 lg:mb-4" : ""}`}
             >
-              {/* Background gradient */}
-              {!plan.highlighted && (
-                <div className={`absolute inset-0 bg-gradient-to-br ${plan.gradient} rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-              )}
-              
+              {/* Popular badge */}
               {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1.5 bg-accent text-accent-foreground text-xs font-medium px-3 py-1.5 rounded-full shadow-lg">
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                  className="absolute -top-3 left-1/2 -translate-x-1/2 z-10"
+                >
+                  <span className="inline-flex items-center gap-1.5 bg-foreground text-background text-xs font-medium px-3 py-1.5 rounded-full">
                     <Star className="w-3 h-3" />
                     Most popular
                   </span>
-                </div>
+                </motion.div>
               )}
-
-              <div className="relative p-6 sm:p-8">
-                <div className="mb-6">
-                  <h3 className={`font-semibold text-xl mb-2 ${plan.highlighted ? "text-primary-foreground" : "text-foreground"}`}>
+              
+              <div className={`h-full rounded-2xl border overflow-hidden transition-all duration-300 ${
+                plan.highlighted
+                  ? "bg-foreground text-background border-foreground shadow-2xl"
+                  : "bg-card border-border hover:border-border-strong hover:shadow-lg"
+              }`}>
+                <div className="p-6 sm:p-8">
+                  {/* Plan name */}
+                  <h3 className={`text-lg font-semibold mb-4 ${
+                    plan.highlighted ? "text-background" : "text-foreground"
+                  }`}>
                     {plan.name}
                   </h3>
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span className={`text-sm ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                  
+                  {/* Price */}
+                  <div className="mb-4">
+                    <div className={`text-xs uppercase tracking-wider mb-1 ${
+                      plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                    }`}>
                       {plan.priceNote}
-                    </span>
-                    <span className={`text-4xl font-bold tracking-tight ${plan.highlighted ? "text-primary-foreground" : "text-foreground"}`}>
-                      {plan.price}
-                    </span>
-                    {plan.priceSuffix && (
-                      <span className={`text-lg ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                        {plan.priceSuffix}
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-4xl sm:text-5xl font-bold tracking-tight ${
+                        plan.highlighted ? "text-background" : "text-foreground"
+                      }`}>
+                        {plan.price}
                       </span>
-                    )}
+                      {plan.priceSuffix && (
+                        <span className={`text-lg ${
+                          plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                        }`}>
+                          {plan.priceSuffix}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className={`text-sm leading-relaxed ${plan.highlighted ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  
+                  {/* Description */}
+                  <p className={`text-sm leading-relaxed mb-6 ${
+                    plan.highlighted ? "text-background/70" : "text-muted-foreground"
+                  }`}>
                     {plan.description}
                   </p>
+                  
+                  {/* Divider */}
+                  <div className={`h-px mb-6 ${
+                    plan.highlighted ? "bg-background/10" : "bg-border"
+                  }`} />
+                  
+                  {/* Features */}
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                          plan.highlighted ? "bg-background/10" : "bg-accent/10"
+                        }`}>
+                          <Check className={`w-3 h-3 ${
+                            plan.highlighted ? "text-background" : "text-accent"
+                          }`} />
+                        </div>
+                        <span className={`text-sm ${
+                          plan.highlighted ? "text-background/80" : "text-muted-foreground"
+                        }`}>
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  {/* CTA */}
+                  <motion.button
+                    onClick={() => scrollToSection('contact')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                      plan.highlighted
+                        ? "bg-background text-foreground hover:bg-background/90"
+                        : "bg-foreground text-background hover:bg-foreground/90"
+                    }`}
+                  >
+                    Get started
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
                 </div>
-
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                        plan.highlighted ? "bg-primary-foreground/20" : "bg-accent/10"
-                      }`}>
-                        <Check className={`w-3 h-3 ${plan.highlighted ? "text-primary-foreground" : "text-accent"}`} />
-                      </div>
-                      <span className={`text-sm ${plan.highlighted ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <motion.button
-                  onClick={() => scrollToSection('contact')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-medium transition-all duration-300 ${
-                    plan.highlighted
-                      ? "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                      : "btn-primary"
-                  }`}
-                >
-                  {plan.cta}
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Bottom note */}
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="text-center text-muted-foreground text-sm mt-10"
+          className="text-center mt-12"
         >
-          Final pricing depends on scope, content, timeline, and integrations.{" "}
-          <button 
-            onClick={() => scrollToSection('contact')} 
-            className="text-foreground hover:text-accent underline underline-offset-2 transition-colors"
-          >
-            Get a custom quote
-          </button>
-        </motion.p>
+          <p className="text-muted-foreground text-sm">
+            Final pricing depends on scope, content, timeline, and integrations.{" "}
+            <button 
+              onClick={() => scrollToSection('contact')} 
+              className="text-foreground hover:text-accent underline underline-offset-4 transition-colors"
+            >
+              Get a custom quote
+            </button>
+          </p>
+        </motion.div>
       </div>
     </section>
   )

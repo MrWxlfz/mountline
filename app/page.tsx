@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/navbar"
 import { Hero3DStage } from "@/components/hero-3d-stage"
+import { BrandStatementSection } from "@/components/brand-statement-section"
 import { ProblemSection } from "@/components/problem-section"
 import { FeatureCardsSection } from "@/components/feature-cards-section"
 import { WorkSection } from "@/components/work-section"
@@ -15,6 +16,7 @@ export default function Home() {
     <main className="min-h-screen bg-background">
       <Navbar />
       <Hero3DStage />
+      <BrandStatementSection />
       <ProblemSection />
       <FeatureCardsSection />
       <WorkSection />

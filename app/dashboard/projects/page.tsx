@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import type { ReactNode } from "react"
 import { 
-  Plus, FolderKanban, Calendar, CreditCard, FileText
+  Plus, FolderKanban, Calendar, CreditCard, FileText, Pencil
 } from "lucide-react"
 import Link from "next/link"
 import { ProjectLinkActions } from "./project-link-actions"
@@ -99,6 +99,15 @@ export default async function ProjectsPage() {
                   liveUrl={project.live_url}
                   paymentLink={project.payment_link}
                 />
+                <div className="pt-3">
+                  <Link
+                    href={`/dashboard/projects/${project.id}/edit`}
+                    className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Edit project
+                  </Link>
+                </div>
               </div>
             )
           })}
@@ -121,7 +130,7 @@ export default async function ProjectsPage() {
       )}
 
       <div className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
-        TODO: Add a focused project edit screen for status, payment link, next step, and portal access updates.
+        Use Edit project to update status, next step, payment links, launch links, and portal access.
       </div>
     </div>
   )

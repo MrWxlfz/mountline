@@ -2,9 +2,11 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import Link from "next/link"
 import { Globe, ArrowUpRight, ExternalLink } from "lucide-react"
+import { PortalCopyButton } from "./portal-copy-button"
 
 export default async function PortalsPage() {
   await requireNorthlineTeamMember()
+  const productionBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || null
 
   const supabase = createAdminClient()
   const { data: projects } = await supabase
@@ -47,6 +49,10 @@ export default async function PortalsPage() {
                   <code className="hidden sm:block text-xs text-muted-foreground bg-muted px-2 py-1 rounded font-mono max-w-[200px] truncate">
                     {portalUrl}
                   </code>
+                  <PortalCopyButton
+                    portalPath={portalUrl}
+                    productionBaseUrl={productionBaseUrl}
+                  />
                   <Link
                     href={portalUrl}
                     target="_blank"

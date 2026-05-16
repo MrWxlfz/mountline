@@ -14,6 +14,8 @@ interface Client {
 export default function NewProjectPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const [loadingClients, setLoadingClients] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [clients, setClients] = useState<Client[]>([])
   const [form, setForm] = useState({
     project_name: "",
@@ -31,10 +33,21 @@ export default function NewProjectPage() {
 
   useEffect(() => {
     async function fetchClients() {
-      const res = await fetch("/api/clients")
-      if (res.ok) {
+      setLoadingClients(true)
+      try {
+        const res = await fetch("/api/clients")
         const data = await res.json()
+
+        if (!res.ok) {
+          setError(data.error || "Clients could not be loaded.")
+          return
+        }
+
         setClients(data.clients || [])
+      } catch {
+        setError("Clients could not be loaded.")
+      } finally {
+        setLoadingClients(false)
       }
     }
     fetchClients()
@@ -43,6 +56,7 @@ export default function NewProjectPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
+    setError(null)
     try {
       const res = await fetch("/api/projects", {
         method: "POST",
@@ -52,10 +66,17 @@ export default function NewProjectPage() {
           client_id: form.client_id || null,
         }),
       })
-      if (res.ok) {
-        router.push("/dashboard/projects")
-        router.refresh()
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || "Project could not be created.")
+        return
       }
+
+      router.push("/dashboard/projects")
+      router.refresh()
+    } catch {
+      setError("Project could not be created.")
     } finally {
       setSaving(false)
     }
@@ -77,6 +98,12 @@ export default function NewProjectPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-6 space-y-5">
+        {error && (
+          <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium">Project Name *</label>
@@ -94,9 +121,10 @@ export default function NewProjectPage() {
             <select
               value={form.client_id}
               onChange={(e) => setForm({ ...form, client_id: e.target.value })}
+              disabled={loadingClients}
               className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
             >
-              <option value="">No client</option>
+              <option value="">{loadingClients ? "Loading clients..." : "No client"}</option>
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>{c.business_name}</option>
               ))}
@@ -222,10 +250,10 @@ export default function NewProjectPage() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-foreground text-background text-sm font-medium rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-foreground text-background text-sm font-medium rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Create Project
+            {saving ? "Creating..." : "Create Project"}
           </button>
         </div>
       </form>

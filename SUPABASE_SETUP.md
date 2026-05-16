@@ -136,3 +136,15 @@ Expected behavior:
 - Service-role Supabase usage is server-only. Do not expose `SUPABASE_SERVICE_ROLE_KEY` to the browser.
 - Public signup should not be promoted.
 - Realtime support chat and Stripe checkout are intentionally not implemented yet.
+
+## Lead Submission and RLS
+
+The current public lead form inserts into `leads` through a server action using the Supabase anon client. For production, choose one of these safe options before enabling strict RLS:
+
+**Option A: anon insert policy for leads only**
+
+Keep the current anon-client insert path and add a restrictive `insert` policy for `leads` only. Do not grant anon read, update, or delete access to lead data.
+
+**Option B: server-only lead submission**
+
+Move public lead submission behind a server route/action that uses the Supabase service-role key on the server only, then add spam/rate limiting before writing. This is the recommended production path once Northline adds abuse protection.

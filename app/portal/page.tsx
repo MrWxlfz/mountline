@@ -16,7 +16,7 @@ export default async function PortalIndexPage() {
   }
 
   const user = await currentUser()
-  const email = user?.emailAddresses?.[0]?.emailAddress
+  const email = user?.emailAddresses?.[0]?.emailAddress?.trim().toLowerCase()
 
   const supabase = createAdminClient()
 

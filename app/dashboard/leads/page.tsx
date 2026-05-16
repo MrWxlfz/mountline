@@ -7,7 +7,9 @@ import {
   Mail,
   Phone,
   Calendar,
+  UserPlus,
 } from "lucide-react"
+import Link from "next/link"
 
 async function getLeads() {
   const supabase = createAdminClient()
@@ -31,6 +33,7 @@ const statusColors: Record<string, string> = {
   qualified: "bg-green-500/10 text-green-500 border-green-500/20",
   proposal: "bg-purple-500/10 text-purple-500 border-purple-500/20",
   closed: "bg-gray-500/10 text-gray-500 border-gray-500/20",
+  converted: "bg-green-500/10 text-green-500 border-green-500/20",
 }
 
 export default async function LeadsPage() {
@@ -142,7 +145,14 @@ export default async function LeadsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 hover:bg-muted rounded-lg transition-colors">
+                      <Link
+                        href={`/dashboard/clients/new?leadId=${lead.id}`}
+                        className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                        Create client
+                      </Link>
+                      <button className="ml-2 p-2 hover:bg-muted rounded-lg transition-colors">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </td>

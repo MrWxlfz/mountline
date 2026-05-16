@@ -1,38 +1,41 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { useInView } from "framer-motion"
+import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { ArrowRight } from "lucide-react"
+import { ArrowUpRight, Layers } from "lucide-react"
 
 const conceptBuilds = [
   {
     title: "Auto Detailing Website",
-    category: "Concept example",
+    category: "Concept build",
     description: "Service packages, gallery, online booking, and quote request form.",
-    includes: ["5 pages", "Booking integration", "Service gallery", "Quote form"],
-    image: "from-blue-100 to-slate-100"
+    includes: ["5 pages", "Booking", "Gallery", "Quote form"],
+    gradient: "from-sky-500/20 via-blue-500/10 to-indigo-500/20",
+    accent: "bg-sky-500"
   },
   {
     title: "Contractor Services Site",
-    category: "Concept example",
+    category: "Concept build",
     description: "Service areas, project portfolio, testimonials, and contact system.",
-    includes: ["6 pages", "Project gallery", "Service areas", "Lead form"],
-    image: "from-amber-100 to-orange-50"
+    includes: ["6 pages", "Portfolio", "Service areas", "Lead form"],
+    gradient: "from-amber-500/20 via-orange-500/10 to-red-500/20",
+    accent: "bg-amber-500"
   },
   {
     title: "Local Gym Landing Page",
-    category: "Concept example",
+    category: "Concept build",
     description: "Membership tiers, class schedule, trainer profiles, and trial signup.",
-    includes: ["Single page", "Pricing table", "Schedule display", "Trial signup"],
-    image: "from-emerald-100 to-teal-50"
+    includes: ["Single page", "Pricing", "Schedule", "Trial signup"],
+    gradient: "from-emerald-500/20 via-teal-500/10 to-cyan-500/20",
+    accent: "bg-emerald-500"
   },
   {
-    title: "Restaurant / Food Truck",
-    category: "Concept example",
+    title: "Restaurant & Food Truck",
+    category: "Concept build",
     description: "Menu display, location info, hours, and online ordering links.",
-    includes: ["3 pages", "Menu sections", "Location map", "Order links"],
-    image: "from-rose-100 to-pink-50"
+    includes: ["3 pages", "Menu", "Location", "Order links"],
+    gradient: "from-rose-500/20 via-pink-500/10 to-fuchsia-500/20",
+    accent: "bg-rose-500"
   },
 ]
 
@@ -41,20 +44,30 @@ export function WorkSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
   return (
-    <section id="work" ref={ref} className="py-20 sm:py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="work" ref={ref} className="py-24 sm:py-32 section-alt">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="max-w-2xl mb-12 sm:mb-16"
+          className="max-w-2xl mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight mb-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border mb-6"
+          >
+            <Layers className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Sample work</span>
+          </motion.div>
+          
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             Examples of what we build.
           </h2>
-          <p className="text-lg text-slate-600 leading-relaxed">
-            Sample builds that show the type of sites Northline creates for local businesses. These are concept examples, not client work.
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Sample builds that show the type of sites northline creates. These are concept examples that demonstrate our design approach.
           </p>
         </motion.div>
 
@@ -63,56 +76,73 @@ export function WorkSection() {
           {conceptBuilds.map((build, index) => (
             <motion.div
               key={build.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group bg-stone-50 rounded-xl border border-stone-100 overflow-hidden hover:shadow-lg hover:shadow-slate-900/5 transition-all duration-300"
+              transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
+              className="group card-premium overflow-hidden"
             >
               {/* Preview area */}
-              <div className={`aspect-[16/10] bg-gradient-to-br ${build.image} p-6 flex flex-col justify-between relative`}>
+              <div className={`aspect-[16/10] bg-gradient-to-br ${build.gradient} p-6 sm:p-8 relative overflow-hidden`}>
                 {/* Mock browser chrome */}
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-slate-300" />
-                  <div className="w-2 h-2 rounded-full bg-slate-300" />
-                  <div className="w-2 h-2 rounded-full bg-slate-300" />
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-foreground/20" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-foreground/20" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-foreground/20" />
+                  </div>
+                  <div className="flex-1 max-w-[200px]">
+                    <div className="h-5 rounded bg-background/50 backdrop-blur-sm" />
+                  </div>
                 </div>
                 
-                {/* Mock content */}
-                <div className="space-y-2">
-                  <div className="w-1/2 h-4 rounded bg-slate-800/80" />
-                  <div className="w-3/4 h-3 rounded bg-slate-600/60" />
-                  <div className="w-1/3 h-6 rounded bg-blue-600 mt-3" />
+                {/* Mock website content */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded ${build.accent}`} />
+                    <div className="w-24 h-3 rounded bg-foreground/60" />
+                  </div>
+                  <div className="w-3/4 h-5 rounded bg-foreground/70" />
+                  <div className="w-full h-3 rounded bg-foreground/40" />
+                  <div className="w-2/3 h-3 rounded bg-foreground/40" />
+                  <div className="flex gap-2 pt-2">
+                    <div className={`w-20 h-8 rounded-lg ${build.accent}`} />
+                    <div className="w-16 h-8 rounded-lg bg-background/50 backdrop-blur-sm border border-foreground/10" />
+                  </div>
                 </div>
                 
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/5 transition-colors duration-300" />
+                {/* Hover overlay with view button */}
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="bg-background/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-foreground shadow-lg">
+                    View concept
+                    <ArrowUpRight className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
               
               {/* Content */}
               <div className="p-6">
-                <span className="text-xs text-slate-500 uppercase tracking-wider mb-2 block">
-                  {build.category}
-                </span>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`w-2 h-2 rounded-full ${build.accent}`} />
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                    {build.category}
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-semibold text-foreground mb-2">
                   {build.title}
                 </h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                   {build.description}
                 </p>
                 
                 {/* Includes */}
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2">
                   {build.includes.map((item) => (
-                    <span key={item} className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                    <span key={item} className="text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full border border-border">
                       {item}
                     </span>
                   ))}
                 </div>
-                
-                <button className="flex items-center gap-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors">
-                  View sample
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </button>
               </div>
             </motion.div>
           ))}

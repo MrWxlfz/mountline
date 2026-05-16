@@ -1,9 +1,8 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { useInView } from "framer-motion"
+import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { Check, ArrowRight } from "lucide-react"
+import { Check, ArrowRight, Star, CreditCard } from "lucide-react"
 
 const pricingPlans = [
   {
@@ -21,6 +20,7 @@ const pricingPlans = [
     ],
     cta: "Get started",
     highlighted: false,
+    gradient: "from-blue-500/10 to-cyan-500/10"
   },
   {
     name: "Business Website",
@@ -37,6 +37,7 @@ const pricingPlans = [
     ],
     cta: "Get started",
     highlighted: true,
+    gradient: "from-violet-500/10 to-purple-500/10"
   },
   {
     name: "Monthly Care",
@@ -54,6 +55,7 @@ const pricingPlans = [
     ],
     cta: "Learn more",
     highlighted: false,
+    gradient: "from-emerald-500/10 to-teal-500/10"
   },
 ]
 
@@ -61,94 +63,121 @@ export function PricingSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id)
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
   return (
-    <section id="pricing" ref={ref} className="py-20 sm:py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="pricing" ref={ref} className="py-24 sm:py-32 section-alt">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
+          className="text-center max-w-2xl mx-auto mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight mb-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border mb-6"
+          >
+            <CreditCard className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Pricing</span>
+          </motion.div>
+          
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             Simple packages. Clear scope.
           </h2>
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <p className="text-lg text-muted-foreground leading-relaxed">
             Start with the site your business needs now. Add more when it actually helps.
           </p>
         </motion.div>
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {pricingPlans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`relative rounded-xl p-6 sm:p-8 ${
+              transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
+              className={`relative group ${
                 plan.highlighted
-                  ? "bg-slate-900 text-white ring-2 ring-slate-900"
-                  : "bg-stone-50 border border-stone-200"
+                  ? "card-premium bg-primary text-primary-foreground ring-2 ring-primary"
+                  : "card-premium"
               }`}
             >
+              {/* Background gradient */}
+              {!plan.highlighted && (
+                <div className={`absolute inset-0 bg-gradient-to-br ${plan.gradient} rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+              )}
+              
               {plan.highlighted && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 bg-accent text-accent-foreground text-xs font-medium px-3 py-1.5 rounded-full shadow-lg">
+                    <Star className="w-3 h-3" />
                     Most popular
                   </span>
                 </div>
               )}
 
-              <div className="mb-6">
-                <h3 className={`font-semibold text-xl mb-2 ${plan.highlighted ? "text-white" : "text-slate-900"}`}>
-                  {plan.name}
-                </h3>
-                <div className="flex items-baseline gap-1 mb-3">
-                  <span className={`text-sm ${plan.highlighted ? "text-slate-400" : "text-slate-500"}`}>
-                    {plan.priceNote}
-                  </span>
-                  <span className={`text-4xl font-semibold tracking-tight ${plan.highlighted ? "text-white" : "text-slate-900"}`}>
-                    {plan.price}
-                  </span>
-                  {plan.priceSuffix && (
-                    <span className={`text-lg ${plan.highlighted ? "text-slate-400" : "text-slate-500"}`}>
-                      {plan.priceSuffix}
+              <div className="relative p-6 sm:p-8">
+                <div className="mb-6">
+                  <h3 className={`font-semibold text-xl mb-2 ${plan.highlighted ? "text-primary-foreground" : "text-foreground"}`}>
+                    {plan.name}
+                  </h3>
+                  <div className="flex items-baseline gap-1 mb-3">
+                    <span className={`text-sm ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                      {plan.priceNote}
                     </span>
-                  )}
+                    <span className={`text-4xl font-bold tracking-tight ${plan.highlighted ? "text-primary-foreground" : "text-foreground"}`}>
+                      {plan.price}
+                    </span>
+                    {plan.priceSuffix && (
+                      <span className={`text-lg ${plan.highlighted ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                        {plan.priceSuffix}
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-sm leading-relaxed ${plan.highlighted ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                    {plan.description}
+                  </p>
                 </div>
-                <p className={`text-sm leading-relaxed ${plan.highlighted ? "text-slate-300" : "text-slate-600"}`}>
-                  {plan.description}
-                </p>
+
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                        plan.highlighted ? "bg-primary-foreground/20" : "bg-accent/10"
+                      }`}>
+                        <Check className={`w-3 h-3 ${plan.highlighted ? "text-primary-foreground" : "text-accent"}`} />
+                      </div>
+                      <span className={`text-sm ${plan.highlighted ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <motion.button
+                  onClick={() => scrollToSection('contact')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    plan.highlighted
+                      ? "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                      : "btn-primary"
+                  }`}
+                >
+                  {plan.cta}
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
               </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                      plan.highlighted ? "bg-blue-600" : "bg-slate-200"
-                    }`}>
-                      <Check className={`w-3 h-3 ${plan.highlighted ? "text-white" : "text-slate-600"}`} />
-                    </div>
-                    <span className={`text-sm ${plan.highlighted ? "text-slate-300" : "text-slate-600"}`}>
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <a
-                href="#contact"
-                className={`flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-medium transition-colors ${
-                  plan.highlighted
-                    ? "bg-white text-slate-900 hover:bg-slate-100"
-                    : "bg-slate-900 text-white hover:bg-slate-800"
-                }`}
-              >
-                {plan.cta}
-                <ArrowRight className="w-4 h-4" />
-              </a>
             </motion.div>
           ))}
         </div>
@@ -157,13 +186,16 @@ export function PricingSection() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center text-slate-500 text-sm mt-10"
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="text-center text-muted-foreground text-sm mt-10"
         >
-          Final pricing depends on scope, content, timeline, and integrations. 
-          <a href="#contact" className="text-slate-700 hover:text-slate-900 underline ml-1">
+          Final pricing depends on scope, content, timeline, and integrations.{" "}
+          <button 
+            onClick={() => scrollToSection('contact')} 
+            className="text-foreground hover:text-accent underline underline-offset-2 transition-colors"
+          >
             Get a custom quote
-          </a>
+          </button>
         </motion.p>
       </div>
     </section>

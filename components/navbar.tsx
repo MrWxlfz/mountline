@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { NorthlineLogo } from "./northline-logo"
+import { ThemeToggle } from "./theme-toggle"
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -38,77 +39,87 @@ export function Navbar() {
     <motion.nav 
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? "bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm" 
+          ? "glass-card shadow-sm" 
           : "bg-transparent"
       }`}
     >
-      <div className="w-full flex justify-center px-6 py-4">
+      <div className="w-full flex justify-center px-4 sm:px-6 py-4">
         <div className="w-full max-w-6xl flex items-center justify-between">
-          <NorthlineLogo size="md" variant="dark" animated />
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <NorthlineLogo size="md" animated />
+          </motion.div>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item, index) => (
               <motion.button
                 key={item.id}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                transition={{ duration: 0.4, delay: 0.15 + index * 0.05 }}
                 onClick={() => scrollToSection(item.id)}
-                className="relative text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
               >
                 {item.label}
               </motion.button>
             ))}
           </div>
           
+          {/* Right side - Theme toggle + CTA */}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="hidden md:flex items-center"
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex items-center gap-3"
           >
+            <ThemeToggle className="hidden sm:flex" />
+            
             <button
               onClick={() => scrollToSection('contact')}
-              className="text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 px-5 py-2.5 rounded-lg transition-colors"
+              className="hidden sm:block text-sm font-medium btn-primary"
             >
               Book a website review
             </button>
-          </motion.div>
 
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden text-slate-600 hover:text-slate-900 transition-colors p-2 -mr-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            <AnimatePresence mode="wait">
-              {mobileMenuOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <X className="w-6 h-6" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Menu className="w-6 h-6" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
+            {/* Mobile menu button */}
+            <button
+              className="lg:hidden text-muted-foreground hover:text-foreground transition-colors p-2 -mr-2 hover:bg-secondary/50 rounded-lg"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              <AnimatePresence mode="wait">
+                {mobileMenuOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="w-6 h-6" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Menu className="w-6 h-6" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          </motion.div>
         </div>
       </div>
 
@@ -120,9 +131,9 @@ export function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="md:hidden border-t border-slate-200 bg-white overflow-hidden"
+            className="lg:hidden border-t border-border bg-card overflow-hidden"
           >
-            <div className="px-6 py-4 space-y-1">
+            <div className="px-4 sm:px-6 py-4 space-y-1">
               {navItems.map((item, index) => (
                 <motion.button 
                   key={item.id}
@@ -130,20 +141,24 @@ export function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   onClick={() => scrollToSection(item.id)}
-                  className="block w-full text-left text-base font-medium text-slate-600 hover:text-slate-900 transition-colors py-3 border-b border-slate-100"
+                  className="block w-full text-left text-base font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 rounded-lg hover:bg-secondary/50"
                 >
                   {item.label}
                 </motion.button>
               ))}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-                onClick={() => scrollToSection('contact')}
-                className="w-full text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 px-4 py-3 rounded-lg transition-colors mt-4"
-              >
-                Book a website review
-              </motion.button>
+              
+              <div className="flex items-center gap-3 pt-4 border-t border-border mt-4">
+                <ThemeToggle />
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                  onClick={() => scrollToSection('contact')}
+                  className="flex-1 text-sm font-medium btn-primary text-center"
+                >
+                  Book a website review
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}

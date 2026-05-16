@@ -9,7 +9,7 @@ import { FeatureCardsSection } from "./feature-cards-section"
 import { AISection } from "./ai-section"
 import { ProductDirectionSection } from "./product-direction-section"
 import { WorkflowsSection } from "./workflows-section"
-import { CTASection } from "./cta-section"
+import { CtaSection } from "./cta-section"
 import { Footer } from "./footer"
 import { PricingSection } from "./pricing-section"
 import { FAQSection } from "./faq-section"
@@ -194,7 +194,7 @@ export function Hero3DStage() {
           <WorkSection />
           <TrustSection />
           <FAQSection />
-          <CTASection />
+          <CtaSection />
           <ContactSection />
           <Footer />
         </div>

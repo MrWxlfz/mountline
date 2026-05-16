@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { NorthlineLogo } from "./northline-logo"
 import { ArrowUpRight } from "lucide-react"
-import { useUser, SignInButton } from "@clerk/nextjs"
+import Link from "next/link"
 
 const footerLinks = {
   services: [
@@ -22,8 +22,6 @@ const footerLinks = {
 }
 
 export function FooterSection() {
-  const { isSignedIn, isLoaded } = useUser()
-  
   const scrollToSection = (id: string) => {
     if (id.startsWith('#')) {
       const element = document.getElementById(id.slice(1))
@@ -124,13 +122,12 @@ export function FooterSection() {
             <button className="text-sm text-background/40 hover:text-background/60 transition-colors">
               Terms
             </button>
-            {isLoaded && !isSignedIn && (
-              <SignInButton mode="modal">
-                <button className="text-sm text-background/40 hover:text-background/60 transition-colors">
-                  Client Login
-                </button>
-              </SignInButton>
-            )}
+            <Link
+              href="/client-login"
+              className="text-sm text-background/40 hover:text-background/60 transition-colors"
+            >
+              Client Login
+            </Link>
           </div>
         </motion.div>
       </div>

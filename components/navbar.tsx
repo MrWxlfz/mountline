@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Menu, X, LayoutDashboard } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useUser, SignInButton, UserButton } from "@clerk/nextjs"
+import { useUser, UserButton } from "@clerk/nextjs"
 import Link from "next/link"
 import { NorthlineLogo } from "./northline-logo"
 import { ThemeToggle } from "./theme-toggle"
@@ -105,15 +105,7 @@ export function Navbar() {
                       }}
                     />
                   </>
-                ) : (
-                  <>
-                    <SignInButton mode="modal">
-                      <button className="hidden sm:block text-sm font-medium btn-primary">
-                        Client Login
-                      </button>
-                    </SignInButton>
-                  </>
-                )}
+                ) : null}
               </>
             )}
 
@@ -195,20 +187,7 @@ export function Navbar() {
                           Dashboard
                         </Link>
                       </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.3 }}
-                        className="flex-1"
-                      >
-                        <SignInButton mode="modal">
-                          <button className="w-full text-sm font-medium btn-primary text-center">
-                            Client Login
-                          </button>
-                        </SignInButton>
-                      </motion.div>
-                    )}
+                    ) : null}
                   </>
                 )}
               </div>

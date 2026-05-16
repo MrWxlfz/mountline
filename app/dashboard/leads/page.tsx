@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin"
+import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { 
   Search, 
   Filter, 
@@ -6,8 +7,6 @@ import {
   Mail,
   Phone,
   Calendar,
-  ExternalLink,
-  Building2
 } from "lucide-react"
 
 async function getLeads() {
@@ -35,6 +34,8 @@ const statusColors: Record<string, string> = {
 }
 
 export default async function LeadsPage() {
+  await requireNorthlineTeamMember()
+
   const leads = await getLeads()
 
   return (

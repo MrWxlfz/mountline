@@ -1,11 +1,49 @@
 "use client"
 
+import { Suspense, useMemo } from "react"
 import { SignIn } from "@clerk/nextjs"
 import { NorthlineLogo } from "@/components/northline-logo"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 
 export default function ClientLoginPage() {
+  return (
+    <Suspense fallback={<ClientLoginShell />}>
+      <ClientLoginContent />
+    </Suspense>
+  )
+}
+
+function ClientLoginContent() {
+  const searchParams = useSearchParams()
+  const redirectUrl = useMemo(
+    () => getSafePortalRedirect(searchParams.get("redirect_url")),
+    [searchParams],
+  )
+
+  return <ClientLoginShell redirectUrl={redirectUrl} />
+}
+
+function getSafePortalRedirect(rawRedirect: string | null) {
+  if (!rawRedirect) return "/portal"
+
+  try {
+    const url = rawRedirect.startsWith("/")
+      ? new URL(rawRedirect, "https://northline.local")
+      : new URL(rawRedirect)
+
+    if (url.pathname === "/portal" || url.pathname.startsWith("/portal/")) {
+      return `${url.pathname}${url.search}${url.hash}`
+    }
+  } catch {
+    return "/portal"
+  }
+
+  return "/portal"
+}
+
+function ClientLoginShell({ redirectUrl = "/portal" }: { redirectUrl?: string }) {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
@@ -34,7 +72,7 @@ export default function ClientLoginPage() {
                 footerAction: "hidden",
               }
             }}
-            redirectUrl="/portal"
+            redirectUrl={redirectUrl}
             signUpUrl={undefined}
           />
         </div>

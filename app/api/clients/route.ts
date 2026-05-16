@@ -1,11 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/admin"
-import { auth } from "@clerk/nextjs/server"
+import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const authCheck = await requireNorthlineTeamMemberApi()
+  if (authCheck.response) {
+    return authCheck.response
   }
 
   const body = await request.json()
@@ -30,9 +30,9 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const authCheck = await requireNorthlineTeamMemberApi()
+  if (authCheck.response) {
+    return authCheck.response
   }
 
   const supabase = createAdminClient()

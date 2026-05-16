@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server"
+import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { 
   Inbox, FolderKanban, Users, Target,
@@ -36,8 +36,7 @@ async function getStats() {
 }
 
 export default async function DashboardPage() {
-  const { userId } = await auth()
-  if (!userId) return null
+  await requireNorthlineTeamMember()
 
   const stats = await getStats()
 

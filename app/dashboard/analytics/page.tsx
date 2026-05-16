@@ -1,10 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin"
-import { auth } from "@clerk/nextjs/server"
+import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { TrendingUp, Users, Inbox, FolderKanban, Target } from "lucide-react"
 
 export default async function AnalyticsPage() {
-  const { userId } = await auth()
-  if (!userId) return null
+  await requireNorthlineTeamMember()
 
   const supabase = createAdminClient()
 

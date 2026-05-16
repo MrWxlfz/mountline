@@ -1,11 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/admin"
-import { auth } from "@clerk/nextjs/server"
+import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import Link from "next/link"
-import { Globe, ArrowUpRight, Copy, ExternalLink } from "lucide-react"
+import { Globe, ArrowUpRight, ExternalLink } from "lucide-react"
 
 export default async function PortalsPage() {
-  const { userId } = await auth()
-  if (!userId) return null
+  await requireNorthlineTeamMember()
 
   const supabase = createAdminClient()
   const { data: projects } = await supabase

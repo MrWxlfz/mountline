@@ -1,8 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin"
-import { auth } from "@clerk/nextjs/server"
+import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { 
   Plus, FolderKanban, ExternalLink, Calendar,
-  Link2, Copy
+  Link2
 } from "lucide-react"
 import Link from "next/link"
 
@@ -17,8 +17,7 @@ const statusColors: Record<string, string> = {
 }
 
 export default async function ProjectsPage() {
-  const { userId } = await auth()
-  if (!userId) return null
+  await requireNorthlineTeamMember()
 
   const supabase = createAdminClient()
   const { data: projects } = await supabase

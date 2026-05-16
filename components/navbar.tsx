@@ -1,14 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LayoutDashboard } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useUser, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
+import Link from "next/link"
 import { NorthlineLogo } from "./northline-logo"
 import { ThemeToggle } from "./theme-toggle"
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const { isSignedIn, isLoaded } = useUser()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,7 +76,7 @@ export function Navbar() {
             ))}
           </div>
           
-          {/* Right side - Theme toggle + CTA */}
+          {/* Right side - Theme toggle + Auth */}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -82,12 +85,42 @@ export function Navbar() {
           >
             <ThemeToggle className="hidden sm:flex" />
             
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="hidden sm:block text-sm font-medium btn-primary"
-            >
-              Book a website review
-            </button>
+            {isLoaded && (
+              <>
+                {isSignedIn ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-secondary/50"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                    <UserButton 
+                      afterSignOutUrl="/"
+                      appearance={{
+                        elements: {
+                          avatarBox: "w-8 h-8"
+                        }
+                      }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <SignInButton mode="modal">
+                      <button className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-secondary/50">
+                        Sign In
+                      </button>
+                    </SignInButton>
+                    <SignUpButton mode="modal">
+                      <button className="hidden sm:block text-sm font-medium btn-primary">
+                        Get Started
+                      </button>
+                    </SignUpButton>
+                  </>
+                )}
+              </>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -149,15 +182,45 @@ export function Navbar() {
               
               <div className="flex items-center gap-3 pt-4 border-t border-border mt-4">
                 <ThemeToggle />
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 }}
-                  onClick={() => scrollToSection('contact')}
-                  className="flex-1 text-sm font-medium btn-primary text-center"
-                >
-                  Book a website review
-                </motion.button>
+                {isLoaded && (
+                  <>
+                    {isSignedIn ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.3 }}
+                        className="flex-1"
+                      >
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center justify-center gap-2 w-full text-sm font-medium btn-primary text-center"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          Dashboard
+                        </Link>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.3 }}
+                        className="flex-1 flex gap-2"
+                      >
+                        <SignInButton mode="modal">
+                          <button className="flex-1 text-sm font-medium text-muted-foreground hover:text-foreground py-2 px-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors">
+                            Sign In
+                          </button>
+                        </SignInButton>
+                        <SignUpButton mode="modal">
+                          <button className="flex-1 text-sm font-medium btn-primary text-center">
+                            Get Started
+                          </button>
+                        </SignUpButton>
+                      </motion.div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

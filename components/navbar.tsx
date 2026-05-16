@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Menu, X, LayoutDashboard } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useUser, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
+import { useUser, SignInButton, UserButton } from "@clerk/nextjs"
 import Link from "next/link"
 import { NorthlineLogo } from "./northline-logo"
 import { ThemeToggle } from "./theme-toggle"
@@ -108,15 +108,10 @@ export function Navbar() {
                 ) : (
                   <>
                     <SignInButton mode="modal">
-                      <button className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-secondary/50">
-                        Sign In
+                      <button className="hidden sm:block text-sm font-medium btn-primary">
+                        Client Login
                       </button>
                     </SignInButton>
-                    <SignUpButton mode="modal">
-                      <button className="hidden sm:block text-sm font-medium btn-primary">
-                        Get Started
-                      </button>
-                    </SignUpButton>
                   </>
                 )}
               </>
@@ -205,18 +200,13 @@ export function Navbar() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: 0.3 }}
-                        className="flex-1 flex gap-2"
+                        className="flex-1"
                       >
                         <SignInButton mode="modal">
-                          <button className="flex-1 text-sm font-medium text-muted-foreground hover:text-foreground py-2 px-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors">
-                            Sign In
+                          <button className="w-full text-sm font-medium btn-primary text-center">
+                            Client Login
                           </button>
                         </SignInButton>
-                        <SignUpButton mode="modal">
-                          <button className="flex-1 text-sm font-medium btn-primary text-center">
-                            Get Started
-                          </button>
-                        </SignUpButton>
                       </motion.div>
                     )}
                   </>

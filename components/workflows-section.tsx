@@ -7,29 +7,37 @@ const capabilities = [
   {
     icon: Layers,
     title: "Strategy & Discovery",
-    description: "We dive deep into your business goals, target audience, and competitive landscape to craft a strategic foundation.",
+    description: "We start by understanding what your business needs and what your customers expect to see.",
   },
   {
     icon: Palette,
-    title: "Design & Prototyping",
-    description: "From wireframes to high-fidelity mockups, we create intuitive interfaces that users love to interact with.",
+    title: "Design & Layout",
+    description: "Clean, professional layouts that look good on any device and make sense to visitors.",
   },
   {
     icon: Code,
     title: "Development & Build",
-    description: "Clean, scalable code built with modern frameworks. We prioritize performance, accessibility, and maintainability.",
+    description: "Fast, modern code that loads quickly and works reliably across browsers and devices.",
   },
   {
     icon: Rocket,
     title: "Launch & Support",
-    description: "We handle deployment, monitoring, and ongoing support to ensure your product thrives post-launch.",
+    description: "We handle deployment and offer ongoing support to keep everything running smoothly.",
   },
 ]
 
 export function WorkflowsSection() {
   return (
-    <section id="capabilities" className="relative py-32 bg-background">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section id="capabilities" className="relative py-32" style={{ backgroundColor: "#09090B" }}>
+      <div
+        className="absolute top-0 left-0 right-0 pointer-events-none"
+        style={{
+          height: "20%",
+          background: "linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, transparent 100%)",
+        }}
+      />
+      
+      <div className="mx-auto max-w-5xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -37,18 +45,18 @@ export function WorkflowsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <p className="text-sm font-medium tracking-widest text-primary uppercase mb-4">
+          <p className="text-sm font-medium tracking-widest text-zinc-500 uppercase mb-4">
             Our Capabilities
           </p>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium text-white mb-6 tracking-tight">
             End-to-end digital expertise
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            We handle every stage of product development, from initial concept to market launch and beyond.
+          <p className="text-lg text-zinc-400 max-w-xl mx-auto">
+            We handle every stage of your project, from initial concept to launch and ongoing support.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {capabilities.map((capability, index) => (
             <motion.div
               key={capability.title}
@@ -56,23 +64,23 @@ export function WorkflowsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative p-8 rounded-2xl border border-border bg-card hover:border-primary/50 transition-all duration-300"
+              className="group relative p-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 transition-all duration-300"
             >
               <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <capability.icon className="w-7 h-7 text-primary" />
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-700 transition-colors">
+                  <capability.icon className="w-6 h-6 text-zinc-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-foreground mb-3">
+                  <h3 className="text-lg font-medium text-white mb-2">
                     {capability.title}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-zinc-500 text-sm leading-relaxed">
                     {capability.description}
                   </p>
                 </div>
               </div>
-              <div className="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ArrowRight className="w-5 h-5 text-primary" />
+              <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                <ArrowRight className="w-5 h-5 text-zinc-500" />
               </div>
             </motion.div>
           ))}

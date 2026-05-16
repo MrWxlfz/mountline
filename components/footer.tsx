@@ -1,57 +1,53 @@
 "use client"
 
 import Link from "next/link"
-import { Twitter, Linkedin, Dribbble, Github } from "lucide-react"
+import { Twitter, Linkedin, Github } from "lucide-react"
 
 const navigation = {
   services: [
     { name: "Web Design", href: "#services" },
     { name: "Development", href: "#services" },
-    { name: "Branding", href: "#services" },
-    { name: "Strategy", href: "#services" },
+    { name: "Landing Pages", href: "#services" },
+    { name: "Monthly Care", href: "#pricing" },
   ],
   company: [
-    { name: "About", href: "#about" },
     { name: "Work", href: "#work" },
     { name: "Process", href: "#process" },
+    { name: "Pricing", href: "#pricing" },
     { name: "Contact", href: "#contact" },
   ],
   resources: [
-    { name: "Blog", href: "#" },
-    { name: "Case Studies", href: "#work" },
     { name: "FAQ", href: "#faq" },
-    { name: "Pricing", href: "#pricing" },
   ],
   social: [
     { name: "Twitter", href: "#", icon: Twitter },
     { name: "LinkedIn", href: "#", icon: Linkedin },
-    { name: "Dribbble", href: "#", icon: Dribbble },
     { name: "GitHub", href: "#", icon: Github },
   ],
 }
 
 export function Footer() {
   return (
-    <footer className="bg-card border-t border-border">
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+    <footer className="bg-zinc-950 border-t border-zinc-800">
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">N</span>
+              <div className="w-7 h-7 bg-white rounded-md flex items-center justify-center">
+                <span className="text-zinc-900 font-bold text-sm">N</span>
               </div>
-              <span className="text-xl font-semibold text-foreground">Northline</span>
+              <span className="text-lg font-semibold text-white">Northline</span>
             </Link>
-            <p className="text-muted-foreground max-w-sm mb-6">
-              A digital studio crafting exceptional web experiences. We blend strategy, design, and technology to build products that matter.
+            <p className="text-zinc-500 text-sm max-w-sm mb-6">
+              Websites and systems for businesses that are done looking average.
             </p>
             <div className="flex items-center gap-4">
               {navigation.social.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-zinc-500 hover:text-white transition-colors"
                   aria-label={item.name}
                 >
                   <item.icon className="w-5 h-5" />
@@ -62,13 +58,13 @@ export function Footer() {
 
           {/* Services */}
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-4">Services</h3>
+            <h3 className="text-sm font-medium text-white mb-4">Services</h3>
             <ul className="space-y-3">
               {navigation.services.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-zinc-500 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -79,13 +75,13 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-4">Company</h3>
+            <h3 className="text-sm font-medium text-white mb-4">Company</h3>
             <ul className="space-y-3">
               {navigation.company.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-zinc-500 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -96,13 +92,13 @@ export function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-4">Resources</h3>
+            <h3 className="text-sm font-medium text-white mb-4">Resources</h3>
             <ul className="space-y-3">
               {navigation.resources.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-zinc-500 hover:text-white transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -113,15 +109,15 @@ export function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Northline Studios. All rights reserved.
+        <div className="mt-16 pt-8 border-t border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-zinc-600">
+            &copy; {new Date().getFullYear()} Northline Services. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="#" className="text-sm text-zinc-600 hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="#" className="text-sm text-zinc-600 hover:text-white transition-colors">
               Terms of Service
             </Link>
           </div>

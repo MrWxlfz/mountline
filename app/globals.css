@@ -73,68 +73,68 @@
 }
 
 /* ============================================
-   DARK MODE - Elegant & Restrained
+   DARK MODE - True Black, Vercel-grade
    ============================================ */
 .dark {
-  /* Core backgrounds */
-  --background: oklch(0.12 0.02 265);
-  --background-secondary: oklch(0.14 0.02 265);
-  --foreground: oklch(0.96 0.003 85);
+  /* Core backgrounds - true black */
+  --background: oklch(0 0 0);
+  --background-secondary: oklch(0.06 0.005 265);
+  --foreground: oklch(0.93 0 0);
   
-  /* Surfaces */
-  --card: oklch(0.16 0.02 265);
-  --card-foreground: oklch(0.96 0.003 85);
-  --card-elevated: oklch(0.18 0.02 265);
+  /* Surfaces - barely lifted from black */
+  --card: oklch(0.08 0.005 265);
+  --card-foreground: oklch(0.93 0 0);
+  --card-elevated: oklch(0.10 0.005 265);
   
   /* Popover */
-  --popover: oklch(0.18 0.02 265);
-  --popover-foreground: oklch(0.96 0.003 85);
+  --popover: oklch(0.10 0.005 265);
+  --popover-foreground: oklch(0.93 0 0);
   
-  /* Primary - Soft white */
-  --primary: oklch(0.96 0.003 85);
-  --primary-foreground: oklch(0.12 0.02 265);
+  /* Primary - White on black */
+  --primary: oklch(0.93 0 0);
+  --primary-foreground: oklch(0 0 0);
   
   /* Secondary */
-  --secondary: oklch(0.20 0.02 265);
-  --secondary-foreground: oklch(0.88 0.003 85);
+  --secondary: oklch(0.12 0.005 265);
+  --secondary-foreground: oklch(0.80 0 0);
   
   /* Muted */
-  --muted: oklch(0.22 0.02 265);
-  --muted-foreground: oklch(0.60 0.01 265);
+  --muted: oklch(0.14 0.005 265);
+  --muted-foreground: oklch(0.50 0 0);
   
-  /* Accent - Electric blue */
-  --accent: oklch(0.62 0.18 250);
-  --accent-foreground: oklch(0.98 0 0);
-  --accent-glow: oklch(0.62 0.18 250 / 0.2);
+  /* Accent - Clean white (no blue) */
+  --accent: oklch(0.93 0 0);
+  --accent-foreground: oklch(0 0 0);
+  --accent-glow: oklch(1 0 0 / 0.06);
   
-  /* Borders */
-  --border: oklch(0.24 0.02 265);
-  --border-strong: oklch(0.30 0.02 265);
-  --input: oklch(0.20 0.02 265);
-  --ring: oklch(0.62 0.18 250);
+  /* Borders - very subtle */
+  --border: oklch(0.16 0.005 265);
+  --border-strong: oklch(0.22 0.005 265);
+  --input: oklch(0.10 0.005 265);
+  --ring: oklch(0.50 0 0);
   
   /* Northline Brand - Dark mode */
-  --northline-dark: oklch(0.96 0.003 85);
-  --northline-charcoal: oklch(0.80 0.003 85);
-  --northline-blue: oklch(0.62 0.18 250);
-  --northline-cream: oklch(0.14 0.02 265);
+  --northline-dark: oklch(0.93 0 0);
+  --northline-charcoal: oklch(0.70 0 0);
+  --northline-blue: oklch(0.93 0 0);
+  --northline-cream: oklch(0.06 0.005 265);
   
   /* Glass effect */
-  --glass-bg: oklch(0.14 0.02 265 / 0.9);
-  --glass-border: oklch(0.26 0.02 265 / 0.8);
+  --glass-bg: oklch(0.04 0.005 265 / 0.92);
+  --glass-border: oklch(0.16 0.005 265 / 0.8);
 }
 
 /* Dark mode scrollbar */
 .dark {
-  scrollbar-color: oklch(0.30 0.02 265) oklch(0.14 0.02 265);
+  scrollbar-color: oklch(0.20 0.005 265) oklch(0 0 0);
 }
 
 .dark::-webkit-scrollbar-track {
-  background: oklch(0.14 0.02 265);
+  background: oklch(0 0 0);
 }
 
 .dark::-webkit-scrollbar-thumb {
-  background: oklch(0.30 0.02 265);
+  background: oklch(0.20 0.005 265);
 }
 
 /* Selection */

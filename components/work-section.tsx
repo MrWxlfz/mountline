@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { ArrowUpRight } from "lucide-react"
+import Link from "next/link"
 
 interface ConceptBuild {
   title: string
@@ -9,6 +10,7 @@ interface ConceptBuild {
   description: string
   tags: string[]
   colorAccent: string
+  href?: string
   mockContent: {
     nav: string
     headline: string
@@ -23,6 +25,7 @@ const conceptBuilds: ConceptBuild[] = [
     description: "Service packages, gallery, online booking, and quote request form for a mobile detailing business.",
     tags: ["5 pages", "Booking", "Gallery"],
     colorAccent: "bg-amber-500",
+    href: "/work/auto-detailing",
     mockContent: {
       nav: "SHINE AUTO",
       headline: "Professional Mobile Detailing",
@@ -235,6 +238,16 @@ export function WorkSection() {
                       </span>
                     ))}
                   </div>
+
+                  {build.href && (
+                    <Link
+                      href={build.href}
+                      className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline underline-offset-4"
+                    >
+                      View concept
+                      <ArrowUpRight className="w-4 h-4" />
+                    </Link>
+                  )}
                 </div>
               </div>
             </motion.div>

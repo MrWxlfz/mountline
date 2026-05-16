@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 import { DashboardMockup } from "./dashboard-mockup"
 import { Navbar } from "./navbar"
 import { LogoCloud } from "./logo-cloud"
@@ -16,14 +16,18 @@ import { FAQSection } from "./faq-section"
 import { WorkSection } from "./work-section"
 import { TrustSection } from "./trust-section"
 import { ContactSection } from "./contact-section"
+import { NorthlinePattern } from "./northline-logo"
 
 export function Hero3DStage() {
   const [yOffset, setYOffset] = useState(0)
+  const { scrollY } = useScroll()
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0])
+  const heroScale = useTransform(scrollY, [0, 400], [1, 0.95])
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY
-      const offset = Math.min(scrollY / 300, 1) * -20
+      const scrollYValue = window.scrollY
+      const offset = Math.min(scrollYValue / 300, 1) * -20
       setYOffset(offset)
     }
 
@@ -46,74 +50,155 @@ export function Hero3DStage() {
     }
   }
 
+  // Stagger animation variants
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  }
+
+  const chipVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  }
+
   return (
     <>
-      <section className="relative min-h-screen overflow-hidden" style={{ backgroundColor: "#09090B" }}>
+      <section className="relative min-h-screen overflow-hidden bg-zinc-950">
         <Navbar />
-
-        {/* Subtle glow */}
+        
+        {/* Background layers */}
+        <NorthlinePattern />
+        
+        {/* Animated gradient orb */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute pointer-events-none animate-subtle-pulse"
+          style={{
+            top: "30%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "1000px",
+            height: "700px",
+            background: "radial-gradient(ellipse at center, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 40%, transparent 70%)",
+          }}
+        />
+        
+        {/* Secondary accent glow */}
         <div
           className="absolute pointer-events-none"
           style={{
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -30%)",
-            width: "1200px",
-            height: "800px",
-            background: "radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, transparent 70%)",
+            top: "60%",
+            right: "10%",
+            width: "600px",
+            height: "600px",
+            background: "radial-gradient(ellipse at center, rgba(99, 102, 241, 0.05) 0%, transparent 60%)",
           }}
         />
+
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 grid-pattern opacity-30" />
 
         {/* Main content */}
         <div className="relative z-10 pt-28 flex flex-col">
           {/* Hero text - contained and centered */}
           <div className="w-full flex justify-center px-6 mt-16">
-            <div className="w-full max-w-4xl">
+            <motion.div 
+              className="w-full max-w-4xl"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {/* Section eyebrow */}
+              <motion.div 
+                variants={itemVariants}
+                className="flex items-center gap-3 mb-6"
+              >
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-subtle-pulse" />
+                <span className="text-zinc-500 text-sm tracking-wide uppercase">Digital Studio</span>
+              </motion.div>
+
               <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-4xl md:text-5xl lg:text-[56px] font-medium text-white leading-[1.1] text-balance"
+                variants={itemVariants}
+                className="text-4xl md:text-5xl lg:text-6xl xl:text-[64px] font-medium text-white leading-[1.08] tracking-tight text-balance"
               >
                 Websites and systems for businesses that are done looking average.
               </motion.h1>
+              
               <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="mt-6 text-lg text-zinc-400 max-w-2xl"
+                variants={itemVariants}
+                className="mt-8 text-lg md:text-xl text-zinc-400 max-w-2xl leading-relaxed"
               >
-                Northline Services builds fast websites, clean landing pages, and simple digital systems for local businesses and small teams that need to look sharp and move faster.
+                Northline builds fast websites, clean landing pages, and simple digital systems for local businesses and small teams that need to look sharp and move faster.
               </motion.p>
+              
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
+                variants={itemVariants}
+                className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
               >
                 <button 
                   onClick={() => scrollToSection('contact')}
-                  className="px-6 py-3 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-100 transition-colors text-sm"
+                  className="group relative px-7 py-3.5 bg-white text-zinc-900 font-medium rounded-lg transition-all duration-300 text-sm overflow-hidden hover:shadow-lg hover:shadow-white/10"
                 >
-                  Get a free audit
+                  <span className="relative z-10">Get a free audit</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-zinc-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
                 <button 
                   onClick={() => scrollToSection('services')}
-                  className="text-zinc-300 font-medium hover:text-white transition-colors flex items-center gap-2 text-sm"
+                  className="group text-zinc-300 font-medium hover:text-white transition-colors flex items-center gap-2 text-sm"
                 >
                   View services
-                  <span aria-hidden="true">→</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true">→</span>
                 </button>
               </motion.div>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="mt-6 text-sm text-zinc-500"
+              
+              {/* Premium chips */}
+              <motion.div
+                variants={containerVariants}
+                className="mt-10 flex flex-wrap items-center gap-3"
               >
-                Fast launches · Mobile-first · Clear pricing · Built by a small focused team
-              </motion.p>
-            </div>
+                {[
+                  "Fast launches",
+                  "Mobile-first",
+                  "Clear pricing",
+                  "Small team, focused work"
+                ].map((chip, index) => (
+                  <motion.span
+                    key={chip}
+                    variants={chipVariants}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs text-zinc-400 bg-zinc-900/60 border border-zinc-800/60 backdrop-blur-sm"
+                  >
+                    <span className="w-1 h-1 rounded-full bg-zinc-600" />
+                    {chip}
+                  </motion.span>
+                ))}
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* 3D Stage - full bleed */}
@@ -127,18 +212,19 @@ export function Hero3DStage() {
               left: "50%",
               right: "50%",
               height: "700px",
-              marginTop: "-60px",
+              marginTop: "-40px",
             }}
           >
+            {/* Bottom fade gradient */}
             <div
-              className="absolute bottom-0 left-0 right-0 h-72 z-10 pointer-events-none"
+              className="absolute bottom-0 left-0 right-0 h-80 z-10 pointer-events-none"
               style={{
-                background: "linear-gradient(to top, #09090B 20%, transparent 100%)",
+                background: "linear-gradient(to top, #09090b 30%, transparent 100%)",
               }}
             />
 
             {/* Perspective container */}
-            <div
+            <motion.div
               style={{
                 transform: `translateY(${yOffset}px)`,
                 transition: "transform 0.1s ease-out",
@@ -153,20 +239,18 @@ export function Hero3DStage() {
             >
               {/* Transformed base */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: 0.5,
-                  duration: 1,
+                  delay: 0.6,
+                  duration: 1.2,
                   ease: [0.22, 1, 0.36, 1],
                 }}
+                className="relative"
                 style={{
-                  backgroundColor: "#09090B",
                   transformOrigin: "0 0",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
-                  border: "1px solid #1e1e1e",
-                  borderRadius: "10px",
                   width: "1600px",
                   height: "900px",
                   margin: "280px auto auto",
@@ -177,12 +261,28 @@ export function Hero3DStage() {
                   right: 0,
                   transform: `translate(${baseTransform.translateX}%) scale(${baseTransform.scale}) rotateX(${baseTransform.rotateX}deg) rotateY(${baseTransform.rotateY}deg) rotate(${baseTransform.rotateZ}deg)`,
                   transformStyle: "preserve-3d",
-                  overflow: "hidden",
                 }}
               >
-                <DashboardMockup />
+                {/* Glow effect behind mockup */}
+                <div 
+                  className="absolute -inset-4 rounded-2xl opacity-40"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, transparent 50%)",
+                    filter: "blur(40px)",
+                  }}
+                />
+                
+                {/* Mockup container */}
+                <div 
+                  className="relative w-full h-full rounded-xl overflow-hidden border border-zinc-800/80"
+                  style={{
+                    boxShadow: "0 0 80px -20px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <DashboardMockup />
+                </div>
               </motion.div>
-            </div>
+            </motion.div>
           </div>
 
           <LogoCloud />

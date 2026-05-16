@@ -1,18 +1,14 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ChevronRight, Check, Smartphone, Search, BarChart3, FileCheck } from "lucide-react"
+import { ChevronRight, Check, Smartphone, FileCheck, Zap, Shield } from "lucide-react"
 
 export function AISection() {
   return (
-    <div className="relative z-20 py-40" style={{ backgroundColor: "#09090B" }}>
-      <div
-        className="absolute top-0 left-0 right-0 pointer-events-none"
-        style={{
-          height: "20%",
-          background: "linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, transparent 100%)",
-        }}
-      />
+    <section className="relative z-20 py-32 md:py-40 bg-zinc-950">
+      {/* Top divider */}
+      <div className="section-divider absolute top-0 left-0 right-0" />
+      
       <div className="w-full flex justify-center px-6">
         <div className="w-full max-w-5xl">
           {/* Section label */}
@@ -21,11 +17,10 @@ export function AISection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="flex items-center gap-2 mb-6"
+            className="flex items-center gap-3 mb-6"
           >
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-zinc-400 text-sm">Modern development</span>
-            <ChevronRight className="w-4 h-4 text-zinc-500" />
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-zinc-500 text-sm tracking-wide uppercase">Modern Development</span>
           </motion.div>
 
           {/* Heading */}
@@ -34,18 +29,20 @@ export function AISection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] text-white max-w-3xl mb-8"
-            style={{
-              letterSpacing: "-0.0325em",
-              fontVariationSettings: '"opsz" 28',
-              fontWeight: 538,
-              lineHeight: 1.1,
-            }}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] text-white max-w-3xl mb-6 leading-[1.1] tracking-tight"
           >
             Built faster with modern tools.
-            <br />
-            <span className="text-zinc-500">Reviewed like real work.</span>
           </motion.h2>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="text-2xl md:text-3xl text-zinc-500 max-w-2xl mb-8"
+          >
+            Reviewed like real work.
+          </motion.p>
 
           {/* Description */}
           <motion.p
@@ -53,9 +50,9 @@ export function AISection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-zinc-400 max-w-lg mb-8"
+            className="text-zinc-400 max-w-lg mb-8 leading-relaxed"
           >
-            We use modern development tools to move quickly, but every project still needs clear scope, clean design, and human review.
+            We use modern development tools to move quickly, but every project still needs clear scope, clean design, and human review before it ships.
           </motion.p>
 
           {/* Learn more button */}
@@ -65,10 +62,10 @@ export function AISection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="inline-flex px-5 py-2.5 bg-zinc-800 text-zinc-300 rounded-lg border border-zinc-700 hover:bg-zinc-700 transition-colors text-sm items-center gap-2 mb-16"
+            className="inline-flex px-5 py-2.5 bg-zinc-900 text-zinc-300 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800 transition-all duration-300 text-sm items-center gap-2 mb-20 group"
           >
             See how we work
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </motion.a>
 
           {/* Process mockup */}
@@ -93,56 +90,52 @@ export function AISection() {
                 style={{
                   transformOrigin: "top",
                   willChange: "transform",
-                  transform: "translateY(0%) rotateX(30deg) scale(1.15)",
+                  transform: "translateY(0%) rotateX(30deg) scale(1.1)",
                   position: "relative",
                 }}
               >
                 {/* Glass overlay effect */}
                 <div
+                  className="absolute inset-0 rounded-xl pointer-events-none z-10"
                   style={{
-                    border: "1px solid rgba(66, 66, 66, 0.5)",
-                    background: "linear-gradient(rgba(255, 255, 255, 0.1) 40%, rgba(8, 9, 10, 0.1) 100%)",
-                    borderRadius: "8px",
-                    position: "absolute",
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    boxShadow:
-                      "inset 0 1.503px 5.261px rgba(255, 255, 255, 0.04), inset 0 -0.752px 0.752px rgba(255, 255, 255, 0.1)",
-                    pointerEvents: "none",
-                    zIndex: 10,
+                    border: "1px solid rgba(63, 63, 70, 0.4)",
+                    background: "linear-gradient(rgba(255, 255, 255, 0.03) 0%, transparent 100%)",
+                    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.05)",
                   }}
                 />
 
+                {/* Bottom fade */}
                 <div
+                  className="absolute -bottom-2 -left-40 -right-40 h-3/4 pointer-events-none z-20"
                   style={{
-                    background: "linear-gradient(180deg, transparent 0%, #09090B 100%)",
-                    height: "80%",
-                    position: "absolute",
-                    bottom: "-2px",
-                    left: "-180px",
-                    right: "-180px",
-                    pointerEvents: "none",
-                    zIndex: 11,
+                    background: "linear-gradient(180deg, transparent 0%, #09090b 100%)",
                   }}
                 />
 
                 {/* Build checklist card */}
-                <div className="bg-zinc-900/80 border border-zinc-700 rounded-xl p-6">
-                  <div className="flex items-center gap-2 mb-6">
-                    <FileCheck className="w-5 h-5 text-zinc-400" />
-                    <span className="text-zinc-300 font-medium">Build Checklist</span>
+                <div className="relative bg-zinc-900/90 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm">
+                  {/* Header */}
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                      <FileCheck className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <span className="text-white font-medium">Launch Checklist</span>
+                      <p className="text-zinc-500 text-xs">Peak Fitness Website</p>
+                    </div>
+                    <div className="ml-auto px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded-full border border-emerald-500/20">
+                      6/8 Complete
+                    </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <ChecklistItem label="Page structure defined" checked />
                     <ChecklistItem label="Mobile layout complete" checked />
                     <ChecklistItem label="Contact form connected" checked />
                     <ChecklistItem label="SEO basics configured" checked />
                     <ChecklistItem label="Analytics ready" checked />
-                    <ChecklistItem label="Speed optimized" inProgress />
-                    <ChecklistItem label="Final review" />
+                    <ChecklistItem label="Speed optimized" checked />
+                    <ChecklistItem label="Final review" inProgress />
                     <ChecklistItem label="Deploy to production" />
                   </div>
                 </div>
@@ -150,88 +143,83 @@ export function AISection() {
             </div>
           </motion.div>
 
-          {/* Bottom divider with two columns */}
+          {/* Bottom two-column section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="mt-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2">
               {/* Left column */}
               <div className="border-t md:border-r border-b border-zinc-800/60 pt-12 md:pr-12 pb-16">
-                <h3 className="text-zinc-200 font-medium text-xl mb-3">Faster build cycles</h3>
-                <p className="text-zinc-500 text-base mb-8">
-                  Modern tools help us go from idea to polished draft quickly, so clients can react to something real instead of waiting around.
+                <h3 className="text-zinc-200 font-medium text-xl mb-4">Faster build cycles</h3>
+                <p className="text-zinc-500 text-base mb-8 leading-relaxed">
+                  Modern tools help us go from idea to polished draft quickly, so clients can react to something real instead of waiting around for weeks.
                 </p>
 
                 {/* Speed visualization */}
-                <div className="bg-zinc-900/30 border border-zinc-800/60 rounded-xl p-5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-5">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                       <Smartphone className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-zinc-300 text-sm font-medium">Mobile-first approach</p>
+                      <p className="text-zinc-200 text-sm font-medium">Mobile-first approach</p>
                       <p className="text-zinc-600 text-xs">Responsive from the start</p>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-zinc-400 text-sm">Draft ready in days, not weeks</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-zinc-400 text-sm">Iterate based on real feedback</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-zinc-400 text-sm">No endless revision cycles</span>
-                    </div>
+                  <div className="space-y-3">
+                    {["Draft ready in days, not weeks", "Iterate based on real feedback", "No endless revision cycles"].map((item, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-zinc-400 text-sm">{item}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
 
               {/* Right column */}
               <div className="border-t border-b border-zinc-800/60 pt-12 md:pl-12 pb-16">
-                <h3 className="text-zinc-200 font-medium text-xl mb-3">Clean technical handoff</h3>
-                <p className="text-zinc-500 text-base mb-8">
-                  Sites are structured for launch, updates, hosting, and future improvements instead of being a messy one-off build.
+                <h3 className="text-zinc-200 font-medium text-xl mb-4">Clean technical handoff</h3>
+                <p className="text-zinc-500 text-base mb-8 leading-relaxed">
+                  Sites are structured for launch, updates, hosting, and future improvements instead of being a messy one-off build that nobody can touch later.
                 </p>
 
                 {/* Code structure visualization */}
-                <div className="bg-zinc-900/30 border border-zinc-800/60 rounded-xl p-5 font-mono text-sm">
-                  <div className="space-y-2">
+                <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-5">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-violet-400" />
+                    </div>
+                    <div>
+                      <p className="text-zinc-200 text-sm font-medium">Production-ready code</p>
+                      <p className="text-zinc-600 text-xs">Built for maintainability</p>
+                    </div>
+                  </div>
+
+                  <div className="font-mono text-sm space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span className="text-zinc-600">/</span>
                       <span className="text-zinc-400">pages</span>
                     </div>
                     <div className="flex items-center gap-2 pl-4">
                       <span className="text-emerald-400">home.tsx</span>
-                      <span className="text-zinc-600 text-xs">Ready</span>
+                      <span className="text-emerald-500/60 text-xs ml-auto">Ready</span>
                     </div>
                     <div className="flex items-center gap-2 pl-4">
                       <span className="text-emerald-400">services.tsx</span>
-                      <span className="text-zinc-600 text-xs">Ready</span>
+                      <span className="text-emerald-500/60 text-xs ml-auto">Ready</span>
                     </div>
                     <div className="flex items-center gap-2 pl-4">
                       <span className="text-emerald-400">contact.tsx</span>
-                      <span className="text-zinc-600 text-xs">Ready</span>
+                      <span className="text-emerald-500/60 text-xs ml-auto">Ready</span>
                     </div>
                     <div className="flex items-center gap-2 pl-4">
                       <span className="text-amber-400">pricing.tsx</span>
-                      <span className="text-zinc-600 text-xs">Review</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-4">
-                      <span className="text-zinc-600">/</span>
-                      <span className="text-zinc-400">components</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-4">
-                      <span className="text-zinc-600">/</span>
-                      <span className="text-zinc-400">styles</span>
+                      <span className="text-amber-500/60 text-xs ml-auto">Review</span>
                     </div>
                   </div>
                 </div>
@@ -240,23 +228,30 @@ export function AISection() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 
 function ChecklistItem({ label, checked, inProgress }: { label: string; checked?: boolean; inProgress?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-zinc-800/30 transition-colors">
       {checked ? (
-        <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
+        <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
           <Check className="w-3 h-3 text-emerald-500" />
         </div>
       ) : inProgress ? (
-        <div className="w-5 h-5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
       ) : (
-        <div className="w-5 h-5 rounded-full border border-zinc-700" />
+        <div className="w-5 h-5 rounded-full border border-zinc-700 bg-zinc-800/50" />
       )}
-      <span className={checked ? "text-zinc-300" : inProgress ? "text-zinc-400" : "text-zinc-600"}>{label}</span>
+      <span className={`text-sm ${checked ? "text-zinc-300" : inProgress ? "text-zinc-400" : "text-zinc-600"}`}>
+        {label}
+      </span>
+      {inProgress && (
+        <span className="ml-auto text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+          Active
+        </span>
+      )}
     </div>
   )
 }

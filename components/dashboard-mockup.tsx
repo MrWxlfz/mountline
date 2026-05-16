@@ -24,6 +24,7 @@ import {
   Clock,
   CheckCircle2,
 } from "lucide-react"
+import { NorthlineIcon } from "./northline-logo"
 
 export function DashboardMockup() {
   const containerVariants = {
@@ -68,9 +69,7 @@ export function DashboardMockup() {
         {/* Logo */}
         <div className="p-3 border-b border-zinc-800/50">
           <div className="flex items-center gap-2 px-2 py-1.5">
-            <div className="w-6 h-6 bg-white rounded-md flex items-center justify-center">
-              <span className="text-zinc-900 font-bold text-xs">N</span>
-            </div>
+            <NorthlineIcon size={24} />
             <span className="text-white font-semibold text-sm">Northline</span>
             <ChevronDown className="w-3.5 h-3.5 text-zinc-500 ml-auto" />
           </div>
@@ -88,39 +87,39 @@ export function DashboardMockup() {
         {/* Main nav */}
         <div className="px-3 space-y-0.5">
           <NavItem icon={Layout} label="Dashboard" active />
-          <NavItem icon={FolderOpen} label="Projects" badge={8} />
-          <NavItem icon={MessageSquare} label="Messages" badge={3} />
+          <NavItem icon={FolderOpen} label="Projects" badge={5} />
+          <NavItem icon={MessageSquare} label="Messages" badge={2} />
         </div>
 
-        {/* Services section */}
+        {/* Project Phases */}
         <div className="mt-5 px-3">
           <div className="px-2 py-1 text-[10px] text-zinc-500 font-medium uppercase tracking-wider flex items-center gap-1">
-            Services
+            Project Phases
           </div>
           <div className="space-y-0.5 mt-1">
-            <NavItem icon={PenTool} label="Brand Design" hasSubmenu />
-            <NavItem icon={Globe} label="Web Development" hasSubmenu />
-            <NavItem icon={Smartphone} label="Mobile Apps" hasSubmenu />
-            <NavItem icon={Layers} label="UI/UX Design" hasSubmenu />
+            <NavItem icon={PenTool} label="Discovery" hasSubmenu />
+            <NavItem icon={Palette} label="Design" hasSubmenu />
+            <NavItem icon={Code2} label="Development" hasSubmenu />
+            <NavItem icon={Rocket} label="Launch" hasSubmenu />
           </div>
         </div>
 
-        {/* Active Projects */}
+        {/* Active Builds */}
         <div className="mt-5 px-3">
           <div className="px-2 py-1 text-[10px] text-zinc-500 font-medium uppercase tracking-wider flex items-center gap-1">
-            Active Projects
+            Active Builds
           </div>
           <div className="space-y-0.5 mt-1">
-            <NavItem icon={FileText} label="Fintech App" color="text-blue-400" />
-            <NavItem icon={FileText} label="E-commerce Site" color="text-emerald-400" />
-            <NavItem icon={FileText} label="SaaS Dashboard" color="text-amber-400" />
+            <NavItem icon={FileText} label="Local Gym Site" color="text-blue-400" />
+            <NavItem icon={FileText} label="Auto Detail Page" color="text-emerald-400" />
+            <NavItem icon={FileText} label="Contractor Site" color="text-amber-400" />
           </div>
         </div>
 
         {/* Bottom */}
         <div className="mt-auto p-3 border-t border-zinc-800/50">
           <NavItem icon={Settings} label="Settings" />
-          <NavItem icon={HelpCircle} label="Help & Support" />
+          <NavItem icon={HelpCircle} label="Help" />
         </div>
       </motion.div>
 
@@ -140,46 +139,39 @@ export function DashboardMockup() {
 
         <div className="flex-1 overflow-auto scrollbar-hide">
           <ProjectItem
-            client="TechVault Inc."
-            title="Fintech Mobile App"
+            client="Peak Fitness"
+            title="Local Gym Website"
             phase="Development"
             progress={75}
             status="in-progress"
             active
           />
           <ProjectItem
-            client="Urban Threads"
-            title="E-commerce Redesign"
+            client="Precision Auto"
+            title="Detailing Service Page"
             phase="Design Review"
             progress={45}
             status="review"
           />
           <ProjectItem
-            client="CloudSync"
-            title="SaaS Dashboard"
+            client="BuildRight Co."
+            title="Contractor Portfolio"
             phase="Discovery"
             progress={20}
             status="planning"
           />
           <ProjectItem
-            client="Wellness Co."
-            title="Brand Identity"
+            client="Fresh Bites"
+            title="Food Truck Landing"
             phase="Delivery"
             progress={95}
             status="complete"
           />
           <ProjectItem
-            client="DataFlow"
-            title="Analytics Platform"
-            phase="Wireframing"
+            client="Clean Sweep"
+            title="Cleaning Service Site"
+            phase="Content"
             progress={30}
-            status="in-progress"
-          />
-          <ProjectItem
-            client="GreenLeaf"
-            title="Corporate Website"
-            phase="Development"
-            progress={60}
             status="in-progress"
           />
         </div>
@@ -192,9 +184,9 @@ export function DashboardMockup() {
           <div className="flex items-center gap-1.5 text-xs">
             <span className="text-zinc-500">Projects</span>
             <span className="text-zinc-600">›</span>
-            <span className="text-blue-400">TechVault Inc.</span>
+            <span className="text-blue-400">Peak Fitness</span>
             <span className="text-zinc-600">›</span>
-            <span className="text-zinc-300">Fintech Mobile App</span>
+            <span className="text-zinc-300">Local Gym Website</span>
           </div>
           <MoreHorizontal className="w-4 h-4 text-zinc-500" />
         </div>
@@ -203,8 +195,8 @@ export function DashboardMockup() {
         <div className="flex-1 p-5 overflow-auto scrollbar-hide">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <h2 className="text-white text-xl font-semibold mb-1">Fintech Mobile App</h2>
-              <p className="text-zinc-500 text-sm">TechVault Inc. • Started Jan 2024</p>
+              <h2 className="text-white text-xl font-semibold mb-1">Local Gym Website</h2>
+              <p className="text-zinc-500 text-sm">Peak Fitness • Started 2 weeks ago</p>
             </div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">In Progress</span>
@@ -214,21 +206,27 @@ export function DashboardMockup() {
           {/* Progress Overview */}
           <div className="bg-zinc-900/80 rounded-lg p-4 mb-5 border border-zinc-800/50">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-zinc-400 text-sm">Overall Progress</span>
+              <span className="text-zinc-400 text-sm">Build Progress</span>
               <span className="text-white text-sm font-medium">75%</span>
             </div>
             <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full" style={{ width: "75%" }} />
+              <motion.div 
+                className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: "75%" }}
+                transition={{ duration: 1.5, ease: "easeOut", delay: 1 }}
+              />
             </div>
           </div>
 
-          {/* Milestones */}
+          {/* Build Checklist */}
           <div className="space-y-3 mb-5">
-            <h3 className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Milestones</h3>
-            <MilestoneItem icon={Palette} title="Brand & Design System" status="complete" />
-            <MilestoneItem icon={Layout} title="UI/UX Design" status="complete" />
-            <MilestoneItem icon={Code2} title="Frontend Development" status="in-progress" />
-            <MilestoneItem icon={Rocket} title="Launch & Deployment" status="pending" />
+            <h3 className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Launch Checklist</h3>
+            <MilestoneItem icon={FileText} title="Page structure defined" status="complete" />
+            <MilestoneItem icon={Smartphone} title="Mobile layout complete" status="complete" />
+            <MilestoneItem icon={Globe} title="Contact form ready" status="complete" />
+            <MilestoneItem icon={Layers} title="SEO basics configured" status="in-progress" />
+            <MilestoneItem icon={Rocket} title="Deploy to production" status="pending" />
           </div>
 
           {/* Recent Activity */}
@@ -236,22 +234,22 @@ export function DashboardMockup() {
             <div className="text-xs text-zinc-500 font-medium mb-3 uppercase tracking-wider">Recent Activity</div>
             <div className="space-y-3">
               <ActivityItem
-                name="Design Team"
+                name="Northline"
                 action="completed"
-                item="Payment flow screens"
+                item="membership pricing section"
                 time="2 hours ago"
-              />
-              <ActivityItem
-                name="Dev Team"
-                action="started"
-                item="Authentication module"
-                time="Yesterday"
               />
               <ActivityItem
                 name="Client"
                 action="approved"
-                item="Dashboard wireframes"
-                time="3 days ago"
+                item="homepage hero design"
+                time="Yesterday"
+              />
+              <ActivityItem
+                name="Northline"
+                action="started"
+                item="class schedule integration"
+                time="2 days ago"
               />
             </div>
           </div>
@@ -348,14 +346,14 @@ function MilestoneItem({
   status: "complete" | "in-progress" | "pending"
 }) {
   const statusStyles = {
-    complete: "text-emerald-400 bg-emerald-500/10",
-    "in-progress": "text-blue-400 bg-blue-500/10",
-    pending: "text-zinc-500 bg-zinc-800/50",
+    complete: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    "in-progress": "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    pending: "text-zinc-500 bg-zinc-800/50 border-zinc-700/30",
   }
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800/30">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${statusStyles[status]}`}>
+    <div className={`flex items-center gap-3 p-3 rounded-lg border ${statusStyles[status]}`}>
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${status === 'complete' ? 'bg-emerald-500/20' : status === 'in-progress' ? 'bg-blue-500/20' : 'bg-zinc-800'}`}>
         <Icon className="w-4 h-4" />
       </div>
       <span className="text-zinc-300 text-sm flex-1">{title}</span>

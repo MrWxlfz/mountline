@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Check } from "lucide-react"
+import { Check, Send, Loader2 } from "lucide-react"
 
 const budgetOptions = [
   "Under $300",
@@ -41,21 +41,32 @@ export function ContactSection() {
 
   if (formState === "success") {
     return (
-      <section id="contact" className="relative py-40 px-6" style={{ backgroundColor: "#09090B" }}>
+      <section id="contact" className="relative py-32 md:py-40 px-6" style={{ backgroundColor: "#09090B" }}>
         <div className="max-w-xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12"
+            className="bg-gradient-to-b from-zinc-900/80 to-zinc-900/40 border border-zinc-800 rounded-3xl p-12"
           >
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6">
-              <Check className="w-8 h-8 text-emerald-500" />
-            </div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.2, type: "spring" }}
+              className="w-20 h-20 rounded-2xl bg-emerald-500/15 flex items-center justify-center mx-auto mb-8"
+            >
+              <Check className="w-10 h-10 text-emerald-500" />
+            </motion.div>
             <h3 className="text-2xl text-white font-medium mb-4">Request received</h3>
-            <p className="text-zinc-400">
-              The Northline team will review it and get back to you soon.
+            <p className="text-zinc-400 mb-8">
+              The Northline team will review it and get back to you within 24-48 hours.
             </p>
+            <button
+              onClick={() => setFormState("idle")}
+              className="text-sm text-northline-accent hover:text-northline-accent-light transition-colors"
+            >
+              Submit another request
+            </button>
           </motion.div>
         </div>
       </section>
@@ -63,23 +74,38 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="relative py-40 px-6" style={{ backgroundColor: "#09090B" }}>
+    <section id="contact" className="relative py-32 md:py-40 px-6 overflow-hidden" style={{ backgroundColor: "#09090B" }}>
+      {/* Subtle gradient overlay */}
       <div
         className="absolute top-0 left-0 right-0 pointer-events-none"
         style={{
-          height: "20%",
-          background: "linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, transparent 100%)",
+          height: "25%",
+          background: "linear-gradient(to bottom, rgba(255,255,255,0.02) 0%, transparent 100%)",
         }}
       />
+      
+      {/* Decorative glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-t from-northline-accent/5 via-transparent to-transparent blur-3xl" />
+      </div>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto relative">
         {/* Header */}
-        <div className="text-center mb-12">
-          <motion.h2
+        <div className="text-center mb-10 md:mb-12">
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            className="text-sm font-medium tracking-widest text-northline-accent uppercase mb-4"
+          >
+            Get Started
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.05 }}
             className="text-3xl sm:text-4xl md:text-5xl text-white mb-6"
             style={{
               letterSpacing: "-0.0325em",
@@ -108,13 +134,13 @@ export function ContactSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
           onSubmit={handleSubmit}
-          className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8"
+          className="bg-gradient-to-b from-zinc-900/80 to-zinc-900/40 border border-zinc-800 rounded-3xl p-8 md:p-10"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm text-zinc-300 mb-2">
-                Name <span className="text-zinc-500">*</span>
+              <label htmlFor="name" className="block text-sm text-zinc-300 mb-2 font-medium">
+                Name <span className="text-zinc-600">*</span>
               </label>
               <input
                 type="text"
@@ -123,34 +149,31 @@ export function ContactSection() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-northline-accent/50 focus:ring-1 focus:ring-northline-accent/20 transition-all"
                 placeholder="Your name"
               />
             </div>
 
-            {/* Business name */}
+            {/* Business Name */}
             <div>
-              <label htmlFor="businessName" className="block text-sm text-zinc-300 mb-2">
-                Business name <span className="text-zinc-500">*</span>
+              <label htmlFor="businessName" className="block text-sm text-zinc-300 mb-2 font-medium">
+                Business Name
               </label>
               <input
                 type="text"
                 id="businessName"
                 name="businessName"
-                required
                 value={formData.businessName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-northline-accent/50 focus:ring-1 focus:ring-northline-accent/20 transition-all"
                 placeholder="Your business"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm text-zinc-300 mb-2">
-                Email <span className="text-zinc-500">*</span>
+              <label htmlFor="email" className="block text-sm text-zinc-300 mb-2 font-medium">
+                Email <span className="text-zinc-600">*</span>
               </label>
               <input
                 type="email"
@@ -159,15 +182,15 @@ export function ContactSection() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-northline-accent/50 focus:ring-1 focus:ring-northline-accent/20 transition-all"
                 placeholder="you@example.com"
               />
             </div>
 
             {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm text-zinc-300 mb-2">
-                Phone <span className="text-zinc-600">(optional)</span>
+              <label htmlFor="phone" className="block text-sm text-zinc-300 mb-2 font-medium">
+                Phone
               </label>
               <input
                 type="tel"
@@ -175,16 +198,16 @@ export function ContactSection() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-northline-accent/50 focus:ring-1 focus:ring-northline-accent/20 transition-all"
                 placeholder="(555) 123-4567"
               />
             </div>
           </div>
 
-          {/* Current website */}
-          <div className="mb-6">
-            <label htmlFor="currentWebsite" className="block text-sm text-zinc-300 mb-2">
-              Current website <span className="text-zinc-600">(optional)</span>
+          {/* Current Website */}
+          <div className="mb-5">
+            <label htmlFor="currentWebsite" className="block text-sm text-zinc-300 mb-2 font-medium">
+              Current Website <span className="text-zinc-600">(if any)</span>
             </label>
             <input
               type="url"
@@ -192,42 +215,24 @@ export function ContactSection() {
               name="currentWebsite"
               value={formData.currentWebsite}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
-              placeholder="https://yourbusiness.com"
+              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-northline-accent/50 focus:ring-1 focus:ring-northline-accent/20 transition-all"
+              placeholder="https://..."
             />
           </div>
 
-          {/* Help needed */}
-          <div className="mb-6">
-            <label htmlFor="helpNeeded" className="block text-sm text-zinc-300 mb-2">
-              What do you need help with? <span className="text-zinc-500">*</span>
-            </label>
-            <textarea
-              id="helpNeeded"
-              name="helpNeeded"
-              required
-              rows={4}
-              value={formData.helpNeeded}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-none"
-              placeholder="Describe what you are looking for..."
-            />
-          </div>
-
-          {/* Budget range */}
-          <div className="mb-8">
-            <label htmlFor="budget" className="block text-sm text-zinc-300 mb-2">
-              Budget range <span className="text-zinc-500">*</span>
+          {/* Budget */}
+          <div className="mb-5">
+            <label htmlFor="budget" className="block text-sm text-zinc-300 mb-2 font-medium">
+              Budget Range
             </label>
             <select
               id="budget"
               name="budget"
-              required
               value={formData.budget}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-zinc-500 transition-colors appearance-none cursor-pointer"
+              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white focus:outline-none focus:border-northline-accent/50 focus:ring-1 focus:ring-northline-accent/20 transition-all appearance-none cursor-pointer"
             >
-              <option value="" disabled className="text-zinc-600">Select a range</option>
+              <option value="" className="bg-zinc-900">Select a range...</option>
               {budgetOptions.map((option) => (
                 <option key={option} value={option} className="bg-zinc-900">
                   {option}
@@ -236,13 +241,39 @@ export function ContactSection() {
             </select>
           </div>
 
+          {/* Help Needed */}
+          <div className="mb-8">
+            <label htmlFor="helpNeeded" className="block text-sm text-zinc-300 mb-2 font-medium">
+              What can Northline help with?
+            </label>
+            <textarea
+              id="helpNeeded"
+              name="helpNeeded"
+              rows={4}
+              value={formData.helpNeeded}
+              onChange={handleChange}
+              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-northline-accent/50 focus:ring-1 focus:ring-northline-accent/20 transition-all resize-none"
+              placeholder="Tell us about your project, goals, or any questions..."
+            />
+          </div>
+
           {/* Submit */}
           <button
             type="submit"
             disabled={formState === "submitting"}
-            className="w-full py-4 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 py-4 bg-white text-zinc-900 rounded-xl font-medium hover:bg-zinc-100 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
           >
-            {formState === "submitting" ? "Sending..." : "Request free audit"}
+            {formState === "submitting" ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                Send Request
+              </>
+            )}
           </button>
         </motion.form>
       </div>

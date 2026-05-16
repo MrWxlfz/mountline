@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Loader2, Check, Mail, Phone, MapPin } from "lucide-react"
+import { ArrowRight, Loader2, Check } from "lucide-react"
 import { submitLead, type LeadFormData } from "@/app/actions/submit-lead"
 
 const budgetOptions = [
@@ -74,89 +74,40 @@ export function ContactSection() {
 
   return (
     <section id="contact" className="py-24 lg:py-32 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
-          {/* Left column - Info */}
-          <div className="lg:col-span-2">
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
-            >
-              Start a project
-            </motion.span>
-            
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.1] mb-6"
-            >
-              Ready for a site
-              <br />
-              <span className="text-muted-foreground">people actually trust?</span>
-            </motion.h2>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
+          >
+            Start a project
+          </motion.span>
+          
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.1] mb-6"
+          >
+            Ready for a site
+            <br />
+            <span className="text-muted-foreground">people actually trust?</span>
+          </motion.h2>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="text-base text-muted-foreground mb-10"
-            >
-              Tell us about your project and we&apos;ll get back to you within 24 hours 
-              with a clear plan and honest quote.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="space-y-5"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center">
-                  <Mail className="w-4 h-4 text-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email us at</p>
-                  <p className="font-medium text-foreground">hello@northline.dev</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center">
-                  <Phone className="w-4 h-4 text-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Call or text</p>
-                  <p className="font-medium text-foreground">(555) 123-4567</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center">
-                  <MapPin className="w-4 h-4 text-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Based in</p>
-                  <p className="font-medium text-foreground">Remote / Worldwide</p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Right column - Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-3"
+            className="text-base text-muted-foreground max-w-lg mx-auto"
           >
+            Tell us about your project and we&apos;ll get back to you within 24 hours 
+            with a clear plan and honest quote.
+          </motion.p>
+        </div>
             <AnimatePresence mode="wait">
               {formState === "success" ? (
                 <motion.div

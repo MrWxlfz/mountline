@@ -1,48 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { DashboardMockup } from "./dashboard-mockup"
-import { Navbar } from "./navbar"
-import { LogoCloud } from "./logo-cloud"
-import { FeatureCardsSection } from "./feature-cards-section"
-import { AISection } from "./ai-section"
-import { ProductDirectionSection } from "./product-direction-section"
-import { WorkflowsSection } from "./workflows-section"
-import { CtaSection } from "./cta-section"
-import { Footer } from "./footer"
-import { PricingSection } from "./pricing-section"
-import { FAQSection } from "./faq-section"
-import { WorkSection } from "./work-section"
-import { TrustSection } from "./trust-section"
-import { ContactSection } from "./contact-section"
-import { NorthlinePattern } from "./northline-logo"
+import { motion } from "framer-motion"
+import { Check, Smartphone, Search, Zap, MessageSquare } from "lucide-react"
 
 export function Hero3DStage() {
-  const [yOffset, setYOffset] = useState(0)
-  const { scrollY } = useScroll()
-  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0])
-  const heroScale = useTransform(scrollY, [0, 400], [1, 0.95])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollYValue = window.scrollY
-      const offset = Math.min(scrollYValue / 300, 1) * -20
-      setYOffset(offset)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  const baseTransform = {
-    translateX: 2,
-    scale: 1.2,
-    rotateX: 47,
-    rotateY: 31,
-    rotateZ: 324,
-  }
-
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
@@ -50,255 +11,239 @@ export function Hero3DStage() {
     }
   }
 
-  // Stagger animation variants
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
-  }
-
-  const chipVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
-  }
+  const trustItems = [
+    "Websites",
+    "Landing pages", 
+    "Quote forms",
+    "Booking flows",
+    "Monthly updates"
+  ]
 
   return (
-    <>
-      <section className="relative min-h-screen overflow-hidden bg-zinc-950">
-        <Navbar />
-        
-        {/* Background layers */}
-        <NorthlinePattern />
-        
-        {/* Animated gradient orb */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="absolute pointer-events-none animate-subtle-pulse"
+    <section className="relative min-h-screen bg-gradient-to-b from-stone-50 to-white pt-24 pb-20 overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-30">
+        <div 
+          className="absolute inset-0"
           style={{
-            top: "30%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "1000px",
-            height: "700px",
-            background: "radial-gradient(ellipse at center, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 40%, transparent 70%)",
+            backgroundImage: `radial-gradient(circle at 1px 1px, #d4d4d8 1px, transparent 0)`,
+            backgroundSize: '32px 32px'
           }}
         />
-        
-        {/* Secondary accent glow */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            top: "60%",
-            right: "10%",
-            width: "600px",
-            height: "600px",
-            background: "radial-gradient(ellipse at center, rgba(99, 102, 241, 0.05) 0%, transparent 60%)",
-          }}
-        />
-
-        {/* Subtle grid overlay */}
-        <div className="absolute inset-0 grid-pattern opacity-30" />
-
-        {/* Main content */}
-        <div className="relative z-10 pt-28 flex flex-col">
-          {/* Hero text - contained and centered */}
-          <div className="w-full flex justify-center px-6 mt-16">
-            <motion.div 
-              className="w-full max-w-4xl"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {/* Section eyebrow */}
-              <motion.div 
-                variants={itemVariants}
-                className="flex items-center gap-3 mb-6"
-              >
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-subtle-pulse" />
-                <span className="text-zinc-500 text-sm tracking-wide uppercase">Digital Studio</span>
-              </motion.div>
-
-              <motion.h1
-                variants={itemVariants}
-                className="text-4xl md:text-5xl lg:text-6xl xl:text-[64px] font-medium text-white leading-[1.08] tracking-tight text-balance"
-              >
-                Websites and systems for businesses that are done looking average.
-              </motion.h1>
-              
-              <motion.p
-                variants={itemVariants}
-                className="mt-8 text-lg md:text-xl text-zinc-400 max-w-2xl leading-relaxed"
-              >
-                Northline builds fast websites, clean landing pages, and simple digital systems for local businesses and small teams that need to look sharp and move faster.
-              </motion.p>
-              
-              <motion.div
-                variants={itemVariants}
-                className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
-              >
-                <button 
-                  onClick={() => scrollToSection('contact')}
-                  className="group relative px-7 py-3.5 bg-white text-zinc-900 font-medium rounded-lg transition-all duration-300 text-sm overflow-hidden hover:shadow-lg hover:shadow-white/10"
-                >
-                  <span className="relative z-10">Get a free audit</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-zinc-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </button>
-                <button 
-                  onClick={() => scrollToSection('services')}
-                  className="group text-zinc-300 font-medium hover:text-white transition-colors flex items-center gap-2 text-sm"
-                >
-                  View services
-                  <span className="group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true">→</span>
-                </button>
-              </motion.div>
-              
-              {/* Premium chips */}
-              <motion.div
-                variants={containerVariants}
-                className="mt-10 flex flex-wrap items-center gap-3"
-              >
-                {[
-                  "Fast launches",
-                  "Mobile-first",
-                  "Clear pricing",
-                  "Small team, focused work"
-                ].map((chip, index) => (
-                  <motion.span
-                    key={chip}
-                    variants={chipVariants}
-                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs text-zinc-400 bg-zinc-900/60 border border-zinc-800/60 backdrop-blur-sm"
-                  >
-                    <span className="w-1 h-1 rounded-full bg-zinc-600" />
-                    {chip}
-                  </motion.span>
-                ))}
-              </motion.div>
-            </motion.div>
-          </div>
-
-          {/* 3D Stage - full bleed */}
-          <div
-            className="relative mt-16"
-            style={{
-              width: "100vw",
-              marginLeft: "-50vw",
-              marginRight: "-50vw",
-              position: "relative",
-              left: "50%",
-              right: "50%",
-              height: "700px",
-              marginTop: "-40px",
-            }}
+      </div>
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-6">
+        {/* Hero content */}
+        <div className="text-center max-w-3xl mx-auto mb-16 pt-8">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-slate-900 tracking-tight leading-[1.1] text-balance mb-6"
           >
-            {/* Bottom fade gradient */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-80 z-10 pointer-events-none"
-              style={{
-                background: "linear-gradient(to top, #09090b 30%, transparent 100%)",
-              }}
-            />
-
-            {/* Perspective container */}
-            <motion.div
-              style={{
-                transform: `translateY(${yOffset}px)`,
-                transition: "transform 0.1s ease-out",
-                contain: "strict",
-                perspective: "4000px",
-                perspectiveOrigin: "100% 0",
-                width: "100%",
-                height: "100%",
-                transformStyle: "preserve-3d",
-                position: "relative",
-              }}
+            Websites that make your business easier to trust.
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-lg sm:text-xl text-slate-600 leading-relaxed text-pretty mb-8"
+          >
+            Northline Services builds clean websites, landing pages, and simple digital systems for businesses that need a stronger first impression and more customer action.
+          </motion.p>
+          
+          {/* CTAs */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10"
+          >
+            <button
+              onClick={() => scrollToSection('contact')}
+              className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 transition-colors"
             >
-              {/* Transformed base */}
-              <motion.div
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.6,
-                  duration: 1.2,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="relative"
-                style={{
-                  transformOrigin: "0 0",
-                  backfaceVisibility: "hidden",
-                  WebkitBackfaceVisibility: "hidden",
-                  width: "1600px",
-                  height: "900px",
-                  margin: "280px auto auto",
-                  position: "absolute",
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  transform: `translate(${baseTransform.translateX}%) scale(${baseTransform.scale}) rotateX(${baseTransform.rotateX}deg) rotateY(${baseTransform.rotateY}deg) rotate(${baseTransform.rotateZ}deg)`,
-                  transformStyle: "preserve-3d",
-                }}
-              >
-                {/* Glow effect behind mockup */}
-                <div 
-                  className="absolute -inset-4 rounded-2xl opacity-40"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, transparent 50%)",
-                    filter: "blur(40px)",
-                  }}
-                />
-                
-                {/* Mockup container */}
-                <div 
-                  className="relative w-full h-full rounded-xl overflow-hidden border border-zinc-800/80"
-                  style={{
-                    boxShadow: "0 0 80px -20px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <DashboardMockup />
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
-
-          <LogoCloud />
-          <FeatureCardsSection />
-          <AISection />
-          <ProductDirectionSection />
-          <WorkflowsSection />
-          <PricingSection />
-          <WorkSection />
-          <TrustSection />
-          <FAQSection />
-          <CtaSection />
-          <ContactSection />
-          <Footer />
+              Book a website review
+            </button>
+            <button
+              onClick={() => scrollToSection('pricing')}
+              className="w-full sm:w-auto px-8 py-3.5 bg-white text-slate-700 font-medium rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors"
+            >
+              See packages
+            </button>
+          </motion.div>
+          
+          {/* Trust row */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm text-slate-500"
+          >
+            {trustItems.map((item, i) => (
+              <span key={i} className="flex items-center gap-2">
+                {i > 0 && <span className="text-slate-300">·</span>}
+                {item}
+              </span>
+            ))}
+          </motion.div>
         </div>
-      </section>
-    </>
+        
+        {/* Website preview visual */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="relative max-w-4xl mx-auto"
+        >
+          {/* Desktop browser mockup */}
+          <div className="relative bg-white rounded-xl shadow-2xl shadow-slate-900/10 border border-slate-200 overflow-hidden">
+            {/* Browser chrome */}
+            <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-slate-300" />
+                <div className="w-3 h-3 rounded-full bg-slate-300" />
+                <div className="w-3 h-3 rounded-full bg-slate-300" />
+              </div>
+              <div className="flex-1 mx-4">
+                <div className="bg-white rounded-md px-3 py-1.5 text-xs text-slate-400 border border-slate-200 max-w-xs mx-auto text-center">
+                  premiumautodetail.com
+                </div>
+              </div>
+            </div>
+            
+            {/* Website preview content */}
+            <div className="aspect-[16/10] bg-gradient-to-br from-slate-50 to-stone-50 p-6 sm:p-8">
+              {/* Mock website layout */}
+              <div className="h-full flex flex-col">
+                {/* Mock nav */}
+                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 sm:w-8 h-6 sm:h-8 rounded-lg bg-slate-800" />
+                    <div className="w-16 sm:w-24 h-3 sm:h-4 rounded bg-slate-800" />
+                  </div>
+                  <div className="hidden sm:flex items-center gap-4 lg:gap-6">
+                    <div className="w-12 h-2.5 rounded bg-slate-300" />
+                    <div className="w-12 h-2.5 rounded bg-slate-300" />
+                    <div className="w-12 h-2.5 rounded bg-slate-300" />
+                    <div className="w-16 h-7 rounded-lg bg-slate-800" />
+                  </div>
+                </div>
+                
+                {/* Mock hero */}
+                <div className="flex-1 flex items-center">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 w-full">
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="w-3/4 h-5 sm:h-7 rounded bg-slate-800" />
+                      <div className="w-full h-4 sm:h-5 rounded bg-slate-700" />
+                      <div className="w-5/6 h-2.5 sm:h-3 rounded bg-slate-400" />
+                      <div className="w-4/5 h-2.5 sm:h-3 rounded bg-slate-400" />
+                      <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
+                        <div className="w-20 sm:w-28 h-8 sm:h-10 rounded-lg bg-blue-600" />
+                        <div className="w-16 sm:w-24 h-8 sm:h-10 rounded-lg bg-slate-200 border border-slate-300" />
+                      </div>
+                    </div>
+                    <div className="hidden lg:block">
+                      <div className="w-full h-40 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile preview */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="absolute -right-2 sm:right-4 lg:right-8 bottom-4 sm:bottom-8 w-[100px] sm:w-[140px] lg:w-[160px]"
+          >
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200 overflow-hidden">
+              {/* Phone notch */}
+              <div className="h-4 sm:h-5 bg-slate-50 flex items-center justify-center">
+                <div className="w-10 sm:w-14 h-2.5 sm:h-3 rounded-full bg-slate-200" />
+              </div>
+              {/* Phone content */}
+              <div className="aspect-[9/16] bg-gradient-to-br from-slate-50 to-stone-50 p-2 sm:p-3">
+                <div className="space-y-2 sm:space-y-2.5">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="w-4 sm:w-5 h-4 sm:h-5 rounded bg-slate-800" />
+                    <div className="w-10 sm:w-12 h-1.5 sm:h-2 rounded bg-slate-800" />
+                  </div>
+                  <div className="w-full h-2 sm:h-2.5 rounded bg-slate-700" />
+                  <div className="w-4/5 h-2 sm:h-2.5 rounded bg-slate-700" />
+                  <div className="w-full h-1.5 sm:h-2 rounded bg-slate-400" />
+                  <div className="w-3/4 h-1.5 sm:h-2 rounded bg-slate-400" />
+                  <div className="w-full h-5 sm:h-6 rounded-lg bg-blue-600 mt-2 sm:mt-3" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          
+          {/* Feature callout cards */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+            className="hidden sm:flex absolute -left-2 lg:-left-4 top-1/4 bg-white rounded-lg shadow-lg shadow-slate-900/5 border border-slate-200 px-3 py-2 items-center gap-2"
+          >
+            <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-medium text-slate-700">Clear services</span>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+            className="hidden sm:flex absolute left-2 lg:left-4 top-1/2 bg-white rounded-lg shadow-lg shadow-slate-900/5 border border-slate-200 px-3 py-2 items-center gap-2"
+          >
+            <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+              <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-medium text-slate-700">Quote ready</span>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
+            className="hidden md:flex absolute left-[20%] -bottom-3 bg-white rounded-lg shadow-lg shadow-slate-900/5 border border-slate-200 px-3 py-2 items-center gap-2"
+          >
+            <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+              <Smartphone className="w-3.5 h-3.5 text-violet-600" />
+            </div>
+            <span className="text-sm font-medium text-slate-700">Mobile-first</span>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
+            className="hidden md:flex absolute right-[20%] -bottom-3 bg-white rounded-lg shadow-lg shadow-slate-900/5 border border-slate-200 px-3 py-2 items-center gap-2"
+          >
+            <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
+              <Search className="w-3.5 h-3.5 text-amber-600" />
+            </div>
+            <span className="text-sm font-medium text-slate-700">SEO basics</span>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 1.1 }}
+            className="hidden sm:flex absolute -right-2 lg:-right-4 top-1/3 bg-white rounded-lg shadow-lg shadow-slate-900/5 border border-slate-200 px-3 py-2 items-center gap-2"
+          >
+            <div className="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
+              <Zap className="w-3.5 h-3.5 text-rose-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-medium text-slate-700">Fast launch</span>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
   )
 }

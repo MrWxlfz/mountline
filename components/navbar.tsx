@@ -41,13 +41,13 @@ export function Navbar() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? "bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50" 
+          ? "bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm" 
           : "bg-transparent"
       }`}
     >
       <div className="w-full flex justify-center px-6 py-4">
-        <div className="w-full max-w-5xl flex items-center justify-between">
-          <NorthlineLogo size="md" animated />
+        <div className="w-full max-w-6xl flex items-center justify-between">
+          <NorthlineLogo size="md" variant="dark" animated />
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -58,10 +58,9 @@ export function Navbar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
                 onClick={() => scrollToSection(item.id)}
-                className="relative text-sm text-zinc-400 hover:text-white transition-colors group"
+                className="relative text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
               >
                 {item.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-500 group-hover:w-full transition-all duration-300" />
               </motion.button>
             ))}
           </div>
@@ -70,20 +69,19 @@ export function Navbar() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="hidden md:flex items-center gap-4"
+            className="hidden md:flex items-center"
           >
             <button
               onClick={() => scrollToSection('contact')}
-              className="relative text-sm text-white bg-zinc-800 hover:bg-zinc-700 px-5 py-2.5 rounded-lg border border-zinc-700 transition-all duration-300 overflow-hidden group"
+              className="text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 px-5 py-2.5 rounded-lg transition-colors"
             >
-              <span className="relative z-10">Get a free audit</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              Book a website review
             </button>
           </motion.div>
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden text-zinc-400 hover:text-white transition-colors p-2 -mr-2"
+            className="md:hidden text-slate-600 hover:text-slate-900 transition-colors p-2 -mr-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
@@ -122,9 +120,9 @@ export function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="md:hidden border-t border-zinc-800/50 bg-zinc-950/95 backdrop-blur-xl overflow-hidden"
+            className="md:hidden border-t border-slate-200 bg-white overflow-hidden"
           >
-            <div className="px-6 py-6 space-y-1">
+            <div className="px-6 py-4 space-y-1">
               {navItems.map((item, index) => (
                 <motion.button 
                   key={item.id}
@@ -132,7 +130,7 @@ export function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   onClick={() => scrollToSection(item.id)}
-                  className="block w-full text-left text-base text-zinc-400 hover:text-white transition-colors py-3 border-b border-zinc-800/50"
+                  className="block w-full text-left text-base font-medium text-slate-600 hover:text-slate-900 transition-colors py-3 border-b border-slate-100"
                 >
                   {item.label}
                 </motion.button>
@@ -142,9 +140,9 @@ export function Navbar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.3 }}
                 onClick={() => scrollToSection('contact')}
-                className="w-full text-sm text-white bg-zinc-800 hover:bg-zinc-700 px-4 py-3 rounded-lg border border-zinc-700 transition-colors mt-4"
+                className="w-full text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 px-4 py-3 rounded-lg transition-colors mt-4"
               >
-                Get a free audit
+                Book a website review
               </motion.button>
             </div>
           </motion.div>

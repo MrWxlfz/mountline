@@ -7,23 +7,22 @@ interface MetricItem {
   label: string
 }
 
-export function MetricsStrip() {
-  const metrics: MetricItem[] = [
-    { value: "7–14 days", label: "typical starter launch" },
-    { value: "$500+", label: "starter websites" },
-    { value: "$149/mo", label: "monthly care" },
-    { value: "0", label: "bloated agency process" },
-    { value: "100%", label: "mobile-first builds" },
-  ]
+const metrics: MetricItem[] = [
+  { value: "7–14 days", label: "Typical starter launch" },
+  { value: "$500+", label: "Starter websites" },
+  { value: "$149/mo", label: "Monthly care" },
+  { value: "Client portals", label: "Available for projects" },
+  { value: "Mobile-first", label: "Built by default" },
+]
 
+export function MetricsStrip() {
   return (
     <section className="relative border-y border-border bg-background overflow-hidden">
       <div className="flex">
-        {/* Scrolling container for mobile, static for desktop */}
         <div className="flex lg:grid lg:grid-cols-5 w-full">
           {metrics.map((metric, index) => (
             <motion.div
-              key={index}
+              key={metric.value}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -32,53 +31,39 @@ export function MetricsStrip() {
                 index !== metrics.length - 1 ? "lg:border-r lg:border-border" : ""
               }`}
             >
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-1">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-1 text-balance">
                 {metric.value}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground leading-relaxed">
                 {metric.label}
               </div>
             </motion.div>
           ))}
         </div>
       </div>
-      
-      {/* Scroll fade indicators on mobile */}
+
       <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none lg:hidden" />
       <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none lg:hidden" />
     </section>
   )
 }
 
-// Alternative horizontal scrolling version
 export function MetricsStripScrolling() {
-  const metrics = [
-    { value: "7–14 days", label: "typical starter" },
-    { value: "$500+", label: "starter sites" },
-    { value: "$149/mo", label: "monthly care" },
-    { value: "0", label: "agency bloat" },
-    { value: "100%", label: "mobile-first" },
-    // Duplicate for seamless loop
-    { value: "7–14 days", label: "typical starter" },
-    { value: "$500+", label: "starter sites" },
-    { value: "$149/mo", label: "monthly care" },
-    { value: "0", label: "agency bloat" },
-    { value: "100%", label: "mobile-first" },
-  ]
+  const scrollingMetrics = [...metrics, ...metrics]
 
   return (
     <section className="relative border-y border-border bg-background overflow-hidden py-6">
-      <motion.div 
+      <motion.div
         className="flex gap-12 whitespace-nowrap"
         animate={{ x: [0, "-50%"] }}
-        transition={{ 
-          duration: 30, 
-          repeat: Infinity, 
-          ease: "linear" 
+        transition={{
+          duration: 30,
+          repeat: Infinity,
+          ease: "linear",
         }}
       >
-        {metrics.map((metric, index) => (
-          <div key={index} className="flex items-center gap-3 px-4">
+        {scrollingMetrics.map((metric, index) => (
+          <div key={`${metric.value}-${index}`} className="flex items-center gap-3 px-4">
             <span className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
               {metric.value}
             </span>

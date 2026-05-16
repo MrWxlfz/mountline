@@ -59,7 +59,7 @@ export function AiSystemsSection() {
               className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight leading-[1.1] mb-6"
             >
               Useful AI systems,{" "}
-              <span className="text-muted-foreground/50">not AI theater.</span>
+              <span className="text-muted-foreground/70">not AI theater.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -68,7 +68,7 @@ export function AiSystemsSection() {
               transition={{ delay: 0.2 }}
               className="text-lg text-muted-foreground leading-relaxed mb-8"
             >
-              Some businesses need more than a website. northline can connect forms, booking, payment links, spreadsheets, email workflows, and simple AI-assisted tools so the site supports the business behind it.
+              Some businesses need more than a website. Northline can connect forms, booking, payment links, spreadsheets, email workflows, and simple AI-assisted tools so the site supports the business behind it.
             </motion.p>
             
             {/* Workflow diagram */}

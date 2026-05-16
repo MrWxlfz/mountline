@@ -90,7 +90,7 @@ export function PricingSection() {
             className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1] max-w-2xl"
           >
             Simple packages.{" "}
-            <span className="text-muted-foreground/50">Clear scope.</span>
+            <span className="text-muted-foreground/70">Clear scope.</span>
           </motion.h2>
         </div>
         
@@ -113,7 +113,7 @@ export function PricingSection() {
                 <div className="p-6">
                   {/* Plan name */}
                   <h3 className={`text-sm font-medium uppercase tracking-wider mb-6 ${
-                    plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                    plan.highlighted ? "text-background/80" : "text-muted-foreground"
                   }`}>
                     {plan.name}
                   </h3>
@@ -128,14 +128,14 @@ export function PricingSection() {
                       </span>
                       {plan.priceSuffix && (
                         <span className={`text-lg ${
-                          plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                          plan.highlighted ? "text-background/80" : "text-muted-foreground"
                         }`}>
                           {plan.priceSuffix}
                         </span>
                       )}
                     </div>
                     <div className={`text-xs mt-1 ${
-                      plan.highlighted ? "text-background/50" : "text-muted-foreground"
+                      plan.highlighted ? "text-background/75" : "text-muted-foreground"
                     }`}>
                       {plan.priceNote}
                     </div>
@@ -143,7 +143,7 @@ export function PricingSection() {
                   
                   {/* Description */}
                   <p className={`text-sm leading-relaxed mb-6 ${
-                    plan.highlighted ? "text-background/70" : "text-muted-foreground"
+                    plan.highlighted ? "text-background/85" : "text-muted-foreground"
                   }`}>
                     {plan.description}
                   </p>
@@ -153,7 +153,7 @@ export function PricingSection() {
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5">
                         <Check className={`w-4 h-4 mt-0.5 shrink-0 ${
-                          plan.highlighted ? "text-background/60" : "text-muted-foreground"
+                          plan.highlighted ? "text-background/80" : "text-muted-foreground"
                         }`} />
                         <span className={`text-sm ${
                           plan.highlighted ? "text-background/80" : "text-muted-foreground"

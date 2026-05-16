@@ -26,7 +26,7 @@ const processSteps = [
   {
     numeral: "V",
     title: "Support",
-    description: "northline can keep the site updated with monthly care.",
+    description: "Northline can keep the site updated with monthly care.",
   }
 ]
 
@@ -52,7 +52,7 @@ export function ProductDirectionSection() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block text-sm font-medium text-background/50 tracking-wide uppercase mb-4"
+            className="inline-block text-sm font-medium text-background/70 tracking-wide uppercase mb-4"
           >
             Process
           </motion.span>
@@ -70,9 +70,9 @@ export function ProductDirectionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-background/60 mt-6 max-w-xl"
+            className="text-lg text-background/80 mt-6 max-w-xl leading-relaxed"
           >
-            No bloated agency maze. Just scope, design, build, and support.
+            Clear scope, careful design, clean build, and steady support.
           </motion.p>
         </div>
         
@@ -103,7 +103,7 @@ export function ProductDirectionSection() {
                 <div className="grid grid-cols-12 gap-4 lg:gap-8 py-8 lg:py-10 border-b border-background/10 last:border-b-0">
                   {/* Numeral */}
                   <div className="col-span-2 lg:col-span-1 flex items-start lg:justify-center">
-                    <span className="text-2xl lg:text-3xl font-serif text-background/30 group-hover:text-accent transition-colors">
+                    <span className="text-2xl lg:text-3xl font-serif text-background/55 group-hover:text-background transition-colors">
                       {step.numeral}
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export function ProductDirectionSection() {
                   
                   {/* Description */}
                   <div className="col-span-12 lg:col-span-7 lg:col-start-5">
-                    <p className="text-background/60 leading-relaxed mt-2 lg:mt-0">
+                    <p className="text-background/80 leading-relaxed mt-2 lg:mt-0">
                       {step.description}
                     </p>
                   </div>

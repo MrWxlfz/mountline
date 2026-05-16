@@ -56,8 +56,8 @@ export function FooterSection() {
           {/* Brand column */}
           <div className="lg:col-span-2">
             <NorthlineLogo size="md" className="mb-6" inverted />
-            <p className="text-background/60 max-w-sm leading-relaxed mb-6">
-              Clean websites, landing pages, and practical digital systems for businesses that need a stronger first impression and more customer action.
+            <p className="text-background/75 max-w-sm leading-relaxed mb-6">
+              Websites, client portals, and practical digital systems for businesses that need to look sharper online.
             </p>
             <motion.button
               onClick={() => scrollToSection('#contact')}
@@ -78,7 +78,7 @@ export function FooterSection() {
                 <li key={link.label}>
                   <button
                     onClick={() => scrollToSection(link.href)}
-                    className="text-sm text-background/60 hover:text-background transition-colors"
+                    className="text-sm text-background/70 hover:text-background transition-colors"
                   >
                     {link.label}
                   </button>
@@ -95,7 +95,7 @@ export function FooterSection() {
                 <li key={link.label}>
                   <button
                     onClick={() => scrollToSection(link.href)}
-                    className="text-sm text-background/60 hover:text-background transition-colors"
+                    className="text-sm text-background/70 hover:text-background transition-colors"
                   >
                     {link.label}
                   </button>
@@ -112,21 +112,21 @@ export function FooterSection() {
           viewport={{ once: true }}
           className="pt-8 border-t border-background/10 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
-          <p className="text-sm text-background/40">
-            {new Date().getFullYear()} northline. All rights reserved.
+          <p className="text-sm text-background/55">
+            {new Date().getFullYear()} Northline Services. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <button className="text-sm text-background/40 hover:text-background/60 transition-colors">
+            <button className="text-sm text-background/55 hover:text-background/75 transition-colors">
               Privacy
             </button>
-            <button className="text-sm text-background/40 hover:text-background/60 transition-colors">
+            <button className="text-sm text-background/55 hover:text-background/75 transition-colors">
               Terms
             </button>
             <Link
               href="/client-login"
-              className="text-sm text-background/40 hover:text-background/60 transition-colors"
+              className="text-sm text-background/55 hover:text-background/75 transition-colors"
             >
-              Client Login
+              Client login
             </Link>
           </div>
         </motion.div>

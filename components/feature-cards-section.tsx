@@ -58,7 +58,7 @@ export function FeatureCardsSection() {
             className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1] max-w-3xl"
           >
             Everything your online presence needs.{" "}
-            <span className="text-muted-foreground/50">Nothing bloated.</span>
+            <span className="text-muted-foreground/70">Nothing bloated.</span>
           </motion.h2>
         </div>
         

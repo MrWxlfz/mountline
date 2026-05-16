@@ -189,7 +189,7 @@ export function Hero3DStage() {
               >
                 <span className="block">Websites people</span>
                 <span className="block">trust before they</span>
-                <span className="block text-muted-foreground/60">ever call.</span>
+                <span className="block text-muted-foreground/75">ever call.</span>
               </motion.h1>
               
               {/* Subheadline */}
@@ -199,7 +199,7 @@ export function Hero3DStage() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mb-8"
               >
-                northline builds clean websites, landing pages, and practical digital systems for businesses that need a stronger first impression.
+                Northline builds clean websites, landing pages, and practical digital systems for businesses that need a stronger first impression.
               </motion.p>
               
               {/* CTAs */}

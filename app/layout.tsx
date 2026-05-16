@@ -9,25 +9,29 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'northline | Websites that make your business impossible to overlook',
-  description: 'northline builds clean websites, landing pages, and practical digital systems for businesses that need a stronger first impression and more customer action.',
-  generator: 'v0.app',
+  metadataBase: new URL('https://nthline.tech'),
+  title: 'Northline Services',
+  description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
+  openGraph: {
+    title: 'Northline Services',
+    description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
+    url: 'https://nthline.tech',
+    siteName: 'Northline Services',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Northline Services',
+    description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
+  },
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
       {
         url: '/icon.svg',
         type: 'image/svg+xml',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: '/icon.svg',
   },
 }
 

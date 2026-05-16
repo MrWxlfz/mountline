@@ -1,7 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Triangle } from "lucide-react"
+
+const capabilityTags = [
+  "Websites",
+  "Landing Pages",
+  "SEO Basics",
+  "Automations",
+  "Booking Flows",
+  "Payments",
+  "Analytics",
+  "Monthly Care",
+]
 
 export function LogoCloud() {
   return (
@@ -15,16 +25,7 @@ export function LogoCloud() {
             transition={{ duration: 0.6 }}
             className="text-lg text-zinc-300 mb-2"
           >
-            Powering the world's best product teams.
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-lg text-zinc-500 mb-16"
-          >
-            From next-gen startups to established enterprises.
+            Built for local businesses, startups, creators, and small teams.
           </motion.p>
 
           <motion.div
@@ -32,24 +33,18 @@ export function LogoCloud() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative group cursor-pointer"
+            className="mt-12"
           >
-            {/* Logo grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-16 gap-y-10 items-center justify-items-center transition-all duration-300 group-hover:blur-[2.5px] group-hover:opacity-50">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="text-white font-semibold text-xl flex items-center gap-2">
-                  <Triangle className="w-5 h-5 fill-white" />
-                  Vercel
+            {/* Capability tags grid */}
+            <div className="flex flex-wrap justify-center gap-3">
+              {capabilityTags.map((tag, i) => (
+                <div
+                  key={tag}
+                  className="px-4 py-2 bg-zinc-900/50 border border-zinc-800 rounded-full text-sm text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors cursor-default"
+                >
+                  {tag}
                 </div>
               ))}
-            </div>
-
-            {/* Hover overlay button */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-              <div className="px-5 py-2.5 bg-zinc-800/80 backdrop-blur-sm border border-zinc-700 rounded-full text-sm text-zinc-300 flex items-center gap-2">
-                Meet our customers
-                <span aria-hidden="true">›</span>
-              </div>
             </div>
           </motion.div>
         </div>

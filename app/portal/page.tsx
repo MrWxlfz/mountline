@@ -76,7 +76,7 @@ export default async function PortalIndexPage() {
             If you believe this is an error, please contact your project manager.
           </p>
           <Link href="/" className="inline-block text-sm text-muted-foreground hover:text-foreground underline mt-4">
-            Back to northline.dev
+            Back to mountline.dev
           </Link>
         </div>
       )}

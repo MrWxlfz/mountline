@@ -192,7 +192,7 @@ export function WorkSection() {
             transition={{ delay: 0.2 }}
             className="text-lg text-muted-foreground max-w-xl"
           >
-            Sample directions that show the kind of online presence Northline can create.
+            Sample directions that show the kind of online presence Mountline can create.
           </motion.p>
         </div>
         

@@ -49,7 +49,7 @@ export function ToolsSection() {
             transition={{ delay: 0.2 }}
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
           >
-            Depending on scope, Northline can prepare or connect your site with the tools already used to run the business.
+            Depending on scope, Mountline can prepare or connect your site with the tools already used to run the business.
           </motion.p>
         </div>
         

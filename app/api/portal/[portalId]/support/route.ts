@@ -7,7 +7,7 @@ function getDisplayName(user: Awaited<ReturnType<typeof currentUser>>, fallback:
   const name = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(" ")
   if (name) return name
   if (fallback && fallback !== "unknown") return fallback
-  return isTeamMember ? "Northline" : "Client"
+  return isTeamMember ? "Mountline" : "Client"
 }
 
 export async function POST(

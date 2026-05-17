@@ -1,4 +1,4 @@
--- Northline client portal core schema.
+-- Mountline client portal core schema.
 -- Run this in Supabase SQL editor or through your migration workflow.
 -- It is written to be safe for an existing project: tables are created if
 -- missing, and newer portal columns are added if the base tables already exist.

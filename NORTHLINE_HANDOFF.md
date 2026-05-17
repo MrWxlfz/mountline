@@ -1,17 +1,17 @@
-# Northline Handoff
+# Mountline Handoff
 
 ## Current Project Goal
-Build Northline into a production-ready small-team website, employee dashboard, and private client project portal. The immediate product goal is to support the core workflow: public lead capture, team-only client/project management, portal link generation, private client project views, manual payment links, and simple Supabase-backed support messages.
+Build Mountline into a production-ready small-team website, employee dashboard, and private client project portal. The immediate product goal is to support the core workflow: public lead capture, team-only client/project management, portal link generation, private client project views, manual payment links, and simple Supabase-backed support messages.
 
 ## Current Architecture
 - Framework: Next.js App Router.
 - Auth: Clerk mounted globally in `app/layout.tsx`.
 - Data: Supabase via server-only service-role helpers for admin/server routes.
 - Public site: `/`.
-- Employee dashboard: `/dashboard`, protected by Clerk plus active Northline team membership.
+- Employee dashboard: `/dashboard`, protected by Clerk plus active Mountline team membership.
 - Client portal: `/portal` chooser and `/portal/[portalId]` project portal.
 - Client login backup: `/client-login`.
-- Styling: dark, black/Vercel-like Northline visual system with Tailwind.
+- Styling: dark, black/Vercel-like Mountline visual system with Tailwind.
 
 ## Routes
 - `/`: public homepage.
@@ -26,13 +26,13 @@ Build Northline into a production-ready small-team website, employee dashboard, 
 - `/dashboard/settings`: team-only settings placeholder.
 - `/portal`: authenticated portal chooser; redirects team members to `/dashboard`; redirects clients with one project to the project portal.
 - `/portal/[portalId]`: authenticated private project portal.
-- `/api/clients`, `/api/projects`, `/api/outreach`: admin APIs requiring active Northline team membership.
+- `/api/clients`, `/api/projects`, `/api/outreach`: admin APIs requiring active Mountline team membership.
 - `/api/portal/[portalId]`: project portal data API requiring Clerk plus team or client access.
 - `/api/portal/[portalId]/support`: support message write API requiring the same portal access.
 
 ## Clerk Auth Rules
 - Public homepage remains public.
-- Dashboard and admin APIs must be available only to active Northline team members.
+- Dashboard and admin APIs must be available only to active Mountline team members.
 - Active team membership is checked in `lib/auth/team.ts` against Supabase `team_members` by `status = active` and either `email` or `clerk_user_id`.
 - Clients should only access assigned portals through `client_portal_access`.
 - Portal authorization must never trust `portalId` alone.
@@ -59,7 +59,7 @@ Type draft currently added:
 - Added server-only team guard in `lib/auth/team.ts` in a previous pass.
 - Added `server-only` protection to `lib/supabase/admin.ts`.
 - Split dashboard layout into server guard plus client shell in `app/dashboard/layout.tsx` and `app/dashboard/dashboard-shell.tsx`.
-- Protected admin APIs with `requireNorthlineTeamMemberApi()`.
+- Protected admin APIs with the shared team guard helper.
 - Added `/access-restricted`.
 - Updated public metadata, favicon SVG, metrics strip, and public copy polish.
 - Started first real client portal implementation:

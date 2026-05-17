@@ -1,6 +1,6 @@
--- Northline full Supabase setup.
+-- Mountline full Supabase setup.
 -- Run this first in the Supabase SQL editor for a fresh test project.
--- The app uses Clerk for auth. Do not use Supabase Auth for Northline users.
+-- The app uses Clerk for auth. Do not use Supabase Auth for Mountline users.
 
 create extension if not exists "pgcrypto";
 

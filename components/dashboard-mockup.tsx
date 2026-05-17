@@ -70,7 +70,7 @@ export function DashboardMockup() {
         <div className="p-3 border-b border-zinc-800/50">
           <div className="flex items-center gap-2 px-2 py-1.5">
             <NorthlineIcon size={24} />
-            <span className="text-white font-semibold text-sm">Northline</span>
+            <span className="text-white font-semibold text-sm">Mountline</span>
             <ChevronDown className="w-3.5 h-3.5 text-zinc-500 ml-auto" />
           </div>
         </div>
@@ -234,7 +234,7 @@ export function DashboardMockup() {
             <div className="text-xs text-zinc-500 font-medium mb-3 uppercase tracking-wider">Recent Activity</div>
             <div className="space-y-3">
               <ActivityItem
-                name="Northline"
+                name="Mountline"
                 action="completed"
                 item="membership pricing section"
                 time="2 hours ago"
@@ -246,7 +246,7 @@ export function DashboardMockup() {
                 time="Yesterday"
               />
               <ActivityItem
-                name="Northline"
+                name="Mountline"
                 action="started"
                 item="class schedule integration"
                 time="2 days ago"

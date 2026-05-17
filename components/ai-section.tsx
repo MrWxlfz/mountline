@@ -53,7 +53,7 @@ export function AISection() {
           className="max-w-2xl mb-12 sm:mb-16"
         >
           <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight mb-4">
-            How Northline builds sites.
+            How Mountline builds sites.
           </h2>
           <p className="text-lg text-slate-600 leading-relaxed">
             Modern tools, clean structure, and practical features that make your website work harder for your business.

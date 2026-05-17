@@ -59,6 +59,12 @@ export function FooterSection() {
             <p className="text-background/75 max-w-sm leading-relaxed mb-6">
               Websites, client portals, and practical digital systems for businesses that need to look sharper online.
             </p>
+            <a
+              href="mailto:hello@mountline.dev"
+              className="mb-6 block text-sm text-background/70 hover:text-background transition-colors"
+            >
+              hello@mountline.dev
+            </a>
             <motion.button
               onClick={() => scrollToSection('#contact')}
               whileHover={{ scale: 1.02 }}
@@ -113,7 +119,7 @@ export function FooterSection() {
           className="pt-8 border-t border-background/10 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <p className="text-sm text-background/55">
-            {new Date().getFullYear()} Northline Services. All rights reserved.
+            {new Date().getFullYear()} Mountline Studio. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <button className="text-sm text-background/55 hover:text-background/75 transition-colors">

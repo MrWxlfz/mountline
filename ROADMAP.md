@@ -1,13 +1,13 @@
-# Northline Portal and Admin Roadmap
+# Mountline Portal and Admin Roadmap
 
-This roadmap captures future work for the Northline client portal and employee admin system. It is planning only; these features are not implemented yet.
+This roadmap captures future work for the Mountline client portal and employee admin system. It is planning only; these features are not implemented yet.
 
 ## Architecture Rules
 
 - Clerk remains the auth provider.
 - Supabase remains the database and storage layer.
 - Stripe is only for card payments.
-- Manual payment methods are marked manually by the Northline team.
+- Manual payment methods are marked manually by the Mountline team.
 - No public signup.
 - Employee dashboard remains team-only.
 - Client portal remains invite/link-based.
@@ -16,7 +16,7 @@ This roadmap captures future work for the Northline client portal and employee a
 
 The current portal has simple support messages. A future version should turn this into a real support workflow.
 
-- Client messages should be labeled as client messages, not Northline messages.
+- Client messages should be labeled as client messages, not Mountline messages.
 - Team replies should appear in the client portal.
 - Admin dashboard should include a support inbox.
 - New client messages should trigger a visible dashboard notification.

@@ -68,7 +68,7 @@ export function AiSystemsSection() {
               transition={{ delay: 0.2 }}
               className="text-lg text-muted-foreground leading-relaxed mb-8"
             >
-              Some businesses need more than a website. Northline can connect forms, booking, payment links, spreadsheets, email workflows, and simple AI-assisted tools so the site supports the business behind it.
+              Some businesses need more than a website. Mountline can connect forms, booking, payment links, spreadsheets, email workflows, and simple AI-assisted tools so the site supports the business behind it.
             </motion.p>
             
             {/* Workflow diagram */}

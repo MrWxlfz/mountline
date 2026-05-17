@@ -115,7 +115,7 @@ export function NorthlineLogo({
           {...(animated ? { variants: textVariants, initial: "initial", animate: "animate" } : {})}
           className={`font-semibold tracking-tight lowercase ${s.text} ${inverted ? "text-primary-foreground" : "text-foreground"}`}
         >
-          northline
+          mountline
         </TextWrapper>
       )}
     </div>
@@ -180,7 +180,7 @@ export function NorthlinePattern({
       >
         <defs>
           <pattern 
-            id="northline-mountain-pattern" 
+            id="mountline-mountain-pattern"
             x="0" 
             y="0" 
             width="100" 
@@ -211,7 +211,7 @@ export function NorthlinePattern({
             />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#northline-mountain-pattern)" />
+        <rect width="100%" height="100%" fill="url(#mountline-mountain-pattern)" />
       </svg>
     </div>
   )

@@ -147,10 +147,10 @@ export async function requireNorthlineTeamMemberApi() {
   }
 
   if (access.status === "forbidden") {
-    return {
+      return {
       access,
       response: NextResponse.json(
-        { error: "Forbidden: Northline team members only" },
+        { error: "Forbidden: Mountline team members only" },
         { status: 403 },
       ),
     }

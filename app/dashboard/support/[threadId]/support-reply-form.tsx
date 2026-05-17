@@ -43,7 +43,7 @@ export function SupportReplyForm({ threadId }: { threadId: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <label className="block space-y-2">
-        <span className="text-sm font-medium">Reply as Northline</span>
+        <span className="text-sm font-medium">Reply as Mountline</span>
         <textarea
           value={message}
           onChange={(event) => {

@@ -1,4 +1,4 @@
--- Northline demo seed data.
+-- Mountline demo seed data.
 -- Run this after supabase/northline_schema.sql.
 --
 -- Change these before using real production data:
@@ -75,7 +75,7 @@ values (
   'https://example.com',
   'https://preview.example.com',
   'https://pay.example.com/demo-invoice',
-  'Northline is preparing the first review build. Please send final service area details and any preferred project photos.',
+  'Mountline is preparing the first review build. Please send final service area details and any preferred project photos.',
   'Demo project for client portal verification.'
 )
 on conflict (id) do update
@@ -135,8 +135,8 @@ values
     '22222222-2222-4222-8222-222222222222',
     'team',
     'luke@mrwxlfz.xyz',
-    'Northline',
-    'Welcome to your Northline portal. Project updates, payment links, and support notes will appear here.'
+    'Mountline',
+    'Welcome to your Mountline portal. Project updates, payment links, and support notes will appear here.'
   ),
   (
     '55555555-5555-4555-8555-555555555555',

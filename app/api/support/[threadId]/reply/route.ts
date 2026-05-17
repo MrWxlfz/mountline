@@ -9,7 +9,7 @@ function getTeamSender(user: Awaited<ReturnType<typeof currentUser>>) {
 
   return {
     email,
-    name: name || "Northline",
+    name: name || "Mountline",
   }
 }
 

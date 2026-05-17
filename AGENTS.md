@@ -1,12 +1,12 @@
-# Northline Project Instructions
+# Mountline Project Instructions
 
-Northline Services is a real small-team website, client portal, and digital systems business.
+Mountline Studio is a real small-team website, client portal, and digital systems business.
 
 ## Brand and copy
-- Use "Northline" in normal site copy.
-- The logo may remain lowercase "northline".
+- Use "Mountline" in normal site copy.
+- The logo may remain lowercase "mountline".
 - Do not use "I", "me", or "my".
-- Use "we", "our", and "Northline".
+- Use "we", "our", and "Mountline".
 - Do not mention age, school, summer, friends, or side hustle.
 - Avoid corporate filler and AI-agency cringe.
 
@@ -22,7 +22,7 @@ Northline Services is a real small-team website, client portal, and digital syst
 
 ## Auth rules
 - Public website is public.
-- Employee dashboard is for Northline team members only.
+- Employee dashboard is for Mountline team members only.
 - Client portal is for assigned clients only.
 - Client login is footer-only backup.
 - Do not show public signup.
@@ -34,7 +34,7 @@ Northline Services is a real small-team website, client portal, and digital syst
 - Make targeted production fixes.
 - Add metadata/favicon/Open Graph.
 - Remove unclear stats like `0` and `100%`.
-- Make homepage text say "Northline" with proper capitalization.
+- Make homepage text say "Mountline" with proper capitalization.
 - Simplify the employee dashboard/admin.
 - Build/improve the client portal.
 - Add manual payment link support.

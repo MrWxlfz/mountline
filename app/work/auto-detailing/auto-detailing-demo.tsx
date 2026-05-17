@@ -101,12 +101,12 @@ function DemoNotice() {
   return (
     <div className="sticky top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 text-sm text-zinc-300 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <p>Concept build by Northline Services. This is a sample website direction, not a real client.</p>
+        <p>Concept build by Mountline Studio. This is a sample website direction, not a real client.</p>
         <Link
           href="/"
           className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white hover:text-black"
         >
-          Back to Northline
+          Back to Mountline
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -409,7 +409,7 @@ function AttributionFooter() {
   return (
     <footer className="bg-black px-4 py-10">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-zinc-400 sm:flex-row sm:items-center sm:justify-between">
-        <p>Demo website concept by Northline Services.</p>
+        <p>Demo website concept by Mountline Studio.</p>
         <Link href="/#contact" className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-medium text-white transition-colors hover:bg-white hover:text-black">
           Get a site like this
           <ArrowRight className="h-4 w-4" />

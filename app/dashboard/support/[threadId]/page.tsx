@@ -96,7 +96,7 @@ export default async function SupportThreadPage({
             <div>
               <h2 className="font-semibold">Message history</h2>
               <p className="text-sm text-muted-foreground">
-                Client messages and Northline replies are separated by sender.
+                Client messages and Mountline replies are separated by sender.
               </p>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default async function SupportThreadPage({
                   >
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                       <p className={`text-sm font-medium ${isTeam ? "text-background" : "text-foreground"}`}>
-                        {isTeam ? "Northline" : isSystem ? "System" : message.sender_name || "Client"}
+                        {isTeam ? "Mountline" : isSystem ? "System" : message.sender_name || "Client"}
                       </p>
                       <p className={`text-xs ${isTeam ? "text-background/70" : "text-muted-foreground"}`}>
                         {formatDateTime(message.created_at)}

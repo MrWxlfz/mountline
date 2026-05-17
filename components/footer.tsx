@@ -112,7 +112,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-500">
-            {new Date().getFullYear()} Northline Services. All rights reserved.
+            {new Date().getFullYear()} Mountline Studio. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link href="#" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">

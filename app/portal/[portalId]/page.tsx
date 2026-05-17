@@ -93,7 +93,7 @@ function formatDateTime(date: string | null) {
 }
 
 function getMessageLabel(item: SupportMessage, viewerEmail: string | null) {
-  if (item.sender_type === "team") return "Northline"
+  if (item.sender_type === "team") return "Mountline"
   if (item.sender_type === "system") return "System"
   if (viewerEmail && item.sender_email?.toLowerCase() === viewerEmail.toLowerCase()) {
     return "You"
@@ -289,7 +289,7 @@ export default function PortalPage() {
               <h2 className="font-semibold">Next step</h2>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {project.next_step || project.notes || "No next step has been posted yet. Northline will update this when there is a clear action or milestone."}
+              {project.next_step || project.notes || "No next step has been posted yet. Mountline will update this when there is a clear action or milestone."}
             </p>
           </section>
 
@@ -337,7 +337,7 @@ export default function PortalPage() {
             <div>
               <h2 className="font-semibold">Support messages</h2>
               <p className="text-sm text-muted-foreground">
-                Send a simple note to Northline about this project.
+                Send a simple note to Mountline about this project.
               </p>
             </div>
           </div>
@@ -426,7 +426,7 @@ export default function PortalPage() {
 
         <footer className="pt-2 text-center">
           <p className="text-xs text-muted-foreground">
-            Powered by Northline Services
+            Powered by Mountline Studio
           </p>
         </footer>
       </main>

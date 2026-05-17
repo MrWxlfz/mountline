@@ -113,7 +113,7 @@ export default async function SupportInboxPage() {
                       </p>
                       <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
                         {latest
-                          ? `${latest.sender_type === "team" ? "Northline" : latest.sender_name || "Client"}: ${latest.message}`
+                          ? `${latest.sender_type === "team" ? "Mountline" : latest.sender_name || "Client"}: ${latest.message}`
                           : "No support messages yet."}
                       </p>
                     </div>

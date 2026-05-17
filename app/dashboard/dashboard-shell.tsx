@@ -160,7 +160,7 @@ export function DashboardShell({
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium truncate text-foreground">Admin</p>
                 <p className="text-[11px] text-muted-foreground truncate">
-                  northline.dev
+                  mountline.dev
                 </p>
               </div>
             </div>

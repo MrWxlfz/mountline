@@ -199,7 +199,7 @@ export function Hero3DStage() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mb-8"
               >
-                Northline builds clean websites, landing pages, and practical digital systems for businesses that need a stronger first impression.
+                Mountline builds clean websites, landing pages, and practical digital systems for businesses that need a stronger first impression.
               </motion.p>
               
               {/* CTAs */}

@@ -25,7 +25,7 @@ export function TrustSection() {
               viewport={{ once: true }}
               className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
             >
-              Why Northline
+              Why Mountline
             </motion.span>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -44,7 +44,7 @@ export function TrustSection() {
               transition={{ delay: 0.2 }}
               className="text-lg text-muted-foreground leading-relaxed max-w-lg"
             >
-              Northline is built for businesses that want sharp work, clear scope, and practical systems without the slow, confusing agency process.
+              Mountline is built for businesses that want sharp work, clear scope, and practical systems without the slow, confusing agency process.
             </motion.p>
           </div>
           

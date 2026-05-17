@@ -13,7 +13,7 @@ export default function AccessRestrictedPage() {
             Access restricted
           </p>
           <h1 className="text-2xl font-bold tracking-tight">
-            This area is for Northline team members only.
+            This area is for Mountline team members only.
           </h1>
           <p className="text-sm text-muted-foreground">
             If you are a client, use the client portal to view assigned project
@@ -27,7 +27,7 @@ export default function AccessRestrictedPage() {
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Northline
+            Back to Mountline
           </Link>
           <Link
             href="/client-login"

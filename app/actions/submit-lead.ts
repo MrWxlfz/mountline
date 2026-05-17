@@ -36,13 +36,13 @@ export async function submitLead(data: LeadFormData): Promise<SubmitLeadResult> 
     })
 
     if (error) {
-      console.error("[northline] Supabase error:", error)
+      console.error("[mountline] Supabase error:", error)
       return { success: false, error: error.message }
     }
 
     return { success: true }
   } catch (err) {
-    console.error("[northline] Submit lead error:", err)
+    console.error("[mountline] Submit lead error:", err)
     return { success: false, error: "Failed to submit. Please try again." }
   }
 }

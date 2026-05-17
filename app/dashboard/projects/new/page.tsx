@@ -192,7 +192,7 @@ export default function NewProjectPage() {
             value={form.preview_url}
             onChange={(e) => setForm({ ...form, preview_url: e.target.value })}
             className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
-            placeholder="https://preview.acme.northline.dev"
+            placeholder="https://preview.acme.mountline.dev"
           />
         </div>
 

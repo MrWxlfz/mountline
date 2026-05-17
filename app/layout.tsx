@@ -9,19 +9,19 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://nthline.tech'),
-  title: 'Northline Services',
+  metadataBase: new URL('https://mountline.dev'),
+  title: 'Mountline Studio',
   description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
   openGraph: {
-    title: 'Northline Services',
+    title: 'Mountline Studio',
     description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
-    url: 'https://nthline.tech',
-    siteName: 'Northline Services',
+    url: 'https://mountline.dev',
+    siteName: 'Mountline Studio',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Northline Services',
+    title: 'Mountline Studio',
     description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
   },
   icons: {

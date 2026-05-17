@@ -1,4 +1,4 @@
--- Northline support chat foundations.
+-- Mountline support chat foundations.
 -- Safe for existing projects: adds sender display/read columns and updates the
 -- sender_type constraint without deleting messages.
 

@@ -1,6 +1,6 @@
-# Northline Supabase Setup
+# Mountline Supabase Setup
 
-Use this guide to set up a Supabase project for testing the Northline dashboard and client portal flow.
+Use this guide to set up a Supabase project for testing the Mountline dashboard and client portal flow.
 
 ## 1. Run Schema SQL
 
@@ -22,7 +22,7 @@ This creates the tables the current app expects:
 - `potential_clients`
 - `lead_insights`
 
-The app uses Clerk for auth and Supabase for data. Do not use Supabase Auth for Northline users.
+The app uses Clerk for auth and Supabase for data. Do not use Supabase Auth for Mountline users.
 
 ## 2. Run Demo Seed SQL
 
@@ -47,11 +47,11 @@ Change the emails and URLs before using real production data.
 
 ## 3. Add a Team Member
 
-To make a Clerk user a Northline team member, add their email to `team_members`:
+To make a Clerk user a Mountline team member, add their email to `team_members`:
 
 ```sql
 insert into public.team_members (email, status, role)
-values ('team@example.com', 'active', 'team')
+values ('team@mountline.dev', 'active', 'team')
 on conflict (email) do update
 set status = 'active';
 ```
@@ -61,7 +61,7 @@ Optional but recommended after the user signs into Clerk: add their Clerk user I
 ```sql
 update public.team_members
 set clerk_user_id = 'user_xxxxxxxxx'
-where email = 'team@example.com';
+where email = 'team@mountline.dev';
 ```
 
 The dashboard team guard accepts either:
@@ -147,4 +147,4 @@ Keep the current anon-client insert path and add a restrictive `insert` policy f
 
 **Option B: server-only lead submission**
 
-Move public lead submission behind a server route/action that uses the Supabase service-role key on the server only, then add spam/rate limiting before writing. This is the recommended production path once Northline adds abuse protection.
+Move public lead submission behind a server route/action that uses the Supabase service-role key on the server only, then add spam/rate limiting before writing. This is the recommended production path once Mountline adds abuse protection.

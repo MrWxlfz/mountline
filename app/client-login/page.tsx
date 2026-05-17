@@ -30,7 +30,7 @@ function getSafePortalRedirect(rawRedirect: string | null) {
 
   try {
     const url = rawRedirect.startsWith("/")
-      ? new URL(rawRedirect, "https://northline.local")
+      ? new URL(rawRedirect, "https://mountline.local")
       : new URL(rawRedirect)
 
     if (url.pathname === "/portal" || url.pathname.startsWith("/portal/")) {
@@ -84,7 +84,7 @@ function ClientLoginShell({ redirectUrl = "/portal" }: { redirectUrl?: string })
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back to northline.dev
+            Back to mountline.dev
           </Link>
         </div>
       </div>

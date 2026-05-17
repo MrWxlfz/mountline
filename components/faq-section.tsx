@@ -16,10 +16,10 @@ const faqs = [
   },
   {
     question: "Do we need a domain already?",
-    answer: "No. Northline can help point an existing domain or guide the setup for a new one. We work with common registrars like GoDaddy, Namecheap, and Google Domains."
+    answer: "No. Mountline can help point an existing domain or guide the setup for a new one. We work with common registrars like GoDaddy, Namecheap, and Google Domains."
   },
   {
-    question: "Can Northline redesign our current site?",
+    question: "Can Mountline redesign our current site?",
     answer: "Yes. We can clean up outdated, confusing, or slow websites and rebuild them into something more useful. We audit your current site first to understand what works and what needs to change."
   },
   {
@@ -40,7 +40,7 @@ const faqs = [
   },
   {
     question: "Do you work outside our local area?",
-    answer: "Yes. Northline works with businesses across different regions. Most communication happens via video calls, email, and shared documents - location is not a barrier."
+    answer: "Yes. Mountline works with businesses across different regions. Most communication happens via video calls, email, and shared documents - location is not a barrier."
   }
 ]
 

@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       .eq("id", lead_id)
 
     if (leadError) {
-      console.error("[northline] Lead conversion status update failed:", leadError.message)
+      console.error("[mountline] Lead conversion status update failed:", leadError.message)
     }
   }
 

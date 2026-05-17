@@ -148,7 +148,7 @@ export function ProblemSection() {
         >
           <div className="w-8 h-px bg-border" />
           <p className="text-sm">
-            Recognize any of these? northline can help fix them.
+            Recognize any of these? Mountline can help fix them.
           </p>
         </motion.div>
       </div>

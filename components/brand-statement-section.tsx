@@ -40,7 +40,7 @@ export function BrandStatementSection() {
           >
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
               If your business looks professional in person, your website should carry 
-              that same weight online. northline helps close that gap with clean design, 
+              that same weight online. Mountline helps close that gap with clean design,
               clear structure, and practical systems.
             </p>
           </motion.div>

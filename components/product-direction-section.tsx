@@ -26,7 +26,7 @@ const processSteps = [
   {
     numeral: "V",
     title: "Support",
-    description: "Northline can keep the site updated with monthly care.",
+    description: "Mountline can keep the site updated with monthly care.",
   }
 ]
 

@@ -1,15 +1,15 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import type { ReactNode } from "react"
-import { createAdminClient } from "@/lib/supabase/admin"
 import { isNorthlineTeamMember } from "@/lib/auth/team"
+import { getAccessiblePortalDestinations } from "@/lib/auth/mountline-id"
 import Link from "next/link"
 import { NorthlineLogo } from "@/components/northline-logo"
 import { FolderKanban } from "lucide-react"
 
 export default async function PortalIndexPage() {
   const { userId } = await auth()
-  if (!userId) redirect("/client-login")
+  if (!userId) redirect("/id")
 
   if (await isNorthlineTeamMember()) {
     redirect("/dashboard")
@@ -18,31 +18,14 @@ export default async function PortalIndexPage() {
   const user = await currentUser()
   const email = user?.emailAddresses?.[0]?.emailAddress?.trim().toLowerCase()
 
-  const supabase = createAdminClient()
-
-  const emailAccess = email
-    ? await supabase
-        .from("client_portal_access")
-        .select("*, projects(portal_id, project_name, status)")
-        .eq("client_email", email)
-        .in("access_status", ["active", "invited"])
-        .order("created_at", { ascending: false })
-    : { data: [] }
-
-  const { data: clerkAccess } = await supabase
-    .from("client_portal_access")
-    .select("*, projects(portal_id, project_name, status)")
-    .eq("clerk_user_id", userId)
-    .in("access_status", ["active", "invited"])
-    .order("created_at", { ascending: false })
-
-  const access = [...(emailAccess.data || []), ...(clerkAccess || [])].filter(
-    (item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index,
-  )
+  const access = await getAccessiblePortalDestinations({
+    userId,
+    emails: user?.emailAddresses?.map((item) => item.emailAddress) || [],
+  })
 
   // If only one project, redirect directly
-  if (access && access.length === 1 && access[0].projects?.portal_id) {
-    redirect(`/portal/${access[0].projects.portal_id}`)
+  if (access && access.length === 1) {
+    redirect(`/portal/${access[0].portalId}`)
   }
 
   return (
@@ -51,16 +34,16 @@ export default async function PortalIndexPage() {
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">You have access to multiple projects. Select one:</p>
           <div className="grid gap-3">
-            {access.map((item: any) => (
+            {access.map((item) => (
               <Link
-                key={item.id}
-                href={`/portal/${item.projects?.portal_id}`}
+                key={item.accessId}
+                href={`/portal/${item.portalId}`}
                 className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-foreground/20 transition-colors"
               >
                 <FolderKanban className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">{item.projects?.project_name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{item.projects?.status}</p>
+                  <p className="text-sm font-medium">{item.projectName}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{item.status}</p>
                 </div>
               </Link>
             ))}

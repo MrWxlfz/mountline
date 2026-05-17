@@ -129,10 +129,10 @@ export function FooterSection() {
               Terms
             </button>
             <Link
-              href="/client-login"
+              href="/id"
               className="text-sm text-background/55 hover:text-background/75 transition-colors"
             >
-              Client login
+              Mountline ID
             </Link>
           </div>
         </motion.div>

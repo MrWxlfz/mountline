@@ -119,17 +119,25 @@ Expected behavior:
 - A team member can view the portal.
 - `demo.client@example.com` can view the portal when signed into Clerk.
 - Any other signed-in non-team user should see access denied.
-- Signed-out users should be sent to `/client-login`.
+- Signed-out users should be sent to `/id`.
 - The portal should show project overview, status, timeline, next step, preview/live links, payment section, and support messages.
 - Submitting a support message should insert a row into `support_messages`.
 
-## 7. Test `/client-login`
+## 7. Test Mountline ID
 
-1. Visit `/client-login`.
-2. Sign in as a client with one assigned portal.
-3. The app should send the user to `/portal`, which redirects to the single assigned project portal.
-4. If the client has multiple assigned projects, `/portal` should show a chooser.
-5. If the client has no assigned projects, `/portal` should show a clear no-active-project state.
+1. Visit `/id`.
+2. Sign in as a Mountline team member and confirm the app sends the user to `/dashboard`.
+3. Sign in as a client with one assigned portal and confirm the app sends the user to `/portal/[portalId]`.
+4. If the client has multiple assigned projects, the app should send the user to `/portal`.
+5. If the account has no assigned access, the app should send the user to `/no-account`.
+6. Visit `/client-login` and confirm it redirects to `/id`.
+
+Recommended Clerk env:
+
+```text
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/id
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/auth/redirect
+```
 
 ## Notes
 

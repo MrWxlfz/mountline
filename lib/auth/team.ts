@@ -126,7 +126,7 @@ export async function requireNorthlineTeamMember() {
   const access = await getNorthlineTeamAccess()
 
   if (access.status === "unauthenticated") {
-    redirect("/client-login")
+    redirect("/id")
   }
 
   if (access.status === "forbidden") {

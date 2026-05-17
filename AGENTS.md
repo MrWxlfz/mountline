@@ -13,7 +13,8 @@ Mountline Studio is a real small-team website, client portal, and digital system
 ## Architecture
 - Public website: `/`
 - Employee/admin dashboard: `/admin` or `/dashboard`
-- Client login backup: `/client-login`
+- Mountline ID login: `/id`
+- Legacy client login redirect: `/client-login`
 - Client project portal: `/portal/[portalId]`
 - Clerk is the auth provider.
 - Supabase stores data.
@@ -24,7 +25,7 @@ Mountline Studio is a real small-team website, client portal, and digital system
 - Public website is public.
 - Employee dashboard is for Mountline team members only.
 - Client portal is for assigned clients only.
-- Client login is footer-only backup.
+- Mountline ID is the unified account login.
 - Do not show public signup.
 - Do not call the employee dashboard "client login".
 - Do not show employee dashboard to clients.

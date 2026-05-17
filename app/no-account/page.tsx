@@ -1,8 +1,9 @@
 import Link from "next/link"
-import { ArrowLeft, LogIn } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { NorthlineLogo } from "@/components/northline-logo"
+import { TryAnotherAccountButton } from "./try-another-account-button"
 
-export default function AccessRestrictedPage() {
+export default function NoAccountPage() {
   return (
     <main className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md text-center space-y-8">
@@ -10,14 +11,11 @@ export default function AccessRestrictedPage() {
 
         <div className="space-y-3">
           <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-            Access restricted
+            Mountline ID
           </p>
-          <h1 className="text-2xl font-bold tracking-tight">
-            This area is for Mountline team members only.
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">No Mountline access found</h1>
           <p className="text-sm text-muted-foreground">
-            If you are a client, sign in with Mountline ID to view assigned project
-            updates.
+            This account is not linked to a Mountline workspace or client portal yet.
           </p>
         </div>
 
@@ -29,13 +27,7 @@ export default function AccessRestrictedPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Mountline
           </Link>
-          <Link
-            href="/id"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:bg-foreground/90 transition-colors"
-          >
-            <LogIn className="h-4 w-4" />
-            Mountline ID
-          </Link>
+          <TryAnotherAccountButton />
         </div>
       </div>
     </main>

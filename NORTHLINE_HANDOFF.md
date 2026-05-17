@@ -10,12 +10,15 @@ Build Mountline into a production-ready small-team website, employee dashboard, 
 - Public site: `/`.
 - Employee dashboard: `/dashboard`, protected by Clerk plus active Mountline team membership.
 - Client portal: `/portal` chooser and `/portal/[portalId]` project portal.
-- Client login backup: `/client-login`.
+- Mountline ID login: `/id`, with `/client-login` kept as a legacy redirect.
 - Styling: dark, black/Vercel-like Mountline visual system with Tailwind.
 
 ## Routes
 - `/`: public homepage.
-- `/client-login`: backup Clerk sign-in for clients; public signup should not be promoted.
+- `/id`: unified Mountline ID sign-in for team and client accounts; public signup should not be promoted.
+- `/auth/redirect`: signed-in account router for dashboard, portal, or no-account state.
+- `/no-account`: clean state for signed-in users without assigned team or client access.
+- `/client-login`: legacy redirect to `/id`.
 - `/dashboard`: team-only command center.
 - `/dashboard/leads`: team-only lead list.
 - `/dashboard/clients`: team-only client list.

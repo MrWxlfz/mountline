@@ -12,8 +12,8 @@ export default clerkMiddleware(async (auth, req) => {
   if (isPortalRoute(req)) {
     const { userId } = await auth()
     if (!userId) {
-      const loginUrl = new URL('/client-login', req.url)
-      loginUrl.searchParams.set('redirect_url', req.url)
+      const loginUrl = new URL('/id', req.url)
+      loginUrl.searchParams.set('redirect_url', `${req.nextUrl.pathname}${req.nextUrl.search}`)
       return NextResponse.redirect(loginUrl)
     }
   }

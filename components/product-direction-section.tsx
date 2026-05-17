@@ -32,25 +32,7 @@ const processSteps = [
 
 export function ProductDirectionSection() {
   return (
-    <section id="process" className="relative py-24 lg:py-32 bg-foreground text-background overflow-hidden">
-      {/* Mountline line motif - subtle mountain pattern */}
-      <div className="absolute inset-0 overflow-hidden">
-        <svg className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] opacity-[0.02]" viewBox="0 0 800 400" fill="none">
-          <path 
-            d="M400 0 L400 400 M200 100 L400 0 L600 100" 
-            stroke="currentColor" 
-            strokeWidth="1" 
-            className="text-background"
-          />
-          <path 
-            d="M400 50 L400 400 M250 125 L400 50 L550 125" 
-            stroke="currentColor" 
-            strokeWidth="0.5" 
-            className="text-background"
-          />
-        </svg>
-      </div>
-      
+    <section id="process" className="relative py-28 lg:py-36 bg-foreground text-background overflow-hidden">
       {/* Subtle grid texture */}
       <div className="absolute inset-0 opacity-[0.02]">
         <svg className="w-full h-full" preserveAspectRatio="none">
@@ -70,9 +52,9 @@ export function ProductDirectionSection() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-3 text-sm font-medium text-background/45 tracking-wide uppercase mb-5"
+            className="inline-flex items-center gap-3 text-sm font-medium text-background/40 tracking-wide uppercase mb-6"
           >
-            <span className="w-8 h-px bg-background/15" />
+            <span className="w-10 h-px bg-background/15" />
             Process
           </motion.span>
           <motion.h2
@@ -80,17 +62,17 @@ export function ProductDirectionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1] max-w-2xl"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05] max-w-3xl"
           >
             A clear path from
-            <span className="text-background/40"> review to launch.</span>
+            <span className="text-background/35"> review to launch.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.15 }}
-            className="text-base lg:text-lg text-background/55 mt-5 max-w-xl leading-relaxed"
+            className="text-lg text-background/50 mt-6 max-w-xl leading-relaxed"
           >
             Clear scope, careful design, clean build, and steady support. No mystery.
           </motion.p>
@@ -98,22 +80,16 @@ export function ProductDirectionSection() {
         
         {/* Steps */}
         <div className="relative">
-          {/* Vertical Mountline line - desktop */}
-          <div className="hidden lg:block absolute left-[42px] top-4 bottom-4">
-            {/* Base line */}
+          {/* Vertical line - desktop */}
+          <div className="hidden lg:block absolute left-[52px] top-8 bottom-8">
             <div className="absolute left-0 top-0 bottom-0 w-px bg-background/10" />
-            {/* Animated progress line */}
             <motion.div 
               className="absolute left-0 top-0 w-px bg-background/25"
               initial={{ height: 0 }}
               whileInView={{ height: "100%" }}
               viewport={{ once: true }}
-              transition={{ duration: 2.5, ease: "easeOut" }}
+              transition={{ duration: 2, ease: "easeOut" }}
             />
-            {/* Mountain peak accent at top */}
-            <svg className="absolute -top-2 -left-3 w-7 h-5 text-background/20" viewBox="0 0 28 20">
-              <path d="M14 0 L7 12 L14 8 L21 12 Z" fill="currentColor" />
-            </svg>
           </div>
           
           {/* Steps list */}
@@ -127,11 +103,11 @@ export function ProductDirectionSection() {
                 transition={{ delay: index * 0.1 }}
                 className="relative group"
               >
-                <div className="grid grid-cols-12 gap-4 lg:gap-8 py-8 lg:py-9 border-b border-background/[0.06] last:border-b-0">
+                <div className="grid grid-cols-12 gap-4 lg:gap-8 py-9 lg:py-10 border-b border-background/[0.06] last:border-b-0">
                   {/* Step dot - desktop */}
                   <div className="hidden lg:flex col-span-1 items-center justify-center">
                     <motion.div 
-                      className="w-3 h-3 rounded-full border-2 border-background/20 bg-foreground group-hover:border-background/40 group-hover:bg-background/5 transition-all duration-300"
+                      className="w-3 h-3 rounded-full border-2 border-background/25 bg-foreground group-hover:border-background/50 transition-all duration-300"
                       initial={{ scale: 0 }}
                       whileInView={{ scale: 1 }}
                       viewport={{ once: true }}
@@ -148,21 +124,21 @@ export function ProductDirectionSection() {
                   
                   {/* Title */}
                   <div className="col-span-10 lg:col-span-3">
-                    <h3 className="text-lg lg:text-xl font-semibold text-background">
+                    <h3 className="text-xl font-semibold text-background">
                       {step.title}
                     </h3>
                   </div>
                   
                   {/* Description */}
                   <div className="col-span-12 lg:col-span-7 lg:col-start-5">
-                    <p className="text-background/60 leading-relaxed mt-2 lg:mt-0 text-[15px]">
+                    <p className="text-background/55 leading-relaxed mt-2 lg:mt-0 text-base">
                       {step.description}
                     </p>
                   </div>
                   
                   {/* Numeral - desktop */}
                   <div className="hidden lg:flex col-span-1 items-center justify-end">
-                    <span className="text-sm font-mono text-background/25 group-hover:text-background/40 transition-colors">
+                    <span className="text-sm font-mono text-background/20 group-hover:text-background/35 transition-colors">
                       {step.numeral}
                     </span>
                   </div>

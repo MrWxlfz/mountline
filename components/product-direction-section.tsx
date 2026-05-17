@@ -148,7 +148,7 @@ export function ProductDirectionSection() {
                   
                   {/* Title */}
                   <div className="col-span-10 lg:col-span-3">
-                    <h3 className="text-lg lg:text-xl font-semibold text-background group-hover:text-accent transition-colors">
+                    <h3 className="text-lg lg:text-xl font-semibold text-background">
                       {step.title}
                     </h3>
                   </div>

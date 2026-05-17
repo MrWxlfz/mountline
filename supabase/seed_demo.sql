@@ -125,6 +125,7 @@ insert into public.support_messages (
   project_id,
   sender_type,
   sender_email,
+  sender_name,
   message
 )
 values
@@ -134,6 +135,7 @@ values
     '22222222-2222-4222-8222-222222222222',
     'team',
     'luke@mrwxlfz.xyz',
+    'Northline',
     'Welcome to your Northline portal. Project updates, payment links, and support notes will appear here.'
   ),
   (
@@ -142,6 +144,7 @@ values
     '22222222-2222-4222-8222-222222222222',
     'client',
     'demo.client@example.com',
+    'Jordan Client',
     'Thanks. We will send over the remaining service area details today.'
   )
 on conflict (id) do update
@@ -149,6 +152,7 @@ set thread_id = excluded.thread_id,
     project_id = excluded.project_id,
     sender_type = excluded.sender_type,
     sender_email = excluded.sender_email,
+    sender_name = excluded.sender_name,
     message = excluded.message;
 
 insert into public.leads (

@@ -11,6 +11,7 @@ import {
   FolderKanban,
   Inbox,
   Settings,
+  MessageSquare,
   Menu,
   X,
   ChevronRight,
@@ -34,6 +35,7 @@ const navGroups = [
       { href: "/dashboard/clients", label: "Clients", icon: Users },
       { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
       { href: "/dashboard/portals", label: "Portals", icon: Globe },
+      { href: "/dashboard/support", label: "Support", icon: MessageSquare },
     ],
   },
 ]
@@ -42,7 +44,13 @@ const bottomNav = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  supportOpenCount = 0,
+}: {
+  children: React.ReactNode
+  supportOpenCount?: number
+}) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -106,7 +114,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     >
                       <item.icon className="w-4 h-4 shrink-0" />
                       {item.label}
-                      {isActive(item.href) && (
+                      {item.href === "/dashboard/support" && supportOpenCount > 0 && (
+                        <span
+                          className={cn(
+                            "ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                            isActive(item.href)
+                              ? "bg-background/20 text-background"
+                              : "bg-blue-500/15 text-blue-400",
+                          )}
+                        >
+                          {supportOpenCount}
+                        </span>
+                      )}
+                      {isActive(item.href) && !(item.href === "/dashboard/support" && supportOpenCount > 0) && (
                         <ChevronRight className="w-3 h-3 ml-auto" />
                       )}
                     </Link>

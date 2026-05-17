@@ -92,11 +92,30 @@ create table if not exists public.support_messages (
   project_id uuid not null references public.projects(id) on delete cascade,
   sender_type text not null,
   sender_email text not null,
+  sender_name text,
+  read_at timestamp with time zone,
   message text not null
 );
 
+alter table public.support_messages add column if not exists sender_name text;
+alter table public.support_messages add column if not exists read_at timestamp with time zone;
+
+alter table public.support_messages
+  drop constraint if exists support_messages_sender_type_check;
+
+alter table public.support_messages
+  add constraint support_messages_sender_type_check
+  check (sender_type in ('client', 'team', 'system'));
+
 create index if not exists support_messages_project_created_idx
   on public.support_messages (project_id, created_at);
+
+create index if not exists support_messages_thread_created_idx
+  on public.support_messages (thread_id, created_at);
+
+create index if not exists support_messages_unread_client_idx
+  on public.support_messages (thread_id, read_at)
+  where sender_type = 'client' and read_at is null;
 
 -- TODO: If you later expose any direct Supabase client writes, enable and tune
 -- RLS policies for these tables. The app currently writes through server-only

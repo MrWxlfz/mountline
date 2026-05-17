@@ -57,7 +57,9 @@ export type SupportMessage = {
   created_at: string
   thread_id: string
   project_id: string
-  sender_type: "client" | "team"
+  sender_type: "client" | "team" | "system"
   sender_email: string
+  sender_name: string | null
+  read_at: string | null
   message: string
 }

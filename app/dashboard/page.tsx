@@ -2,7 +2,7 @@ import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { 
   Inbox, FolderKanban, Users, Globe,
-  ArrowUpRight
+  ArrowUpRight, MessageSquare
 } from "lucide-react"
 import Link from "next/link"
 
@@ -14,6 +14,7 @@ async function getStats() {
     { count: projectsCount },
     { count: clientsCount },
     { count: portalsCount },
+    { count: supportOpenCount },
     { data: recentLeads },
     { data: recentProjects }
   ] = await Promise.all([
@@ -21,6 +22,7 @@ async function getStats() {
     supabase.from("projects").select("*", { count: "exact", head: true }),
     supabase.from("clients").select("*", { count: "exact", head: true }),
     supabase.from("projects").select("*", { count: "exact", head: true }).not("portal_id", "is", null),
+    supabase.from("support_threads").select("*", { count: "exact", head: true }).eq("status", "open"),
     supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(5),
     supabase.from("projects").select("*, clients(business_name)").order("created_at", { ascending: false }).limit(5),
   ])
@@ -30,6 +32,7 @@ async function getStats() {
     projectsCount: projectsCount || 0,
     clientsCount: clientsCount || 0,
     portalsCount: portalsCount || 0,
+    supportOpenCount: supportOpenCount || 0,
     recentLeads: recentLeads || [],
     recentProjects: recentProjects || []
   }
@@ -45,6 +48,7 @@ export default async function DashboardPage() {
     { label: "Active Projects", value: stats.projectsCount, icon: FolderKanban, href: "/dashboard/projects" },
     { label: "Clients", value: stats.clientsCount, icon: Users, href: "/dashboard/clients" },
     { label: "Portals", value: stats.portalsCount, icon: Globe, href: "/dashboard/portals" },
+    { label: "Open Support", value: stats.supportOpenCount, icon: MessageSquare, href: "/dashboard/support" },
   ]
 
   return (
@@ -58,7 +62,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {statCards.map((stat) => (
           <Link
             key={stat.label}
@@ -158,7 +162,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Link
           href="/dashboard/clients"
           className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
@@ -186,6 +190,13 @@ export default async function DashboardPage() {
         >
           <Inbox className="w-5 h-5 text-muted-foreground" />
           <span className="text-sm font-medium">Review Leads</span>
+        </Link>
+        <Link
+          href="/dashboard/support"
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-foreground/20 transition-colors"
+        >
+          <MessageSquare className="w-5 h-5 text-muted-foreground" />
+          <span className="text-sm font-medium">Open Support</span>
         </Link>
       </div>
     </div>

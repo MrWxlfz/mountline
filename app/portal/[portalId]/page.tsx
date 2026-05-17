@@ -82,6 +82,25 @@ function formatDate(date: string | null) {
   })
 }
 
+function formatDateTime(date: string | null) {
+  if (!date) return null
+  return new Date(date).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
+function getMessageLabel(item: SupportMessage, viewerEmail: string | null) {
+  if (item.sender_type === "team") return "Northline"
+  if (item.sender_type === "system") return "System"
+  if (viewerEmail && item.sender_email?.toLowerCase() === viewerEmail.toLowerCase()) {
+    return "You"
+  }
+  return item.sender_name || "Client"
+}
+
 export default function PortalPage() {
   const { portalId } = useParams<{ portalId: string }>()
   const { user, isLoaded } = useUser()
@@ -325,21 +344,42 @@ export default function PortalPage() {
 
           <div className="space-y-3 mb-5">
             {payload.supportMessages.length > 0 ? (
-              payload.supportMessages.map((item) => (
-                <div key={item.id} className="rounded-lg border border-border bg-background p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <p className="text-sm font-medium">
-                      {item.sender_type === "team" ? "Northline" : "Client"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(item.created_at)}
-                    </p>
+              payload.supportMessages.map((item) => {
+                const ownMessage =
+                  item.sender_type === "client" &&
+                  payload.viewer.email &&
+                  item.sender_email?.toLowerCase() === payload.viewer.email.toLowerCase()
+                const teamMessage = item.sender_type === "team"
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`flex ${ownMessage ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[88%] rounded-2xl border p-4 ${
+                        teamMessage
+                          ? "border-blue-500/25 bg-blue-500/10"
+                          : ownMessage
+                            ? "border-foreground/20 bg-foreground text-background"
+                            : "border-border bg-background"
+                      }`}
+                    >
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+                        <p className={`text-sm font-medium ${ownMessage ? "text-background" : "text-foreground"}`}>
+                          {getMessageLabel(item, payload.viewer.email)}
+                        </p>
+                        <p className={`text-xs ${ownMessage ? "text-background/70" : "text-muted-foreground"}`}>
+                          {formatDateTime(item.created_at)}
+                        </p>
+                      </div>
+                      <p className={`whitespace-pre-wrap text-sm leading-relaxed ${ownMessage ? "text-background/85" : "text-muted-foreground"}`}>
+                        {item.message}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {item.message}
-                  </p>
-                </div>
-              ))
+                )
+              })
             ) : (
               <div className="rounded-lg border border-dashed border-border p-6 text-center">
                 <p className="text-sm text-muted-foreground">

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { getOrCreateSupportThread, getPortalAccess } from "@/lib/portal/access"
+import { getPortalAccess } from "@/lib/portal/access"
 
 export async function GET(
   request: Request,
@@ -25,11 +25,16 @@ export async function GET(
   }
 
   const supabase = createAdminClient()
-  const thread = await getOrCreateSupportThread(access.project.id)
+  const { data: thread } = await supabase
+    .from("support_threads")
+    .select("id, status")
+    .eq("project_id", access.project.id)
+    .eq("status", "open")
+    .maybeSingle()
 
   const { data: messages, error: messagesError } = await supabase
     .from("support_messages")
-    .select("id, created_at, thread_id, project_id, sender_type, sender_email, message")
+    .select("id, created_at, thread_id, project_id, sender_type, sender_email, sender_name, read_at, message")
     .eq("project_id", access.project.id)
     .order("created_at", { ascending: true })
 

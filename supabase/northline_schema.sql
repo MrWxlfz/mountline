@@ -123,13 +123,32 @@ create table if not exists public.support_messages (
   created_at timestamp with time zone not null default now(),
   thread_id uuid not null references public.support_threads(id) on delete cascade,
   project_id uuid not null references public.projects(id) on delete cascade,
-  sender_type text not null check (sender_type in ('client', 'team')),
+  sender_type text not null check (sender_type in ('client', 'team', 'system')),
   sender_email text not null,
+  sender_name text,
+  read_at timestamp with time zone,
   message text not null
 );
 
+alter table public.support_messages add column if not exists sender_name text;
+alter table public.support_messages add column if not exists read_at timestamp with time zone;
+
+alter table public.support_messages
+  drop constraint if exists support_messages_sender_type_check;
+
+alter table public.support_messages
+  add constraint support_messages_sender_type_check
+  check (sender_type in ('client', 'team', 'system'));
+
 create index if not exists support_messages_project_created_idx
   on public.support_messages (project_id, created_at);
+
+create index if not exists support_messages_thread_created_idx
+  on public.support_messages (thread_id, created_at);
+
+create index if not exists support_messages_unread_client_idx
+  on public.support_messages (thread_id, read_at)
+  where sender_type = 'client' and read_at is null;
 
 create table if not exists public.potential_clients (
   id uuid primary key default gen_random_uuid(),

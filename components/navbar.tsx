@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, LayoutDashboard, ArrowRight } from "lucide-react"
+import { Menu, X, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useUser, UserButton } from "@clerk/nextjs"
 import Link from "next/link"
 import { NorthlineLogo } from "./northline-logo"
-import { ThemeToggle } from "./theme-toggle"
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -37,9 +36,10 @@ export function Navbar() {
   const navItems = [
     { label: "Services", id: "services" },
     { label: "Work", id: "work" },
+    { label: "Portal", id: "portal" },
     { label: "Process", id: "process" },
     { label: "Pricing", id: "pricing" },
-    { label: "AI Systems", id: "ai-systems" },
+    { label: "Contact", id: "contact" },
   ]
 
   return (
@@ -48,12 +48,14 @@ export function Navbar() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? "glass-card shadow-sm" : "bg-transparent"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled 
+            ? "bg-background/80 backdrop-blur-xl border-b border-border/50" 
+            : "bg-transparent"
         }`}
       >
-        <div className="w-full flex justify-center px-4 sm:px-6 py-4">
-          <div className="w-full max-w-6xl flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <NorthlineLogo size="md" animated />
             
@@ -64,9 +66,9 @@ export function Navbar() {
                   key={item.id}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.15 + index * 0.05 }}
+                  transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
                   onClick={() => scrollToSection(item.id)}
-                  className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+                  className="relative px-4 py-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors duration-200"
                 >
                   {item.label}
                 </motion.button>
@@ -74,17 +76,14 @@ export function Navbar() {
             </div>
             
             {/* Right side */}
-            <div className="flex items-center gap-3">
-              <ThemeToggle className="hidden sm:flex" />
-              
+            <div className="flex items-center gap-4">
               {isLoaded && isSignedIn && (
                 <>
                   <Link
                     href="/dashboard"
-                    className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-secondary/50"
+                    className="hidden sm:flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
                   >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
+                    Mountline ID
                   </Link>
                   <UserButton 
                     afterSignOutUrl="/"
@@ -93,18 +92,21 @@ export function Navbar() {
                 </>
               )}
 
-              {/* CTA - always visible */}
-              <button
+              {/* CTA */}
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
                 onClick={() => scrollToSection("contact")}
-                className="hidden sm:flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4"
+                className="hidden sm:flex items-center gap-2 text-sm font-medium bg-foreground text-background px-4 py-2 rounded-full hover:bg-foreground/90 transition-all duration-200"
               >
-                Book a Free Review
+                Book a Review
                 <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              </motion.button>
 
               {/* Mobile menu button */}
               <button
-                className="lg:hidden text-muted-foreground hover:text-foreground transition-colors p-2 -mr-2 hover:bg-secondary/50 rounded-lg"
+                className="lg:hidden text-foreground/60 hover:text-foreground transition-colors p-2 -mr-2"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               >
@@ -132,11 +134,11 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-lg lg:hidden"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 bg-background lg:hidden"
           >
-            <div className="flex flex-col h-full pt-20 px-6 pb-8">
-              <div className="flex flex-col gap-1 flex-1">
+            <div className="flex flex-col h-full pt-24 px-6 pb-8">
+              <div className="flex flex-col gap-2 flex-1">
                 {navItems.map((item, i) => (
                   <motion.button
                     key={item.id}
@@ -144,33 +146,29 @@ export function Navbar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: i * 0.05 }}
                     onClick={() => scrollToSection(item.id)}
-                    className="text-left text-lg font-medium text-foreground py-3 px-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                    className="text-left text-2xl font-medium text-foreground py-3 border-b border-border/30"
                   >
                     {item.label}
                   </motion.button>
                 ))}
               </div>
 
-              <div className="flex flex-col gap-3 pt-6 border-t border-border">
-                <div className="flex items-center gap-3">
-                  <ThemeToggle />
-                  {isLoaded && isSignedIn && (
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center justify-center gap-2 flex-1 text-sm font-medium text-muted-foreground hover:text-foreground py-2.5 px-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
-                    </Link>
-                  )}
-                </div>
+              <div className="flex flex-col gap-4 pt-8 border-t border-border">
+                {isLoaded && isSignedIn && (
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium text-foreground/60 hover:text-foreground"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Mountline ID
+                  </Link>
+                )}
                 <button
                   onClick={() => scrollToSection("contact")}
-                  className="w-full text-sm font-medium btn-primary text-center flex items-center justify-center gap-2"
+                  className="w-full text-base font-medium bg-foreground text-background py-4 rounded-full flex items-center justify-center gap-2"
                 >
-                  Book a Free Review
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  Book a Review
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>

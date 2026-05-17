@@ -34,34 +34,24 @@ const faqs = [
     question: "Do you offer monthly support?",
     answer: "Yes. Monthly care plans are available for updates, small changes, new photos, basic checks, and priority fixes. This is ideal for businesses that want their site maintained without having to think about it."
   },
-  {
-    question: "What do we need to provide?",
-    answer: "Usually business details, services, logo if available, photos, contact info, and any examples of sites you like. We guide you through what is needed during the onboarding call."
-  },
-  {
-    question: "Do you work outside our local area?",
-    answer: "Yes. Mountline works with businesses across different regions. Most communication happens via video calls, email, and shared documents - location is not a barrier."
-  }
 ]
 
 export function FAQSection() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
-    }
+    if (element) element.scrollIntoView({ behavior: "smooth" })
   }
 
   return (
-    <section id="faq" className="py-20 lg:py-28 bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="faq" className="py-24 lg:py-32 bg-[#fafafa]">
+      <div className="max-w-3xl mx-auto px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block text-sm font-medium text-foreground/60 tracking-wide uppercase mb-4"
+            className="inline-block text-sm font-medium text-black/30 tracking-wide uppercase mb-4"
           >
             FAQ
           </motion.span>
@@ -70,13 +60,12 @@ export function FAQSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.1]"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black tracking-tight leading-[1.1]"
           >
             Common questions
           </motion.h2>
         </div>
 
-        {/* FAQ Accordion */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -88,12 +77,12 @@ export function FAQSection() {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="border-b border-foreground/10"
+                className="border-b border-black/[0.08]"
               >
-                <AccordionTrigger className="text-left text-foreground hover:text-accent py-5 text-base font-medium transition-colors [&[data-state=open]]:text-accent">
+                <AccordionTrigger className="text-left text-black hover:text-black/70 py-5 text-base font-medium transition-colors [&[data-state=open]]:text-black">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-foreground/70 pb-5 leading-relaxed text-[15px]">
+                <AccordionContent className="text-black/55 pb-5 leading-relaxed text-[15px]">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -101,7 +90,6 @@ export function FAQSection() {
           </Accordion>
         </motion.div>
 
-        {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -109,17 +97,14 @@ export function FAQSection() {
           transition={{ delay: 0.3 }}
           className="text-center mt-10"
         >
-          <p className="text-foreground/60 text-sm mb-4">
-            Still have questions?
-          </p>
-          <motion.button
+          <p className="text-black/40 text-sm mb-4">Still have questions?</p>
+          <button
             onClick={() => scrollToSection('contact')}
-            className="group inline-flex items-center gap-2 text-foreground hover:text-accent transition-colors font-medium"
-            whileHover={{ x: 4 }}
+            className="group inline-flex items-center gap-2 text-black hover:text-black/70 transition-colors font-medium"
           >
             Get in touch
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </button>
         </motion.div>
       </div>
     </section>

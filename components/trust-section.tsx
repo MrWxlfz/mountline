@@ -1,115 +1,82 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { LayoutDashboard, MessageSquare, CreditCard, CheckCircle2, ExternalLink, ListChecks } from "lucide-react"
+import { Sparkles, Users, LayoutDashboard, Zap } from "lucide-react"
 
-const differentiators = [
+const pillars = [
+  {
+    icon: Sparkles,
+    title: "Sharper first impression",
+    description: "Premium design that builds trust before the first call.",
+  },
+  {
+    icon: Users,
+    title: "Leads routed clearly",
+    description: "Form submissions organized and tracked, not lost in inboxes.",
+  },
   {
     icon: LayoutDashboard,
     title: "Private project portal",
-    description: "Track progress in one place",
+    description: "Track progress, preview drafts, and message support in one place.",
   },
   {
-    icon: MessageSquare,
-    title: "Support thread",
-    description: "Direct line to your team",
-  },
-  {
-    icon: ExternalLink,
-    title: "Preview links",
-    description: "Review your site as we build",
-  },
-  {
-    icon: CreditCard,
-    title: "Payment tracking",
-    description: "Clear billing records",
-  },
-  {
-    icon: ListChecks,
-    title: "Launch checklist",
-    description: "Know exactly what is left",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Clear updates",
-    description: "No chasing emails",
+    icon: Zap,
+    title: "Support and payment in one place",
+    description: "No more scattered threads or confusing invoices.",
   },
 ]
 
 export function TrustSection() {
   return (
-    <section className="py-24 lg:py-32 bg-foreground/[0.02]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-28 lg:py-36 bg-black border-t border-white/[0.04]">
+      <div className="max-w-5xl mx-auto px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16 lg:mb-20">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-3 text-sm font-medium text-foreground/50 tracking-wide uppercase mb-5"
-          >
-            <span className="w-8 h-px bg-foreground/15" />
-            Why Mountline
-            <span className="w-8 h-px bg-foreground/15" />
-          </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.1] mb-5"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.05] mb-6"
           >
             Not just a site.
-            <span className="text-foreground/40 block sm:inline"> A cleaner way to work.</span>
+            <span className="text-white/25 block">A cleaner way to work.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.15 }}
-            className="text-base lg:text-lg text-foreground/55 max-w-2xl mx-auto leading-relaxed"
+            transition={{ delay: 0.1 }}
+            className="text-lg text-white/40 max-w-2xl mx-auto leading-relaxed"
           >
-            Every Mountline project includes a private portal so you can track progress, review previews, message support, and see payment details in one place.
+            Mountline combines sharp websites with private client portals, support threads, payment links, and clear launch tracking — so the project feels organized from day one.
           </motion.p>
         </div>
         
-        {/* Differentiators grid */}
+        {/* Pillars grid */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4"
+          transition={{ delay: 0.15 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5"
         >
-          {differentiators.map((item, index) => (
+          {pillars.map((pillar, index) => (
             <motion.div
-              key={item.title}
+              key={pillar.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.25 + index * 0.05 }}
-              whileHover={{ y: -3, transition: { duration: 0.2 } }}
-              className="group flex flex-col items-center text-center p-5 lg:p-6 rounded-xl border border-foreground/[0.06] bg-card hover:border-foreground/10 hover:shadow-lg hover:shadow-foreground/[0.02] transition-all duration-300"
+              transition={{ delay: 0.2 + index * 0.05 }}
+              className="group p-6 lg:p-8 rounded-2xl border border-white/[0.06] bg-white/[0.01] hover:bg-white/[0.02] hover:border-white/[0.08] transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] flex items-center justify-center mb-4 group-hover:border-foreground/15 group-hover:bg-foreground/[0.04] transition-all">
-                <item.icon className="w-5 h-5 text-foreground/60 group-hover:text-foreground/80 transition-colors" />
+              <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mb-5 group-hover:bg-white/[0.06] transition-colors">
+                <pillar.icon className="w-5 h-5 text-white/50" />
               </div>
-              <h3 className="text-sm font-semibold text-foreground mb-1">{item.title}</h3>
-              <p className="text-xs text-foreground/50">{item.description}</p>
+              <h3 className="text-lg font-semibold text-white mb-2">{pillar.title}</h3>
+              <p className="text-sm text-white/40 leading-relaxed">{pillar.description}</p>
             </motion.div>
           ))}
         </motion.div>
-        
-        {/* Bottom note */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="text-center text-sm text-foreground/40 mt-10"
-        >
-          Fewer lost emails. Clearer project updates. Faster feedback.
-        </motion.p>
       </div>
     </section>
   )

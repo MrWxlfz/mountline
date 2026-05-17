@@ -24,7 +24,7 @@ const navigation = {
 
 export function Footer() {
   return (
-    <footer className="bg-slate-900 border-t border-slate-800">
+    <footer className="bg-[#060606] border-t border-white/[0.04]">
       <div className="mx-auto max-w-6xl px-6 py-14 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           {/* Brand */}
@@ -32,12 +32,12 @@ export function Footer() {
             <Link href="/" className="inline-block mb-5">
               <NorthlineLogo />
             </Link>
-            <p className="text-slate-400 text-sm max-w-xs mb-5 leading-relaxed">
-              Websites and digital systems for businesses that need a stronger online presence. Built with care by a small team.
+            <p className="text-white/30 text-sm max-w-xs mb-5 leading-relaxed">
+              Websites and digital systems for businesses that need a stronger online presence.
             </p>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
             >
               <Mail className="w-4 h-4" />
               Get in touch
@@ -47,13 +47,13 @@ export function Footer() {
 
           {/* Services */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-medium text-white mb-4">Services</h3>
+            <h3 className="text-sm font-medium text-white/70 mb-4">Services</h3>
             <ul className="space-y-2.5">
               {navigation.services.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-sm text-white/30 hover:text-white/60 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -64,13 +64,13 @@ export function Footer() {
 
           {/* Company */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-medium text-white mb-4">Company</h3>
+            <h3 className="text-sm font-medium text-white/70 mb-4">Company</h3>
             <ul className="space-y-2.5">
               {navigation.company.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-sm text-white/30 hover:text-white/60 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -81,13 +81,13 @@ export function Footer() {
 
           {/* Resources */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-medium text-white mb-4">Resources</h3>
+            <h3 className="text-sm font-medium text-white/70 mb-4">Resources</h3>
             <ul className="space-y-2.5">
               {navigation.resources.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-sm text-white/30 hover:text-white/60 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -98,10 +98,10 @@ export function Footer() {
 
           {/* CTA */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-medium text-white mb-4">Ready to start?</h3>
+            <h3 className="text-sm font-medium text-white/70 mb-4">Ready to start?</h3>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-slate-900 rounded-lg text-sm font-medium hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-white/90 transition-colors"
             >
               Book a review
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -110,15 +110,15 @@ export function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500">
+        <div className="mt-12 pt-8 border-t border-white/[0.04] flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-white/25">
             {new Date().getFullYear()} Mountline Studio. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">
+            <Link href="#" className="text-sm text-white/25 hover:text-white/50 transition-colors">
               Privacy
             </Link>
-            <Link href="#" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">
+            <Link href="#" className="text-sm text-white/25 hover:text-white/50 transition-colors">
               Terms
             </Link>
           </div>

@@ -14,17 +14,6 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-## Core Routes
-
-- `/`: public website
-- `/id`: Mountline ID sign-in for team and client accounts
-- `/auth/redirect`: signed-in account router for dashboard or portal access
-- `/no-account`: clean state for signed-in users without assigned access
-- `/dashboard`: Mountline team dashboard
-- `/client-login`: legacy redirect to `/id`
-- `/portal/[portalId]`: invite/link-based client project portal
-- `/work/auto-detailing`: public demo concept page
-
 ## Architecture Notes
 
 - Clerk handles auth.
@@ -35,10 +24,3 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 - Recommended Clerk env:
   - `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/id`
   - `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/auth/redirect`
-
-## Contact Emails
-
-- Public: `hello@mountline.dev`
-- Support: `support@mountline.dev`
-- Projects: `projects@mountline.dev`
-- Team: `team@mountline.dev`

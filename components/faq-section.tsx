@@ -53,15 +53,15 @@ export function FAQSection() {
   }
 
   return (
-    <section id="faq" className="py-24 lg:py-32 bg-background">
+    <section id="faq" className="py-20 lg:py-28 bg-background">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
+            className="inline-block text-sm font-medium text-foreground/60 tracking-wide uppercase mb-4"
           >
             FAQ
           </motion.span>
@@ -70,7 +70,7 @@ export function FAQSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight leading-[1.1]"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.1]"
           >
             Common questions
           </motion.h2>
@@ -88,12 +88,12 @@ export function FAQSection() {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="border-b border-border"
+                className="border-b border-foreground/10"
               >
-                <AccordionTrigger className="text-left text-foreground hover:text-accent py-6 text-base font-medium transition-colors [&[data-state=open]]:text-accent">
+                <AccordionTrigger className="text-left text-foreground hover:text-accent py-5 text-base font-medium transition-colors [&[data-state=open]]:text-accent">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
+                <AccordionContent className="text-foreground/70 pb-5 leading-relaxed text-[15px]">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -107,9 +107,9 @@ export function FAQSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="text-center mt-12"
+          className="text-center mt-10"
         >
-          <p className="text-muted-foreground text-sm mb-4">
+          <p className="text-foreground/60 text-sm mb-4">
             Still have questions?
           </p>
           <motion.button

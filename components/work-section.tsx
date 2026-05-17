@@ -134,18 +134,18 @@ function RichWebsitePreview({ build, index }: { build: ConceptBuild; index: numb
   const accent = accentClasses[build.mockContent.accent] || accentClasses.amber
   
   return (
-    <div className="aspect-[4/3] relative overflow-hidden rounded-t-lg">
+    <div className="aspect-[4/3] relative overflow-hidden rounded-t-xl">
       {/* Browser chrome */}
-      <div className="absolute top-0 left-0 right-0 h-8 bg-muted/50 dark:bg-muted/30 border-b border-border flex items-center px-3 z-10">
+      <div className="absolute top-0 left-0 right-0 h-7 bg-foreground/[0.03] border-b border-foreground/10 flex items-center px-3 z-10">
         <div className="flex gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
-          <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
-          <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
+          <div className="w-2 h-2 rounded-full bg-foreground/15" />
+          <div className="w-2 h-2 rounded-full bg-foreground/15" />
+          <div className="w-2 h-2 rounded-full bg-foreground/15" />
         </div>
-        <div className="flex-1 mx-4">
-          <div className="flex items-center gap-1.5 h-4.5 rounded bg-background/80 border border-border/50 max-w-[160px] mx-auto px-2">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-[9px] text-muted-foreground truncate">
+        <div className="flex-1 mx-3">
+          <div className="flex items-center gap-1.5 h-4 rounded bg-foreground/[0.03] border border-foreground/10 max-w-[140px] mx-auto px-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            <span className="text-[8px] text-foreground/40 truncate">
               {build.mockContent.brand.toLowerCase().replace(/\s+/g, "")}.com
             </span>
           </div>
@@ -153,24 +153,24 @@ function RichWebsitePreview({ build, index }: { build: ConceptBuild; index: numb
       </div>
       
       {/* Website content preview */}
-      <div className={`absolute inset-0 top-8 ${isDark ? "bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" : "bg-gradient-to-br from-stone-50 via-white to-stone-100"}`}>
+      <div className={`absolute inset-0 top-7 ${isDark ? "bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" : "bg-gradient-to-br from-stone-50 via-white to-stone-100"}`}>
         <div className="h-full flex flex-col p-4">
           {/* Nav */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className={`w-6 h-6 rounded ${accent.bgLight} flex items-center justify-center`}>
-                <span className={`${accent.text} text-[8px] font-bold`}>
+              <div className={`w-5 h-5 rounded ${accent.bgLight} flex items-center justify-center`}>
+                <span className={`${accent.text} text-[7px] font-bold`}>
                   {build.mockContent.brand.charAt(0)}
                 </span>
               </div>
-              <span className={`text-[10px] font-bold tracking-wider ${isDark ? "text-white" : "text-slate-900"}`}>
+              <span className={`text-[9px] font-bold tracking-wider ${isDark ? "text-white/80" : "text-slate-900/80"}`}>
                 {build.mockContent.brand}
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className={`w-8 h-1.5 rounded ${isDark ? "bg-white/15" : "bg-slate-900/10"}`} />
-              <div className={`w-8 h-1.5 rounded ${isDark ? "bg-white/15" : "bg-slate-900/10"}`} />
-              <div className={`px-2.5 py-1 rounded ${accent.bg} text-white text-[8px] font-medium`}>
+            <div className="flex items-center gap-2">
+              <div className={`w-6 h-1 rounded ${isDark ? "bg-white/10" : "bg-slate-900/10"}`} />
+              <div className={`w-6 h-1 rounded ${isDark ? "bg-white/10" : "bg-slate-900/10"}`} />
+              <div className={`px-2 py-1 rounded ${accent.bg} text-white text-[7px] font-medium`}>
                 {build.mockContent.cta}
               </div>
             </div>
@@ -182,19 +182,19 @@ function RichWebsitePreview({ build, index }: { build: ConceptBuild; index: numb
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.08 }}
             >
-              <h4 className={`text-base sm:text-lg font-bold leading-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}>
+              <h4 className={`text-sm sm:text-base font-bold leading-tight mb-1 ${isDark ? "text-white" : "text-slate-900"}`}>
                 {build.mockContent.headline}
               </h4>
-              <p className={`text-[10px] mb-3 ${isDark ? "text-white/50" : "text-slate-600"}`}>
+              <p className={`text-[9px] mb-3 ${isDark ? "text-white/45" : "text-slate-600"}`}>
                 {build.mockContent.subline}
               </p>
-              <div className="flex gap-2">
-                <div className={`px-3 py-1.5 rounded ${accent.bg} text-white text-[9px] font-medium`}>
+              <div className="flex gap-1.5">
+                <div className={`px-2.5 py-1.5 rounded ${accent.bg} text-white text-[8px] font-medium`}>
                   {build.mockContent.cta}
                 </div>
-                <div className={`px-3 py-1.5 rounded border ${isDark ? "border-white/20 text-white/70" : "border-slate-300 text-slate-600"} text-[9px] font-medium`}>
+                <div className={`px-2.5 py-1.5 rounded border ${isDark ? "border-white/15 text-white/60" : "border-slate-300 text-slate-600"} text-[8px] font-medium`}>
                   Learn More
                 </div>
               </div>
@@ -202,15 +202,15 @@ function RichWebsitePreview({ build, index }: { build: ConceptBuild; index: numb
           </div>
           
           {/* Bottom feature cards */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             {[1, 2, 3].map((i) => (
               <div 
                 key={i} 
-                className={`p-2 rounded ${isDark ? "bg-white/5 border border-white/10" : "bg-slate-100/80 border border-slate-200/50"}`}
+                className={`p-2 rounded ${isDark ? "bg-white/[0.03] border border-white/[0.06]" : "bg-slate-100/80 border border-slate-200/50"}`}
               >
-                <div className={`w-5 h-5 rounded ${accent.bgLight} mb-1.5`} />
-                <div className={`w-full h-1.5 rounded ${isDark ? "bg-white/15" : "bg-slate-300/50"} mb-1`} />
-                <div className={`w-2/3 h-1.5 rounded ${isDark ? "bg-white/10" : "bg-slate-200/50"}`} />
+                <div className={`w-4 h-4 rounded ${accent.bgLight} mb-1`} />
+                <div className={`w-full h-1 rounded ${isDark ? "bg-white/10" : "bg-slate-300/50"} mb-0.5`} />
+                <div className={`w-2/3 h-1 rounded ${isDark ? "bg-white/[0.06]" : "bg-slate-200/50"}`} />
               </div>
             ))}
           </div>
@@ -218,44 +218,26 @@ function RichWebsitePreview({ build, index }: { build: ConceptBuild; index: numb
       </div>
       
       {/* Concept label */}
-      <div className="absolute top-10 left-2 px-1.5 py-0.5 bg-background/90 backdrop-blur-sm rounded text-[8px] font-medium text-muted-foreground border border-border">
+      <div className="absolute top-9 left-2 px-1.5 py-0.5 bg-background/90 backdrop-blur-sm rounded text-[7px] font-medium text-foreground/60 border border-foreground/10">
         Concept
       </div>
-      
-      {/* Mobile overlay */}
-      <motion.div
-        initial={{ opacity: 0, x: 10 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.3 + index * 0.1 }}
-        className="absolute bottom-2 right-2 w-12 rounded-lg border border-border bg-card shadow-lg overflow-hidden"
-      >
-        <div className="p-0.5 bg-muted/50 border-b border-border">
-          <div className="w-4 h-0.5 rounded bg-muted-foreground/30 mx-auto" />
-        </div>
-        <div className={`p-1.5 ${isDark ? "bg-slate-900" : "bg-white"}`}>
-          <div className={`w-full h-1.5 rounded ${isDark ? "bg-white/20" : "bg-slate-200"} mb-1`} />
-          <div className={`w-2/3 h-1.5 rounded ${isDark ? "bg-white/15" : "bg-slate-100"} mb-2`} />
-          <div className={`w-full h-4 rounded ${accent.bg}`} />
-        </div>
-      </motion.div>
     </div>
   )
 }
 
 export function WorkSection() {
   return (
-    <section id="work" className="py-24 lg:py-32 bg-background">
+    <section id="work" className="py-20 lg:py-28 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-16 lg:mb-20">
+        <div className="mb-14 lg:mb-16">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-3 text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
+            className="inline-flex items-center gap-3 text-sm font-medium text-foreground/60 tracking-wide uppercase mb-4"
           >
-            <span className="w-8 h-px bg-border" />
+            <span className="w-8 h-px bg-foreground/20" />
             Work
           </motion.span>
           <motion.h2
@@ -263,52 +245,52 @@ export function WorkSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1] max-w-3xl mb-6"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.1] max-w-3xl mb-5"
           >
             Concept builds for
-            <br />
-            <span className="text-muted-foreground/60">real businesses.</span>
+            <span className="text-foreground/40"> real businesses.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-muted-foreground max-w-xl"
+            className="text-base lg:text-lg text-foreground/60 max-w-xl leading-relaxed"
           >
             Sample directions that show the kind of online presence Mountline can create for your business.
           </motion.p>
         </div>
         
         {/* Work grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
           {conceptBuilds.map((build, index) => (
             <motion.div
               key={build.title}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.08 }}
+              whileHover={{ y: -4, transition: { duration: 0.25 } }}
               className="group"
             >
               <Link href={build.href || "#"} className="block">
-                <div className="rounded-xl border border-border bg-card overflow-hidden hover:border-foreground/20 hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1">
+                <div className="rounded-xl border border-foreground/10 bg-card overflow-hidden hover:border-foreground/20 hover:shadow-xl hover:shadow-foreground/5 transition-all duration-300">
                   {/* Preview area */}
                   <RichWebsitePreview build={build} index={index} />
                   
                   {/* Content */}
-                  <div className="p-5 border-t border-border">
+                  <div className="p-5 border-t border-foreground/10">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                      <span className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">
                         {build.category}
                       </span>
-                      <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                      <ArrowUpRight className="w-4 h-4 text-foreground/30 group-hover:text-foreground/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                     </div>
                     
-                    <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-foreground/90">
+                    <h3 className="text-base font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
                       {build.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                    <p className="text-sm text-foreground/60 leading-relaxed mb-4">
                       {build.description}
                     </p>
                     
@@ -317,7 +299,7 @@ export function WorkSection() {
                       {build.tags.map((tag) => (
                         <span 
                           key={tag} 
-                          className="text-[10px] text-muted-foreground bg-muted px-2 py-1 rounded-full"
+                          className="text-[10px] text-foreground/50 bg-foreground/[0.03] border border-foreground/10 px-2 py-1 rounded-full"
                         >
                           {tag}
                         </span>
@@ -335,9 +317,9 @@ export function WorkSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 text-center"
+          className="mt-12 text-center"
         >
-          <p className="text-muted-foreground mb-4">
+          <p className="text-foreground/50 mb-3 text-sm">
             Have a similar business? Let&apos;s build something like this for you.
           </p>
           <a 

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Globe, FileText, MessageSquare, Sparkles, Wrench, ArrowRight } from "lucide-react"
+import { Globe, FileText, MessageSquare, Sparkles, Wrench, LayoutDashboard, ArrowRight } from "lucide-react"
 
 const services = [
   {
@@ -20,20 +20,27 @@ const services = [
   },
   {
     number: "03",
+    title: "Client Portals",
+    description: "Private dashboards where clients track progress, view previews, send messages, and manage payments in one place.",
+    icon: LayoutDashboard,
+    features: ["Progress tracking", "Support chat", "Payments"],
+  },
+  {
+    number: "04",
     title: "Quote & Contact Flows",
     description: "Forms, booking links, payment links, and customer paths that make action simple and reduce friction.",
     icon: MessageSquare,
     features: ["Smart forms", "Integrations", "Automations"],
   },
   {
-    number: "04",
+    number: "05",
     title: "AI-Assisted Systems",
     description: "Practical AI tools for repetitive tasks, customer follow-up drafts, summaries, and internal workflows.",
     icon: Sparkles,
     features: ["No gimmicks", "Useful tools", "Time saved"],
   },
   {
-    number: "05",
+    number: "06",
     title: "Monthly Website Care",
     description: "Updates, photos, seasonal changes, basic checks, and priority fixes. Keep your site fresh without thinking about it.",
     icon: Wrench,
@@ -44,30 +51,30 @@ const services = [
 function AnimatedIcon({ Icon, index }: { Icon: typeof Globe; index: number }) {
   return (
     <motion.div
-      className="w-12 h-12 rounded-xl border border-border bg-card flex items-center justify-center group-hover:border-foreground/30 group-hover:bg-foreground/5 transition-all duration-300"
+      className="w-11 h-11 rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] flex items-center justify-center group-hover:border-foreground/15 group-hover:bg-foreground/[0.04] transition-all duration-300"
       initial={{ scale: 0.8, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
       viewport={{ once: true }}
-      transition={{ delay: 0.2 + index * 0.1 }}
+      transition={{ delay: 0.1 + index * 0.05 }}
     >
-      <Icon className="w-5 h-5 text-foreground/70 group-hover:text-foreground transition-colors" />
+      <Icon className="w-5 h-5 text-foreground/60 group-hover:text-foreground/80 transition-colors" />
     </motion.div>
   )
 }
 
 export function FeatureCardsSection() {
   return (
-    <section id="services" className="py-20 lg:py-28 bg-background">
+    <section id="services" className="py-24 lg:py-32 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
-        <div className="mb-14 lg:mb-16">
+        <div className="mb-16 lg:mb-20">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-3 text-sm font-medium text-foreground/60 tracking-wide uppercase mb-4"
+            className="inline-flex items-center gap-3 text-sm font-medium text-foreground/50 tracking-wide uppercase mb-5"
           >
-            <span className="w-8 h-px bg-foreground/20" />
+            <span className="w-8 h-px bg-foreground/15" />
             Services
           </motion.span>
           <motion.h2
@@ -79,39 +86,39 @@ export function FeatureCardsSection() {
           >
             Everything your online
             <br />
-            <span className="text-foreground/50">presence needs.</span>
+            <span className="text-foreground/40">presence needs.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-base lg:text-lg text-foreground/70 max-w-xl leading-relaxed"
+            transition={{ delay: 0.15 }}
+            className="text-base lg:text-lg text-foreground/60 max-w-xl leading-relaxed"
           >
-            No bloat. No unnecessary features. Just the tools that help your business grow.
+            Nothing bloated. Just the tools that help your business grow and look sharper online.
           </motion.p>
         </div>
         
         {/* Service rows */}
-        <div className="border-t border-foreground/10">
+        <div className="border-t border-foreground/[0.06]">
           {services.map((service, index) => (
             <motion.div
               key={service.number}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.08 }}
-              className="group border-b border-foreground/10 py-7 lg:py-8 hover:bg-foreground/[0.02] transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 cursor-pointer"
+              transition={{ delay: index * 0.05 }}
+              className="group border-b border-foreground/[0.06] py-8 lg:py-9 hover:bg-foreground/[0.015] transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 cursor-pointer"
             >
               <div className="grid grid-cols-12 gap-4 lg:gap-8 items-start lg:items-center">
                 {/* Number */}
                 <div className="col-span-2 lg:col-span-1">
                   <motion.span 
-                    className="text-sm font-mono text-foreground/40 group-hover:text-foreground/60 transition-colors"
+                    className="text-sm font-mono text-foreground/30 group-hover:text-foreground/50 transition-colors"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.1 + index * 0.08 }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
                   >
                     {service.number}
                   </motion.span>
@@ -127,7 +134,7 @@ export function FeatureCardsSection() {
                 
                 {/* Description */}
                 <div className="col-span-12 lg:col-span-5 lg:col-start-5">
-                  <p className="text-foreground/70 leading-relaxed mt-3 lg:mt-0 text-[15px]">
+                  <p className="text-foreground/60 leading-relaxed mt-3 lg:mt-0 text-[15px]">
                     {service.description}
                   </p>
                 </div>
@@ -137,7 +144,7 @@ export function FeatureCardsSection() {
                   {service.features.map((feature) => (
                     <span 
                       key={feature}
-                      className="px-2.5 py-1 text-[11px] text-foreground/60 bg-foreground/5 border border-foreground/10 rounded-full uppercase tracking-wider font-medium"
+                      className="px-2.5 py-1 text-[10px] text-foreground/50 bg-foreground/[0.03] border border-foreground/[0.06] rounded-full uppercase tracking-wider font-medium"
                     >
                       {feature}
                     </span>
@@ -153,7 +160,7 @@ export function FeatureCardsSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-10 flex justify-center"
+          className="mt-12 flex justify-center"
         >
           <a
             href="#contact"

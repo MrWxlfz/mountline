@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Check, ArrowRight, Sparkles, LayoutDashboard } from "lucide-react"
+import { Check, ArrowRight, LayoutDashboard } from "lucide-react"
 
 const pricingPlans = [
   {
@@ -74,17 +74,17 @@ export function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="py-20 lg:py-28 bg-background">
+    <section id="pricing" className="py-24 lg:py-32 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-14 lg:mb-16">
+        <div className="mb-16 lg:mb-20">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-3 text-sm font-medium text-foreground/60 tracking-wide uppercase mb-4"
+            className="inline-flex items-center gap-3 text-sm font-medium text-foreground/50 tracking-wide uppercase mb-5"
           >
-            <span className="w-8 h-px bg-foreground/20" />
+            <span className="w-8 h-px bg-foreground/15" />
             Pricing
           </motion.span>
           <div className="grid lg:grid-cols-2 gap-6 items-end">
@@ -97,14 +97,14 @@ export function PricingSection() {
             >
               Simple packages.
               <br />
-              <span className="text-foreground/50">Clear scope.</span>
+              <span className="text-foreground/40">Clear scope.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="text-base lg:text-lg text-foreground/70"
+              transition={{ delay: 0.15 }}
+              className="text-base lg:text-lg text-foreground/60"
             >
               Every project includes a private client portal for tracking progress, previews, support, and payments.
             </motion.p>
@@ -120,19 +120,18 @@ export function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.08 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              whileHover={{ y: -4, transition: { duration: 0.25 } }}
               className="group relative"
             >
               <div className={`h-full rounded-2xl border transition-all duration-300 ${
                 plan.highlight 
-                  ? "border-foreground bg-foreground text-background shadow-2xl shadow-foreground/10" 
-                  : "border-foreground/10 bg-card hover:border-foreground/20 hover:shadow-lg"
+                  ? "border-foreground bg-foreground text-background shadow-2xl shadow-foreground/5" 
+                  : "border-foreground/[0.06] bg-card hover:border-foreground/10 hover:shadow-xl hover:shadow-foreground/[0.02]"
               }`}>
                 {/* Badge */}
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-accent-foreground text-[10px] font-medium uppercase tracking-wider shadow-lg">
-                      <Sparkles className="w-3 h-3" />
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-background text-foreground text-[10px] font-medium uppercase tracking-wider shadow-lg border border-foreground/10">
                       {plan.badge}
                     </span>
                   </div>
@@ -140,8 +139,8 @@ export function PricingSection() {
                 
                 <div className="p-6">
                   {/* Plan name */}
-                  <h3 className={`text-xs font-medium uppercase tracking-wider mb-5 ${
-                    plan.highlight ? "text-background/60" : "text-foreground/50"
+                  <h3 className={`text-[11px] font-medium uppercase tracking-wider mb-5 ${
+                    plan.highlight ? "text-background/55" : "text-foreground/45"
                   }`}>
                     {plan.name}
                   </h3>
@@ -156,14 +155,14 @@ export function PricingSection() {
                       </span>
                       {plan.priceSuffix && (
                         <span className={`text-base ${
-                          plan.highlight ? "text-background/60" : "text-foreground/50"
+                          plan.highlight ? "text-background/55" : "text-foreground/45"
                         }`}>
                           {plan.priceSuffix}
                         </span>
                       )}
                     </div>
                     <div className={`text-[10px] uppercase tracking-wider mt-1 ${
-                      plan.highlight ? "text-background/50" : "text-foreground/40"
+                      plan.highlight ? "text-background/45" : "text-foreground/35"
                     }`}>
                       {plan.priceNote}
                     </div>
@@ -171,29 +170,29 @@ export function PricingSection() {
                   
                   {/* Description */}
                   <p className={`text-sm leading-relaxed mb-5 ${
-                    plan.highlight ? "text-background/75" : "text-foreground/60"
+                    plan.highlight ? "text-background/70" : "text-foreground/55"
                   }`}>
                     {plan.description}
                   </p>
                   
                   {/* Divider */}
                   <div className={`h-px mb-5 ${
-                    plan.highlight ? "bg-background/15" : "bg-foreground/10"
+                    plan.highlight ? "bg-background/10" : "bg-foreground/[0.06]"
                   }`} />
                   
                   {/* Features */}
                   <ul className="space-y-2.5 mb-6">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5">
-                        <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                          plan.highlight ? "bg-background/15" : "bg-foreground/5"
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                          plan.highlight ? "bg-background/10" : "bg-foreground/[0.03]"
                         }`}>
                           <Check className={`w-2.5 h-2.5 ${
-                            plan.highlight ? "text-background" : "text-foreground/70"
+                            plan.highlight ? "text-background" : "text-foreground/60"
                           }`} />
                         </div>
                         <span className={`text-sm ${
-                          plan.highlight ? "text-background/80" : "text-foreground/70"
+                          plan.highlight ? "text-background/75" : "text-foreground/60"
                         }`}>
                           {feature}
                         </span>
@@ -209,7 +208,7 @@ export function PricingSection() {
                     className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all ${
                       plan.highlight
                         ? "bg-background text-foreground hover:bg-background/90 shadow-lg"
-                        : "bg-foreground/5 hover:bg-foreground/10 text-foreground border border-foreground/10 hover:border-foreground/20"
+                        : "bg-foreground/[0.03] hover:bg-foreground/[0.06] text-foreground border border-foreground/[0.06] hover:border-foreground/10"
                     }`}
                   >
                     Get started
@@ -227,7 +226,7 @@ export function PricingSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-10 flex items-center justify-center gap-3 text-sm text-foreground/60"
+          className="mt-12 flex items-center justify-center gap-3 text-sm text-foreground/50"
         >
           <LayoutDashboard className="w-4 h-4" />
           <span>All packages include access to your private client portal</span>
@@ -239,7 +238,7 @@ export function PricingSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="text-center text-xs text-foreground/40 mt-4"
+          className="text-center text-xs text-foreground/35 mt-4"
         >
           Final pricing depends on scope, content, timeline, and integrations.
         </motion.p>

@@ -7,7 +7,6 @@ import { ProductDirectionSection } from "@/components/product-direction-section"
 import { AiSystemsSection } from "@/components/ai-systems-section"
 import { PricingSection } from "@/components/pricing-section"
 import { TrustSection } from "@/components/trust-section"
-import { ToolsSection } from "@/components/tools-section"
 import { FAQSection } from "@/components/faq-section"
 import { ContactSection } from "@/components/contact-section"
 import { FooterSection } from "@/components/footer-section"
@@ -24,7 +23,6 @@ export default function Home() {
       <AiSystemsSection />
       <PricingSection />
       <TrustSection />
-      <ToolsSection />
       <FAQSection />
       <ContactSection />
       <FooterSection />

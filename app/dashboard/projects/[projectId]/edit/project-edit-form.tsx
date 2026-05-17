@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Check, Loader2, Plus, Save } from "lucide-react"
 
+type PaymentMethod =
+  | "stripe_card"
+  | "crypto"
+  | "cash"
+  | "check"
+  | "bank_transfer"
+  | "other"
+
 type ProjectRecord = {
   id: string
   project_name: string
@@ -14,6 +22,11 @@ type ProjectRecord = {
   preview_url: string | null
   live_url: string | null
   payment_link: string | null
+  payment_status: string | null
+  accepted_payment_methods: PaymentMethod[] | null
+  manual_payment_instructions: string | null
+  invoice_amount: number | null
+  invoice_label: string | null
   next_step: string | null
   notes: string | null
   clients: {
@@ -37,6 +50,11 @@ type ProjectForm = {
   preview_url: string
   live_url: string
   payment_link: string
+  payment_status: string
+  accepted_payment_methods: PaymentMethod[]
+  manual_payment_instructions: string
+  invoice_amount: string
+  invoice_label: string
   next_step: string
   target_launch_date: string
   notes: string
@@ -44,6 +62,21 @@ type ProjectForm = {
 
 const statuses = ["discovery", "design", "build", "review", "launch", "support", "completed"]
 const accessStatuses = ["invited", "active", "revoked"]
+const paymentStatuses = [
+  { value: "not_sent", label: "Not sent" },
+  { value: "pending", label: "Pending" },
+  { value: "paid", label: "Paid" },
+  { value: "waived", label: "Waived" },
+  { value: "manual_received", label: "Manual received" },
+]
+const paymentMethods: { value: PaymentMethod; label: string }[] = [
+  { value: "stripe_card", label: "Stripe/card" },
+  { value: "crypto", label: "Crypto" },
+  { value: "cash", label: "Cash" },
+  { value: "check", label: "Check" },
+  { value: "bank_transfer", label: "Bank transfer" },
+  { value: "other", label: "Other" },
+]
 
 export function ProjectEditForm({
   project,
@@ -58,6 +91,13 @@ export function ProjectEditForm({
     preview_url: project.preview_url || "",
     live_url: project.live_url || "",
     payment_link: project.payment_link || "",
+    payment_status: project.payment_status || "not_sent",
+    accepted_payment_methods: Array.isArray(project.accepted_payment_methods)
+      ? project.accepted_payment_methods
+      : [],
+    manual_payment_instructions: project.manual_payment_instructions || "",
+    invoice_amount: project.invoice_amount?.toString() || "",
+    invoice_label: project.invoice_label || "",
     next_step: project.next_step || "",
     target_launch_date: project.target_launch_date || "",
     notes: project.notes || "",
@@ -71,6 +111,15 @@ export function ProjectEditForm({
   const [error, setError] = useState<string | null>(null)
   const [accessError, setAccessError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  function togglePaymentMethod(method: PaymentMethod) {
+    setForm((current) => ({
+      ...current,
+      accepted_payment_methods: current.accepted_payment_methods.includes(method)
+        ? current.accepted_payment_methods.filter((item) => item !== method)
+        : [...current.accepted_payment_methods, method],
+    }))
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -177,7 +226,7 @@ export function ProjectEditForm({
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="bg-card border border-border rounded-xl p-6 space-y-5">
+      <form onSubmit={handleSave} className="bg-card border border-border rounded-xl p-6 space-y-6">
         {error && (
           <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-400">
             {error}
@@ -218,7 +267,89 @@ export function ProjectEditForm({
 
         <ProjectInput label="Preview URL" value={form.preview_url} onChange={(value) => setForm({ ...form, preview_url: value })} />
         <ProjectInput label="Live URL" value={form.live_url} onChange={(value) => setForm({ ...form, live_url: value })} />
-        <ProjectInput label="Manual Payment Link" value={form.payment_link} onChange={(value) => setForm({ ...form, payment_link: value })} />
+
+        <section className="rounded-xl border border-border bg-background/40 p-4 space-y-4">
+          <div>
+            <h2 className="text-base font-semibold">Payment</h2>
+            <p className="text-sm text-muted-foreground">
+              Set payment options and status shown in the client portal.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="space-y-2">
+              <span className="text-sm font-medium">Invoice label</span>
+              <input
+                type="text"
+                value={form.invoice_label}
+                onChange={(e) => setForm({ ...form, invoice_label: e.target.value })}
+                className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+                placeholder="Website deposit"
+              />
+            </label>
+            <label className="space-y-2">
+              <span className="text-sm font-medium">Invoice amount</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.invoice_amount}
+                onChange={(e) => setForm({ ...form, invoice_amount: e.target.value })}
+                className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+                placeholder="500.00"
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="space-y-2">
+              <span className="text-sm font-medium">Payment status</span>
+              <select
+                value={form.payment_status}
+                onChange={(e) => setForm({ ...form, payment_status: e.target.value })}
+                className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+              >
+                {paymentStatuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <ProjectInput label="Payment link" value={form.payment_link} onChange={(value) => setForm({ ...form, payment_link: value })} />
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-sm font-medium">Accepted methods</span>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {paymentMethods.map((method) => (
+                <label
+                  key={method.value}
+                  className="flex items-center gap-3 rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={form.accepted_payment_methods.includes(method.value)}
+                    onChange={() => togglePaymentMethod(method.value)}
+                    className="h-4 w-4 accent-foreground"
+                  />
+                  {method.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <label className="space-y-2 block">
+            <span className="text-sm font-medium">Manual payment instructions</span>
+            <textarea
+              value={form.manual_payment_instructions}
+              onChange={(e) => setForm({ ...form, manual_payment_instructions: e.target.value })}
+              rows={3}
+              className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20 resize-none"
+              placeholder="Add check, bank transfer, cash, crypto, or other instructions shown to the client."
+            />
+          </label>
+        </section>
 
         <label className="space-y-2 block">
           <span className="text-sm font-medium">Next Step</span>

@@ -22,6 +22,15 @@ This creates the tables the current app expects:
 - `potential_clients`
 - `lead_insights`
 
+The `projects` table includes payment foundations used by the portal:
+
+- `payment_link`
+- `payment_status`
+- `accepted_payment_methods`
+- `manual_payment_instructions`
+- `invoice_amount`
+- `invoice_label`
+
 The app uses Clerk for auth and Supabase for data. Do not use Supabase Auth for Mountline users.
 
 ## 2. Run Demo Seed SQL
@@ -38,6 +47,7 @@ The seed creates:
 - Demo client: `demo.client@example.com`
 - Demo project: `Demo Roofing Website`
 - Portal ID: `demo-portal`
+- Demo payment status, card/check/bank-transfer methods, invoice amount, and manual instructions
 - Portal access row for the demo client
 - One open support thread
 - Two support messages
@@ -121,6 +131,7 @@ Expected behavior:
 - Any other signed-in non-team user should see access denied.
 - Signed-out users should be sent to `/id`.
 - The portal should show project overview, status, timeline, next step, preview/live links, payment section, and support messages.
+- The payment section should show card/manual payment options when configured and paid/no-payment states when applicable.
 - Submitting a support message should insert a row into `support_messages`.
 
 ## 7. Test Mountline ID

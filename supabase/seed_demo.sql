@@ -60,6 +60,11 @@ insert into public.projects (
   live_url,
   preview_url,
   payment_link,
+  payment_status,
+  accepted_payment_methods,
+  manual_payment_instructions,
+  invoice_amount,
+  invoice_label,
   next_step,
   notes
 )
@@ -75,6 +80,11 @@ values (
   'https://example.com',
   'https://preview.example.com',
   'https://pay.example.com/demo-invoice',
+  'pending',
+  '["stripe_card", "check", "bank_transfer"]'::jsonb,
+  'Checks can be made payable to Mountline Studio. Bank transfer details are shared by the project team when requested.',
+  500,
+  'Website starter deposit',
   'Mountline is preparing the first review build. Please send final service area details and any preferred project photos.',
   'Demo project for client portal verification.'
 )
@@ -89,6 +99,11 @@ set client_id = excluded.client_id,
     live_url = excluded.live_url,
     preview_url = excluded.preview_url,
     payment_link = excluded.payment_link,
+    payment_status = excluded.payment_status,
+    accepted_payment_methods = excluded.accepted_payment_methods,
+    manual_payment_instructions = excluded.manual_payment_instructions,
+    invoice_amount = excluded.invoice_amount,
+    invoice_label = excluded.invoice_label,
     next_step = excluded.next_step,
     notes = excluded.notes;
 

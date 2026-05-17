@@ -15,7 +15,7 @@ export default async function ProjectEditPage({
 
   const { data: project, error } = await supabase
     .from("projects")
-    .select("id, project_name, status, portal_id, target_launch_date, preview_url, live_url, payment_link, next_step, notes, clients(business_name, contact_name, email)")
+    .select("id, project_name, status, portal_id, target_launch_date, preview_url, live_url, payment_link, payment_status, accepted_payment_methods, manual_payment_instructions, invoice_amount, invoice_label, next_step, notes, clients(business_name, contact_name, email)")
     .eq("id", projectId)
     .maybeSingle()
 

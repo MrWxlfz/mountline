@@ -44,6 +44,11 @@ export type PortalProjectRecord = {
   live_url: string | null
   preview_url: string | null
   payment_link: string | null
+  payment_status: string
+  accepted_payment_methods: string[] | null
+  manual_payment_instructions: string | null
+  invoice_amount: number | null
+  invoice_label: string | null
   next_step: string | null
   notes: string | null
   clients: {
@@ -87,6 +92,11 @@ export async function getPortalAccess(portalId: string): Promise<PortalAccessRes
       live_url,
       preview_url,
       payment_link,
+      payment_status,
+      accepted_payment_methods,
+      manual_payment_instructions,
+      invoice_amount,
+      invoice_label,
       next_step,
       notes,
       clients (

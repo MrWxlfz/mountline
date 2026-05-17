@@ -7,6 +7,21 @@ export type ProjectStatus =
   | "support"
   | "completed"
 
+export type PaymentStatus =
+  | "not_sent"
+  | "pending"
+  | "paid"
+  | "waived"
+  | "manual_received"
+
+export type PaymentMethod =
+  | "stripe_card"
+  | "crypto"
+  | "cash"
+  | "check"
+  | "bank_transfer"
+  | "other"
+
 export type Client = {
   id: string
   created_at: string
@@ -32,6 +47,11 @@ export type Project = {
   live_url: string | null
   preview_url: string | null
   payment_link: string | null
+  payment_status: PaymentStatus
+  accepted_payment_methods: PaymentMethod[] | null
+  manual_payment_instructions: string | null
+  invoice_amount: number | null
+  invoice_label: string | null
   next_step: string | null
   notes: string | null
 }

@@ -38,6 +38,11 @@ create table if not exists public.projects (
   live_url text,
   preview_url text,
   payment_link text,
+  payment_status text not null default 'not_sent',
+  accepted_payment_methods jsonb,
+  manual_payment_instructions text,
+  invoice_amount numeric,
+  invoice_label text,
   next_step text,
   notes text
 );
@@ -52,8 +57,20 @@ alter table public.projects add column if not exists target_launch_date date;
 alter table public.projects add column if not exists live_url text;
 alter table public.projects add column if not exists preview_url text;
 alter table public.projects add column if not exists payment_link text;
+alter table public.projects add column if not exists payment_status text not null default 'not_sent';
+alter table public.projects add column if not exists accepted_payment_methods jsonb;
+alter table public.projects add column if not exists manual_payment_instructions text;
+alter table public.projects add column if not exists invoice_amount numeric;
+alter table public.projects add column if not exists invoice_label text;
 alter table public.projects add column if not exists next_step text;
 alter table public.projects add column if not exists notes text;
+
+alter table public.projects
+  drop constraint if exists projects_payment_status_check;
+
+alter table public.projects
+  add constraint projects_payment_status_check
+  check (payment_status in ('not_sent', 'pending', 'paid', 'waived', 'manual_received'));
 
 create unique index if not exists projects_portal_id_unique_idx
   on public.projects (portal_id)

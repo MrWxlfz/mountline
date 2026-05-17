@@ -1,7 +1,6 @@
 "use client"
 
-import { motion, useScroll, useTransform } from "framer-motion"
-import { useRef } from "react"
+import { motion } from "framer-motion"
 import { ArrowRight, Check, MessageSquare, CreditCard, ExternalLink, Send } from "lucide-react"
 
 // Mountline line motif SVG
@@ -296,15 +295,6 @@ function SystemCenterpiece() {
 }
 
 export function Hero3DStage() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  })
-  
-  const opacity = useTransform(scrollYProgress, [0, 0.4], [1, 0])
-  const y = useTransform(scrollYProgress, [0, 0.4], [0, 80])
-
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
@@ -313,10 +303,7 @@ export function Hero3DStage() {
   }
 
   return (
-    <section 
-      ref={containerRef}
-      className="relative min-h-screen flex flex-col justify-center overflow-hidden"
-    >
+    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
       {/* Premium background */}
       <PremiumGrid />
       
@@ -324,10 +311,7 @@ export function Hero3DStage() {
       <MountlineMotif />
       
       {/* Main content */}
-      <motion.div 
-        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 sm:pb-20"
-        style={{ opacity, y }}
-      >
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 sm:pb-20">
         {/* Eyebrow */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -391,7 +375,7 @@ export function Hero3DStage() {
         
         {/* Cinematic centerpiece */}
         <SystemCenterpiece />
-      </motion.div>
+      </div>
       
       {/* Bottom gradient fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />

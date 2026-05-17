@@ -7,15 +7,13 @@ interface NorthlineLogoProps {
   showWordmark?: boolean
   animated?: boolean
   className?: string
-  inverted?: boolean
 }
 
 export function NorthlineLogo({ 
   size = "md", 
   showWordmark = true,
   animated = false,
-  className = "",
-  inverted = false
+  className = ""
 }: NorthlineLogoProps) {
   const sizes = {
     sm: { mark: 28, text: "text-base", gap: "gap-2" },
@@ -58,7 +56,7 @@ export function NorthlineLogo({
 
   return (
     <div className={`flex items-center ${s.gap} ${className}`}>
-      {/* Brand Mark - Mountain with upward line */}
+      {/* Brand Mark - Mountain with upward line - White on black */}
       <MarkWrapper
         {...(animated ? { variants: markVariants, initial: "initial", animate: "animate" } : {})}
         className="relative flex-shrink-0"
@@ -72,7 +70,7 @@ export function NorthlineLogo({
           {/* Mountain shape - abstract, geometric */}
           <motion.path
             d="M20 8 L32 32 L8 32 Z"
-            className={inverted ? "fill-primary-foreground/10 stroke-primary-foreground" : "fill-foreground/10 stroke-foreground"}
+            className="fill-white/10 stroke-white"
             strokeWidth="1.5"
             strokeLinejoin="round"
             {...(animated ? { variants: lineVariants, initial: "initial", animate: "animate" } : {})}
@@ -81,7 +79,7 @@ export function NorthlineLogo({
           {/* Upward cutting line - momentum, direction, growth */}
           <motion.path
             d="M20 34 L20 6"
-            className={inverted ? "stroke-accent" : "stroke-accent"}
+            className="stroke-white"
             strokeWidth="2.5"
             strokeLinecap="round"
             {...(animated ? { 
@@ -95,7 +93,7 @@ export function NorthlineLogo({
           {/* Arrow head at top */}
           <motion.path
             d="M16 12 L20 6 L24 12"
-            className={inverted ? "stroke-accent" : "stroke-accent"}
+            className="stroke-white"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -113,7 +111,7 @@ export function NorthlineLogo({
       {showWordmark && (
         <TextWrapper
           {...(animated ? { variants: textVariants, initial: "initial", animate: "animate" } : {})}
-          className={`font-semibold tracking-tight lowercase ${s.text} ${inverted ? "text-primary-foreground" : "text-foreground"}`}
+          className={`font-semibold tracking-tight lowercase ${s.text} text-white`}
         >
           mountline
         </TextWrapper>
@@ -122,7 +120,7 @@ export function NorthlineLogo({
   )
 }
 
-// Standalone icon for favicon / small uses
+// Standalone icon for favicon / small uses - White on black
 export function NorthlineIcon({ 
   size = 32, 
   className = "" 
@@ -138,119 +136,25 @@ export function NorthlineIcon({
       <svg viewBox="0 0 40 40" fill="none" className="w-full h-full">
         <path
           d="M20 8 L32 32 L8 32 Z"
-          className="fill-foreground/10 stroke-foreground"
+          className="fill-white/10 stroke-white"
           strokeWidth="1.5"
           strokeLinejoin="round"
         />
         <path
           d="M20 34 L20 6"
-          className="stroke-accent"
+          className="stroke-white"
           strokeWidth="2.5"
           strokeLinecap="round"
         />
         <path
           d="M16 12 L20 6 L24 12"
-          className="stroke-accent"
+          className="stroke-white"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
         />
       </svg>
-    </div>
-  )
-}
-
-// Decorative brand pattern with mountain motifs
-export function NorthlinePattern({ 
-  className = "",
-  opacity = 0.04
-}: { 
-  className?: string
-  opacity?: number 
-}) {
-  return (
-    <div 
-      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
-      style={{ opacity }}
-    >
-      <svg 
-        className="absolute w-full h-full text-foreground" 
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <pattern 
-            id="mountline-mountain-pattern"
-            x="0" 
-            y="0" 
-            width="100" 
-            height="100" 
-            patternUnits="userSpaceOnUse"
-          >
-            {/* Mountain shape */}
-            <path
-              d="M50 20 L70 60 L30 60 Z"
-              stroke="currentColor"
-              strokeWidth="0.5"
-              fill="none"
-            />
-            {/* Upward line */}
-            <path
-              d="M50 65 L50 15"
-              stroke="currentColor"
-              strokeWidth="0.75"
-              strokeLinecap="round"
-            />
-            <path
-              d="M46 22 L50 15 L54 22"
-              stroke="currentColor"
-              strokeWidth="0.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#mountline-mountain-pattern)" />
-      </svg>
-    </div>
-  )
-}
-
-// Animated line element for section dividers
-export function NorthlineDivider({ className = "" }: { className?: string }) {
-  return (
-    <div className={`relative h-16 flex items-center justify-center ${className}`}>
-      <motion.svg 
-        viewBox="0 0 100 40" 
-        className="w-24 h-10 text-muted-foreground/30"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-      >
-        <motion.path
-          d="M10 35 L50 5 L90 35"
-          stroke="currentColor"
-          strokeWidth="1"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          initial={{ pathLength: 0 }}
-          whileInView={{ pathLength: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <motion.path
-          d="M50 38 L50 2"
-          className="stroke-accent/50"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          initial={{ pathLength: 0 }}
-          whileInView={{ pathLength: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        />
-      </motion.svg>
     </div>
   )
 }

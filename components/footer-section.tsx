@@ -55,7 +55,7 @@ export function FooterSection() {
         >
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <NorthlineLogo size="md" className="mb-6" inverted />
+            <NorthlineLogo size="md" className="mb-6" />
             <p className="text-background/75 max-w-sm leading-relaxed mb-6">
               Websites, client portals, and practical digital systems for businesses that need to look sharper online.
             </p>

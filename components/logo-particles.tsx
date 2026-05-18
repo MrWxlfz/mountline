@@ -2,70 +2,55 @@
 
 import { useEffect, useRef } from "react"
 
-interface Particle {
-  x: number
-  y: number
-  tx: number  // target x
-  ty: number  // target y
-  vx: number
-  vy: number
-  alpha: number
-  size: number
-  orbitRadius: number
-  orbitAngle: number
-  orbitSpeed: number
-  settled: boolean
-}
-
-// Sample points along the Mountline logo paths (viewBox 0 0 40 40)
-function getLogoPoints(scale: number, cx: number, cy: number): Array<{ x: number; y: number }> {
+// Sample evenly-spaced points along the Mountline logo outline (viewBox 0 0 40 40)
+function getLogoPoints(scale: number, cx: number, cy: number) {
   const pts: Array<{ x: number; y: number }> = []
 
-  const transform = (x: number, y: number) => ({
+  const t = (x: number, y: number) => ({
     x: cx + (x - 20) * scale,
     y: cy + (y - 20) * scale,
   })
 
-  // Triangle edges: M20 8 L32 32 L8 32 Z
-  // Left edge: (20,8) -> (8,32)
-  for (let t = 0; t <= 1; t += 0.08) {
-    pts.push(transform(20 + (8 - 20) * t, 8 + (32 - 8) * t))
-  }
-  // Right edge: (20,8) -> (32,32)
-  for (let t = 0; t <= 1; t += 0.08) {
-    pts.push(transform(20 + (32 - 20) * t, 8 + (32 - 8) * t))
-  }
-  // Bottom edge: (8,32) -> (32,32)
-  for (let t = 0; t <= 1; t += 0.1) {
-    pts.push(transform(8 + (32 - 8) * t, 32))
-  }
-
-  // Vertical stem: M20 34 L20 6
-  for (let t = 0; t <= 1; t += 0.07) {
-    pts.push(transform(20, 6 + (34 - 6) * t))
-  }
-
-  // Arrow head: M16 12 L20 6 L24 12
-  for (let t = 0; t <= 1; t += 0.12) {
-    pts.push(transform(16 + (20 - 16) * t, 12 + (6 - 12) * t))
-  }
-  for (let t = 0; t <= 1; t += 0.12) {
-    pts.push(transform(20 + (24 - 20) * t, 6 + (12 - 6) * t))
-  }
+  // Triangle: left edge (20,8)->(8,32), right edge (20,8)->(32,32), base (8,32)->(32,32)
+  for (let i = 0; i <= 1; i += 0.05) pts.push(t(20 + (8 - 20) * i, 8 + 24 * i))
+  for (let i = 0; i <= 1; i += 0.05) pts.push(t(20 + 12 * i, 8 + 24 * i))
+  for (let i = 0; i <= 1; i += 0.06) pts.push(t(8 + 24 * i, 32))
+  // Vertical stem (20,6)->(20,34)
+  for (let i = 0; i <= 1; i += 0.06) pts.push(t(20, 6 + 28 * i))
+  // Arrow head (16,12)->(20,6) and (20,6)->(24,12)
+  for (let i = 0; i <= 1; i += 0.15) pts.push(t(16 + 4 * i, 12 - 6 * i))
+  for (let i = 0; i <= 1; i += 0.15) pts.push(t(20 + 4 * i, 6 + 6 * i))
 
   return pts
 }
 
-export function LogoParticles({
-  className = "",
-}: {
-  className?: string
-}) {
+interface Particle {
+  // Logo anchor point
+  ax: number
+  ay: number
+  // Current position offset from anchor
+  ox: number
+  oy: number
+  // Drift velocity
+  vx: number
+  vy: number
+  // Visual
+  radius: number
+  alpha: number
+  targetAlpha: number
+  // Drift cycle
+  driftAngle: number
+  driftSpeed: number
+  driftRadius: number
+  // Pulse ring state
+  ring: boolean
+  ringRadius: number
+  ringAlpha: number
+}
+
+export function LogoParticles({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animRef = useRef<number>(0)
-  const particlesRef = useRef<Particle[]>([])
-  const phaseRef = useRef<"forming" | "formed" | "dissolving">("forming")
-  const phaseTimerRef = useRef<number>(0)
+  const rafRef = useRef<number>(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -73,170 +58,114 @@ export function LogoParticles({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    if (prefersReducedMotion) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
-    // Detect dark mode
     const isDark = () => document.documentElement.classList.contains("dark")
 
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1
-      canvas.width = canvas.offsetWidth * dpr
-      canvas.height = canvas.offsetHeight * dpr
-      ctx.scale(dpr, dpr)
-      init()
-    }
+    let particles: Particle[] = []
 
-    const init = () => {
-      const w = canvas.offsetWidth
-      const h = canvas.offsetHeight
-
-      // Scale logo to fit ~40% of the smaller dimension, centered
-      const logoScale = (Math.min(w, h) * 0.38) / 20
+    const buildParticles = (w: number, h: number) => {
+      // Logo scale: ~28% of shorter dimension
+      const scale = (Math.min(w, h) * 0.28) / 20
       const cx = w * 0.5
-      const cy = h * 0.48
+      const cy = h * 0.46
 
-      const targets = getLogoPoints(logoScale, cx, cy)
-      const count = 110
+      const anchors = getLogoPoints(scale, cx, cy)
 
-      particlesRef.current = Array.from({ length: count }, (_, i) => {
-        const target = targets[i % targets.length]
-        // Scatter particles from random positions around the canvas
-        const angle = Math.random() * Math.PI * 2
-        const dist = Math.min(w, h) * (0.3 + Math.random() * 0.5)
+      particles = anchors.map((a) => {
+        const driftRadius = 6 + Math.random() * 14
         return {
-          x: cx + Math.cos(angle) * dist,
-          y: cy + Math.sin(angle) * dist,
-          tx: target.x + (Math.random() - 0.5) * 6,
-          ty: target.y + (Math.random() - 0.5) * 6,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
+          ax: a.x,
+          ay: a.y,
+          ox: (Math.random() - 0.5) * 30,
+          oy: (Math.random() - 0.5) * 30,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
+          radius: 0.5 + Math.random() * 0.7,
           alpha: 0,
-          size: 0.8 + Math.random() * 1.2,
-          orbitRadius: 1.5 + Math.random() * 2.5,
-          orbitAngle: Math.random() * Math.PI * 2,
-          orbitSpeed: (Math.random() - 0.5) * 0.015,
-          settled: false,
+          targetAlpha: 0.08 + Math.random() * 0.12, // max 0.20 — very faint
+          driftAngle: Math.random() * Math.PI * 2,
+          driftSpeed: 0.003 + Math.random() * 0.005,
+          driftRadius,
+          ring: false,
+          ringRadius: 0,
+          ringAlpha: 0,
         }
       })
+    }
 
-      phaseRef.current = "forming"
-      phaseTimerRef.current = 0
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const w = canvas.offsetWidth
+      const h = canvas.offsetHeight
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      ctx.scale(dpr, dpr)
+      buildParticles(w, h)
     }
 
     let frame = 0
+    // Every ~8s, one random particle emits a faint expanding ring
+    let nextRingFrame = 180 + Math.floor(Math.random() * 200)
 
     const draw = () => {
-      animRef.current = requestAnimationFrame(draw)
+      rafRef.current = requestAnimationFrame(draw)
       frame++
 
       const w = canvas.offsetWidth
       const h = canvas.offsetHeight
-      const dark = isDark()
-
       ctx.clearRect(0, 0, w, h)
-      phaseTimerRef.current++
 
-      const phase = phaseRef.current
-      // forming: ~3s at 60fps = 180 frames, formed: ~4s = 240 frames, dissolving: ~2.5s = 150 frames
-      if (phase === "forming" && phaseTimerRef.current > 180) {
-        phaseRef.current = "formed"
-        phaseTimerRef.current = 0
-      } else if (phase === "formed" && phaseTimerRef.current > 260) {
-        phaseRef.current = "dissolving"
-        phaseTimerRef.current = 0
-      } else if (phase === "dissolving" && phaseTimerRef.current > 150) {
-        init()
-        return
+      const dark = isDark()
+      const rgb = dark ? "255,255,255" : "20,20,20"
+
+      // Occasionally spawn a ring on a random particle
+      if (frame === nextRingFrame && particles.length > 0) {
+        const p = particles[Math.floor(Math.random() * particles.length)]
+        p.ring = true
+        p.ringRadius = p.radius
+        p.ringAlpha = 0.12
+        nextRingFrame = frame + 300 + Math.floor(Math.random() * 300)
       }
 
-      const logoScale = (Math.min(w, h) * 0.38) / 20
-      const cx = w * 0.5
-      const cy = h * 0.48
+      for (const p of particles) {
+        // Fade in slowly
+        if (p.alpha < p.targetAlpha) p.alpha += 0.002
 
-      for (const p of particlesRef.current) {
-        if (phase === "forming") {
-          // Attract toward target
-          const dx = p.tx - p.x
-          const dy = p.ty - p.y
-          const dist = Math.sqrt(dx * dx + dy * dy)
+        // Gentle circular drift around anchor
+        p.driftAngle += p.driftSpeed
+        const targetOx = Math.cos(p.driftAngle) * p.driftRadius
+        const targetOy = Math.sin(p.driftAngle) * p.driftRadius * 0.6
 
-          p.vx += dx * 0.018
-          p.vy += dy * 0.018
-          p.vx *= 0.82
-          p.vy *= 0.82
-          p.x += p.vx
-          p.y += p.vy
+        // Soft-spring toward drift target
+        p.vx += (targetOx - p.ox) * 0.008
+        p.vy += (targetOy - p.oy) * 0.008
+        p.vx *= 0.92
+        p.vy *= 0.92
+        p.ox += p.vx
+        p.oy += p.vy
 
-          // Fade in
-          p.alpha = Math.min(p.alpha + 0.012, dist < 8 ? 0.85 : 0.5)
+        const px = p.ax + p.ox
+        const py = p.ay + p.oy
 
-          if (dist < 3) p.settled = true
-        } else if (phase === "formed") {
-          // Gentle orbit around settled position
-          p.orbitAngle += p.orbitSpeed
-          const ox = Math.cos(p.orbitAngle) * p.orbitRadius
-          const oy = Math.sin(p.orbitAngle) * p.orbitRadius * 0.6
-
-          const dx = (p.tx + ox) - p.x
-          const dy = (p.ty + oy) - p.y
-          p.vx += dx * 0.06
-          p.vy += dy * 0.06
-          p.vx *= 0.75
-          p.vy *= 0.75
-          p.x += p.vx
-          p.y += p.vy
-
-          p.alpha = Math.min(p.alpha + 0.02, 0.85)
-        } else if (phase === "dissolving") {
-          // Drift outward
-          const ddx = p.x - cx
-          const ddy = p.y - cy
-          const mag = Math.sqrt(ddx * ddx + ddy * ddy) || 1
-          p.vx += (ddx / mag) * 0.12 + (Math.random() - 0.5) * 0.05
-          p.vy += (ddy / mag) * 0.12 + (Math.random() - 0.5) * 0.05
-          p.vx *= 0.95
-          p.vy *= 0.95
-          p.x += p.vx
-          p.y += p.vy
-          p.alpha = Math.max(p.alpha - 0.008, 0)
-        }
-
-        if (p.alpha <= 0) continue
-
-        // Particle color: in dark mode use white, in light mode use dark
-        const rgb = dark ? "255,255,255" : "24,24,27"
+        // Draw dot
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.arc(px, py, p.radius, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(${rgb},${p.alpha})`
         ctx.fill()
-      }
 
-      // Draw faint connecting lines between nearby particles when formed
-      if (phase === "formed" || (phase === "dissolving" && phaseTimerRef.current < 60)) {
-        const opacity = phase === "dissolving"
-          ? Math.max(0, (60 - phaseTimerRef.current) / 60) * 0.07
-          : 0.07
-        const rgb = dark ? "255,255,255" : "24,24,27"
-        const maxDist = logoScale * 3.5
-
-        ctx.lineWidth = 0.4
-        for (let i = 0; i < particlesRef.current.length; i++) {
-          const a = particlesRef.current[i]
-          for (let j = i + 1; j < particlesRef.current.length; j++) {
-            const b = particlesRef.current[j]
-            const dx = a.x - b.x
-            const dy = a.y - b.y
-            const dist = Math.sqrt(dx * dx + dy * dy)
-            if (dist < maxDist) {
-              const lineAlpha = opacity * (1 - dist / maxDist)
-              ctx.beginPath()
-              ctx.strokeStyle = `rgba(${rgb},${lineAlpha})`
-              ctx.moveTo(a.x, a.y)
-              ctx.lineTo(b.x, b.y)
-              ctx.stroke()
-            }
+        // Draw expanding ring if active
+        if (p.ring) {
+          p.ringRadius += 0.6
+          p.ringAlpha -= 0.0018
+          if (p.ringAlpha <= 0) {
+            p.ring = false
+          } else {
+            ctx.beginPath()
+            ctx.arc(px, py, p.ringRadius, 0, Math.PI * 2)
+            ctx.strokeStyle = `rgba(${rgb},${p.ringAlpha})`
+            ctx.lineWidth = 0.5
+            ctx.stroke()
           }
         }
       }
@@ -249,7 +178,7 @@ export function LogoParticles({
     ro.observe(canvas)
 
     return () => {
-      cancelAnimationFrame(animRef.current)
+      cancelAnimationFrame(rafRef.current)
       ro.disconnect()
     }
   }, [])

@@ -94,15 +94,7 @@ export function Navbar() {
                 </>
               )}
 
-              {/* CTA - always visible */}
-              <button
-                onClick={() => scrollToSection("contact")}
-                style={{ padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
-                className="flex items-center gap-1.5 font-medium btn-primary whitespace-nowrap sm:hidden"
-              >
-                Get Started
-                <ArrowRight className="w-3 h-3" />
-              </button>
+              {/* CTA - desktop only */}
               <button
                 onClick={() => scrollToSection("contact")}
                 className="hidden sm:flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4 whitespace-nowrap"

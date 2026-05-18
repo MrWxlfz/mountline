@@ -52,10 +52,11 @@ export function Navbar() {
           scrolled ? "glass-card shadow-sm" : "bg-transparent"
         }`}
       >
-        <div className="w-full flex justify-center px-4 sm:px-6 py-4">
+        <div className="w-full flex justify-center px-3 sm:px-6 py-2 sm:py-3.5">
           <div className="w-full max-w-6xl flex items-center justify-between">
             {/* Logo */}
-            <NorthlineLogo size="md" animated />
+            <NorthlineLogo size="sm" animated className="sm:hidden" />
+            <NorthlineLogo size="md" animated className="hidden sm:flex" />
             
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
@@ -93,10 +94,10 @@ export function Navbar() {
                 </>
               )}
 
-              {/* CTA - always visible */}
+              {/* CTA - desktop only */}
               <button
                 onClick={() => scrollToSection("contact")}
-                className="hidden sm:flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4"
+                className="hidden sm:flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4 whitespace-nowrap"
               >
                 Book a Free Review
                 <ArrowRight className="w-3.5 h-3.5" />

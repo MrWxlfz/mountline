@@ -103,14 +103,14 @@ export function ProductDirectionSection() {
                 <div className="grid grid-cols-12 gap-4 lg:gap-8 py-8 lg:py-10 border-b border-background/10 last:border-b-0">
                   {/* Numeral */}
                   <div className="col-span-2 lg:col-span-1 flex items-start lg:justify-center">
-                    <span className="text-2xl lg:text-3xl font-serif text-background/55 group-hover:text-background transition-colors">
+                    <span className="text-2xl lg:text-3xl font-serif text-background/55">
                       {step.numeral}
                     </span>
                   </div>
                   
                   {/* Title */}
                   <div className="col-span-10 lg:col-span-3">
-                    <h3 className="text-xl lg:text-2xl font-semibold group-hover:text-accent transition-colors">
+                    <h3 className="text-xl lg:text-2xl font-semibold">
                       {step.title}
                     </h3>
                   </div>

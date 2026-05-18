@@ -189,9 +189,38 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-background text-foreground antialiased;
+    /* Prevent content from going under notch/dynamic island on iOS */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Prevent iOS font size inflation */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  /* Prevent zoom on form inputs on iOS (font-size must be >= 16px) */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  /* Ensure links have sufficient tap area on mobile */
+  a {
+    touch-action: manipulation;
+  }
+  button {
+    touch-action: manipulation;
   }
 }
 

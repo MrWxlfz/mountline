@@ -28,20 +28,23 @@ const positioningPoints = [
 
 export function PositioningSection() {
   return (
-    <section className="py-24 lg:py-32 bg-background border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+    <section className="py-24 lg:py-32 bg-background relative overflow-hidden">
+      {/* Subtle top border */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
           {/* Left - Main message */}
-          <div>
-            <motion.span
+          <div className="lg:col-span-5">
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-3 text-sm font-medium text-muted-foreground tracking-wide mb-6"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-6"
             >
               <span className="w-8 h-px bg-border" />
               The Mountline difference
-            </motion.span>
+            </motion.div>
             
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -52,7 +55,7 @@ export function PositioningSection() {
             >
               Not just a site.
               <br />
-              <span className="text-muted-foreground/60">A cleaner way to work.</span>
+              <span className="text-muted-foreground/50">A cleaner way to work.</span>
             </motion.h2>
             
             <motion.p
@@ -60,34 +63,38 @@ export function PositioningSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground leading-relaxed max-w-lg"
+              className="text-lg text-muted-foreground leading-relaxed"
             >
-              Most studios hand you a website and walk away. Mountline builds the site, the portal, and the systems that help your business run smoother after launch.
+              Mountline combines sharp websites with private client portals, support threads, payment links, and launch tracking so every project feels organized from day one.
             </motion.p>
           </div>
           
           {/* Right - Points grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {positioningPoints.map((point, index) => (
-              <motion.div
-                key={point.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 + index * 0.1 }}
-                className="group p-5 rounded-xl border border-border bg-card hover:border-foreground/20 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="w-10 h-10 rounded-lg border border-border bg-background flex items-center justify-center mb-4 group-hover:border-foreground/20 group-hover:bg-foreground/5 transition-all">
-                  <point.icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground mb-1.5">
-                  {point.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {point.description}
-                </p>
-              </motion.div>
-            ))}
+          <div className="lg:col-span-7">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {positioningPoints.map((point, index) => (
+                <motion.div
+                  key={point.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 + index * 0.1 }}
+                  className="group relative"
+                >
+                  <div className="p-6 rounded-2xl border border-border bg-card/50 hover:bg-card hover:border-border transition-all duration-300">
+                    <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center mb-5 group-hover:bg-foreground/5 transition-colors">
+                      <point.icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground mb-2">
+                      {point.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {point.description}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

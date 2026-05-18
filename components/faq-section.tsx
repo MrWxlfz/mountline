@@ -54,17 +54,19 @@ export function FAQSection() {
 
   return (
     <section id="faq" className="py-24 lg:py-32 bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <motion.span
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-6"
           >
+            <span className="w-8 h-px bg-border" />
             FAQ
-          </motion.span>
+            <span className="w-8 h-px bg-border" />
+          </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -90,7 +92,7 @@ export function FAQSection() {
                 value={`item-${index}`}
                 className="border-b border-border"
               >
-                <AccordionTrigger className="text-left text-foreground hover:text-accent py-6 text-base font-medium transition-colors [&[data-state=open]]:text-accent">
+                <AccordionTrigger className="text-left text-foreground hover:text-foreground/80 py-6 text-base font-medium transition-colors [&[data-state=open]]:text-foreground">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
@@ -114,8 +116,7 @@ export function FAQSection() {
           </p>
           <motion.button
             onClick={() => scrollToSection('contact')}
-            className="group inline-flex items-center gap-2 text-foreground hover:text-accent transition-colors font-medium"
-            whileHover={{ x: 4 }}
+            className="group inline-flex items-center gap-2 text-foreground hover:text-muted-foreground transition-colors font-medium"
           >
             Get in touch
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

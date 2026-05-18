@@ -83,3 +83,49 @@ export type SupportMessage = {
   read_at: string | null
   message: string
 }
+
+export type ScoutOutreachStatus =
+  | "not_contacted"
+  | "reviewed"
+  | "contacted"
+  | "not_fit"
+  | "lead_created"
+
+export type ScoutProspect = {
+  id: string
+  created_at: string
+  business_name: string
+  industry: string | null
+  city: string | null
+  state: string | null
+  website: string | null
+  phone: string | null
+  email: string | null
+  google_rating: number | null
+  google_review_count: number | null
+  source: string
+  website_score: number | null
+  opportunity_score: number | null
+  estimated_project_fit: string | null
+  reasons: string[]
+  website_notes: string | null
+  ai_summary: string | null
+  outreach_angle: string | null
+  red_flags: string[]
+  outreach_status: ScoutOutreachStatus
+  last_checked_at: string | null
+  notes: string | null
+}
+
+export type ScoutAlert = {
+  id: string
+  created_at: string
+  prospect_id: string
+  alert_type: string
+  score: number
+  payload: Record<string, unknown>
+  delivery_channel: string
+  status: string
+  delivered_at: string | null
+  delivery_error: string | null
+}

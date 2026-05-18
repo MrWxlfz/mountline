@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Globe,
   ArrowUpRight,
+  Radar,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NorthlineLogo } from "@/components/northline-logo"
@@ -27,6 +28,7 @@ const navGroups = [
     items: [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
       { href: "/dashboard/leads", label: "Leads", icon: Inbox },
+      { href: "/dashboard/scout", label: "Scout", icon: Radar },
     ],
   },
   {

@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 import { ArrowRight, Check, MessageSquare, CreditCard, Clock, Bell } from "lucide-react"
+import { LogoParticles } from "./logo-particles"
 
 // Animated grid background
 function AnimatedGrid() {
@@ -45,51 +46,6 @@ function AnimatedGrid() {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background opacity-50" />
     </div>
-  )
-}
-
-// Mountline mountain motif
-function MountainMotif() {
-  return (
-    <motion.svg
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] lg:w-[800px] lg:h-[800px] opacity-[0.03]"
-      viewBox="0 0 200 200"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 0.03, scale: 1 }}
-      transition={{ duration: 1.5 }}
-    >
-      {/* Mountain peak lines */}
-      <motion.path
-        d="M 100 40 L 60 100 L 100 80 L 140 100 Z"
-        stroke="currentColor"
-        strokeWidth="0.5"
-        fill="none"
-        className="text-foreground"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 2, delay: 0.5 }}
-      />
-      <motion.path
-        d="M 100 60 L 70 110 L 100 95 L 130 110 Z"
-        stroke="currentColor"
-        strokeWidth="0.3"
-        fill="none"
-        className="text-foreground"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 2, delay: 0.8 }}
-      />
-      {/* Vertical line */}
-      <motion.line
-        x1="100" y1="40" x2="100" y2="160"
-        stroke="currentColor"
-        strokeWidth="0.5"
-        className="text-foreground"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.5, delay: 1 }}
-      />
-    </motion.svg>
   )
 }
 
@@ -307,7 +263,9 @@ export function Hero3DStage() {
     >
       {/* Animated background */}
       <AnimatedGrid />
-      <MountainMotif />
+
+      {/* Logo particle animation - forms the Mountline arrow logo */}
+      <LogoParticles />
       
       {/* Subtle radial gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/[0.02] rounded-full blur-3xl pointer-events-none" />

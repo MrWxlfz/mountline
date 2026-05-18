@@ -52,7 +52,7 @@ export function Navbar() {
           scrolled ? "glass-card shadow-sm" : "bg-transparent"
         }`}
       >
-        <div className="w-full flex justify-center px-3 sm:px-6 py-2.5 sm:py-4">
+        <div className="w-full flex justify-center px-3 sm:px-6 py-2 sm:py-3.5">
           <div className="w-full max-w-6xl flex items-center justify-between">
             {/* Logo */}
             <NorthlineLogo size="sm" animated className="sm:hidden" />
@@ -97,11 +97,18 @@ export function Navbar() {
               {/* CTA - always visible */}
               <button
                 onClick={() => scrollToSection("contact")}
-                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium btn-primary !py-2 !px-3 sm:!py-2.5 sm:!px-4 whitespace-nowrap"
+                style={{ padding: "0.4rem 0.75rem", fontSize: "0.75rem" }}
+                className="flex items-center gap-1.5 font-medium btn-primary whitespace-nowrap sm:hidden"
               >
-                <span className="hidden sm:inline">Book a Free Review</span>
-                <span className="sm:hidden">Get Started</span>
-                <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                Get Started
+                <ArrowRight className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => scrollToSection("contact")}
+                className="hidden sm:flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4 whitespace-nowrap"
+              >
+                Book a Free Review
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
               {/* Mobile menu button */}

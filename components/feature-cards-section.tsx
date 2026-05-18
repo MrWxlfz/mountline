@@ -101,7 +101,7 @@ export function FeatureCardsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="group border-b border-border py-8 lg:py-10 hover:bg-muted/30 transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+              className="group border-b border-border py-8 lg:py-10 hover:bg-muted/30 transition-colors rounded-lg px-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
             >
               <div className="grid grid-cols-12 gap-4 lg:gap-8 items-start lg:items-center">
                 {/* Number */}

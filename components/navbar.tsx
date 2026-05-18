@@ -96,9 +96,10 @@ export function Navbar() {
               {/* CTA - always visible */}
               <button
                 onClick={() => scrollToSection("contact")}
-                className="hidden sm:flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4"
+                className="flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4 whitespace-nowrap"
               >
-                Book a Free Review
+                <span className="hidden sm:inline">Book a Free Review</span>
+                <span className="sm:hidden">Get Started</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 

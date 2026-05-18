@@ -338,7 +338,7 @@ export function Hero3DStage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground tracking-tight leading-[0.95] mb-6"
+              className="text-[2.25rem] sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground tracking-tight leading-[0.95] mb-6"
             >
               <span className="block">Websites people</span>
               <span className="block">trust before they</span>
@@ -360,11 +360,11 @@ export function Hero3DStage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row items-start gap-4 mb-10"
+              className="flex flex-col sm:flex-row items-stretch sm:items-start gap-3 sm:gap-4 mb-10"
             >
               <motion.button
                 onClick={() => scrollToSection('contact')}
-                className="group inline-flex items-center gap-2 px-6 py-3.5 bg-foreground text-background font-medium rounded-lg hover:bg-foreground/90 transition-all hover:shadow-lg"
+                className="group inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 bg-foreground text-background font-medium rounded-lg hover:bg-foreground/90 transition-all hover:shadow-lg"
                 whileHover={{ scale: 1.02, y: -1 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -373,7 +373,7 @@ export function Hero3DStage() {
               </motion.button>
               <motion.button
                 onClick={() => scrollToSection('work')}
-                className="inline-flex items-center gap-2 px-6 py-3.5 border border-border font-medium rounded-lg hover:bg-muted/50 hover:border-foreground/20 transition-all"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 border border-border font-medium rounded-lg hover:bg-muted/50 hover:border-foreground/20 transition-all"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >

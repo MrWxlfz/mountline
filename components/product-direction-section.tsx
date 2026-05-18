@@ -4,29 +4,29 @@ import { motion } from "framer-motion"
 
 const processSteps = [
   {
-    numeral: "I",
+    number: "01",
     title: "Review",
-    description: "We look at the current site, business goals, and what customers need to do.",
+    description: "We look at the current site, business goals, and what customers need to do. Free, no commitment.",
   },
   {
-    numeral: "II", 
+    number: "02", 
     title: "Plan",
-    description: "We define pages, content, timeline, and systems before the build starts.",
+    description: "We define pages, content structure, timeline, and systems before the build starts. Clear scope upfront.",
   },
   {
-    numeral: "III",
+    number: "03",
     title: "Build",
-    description: "We design and build the site with mobile, speed, forms, and trust in mind.",
+    description: "We design and build the site with mobile, speed, forms, and trust signals in mind. You review along the way.",
   },
   {
-    numeral: "IV",
+    number: "04",
     title: "Launch",
-    description: "We connect the domain, test the site, and make sure it is ready to use.",
+    description: "We connect the domain, test everything, and make sure the site is ready to use. Smooth handoff.",
   },
   {
-    numeral: "V",
+    number: "05",
     title: "Support",
-    description: "Mountline can keep the site updated with monthly care.",
+    description: "Mountline can keep the site updated with monthly care. Or you can manage it yourself.",
   }
 ]
 
@@ -63,7 +63,9 @@ export function ProductDirectionSection() {
             transition={{ delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] max-w-2xl"
           >
-            A clear path from review to launch.
+            A clear path from
+            <br />
+            <span className="text-background/60">review to launch.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -72,16 +74,16 @@ export function ProductDirectionSection() {
             transition={{ delay: 0.2 }}
             className="text-lg text-background/80 mt-6 max-w-xl leading-relaxed"
           >
-            Clear scope, careful design, clean build, and steady support.
+            Clear scope, careful design, clean build, and steady support. No surprises.
           </motion.p>
         </div>
         
         {/* Steps with animated progress line */}
         <div className="relative">
           {/* Vertical progress line - desktop */}
-          <div className="hidden lg:block absolute left-8 top-0 bottom-0 w-px bg-background/10">
+          <div className="hidden lg:block absolute left-12 top-0 bottom-0 w-px bg-background/10">
             <motion.div 
-              className="absolute top-0 left-0 w-full bg-accent"
+              className="absolute top-0 left-0 w-full bg-background/40"
               initial={{ height: 0 }}
               whileInView={{ height: "100%" }}
               viewport={{ once: true }}
@@ -93,7 +95,7 @@ export function ProductDirectionSection() {
           <div className="space-y-0">
             {processSteps.map((step, index) => (
               <motion.div
-                key={step.numeral}
+                key={step.number}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -101,23 +103,29 @@ export function ProductDirectionSection() {
                 className="relative group"
               >
                 <div className="grid grid-cols-12 gap-4 lg:gap-8 py-8 lg:py-10 border-b border-background/10 last:border-b-0">
-                  {/* Numeral */}
-                  <div className="col-span-2 lg:col-span-1 flex items-start lg:justify-center">
-                    <span className="text-2xl lg:text-3xl font-serif text-background/55 group-hover:text-background transition-colors">
-                      {step.numeral}
-                    </span>
+                  {/* Number */}
+                  <div className="col-span-3 lg:col-span-2 flex items-start">
+                    <motion.span 
+                      className="text-3xl lg:text-4xl font-bold font-mono text-background/30 group-hover:text-background/50 transition-colors"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.2 + index * 0.1 }}
+                    >
+                      {step.number}
+                    </motion.span>
                   </div>
                   
                   {/* Title */}
-                  <div className="col-span-10 lg:col-span-3">
-                    <h3 className="text-xl lg:text-2xl font-semibold group-hover:text-accent transition-colors">
+                  <div className="col-span-9 lg:col-span-3">
+                    <h3 className="text-2xl lg:text-3xl font-semibold group-hover:text-background/90 transition-colors">
                       {step.title}
                     </h3>
                   </div>
                   
                   {/* Description */}
-                  <div className="col-span-12 lg:col-span-7 lg:col-start-5">
-                    <p className="text-background/80 leading-relaxed mt-2 lg:mt-0">
+                  <div className="col-span-12 lg:col-span-6 lg:col-start-6">
+                    <p className="text-background/75 leading-relaxed mt-2 lg:mt-0 text-base lg:text-lg">
                       {step.description}
                     </p>
                   </div>
@@ -125,7 +133,7 @@ export function ProductDirectionSection() {
                   {/* Progress dot - desktop */}
                   <div className="hidden lg:flex col-span-1 items-center justify-end">
                     <motion.div 
-                      className="w-3 h-3 rounded-full border-2 border-background/20 group-hover:border-accent group-hover:bg-accent transition-colors"
+                      className="w-3 h-3 rounded-full border-2 border-background/20 group-hover:border-background/50 group-hover:bg-background/30 transition-colors"
                       initial={{ scale: 0 }}
                       whileInView={{ scale: 1 }}
                       viewport={{ once: true }}

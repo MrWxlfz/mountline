@@ -37,9 +37,9 @@ export function Navbar() {
   const navItems = [
     { label: "Services", id: "services" },
     { label: "Work", id: "work" },
+    { label: "Portal", id: "portal" },
     { label: "Process", id: "process" },
     { label: "Pricing", id: "pricing" },
-    { label: "AI Systems", id: "ai-systems" },
   ]
 
   return (
@@ -98,7 +98,7 @@ export function Navbar() {
                 onClick={() => scrollToSection("contact")}
                 className="hidden sm:flex items-center gap-2 text-sm font-medium btn-primary !py-2.5 !px-4"
               >
-                Book a Free Review
+                Book a Review
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
@@ -169,7 +169,7 @@ export function Navbar() {
                   onClick={() => scrollToSection("contact")}
                   className="w-full text-sm font-medium btn-primary text-center flex items-center justify-center gap-2"
                 >
-                  Book a Free Review
+                  Book a Review
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

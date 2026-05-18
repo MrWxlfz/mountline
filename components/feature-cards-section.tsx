@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Globe, FileText, MessageSquare, Sparkles, Wrench, ArrowRight } from "lucide-react"
+import { Globe, FileText, MessageSquare, Lock, Sparkles, Wrench, ArrowRight } from "lucide-react"
 
 const services = [
   {
@@ -27,13 +27,20 @@ const services = [
   },
   {
     number: "04",
+    title: "Client Portals",
+    description: "Private dashboards where clients track project status, send messages, view previews, and handle payments in one place.",
+    icon: Lock,
+    features: ["Project tracking", "Messaging", "Payments"],
+  },
+  {
+    number: "05",
     title: "AI-Assisted Systems",
     description: "Practical AI tools for repetitive tasks, customer follow-up drafts, summaries, and internal workflows.",
     icon: Sparkles,
     features: ["No gimmicks", "Useful tools", "Time saved"],
   },
   {
-    number: "05",
+    number: "06",
     title: "Monthly Website Care",
     description: "Updates, photos, seasonal changes, basic checks, and priority fixes. Keep your site fresh without thinking about it.",
     icon: Wrench,
@@ -88,7 +95,7 @@ export function FeatureCardsSection() {
             transition={{ delay: 0.2 }}
             className="text-lg text-muted-foreground max-w-xl"
           >
-            No bloat. No unnecessary features. Just the tools that help your business grow.
+            Nothing bloated. Just the tools that help your business grow and run smoother.
           </motion.p>
         </div>
         

@@ -11,7 +11,8 @@ import {
   ChevronRight,
   User,
   Zap,
-  LayoutDashboard
+  LayoutDashboard,
+  CreditCard
 } from "lucide-react"
 
 const aiCapabilities = [
@@ -41,9 +42,9 @@ const aiCapabilities = [
     description: "Connect forms to your existing Google Sheets workflow.",
   },
   {
-    icon: LayoutDashboard,
-    title: "Project portal",
-    description: "Clients track progress in their own private dashboard.",
+    icon: CreditCard,
+    title: "Payment links",
+    description: "Simple invoicing and payment collection for projects.",
   },
 ]
 
@@ -121,7 +122,7 @@ export function AiSystemsSection() {
             className="inline-flex items-center gap-3 text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4"
           >
             <span className="w-8 h-px bg-border" />
-            AI Systems
+            Systems
           </motion.span>
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-end">
             <motion.h2
@@ -142,7 +143,7 @@ export function AiSystemsSection() {
               transition={{ delay: 0.2 }}
               className="text-lg text-muted-foreground leading-relaxed"
             >
-              Some businesses need more than a website. Mountline can connect forms, booking, payment links, spreadsheets, email workflows, and simple AI-assisted tools so the site supports the business behind it.
+              Some businesses need more than a website. Mountline can connect forms, booking, payment links, spreadsheets, and simple AI-assisted tools so the site supports the business behind it.
             </motion.p>
           </div>
         </div>

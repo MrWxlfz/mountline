@@ -104,9 +104,9 @@ export function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground"
-            >
-              Every project includes a private client portal for tracking progress, previews, support, and payments.
+            className="text-lg text-muted-foreground"
+          >
+            Every project includes a private client portal for tracking progress, support, and payments. No extra cost.
             </motion.p>
           </div>
         </div>

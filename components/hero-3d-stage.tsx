@@ -2,14 +2,14 @@
 
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
-import { ArrowRight, Check, MessageSquare, CreditCard, Clock, Bell } from "lucide-react"
+import { ArrowRight, Check, MessageSquare, CreditCard, Clock, Bell, ExternalLink } from "lucide-react"
 
 // Animated grid background
 function AnimatedGrid() {
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Base grid */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="hero-grid" width="60" height="60" patternUnits="userSpaceOnUse">
             <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-foreground" />
@@ -18,29 +18,6 @@ function AnimatedGrid() {
         <rect width="100%" height="100%" fill="url(#hero-grid)" />
       </svg>
       
-      {/* Animated vertical lines */}
-      <div className="absolute inset-0">
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-0 w-px bg-gradient-to-b from-transparent via-accent/20 to-transparent"
-            style={{ left: `${12 + i * 12}%`, height: '100%' }}
-            initial={{ opacity: 0, scaleY: 0 }}
-            animate={{ 
-              opacity: [0, 0.5, 0],
-              scaleY: [0, 1, 0],
-            }}
-            transition={{
-              duration: 4,
-              delay: i * 0.3,
-              repeat: Infinity,
-              repeatDelay: 2,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
-      
       {/* Gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background opacity-50" />
@@ -48,63 +25,17 @@ function AnimatedGrid() {
   )
 }
 
-// Mountline mountain motif
-function MountainMotif() {
-  return (
-    <motion.svg
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] lg:w-[800px] lg:h-[800px] opacity-[0.03]"
-      viewBox="0 0 200 200"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 0.03, scale: 1 }}
-      transition={{ duration: 1.5 }}
-    >
-      {/* Mountain peak lines */}
-      <motion.path
-        d="M 100 40 L 60 100 L 100 80 L 140 100 Z"
-        stroke="currentColor"
-        strokeWidth="0.5"
-        fill="none"
-        className="text-foreground"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 2, delay: 0.5 }}
-      />
-      <motion.path
-        d="M 100 60 L 70 110 L 100 95 L 130 110 Z"
-        stroke="currentColor"
-        strokeWidth="0.3"
-        fill="none"
-        className="text-foreground"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 2, delay: 0.8 }}
-      />
-      {/* Vertical line */}
-      <motion.line
-        x1="100" y1="40" x2="100" y2="160"
-        stroke="currentColor"
-        strokeWidth="0.5"
-        className="text-foreground"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.5, delay: 1 }}
-      />
-    </motion.svg>
-  )
-}
-
-// Website preview mockup
+// Main website preview - larger and more impactful
 function WebsitePreview() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60, rotateX: 15 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ duration: 1, delay: 0.4 }}
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.8, delay: 0.3 }}
       className="relative"
-      style={{ perspective: "1200px" }}
     >
       {/* Main browser window */}
-      <div className="relative w-full max-w-[520px] rounded-xl border border-border bg-card shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-[560px] rounded-xl border border-border bg-card shadow-2xl overflow-hidden">
         {/* Browser chrome */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
           <div className="flex gap-1.5">
@@ -121,42 +52,43 @@ function WebsitePreview() {
         </div>
         
         {/* Website content - Contractor theme */}
-        <div className="relative p-5 bg-gradient-to-b from-stone-900 to-stone-800 min-h-[280px]">
+        <div className="relative p-6 bg-gradient-to-b from-stone-900 to-stone-800 min-h-[300px]">
           {/* Mock nav */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded bg-amber-500/20 flex items-center justify-center">
-                <span className="text-amber-400 font-bold text-xs">R</span>
+              <div className="w-9 h-9 rounded bg-amber-500/20 flex items-center justify-center">
+                <span className="text-amber-400 font-bold text-sm">R</span>
               </div>
-              <span className="text-white/90 font-semibold text-sm">RIDGEWAY</span>
+              <span className="text-white/90 font-semibold">RIDGEWAY</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
               <span className="text-white/40 text-xs hidden sm:block">Services</span>
               <span className="text-white/40 text-xs hidden sm:block">Gallery</span>
-              <div className="px-3 py-1.5 rounded bg-amber-500 text-white text-xs font-medium">
+              <span className="text-white/40 text-xs hidden sm:block">About</span>
+              <div className="px-4 py-2 rounded-lg bg-amber-500 text-white text-xs font-medium">
                 Get Estimate
               </div>
             </div>
           </div>
           
           {/* Hero content */}
-          <div className="space-y-4">
-            <div className="inline-block px-2 py-1 rounded bg-amber-500/20 text-amber-400 text-[10px] font-medium uppercase tracking-wider">
+          <div className="space-y-5">
+            <div className="inline-block px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 text-[10px] font-medium uppercase tracking-wider">
               Trusted Since 2008
             </div>
-            <h3 className="text-white text-xl sm:text-2xl font-bold leading-tight">
+            <h3 className="text-white text-2xl sm:text-3xl font-bold leading-tight">
               Build Something
               <br />
               <span className="text-white/60">That Lasts</span>
             </h3>
-            <p className="text-white/50 text-xs max-w-[280px]">
-              Premium residential contracting for roofing, remodels, and outdoor projects.
+            <p className="text-white/50 text-sm max-w-[320px]">
+              Premium residential contracting for roofing, remodels, and outdoor projects in the greater area.
             </p>
             <div className="flex gap-3 pt-2">
-              <div className="px-4 py-2 rounded-lg bg-amber-500 text-white text-xs font-medium">
+              <div className="px-5 py-2.5 rounded-lg bg-amber-500 text-white text-sm font-medium">
                 Free Estimate
               </div>
-              <div className="px-4 py-2 rounded-lg border border-white/20 text-white/80 text-xs font-medium">
+              <div className="px-5 py-2.5 rounded-lg border border-white/20 text-white/80 text-sm font-medium">
                 View Work
               </div>
             </div>
@@ -172,49 +104,27 @@ function WebsitePreview() {
   )
 }
 
-// Mobile preview overlay
-function MobilePreview() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 40, y: 40 }}
-      animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.9 }}
-      className="absolute -right-2 sm:-right-6 -bottom-8 sm:-bottom-12 w-24 sm:w-32 rounded-2xl border border-border bg-card shadow-xl overflow-hidden"
-    >
-      <div className="p-1.5 bg-muted/50 border-b border-border">
-        <div className="w-10 h-1 rounded bg-muted-foreground/30 mx-auto" />
-      </div>
-      <div className="p-3 bg-gradient-to-b from-stone-900 to-stone-800">
-        <div className="space-y-2">
-          <div className="w-full h-3 rounded bg-white/25" />
-          <div className="w-2/3 h-3 rounded bg-white/25" />
-          <div className="w-full h-7 rounded bg-amber-500 mt-4 flex items-center justify-center">
-            <span className="text-white text-[8px] font-medium">Get Quote</span>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-// Floating portal preview card
+// Floating portal preview card - positioned to show connection
 function PortalPreviewCard() {
   return (
     <motion.div
-      initial={{ opacity: 0, x: -30, y: -20 }}
+      initial={{ opacity: 0, x: -20, y: -10 }}
       animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: 0.7, delay: 1.1 }}
-      className="absolute -left-4 sm:-left-8 top-16 sm:top-20 w-44 sm:w-52 rounded-xl border border-border bg-card shadow-lg overflow-hidden"
+      transition={{ duration: 0.6, delay: 0.8 }}
+      className="absolute -left-4 sm:-left-8 top-24 sm:top-28 w-48 sm:w-56 rounded-xl border border-border bg-card shadow-xl overflow-hidden"
     >
-      <div className="px-3 py-2 border-b border-border bg-muted/30">
+      <div className="px-3 py-2.5 border-b border-border bg-muted/30">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded bg-accent/10 flex items-center justify-center">
-            <span className="text-accent text-[8px] font-bold">M</span>
+          <div className="w-6 h-6 rounded bg-foreground flex items-center justify-center">
+            <span className="text-background text-[9px] font-bold">M</span>
           </div>
-          <span className="text-[10px] font-medium text-foreground">Client Portal</span>
+          <div>
+            <span className="text-[10px] font-semibold text-foreground block leading-tight">Client Portal</span>
+            <span className="text-[8px] text-muted-foreground">Ridgeway Contracting</span>
+          </div>
         </div>
       </div>
-      <div className="p-3 space-y-2">
+      <div className="p-3 space-y-2.5">
         <div className="flex items-center gap-2">
           <Clock className="w-3 h-3 text-muted-foreground" />
           <span className="text-[9px] text-muted-foreground">Project Status</span>
@@ -222,56 +132,84 @@ function PortalPreviewCard() {
         </div>
         <div className="flex items-center gap-2">
           <MessageSquare className="w-3 h-3 text-muted-foreground" />
-          <span className="text-[9px] text-muted-foreground">Support Chat</span>
-          <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />
+          <span className="text-[9px] text-muted-foreground">Messages</span>
+          <span className="ml-auto w-4 h-4 rounded-full bg-accent text-accent-foreground text-[8px] flex items-center justify-center font-medium">2</span>
         </div>
         <div className="flex items-center gap-2">
           <CreditCard className="w-3 h-3 text-muted-foreground" />
           <span className="text-[9px] text-muted-foreground">Payments</span>
-          <span className="ml-auto text-[8px] text-muted-foreground">$2,400</span>
+          <span className="ml-auto text-[8px] text-foreground font-medium">$2,400</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <ExternalLink className="w-3 h-3 text-muted-foreground" />
+          <span className="text-[9px] text-muted-foreground">Preview Site</span>
+          <span className="ml-auto w-1.5 h-1.5 rounded-full bg-green-500" />
         </div>
       </div>
     </motion.div>
   )
 }
 
-// Floating lead captured card
+// Lead captured notification
 function LeadCapturedCard() {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+      initial={{ opacity: 0, scale: 0.9, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 1.4 }}
-      className="absolute -left-2 sm:-left-4 bottom-4 sm:bottom-8 flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg shadow-lg"
+      transition={{ duration: 0.5, delay: 1.1 }}
+      className="absolute -left-2 sm:-left-4 bottom-8 sm:bottom-12 flex items-center gap-2.5 px-3.5 py-2.5 bg-card border border-border rounded-xl shadow-lg"
     >
       <motion.div 
-        className="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center"
+        className="w-7 h-7 rounded-full bg-green-500/10 flex items-center justify-center"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ delay: 1.6, type: "spring" }}
+        transition={{ delay: 1.3, type: "spring" }}
       >
-        <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+        <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
       </motion.div>
       <div>
-        <span className="text-[10px] font-medium text-foreground block">Lead Captured</span>
-        <span className="text-[8px] text-muted-foreground">Roofing quote request</span>
+        <span className="text-[11px] font-medium text-foreground block">Lead Captured</span>
+        <span className="text-[9px] text-muted-foreground">Roofing estimate request</span>
       </div>
     </motion.div>
   )
 }
 
-// Notification card
-function NotificationCard() {
+// New message notification
+function MessageNotification() {
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20, y: -10 }}
-      animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: 0.5, delay: 1.6 }}
-      className="absolute right-0 sm:-right-4 top-0 sm:-top-4 flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg shadow-lg"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 1.4 }}
+      className="absolute right-0 sm:-right-4 -top-2 sm:-top-4 flex items-center gap-2.5 px-3.5 py-2.5 bg-card border border-border rounded-xl shadow-lg"
     >
-      <Bell className="w-3.5 h-3.5 text-accent" />
-      <span className="text-[9px] font-medium text-foreground">New message from client</span>
+      <Bell className="w-4 h-4 text-foreground" />
+      <span className="text-[10px] font-medium text-foreground">New client message</span>
     </motion.div>
+  )
+}
+
+// Connection line visual
+function ConnectionLine() {
+  return (
+    <motion.svg
+      className="absolute top-32 -left-12 w-16 h-24 hidden lg:block"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 0.3 }}
+      transition={{ delay: 1 }}
+    >
+      <motion.path
+        d="M 60 0 C 60 40, 0 40, 0 80"
+        stroke="currentColor"
+        strokeWidth="1"
+        fill="none"
+        className="text-border"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1, delay: 0.8 }}
+      />
+    </motion.svg>
   )
 }
 
@@ -307,10 +245,9 @@ export function Hero3DStage() {
     >
       {/* Animated background */}
       <AnimatedGrid />
-      <MountainMotif />
       
       {/* Subtle radial gradient */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/[0.02] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/[0.015] rounded-full blur-3xl pointer-events-none" />
       
       {/* Main content */}
       <motion.div 
@@ -333,7 +270,7 @@ export function Hero3DStage() {
               </span>
             </motion.div>
             
-            {/* Main headline - Large editorial type */}
+            {/* Main headline */}
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -345,17 +282,17 @@ export function Hero3DStage() {
               <span className="block text-muted-foreground/60">ever call.</span>
             </motion.h1>
             
-            {/* Subheadline - Updated per brief */}
+            {/* Subheadline */}
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mb-8"
             >
-              Mountline Studio builds clean websites, client portals, and practical systems for businesses that need a stronger first impression and smoother customer action.
+              Mountline Studio builds premium websites, private client portals, and practical systems for businesses that need a stronger first impression and smoother customer action.
             </motion.p>
             
-            {/* CTAs - Updated per brief */}
+            {/* CTAs */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -404,12 +341,12 @@ export function Hero3DStage() {
           
           {/* Right column - Layered preview composition */}
           <div className="hidden lg:block relative">
-            <div className="relative">
+            <div className="relative ml-8">
+              <ConnectionLine />
               <WebsitePreview />
-              <MobilePreview />
               <PortalPreviewCard />
               <LeadCapturedCard />
-              <NotificationCard />
+              <MessageNotification />
             </div>
           </div>
         </div>

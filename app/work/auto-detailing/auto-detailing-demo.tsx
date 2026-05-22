@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import type { FormEvent } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import {
   ArrowRight,
@@ -88,15 +89,64 @@ const processSteps = [
   },
 ]
 
+// High-quality public domain automotive images from Unsplash
 const galleryImages = [
-  { id: 1, alt: "Black truck exterior detail", aspect: "tall" },
-  { id: 2, alt: "Detailed wheel and brake caliper", aspect: "square" },
-  { id: 3, alt: "Premium leather interior", aspect: "wide" },
-  { id: 4, alt: "Glossy hood reflection", aspect: "square" },
-  { id: 5, alt: "SUV after full detail", aspect: "tall" },
-  { id: 6, alt: "Foam wash in progress", aspect: "wide" },
-  { id: 7, alt: "Sports car ceramic finish", aspect: "square" },
-  { id: 8, alt: "Mobile detailing van setup", aspect: "square" },
+  { 
+    id: 1, 
+    alt: "Black truck exterior detail", 
+    aspect: "tall",
+    src: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=800&q=80",
+    label: "Exterior Detail"
+  },
+  { 
+    id: 2, 
+    alt: "Detailed wheel and brake caliper", 
+    aspect: "square",
+    src: "https://images.unsplash.com/photo-1611651338412-8403fa6e3599?w=600&q=80",
+    label: "Wheel Detail"
+  },
+  { 
+    id: 3, 
+    alt: "Premium leather interior", 
+    aspect: "wide",
+    src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1000&q=80",
+    label: "Interior"
+  },
+  { 
+    id: 4, 
+    alt: "Glossy hood reflection", 
+    aspect: "square",
+    src: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&q=80",
+    label: "Paint Finish"
+  },
+  { 
+    id: 5, 
+    alt: "SUV after full detail", 
+    aspect: "tall",
+    src: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=80",
+    label: "Full Detail"
+  },
+  { 
+    id: 6, 
+    alt: "Foam wash in progress", 
+    aspect: "wide",
+    src: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=1000&q=80",
+    label: "Wash Process"
+  },
+  { 
+    id: 7, 
+    alt: "Sports car ceramic finish", 
+    aspect: "square",
+    src: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&q=80",
+    label: "Ceramic Coating"
+  },
+  { 
+    id: 8, 
+    alt: "Clean dashboard detail", 
+    aspect: "square",
+    src: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=600&q=80",
+    label: "Dashboard"
+  },
 ]
 
 const trustValues = [
@@ -313,23 +363,22 @@ function Hero() {
 
   return (
     <section ref={ref} className="relative min-h-[90vh] sm:min-h-screen overflow-hidden">
-      {/* Background Image Placeholder */}
+      {/* Background Image - Glossy Black Vehicle */}
       <motion.div style={{ scale }} className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#0a0a0a]" />
+        <Image
+          src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1920&q=85"
+          alt="Premium black vehicle with glossy finish"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-[#0a0a0a]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#0a0a0a_70%)]" />
-        {/* Placeholder for hero image - glossy black vehicle */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-800 to-black">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[40%] rounded-[100px] bg-gradient-to-b from-zinc-600/50 to-transparent blur-sm" />
-            <div className="absolute top-[55%] left-1/2 -translate-x-1/2 w-[70%] h-[2px] bg-gradient-to-r from-transparent via-[#c41e3a]/60 to-transparent" />
-          </div>
-        </div>
-        <p className="absolute bottom-4 right-4 text-[10px] text-white/30 uppercase tracking-wider">
-          Replace with hero vehicle image
-        </p>
+        {/* Subtle red accent line */}
+        <div className="absolute top-[60%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#c41e3a]/40 to-transparent" />
       </motion.div>
 
-      {/* Accent Line */}
+      {/* Accent Line at Bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c41e3a] to-transparent opacity-60" />
 
       {/* Content */}
@@ -350,7 +399,7 @@ function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="max-w-4xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-white leading-[1.1]"
+            className="max-w-4xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-white leading-[1.1] text-balance"
           >
             Detailing that makes your vehicle feel new again.
           </motion.h1>
@@ -442,12 +491,12 @@ function IntroSection() {
           <div>
             <motion.h2
               variants={fadeUp}
-              className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-tight text-balance"
             >
               Clean work. Clear service. A finish you can see.
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-6 text-zinc-400 leading-relaxed">
-              Summit Auto Detail is a fictional concept created to show how a detailing business can present services, packages, work, and booking in a clearer, more premium way.
+              Summit Auto Detail is a fictional concept created to show how a detailing business can present services, packages, work, and booking in a clearer, more professional way.
             </motion.p>
 
             {/* Value Points */}
@@ -467,18 +516,21 @@ function IntroSection() {
             </motion.div>
           </div>
 
-          {/* Image Placeholder */}
+          {/* Image - Interior Detail */}
           <motion.div
             variants={fadeUp}
-            className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10"
+            className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10"
           >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Droplets className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
-                <p className="text-xs text-zinc-500 uppercase tracking-wider">Service image placeholder</p>
-              </div>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <Image
+              src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=800&q=80"
+              alt="Clean black leather interior detail"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <p className="absolute bottom-4 left-4 text-[10px] text-white/50 uppercase tracking-wider bg-black/40 px-2 py-1 rounded">
+              Sample imagery — replace with real client work
+            </p>
           </motion.div>
         </motion.div>
       </div>
@@ -507,6 +559,30 @@ function ProcessSection() {
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white">
               Booking made simple.
             </h2>
+          </motion.div>
+
+          {/* Process Image Tiles */}
+          <motion.div variants={fadeUp} className="grid sm:grid-cols-2 gap-4 mb-12">
+            <div className="relative aspect-[16/9] rounded-xl overflow-hidden group">
+              <Image
+                src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=80"
+                alt="Completed exterior detail on SUV"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <p className="absolute bottom-4 left-4 text-sm font-medium text-white">Exterior Detail</p>
+            </div>
+            <div className="relative aspect-[16/9] rounded-xl overflow-hidden group">
+              <Image
+                src="https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&q=80"
+                alt="Clean wheel and tire detail"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <p className="absolute bottom-4 left-4 text-sm font-medium text-white">Wheel Detail</p>
+            </div>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
@@ -664,30 +740,32 @@ function CeramicSection() {
           variants={stagger}
           className="grid lg:grid-cols-2 gap-12 items-center"
         >
-          {/* Image */}
+          {/* Image - Water Beading/Ceramic Coating */}
           <motion.div
             variants={fadeUp}
-            className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 order-2 lg:order-1"
+            className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 order-2 lg:order-1"
           >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Shield className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
-                <p className="text-xs text-zinc-500 uppercase tracking-wider">Ceramic coating image</p>
-              </div>
-            </div>
-            {/* Glossy reflection effect */}
+            <Image
+              src="https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=800&q=80"
+              alt="Glossy ceramic coated hood with water beading"
+              fill
+              className="object-cover"
+            />
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
+            <p className="absolute bottom-4 left-4 text-[10px] text-white/50 uppercase tracking-wider bg-black/40 px-2 py-1 rounded">
+              Sample imagery
+            </p>
           </motion.div>
 
           {/* Content */}
           <motion.div variants={fadeUp} className="order-1 lg:order-2">
             <p className="text-sm uppercase tracking-[0.2em] text-[#c41e3a] mb-4">Featured service</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-tight">
-              Protection that keeps the finish easier to love.
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-tight text-balance">
+              Protection that keeps the finish easier to maintain.
             </h2>
             <p className="mt-6 text-zinc-400 leading-relaxed">
-              Ceramic protection helps maintain gloss, makes routine cleaning easier, and gives premium vehicles the presentation they deserve.
+              Ceramic protection helps maintain gloss, makes routine cleaning easier, and gives vehicles the lasting shine they deserve.
             </p>
             <a
               href="#contact"
@@ -725,16 +803,16 @@ function GallerySection() {
               Results worth showing off.
             </h2>
             <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
-              A clean gallery helps customers trust the work before they book.
+              A clean gallery helps customers see the finish before they book.
             </p>
           </motion.div>
 
           {/* Masonry Grid */}
           <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            {galleryImages.map((image, index) => (
+            {galleryImages.map((image) => (
               <div
                 key={image.id}
-                className={`group relative overflow-hidden rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 hover:border-white/20 transition-all cursor-pointer ${
+                className={`group relative overflow-hidden rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer ${
                   image.aspect === "tall"
                     ? "row-span-2"
                     : image.aspect === "wide"
@@ -751,14 +829,18 @@ function GallerySection() {
                       : "aspect-square"
                   }`}
                 >
-                  {/* Placeholder content */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity">
-                    <Sparkles className="h-8 w-8 text-zinc-500" />
-                  </div>
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
 
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                    <p className="text-sm text-white">{image.alt}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                    <span className="text-xs font-medium text-white bg-black/40 px-2 py-1 rounded">
+                      {image.label}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -785,14 +867,17 @@ function ReviewsSection() {
   const sampleReviews = [
     {
       name: "Customer Name",
-      text: "Your real customer review would appear here, paired with a finished-detail photo or service booked.",
+      service: "Full Detail",
+      text: "A real customer review would appear here, paired with the service completed and optionally a finished-detail photo.",
     },
     {
       name: "Customer Name",
+      service: "Ceramic Protection",
       text: "Another genuine testimonial showcasing the quality of work and customer experience.",
     },
     {
       name: "Customer Name",
+      service: "Essential Wash",
       text: "A third review highlighting specific services, professionalism, and results delivered.",
     },
   ]
@@ -806,9 +891,9 @@ function ReviewsSection() {
           variants={stagger}
         >
           <motion.div variants={fadeUp} className="text-center mb-12">
-            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500 mb-4">Social proof</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500 mb-4">Sample review layout</p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white">
-              Social proof, presented clearly.
+              What customers would say.
             </h2>
             <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
               A review section like this helps strong customer feedback work harder on the site.
@@ -821,22 +906,27 @@ function ReviewsSection() {
                 key={index}
                 className="relative rounded-2xl bg-white/[0.03] border border-white/10 border-dashed p-6 sm:p-8"
               >
+                {/* Sample badge */}
                 <span className="absolute -top-2.5 left-6 px-2 py-0.5 bg-[#111] text-[10px] uppercase tracking-wider text-zinc-500">
-                  Sample review layout
+                  Sample layout
                 </span>
 
                 {/* Stars placeholder */}
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="h-4 w-4 rounded bg-white/10" />
+                    <div key={i} className="h-4 w-4 rounded-sm bg-[#c41e3a]/60" />
                   ))}
                 </div>
 
-                <p className="text-zinc-300 leading-relaxed italic">&ldquo;{review.text}&rdquo;</p>
+                <p className="text-zinc-300 leading-relaxed">&ldquo;{review.text}&rdquo;</p>
 
-                <div className="mt-6 pt-4 border-t border-white/10">
-                  <p className="text-sm font-medium text-white">{review.name}</p>
-                  <p className="text-xs text-zinc-500">Verified Customer</p>
+                <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white">{review.name}</p>
+                    <p className="text-xs text-zinc-500">{review.service}</p>
+                  </div>
+                  {/* Small image placeholder */}
+                  <div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10" />
                 </div>
               </div>
             ))}
@@ -847,7 +937,7 @@ function ReviewsSection() {
             className="mt-10 p-6 rounded-xl bg-white/[0.02] border border-white/10 border-dashed text-center"
           >
             <p className="text-sm text-zinc-500">
-              Google reviews can be linked or embedded here.
+              Google reviews can be linked or embedded into a live client site.
             </p>
           </motion.div>
         </motion.div>
@@ -882,7 +972,7 @@ function ContactSection({
           {/* Left Column */}
           <motion.div variants={fadeUp}>
             <p className="text-sm uppercase tracking-[0.2em] text-[#c41e3a] mb-4">Get started</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-tight text-balance">
               Ready for a cleaner vehicle?
             </h2>
             <p className="mt-6 text-zinc-400 leading-relaxed">
@@ -910,6 +1000,11 @@ function ContactSection({
                 </div>
               </div>
             </div>
+
+            {/* Service area note */}
+            <p className="mt-8 text-xs text-zinc-500 leading-relaxed">
+              Mobile detailing available throughout the DFW metroplex. Contact for service availability in your area.
+            </p>
           </motion.div>
 
           {/* Form */}
@@ -925,7 +1020,7 @@ function ContactSection({
                   </div>
                   <h3 className="mt-6 text-2xl font-semibold text-white">Demo request received</h3>
                   <p className="mt-4 max-w-md text-sm text-zinc-400 leading-relaxed">
-                    Demo request received — a real site would send this directly to the business.
+                    A real site would send this directly to the business for follow-up.
                   </p>
                 </div>
               ) : (
@@ -937,7 +1032,7 @@ function ContactSection({
 
                   <label className="space-y-2">
                     <span className="text-sm font-medium text-zinc-300">Service interested in</span>
-                    <select className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white outline-none transition-colors focus:border-[#c41e3a]">
+                    <select className="h-12 w-full rounded-xl border border-white/15 bg-white/5 px-4 text-sm text-white outline-none transition-colors focus:border-[#c41e3a] focus:bg-white/10">
                       <option value="">Select a service</option>
                       <option>Essential Wash</option>
                       <option>Full Detail</option>
@@ -952,32 +1047,32 @@ function ContactSection({
                   <label className="space-y-2 sm:col-span-2">
                     <span className="text-sm font-medium text-zinc-300">Notes about the vehicle</span>
                     <textarea
-                      className="min-h-24 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-[#c41e3a]"
+                      className="min-h-24 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-[#c41e3a] focus:bg-white/10"
                       placeholder="Any details about condition, requests, or questions..."
                     />
                   </label>
 
                   {/* Checkboxes */}
                   <div className="sm:col-span-2 space-y-3">
-                    <label className="flex items-center gap-3 cursor-pointer">
+                    <label className="flex items-center gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
                         className="h-4 w-4 rounded border-white/20 bg-white/5 text-[#c41e3a] focus:ring-[#c41e3a]"
                       />
-                      <span className="text-sm text-zinc-400">I would like maintenance wash information</span>
+                      <span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">I would like maintenance wash information</span>
                     </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
+                    <label className="flex items-center gap-3 cursor-pointer group">
                       <input
                         type="checkbox"
                         className="h-4 w-4 rounded border-white/20 bg-white/5 text-[#c41e3a] focus:ring-[#c41e3a]"
                       />
-                      <span className="text-sm text-zinc-400">I would like ceramic protection pricing</span>
+                      <span className="text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">I would like ceramic protection pricing</span>
                     </label>
                   </div>
 
                   <button
                     type="submit"
-                    className="sm:col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-[#c41e3a] px-6 py-4 text-sm font-semibold text-white hover:bg-[#a01830] transition-all hover:-translate-y-0.5"
+                    className="sm:col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-[#c41e3a] px-6 py-4 text-sm font-semibold text-white hover:bg-[#a01830] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#c41e3a]/25"
                   >
                     Request Appointment
                     <ArrowRight className="h-4 w-4" />
@@ -1009,7 +1104,7 @@ function InputField({
       <input
         type={type}
         placeholder={placeholder}
-        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-[#c41e3a]"
+        className="h-12 w-full rounded-xl border border-white/15 bg-white/5 px-4 text-sm text-white outline-none transition-colors placeholder:text-zinc-600 focus:border-[#c41e3a] focus:bg-white/10"
       />
     </label>
   )
@@ -1025,13 +1120,15 @@ function FinalCTA() {
 
   return (
     <section ref={ref} className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Background with vehicle silhouette placeholder */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#111] to-[#0a0a0a]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#c41e3a08,transparent_60%)]" />
-
-      {/* Placeholder for background vehicle image */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[30%] rounded-[80px] bg-gradient-to-b from-zinc-500 to-transparent" />
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <Image
+          src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1600&q=80"
+          alt="Premium vehicle at golden hour"
+          fill
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-[#0a0a0a]" />
       </div>
 
       <motion.div
@@ -1042,7 +1139,7 @@ function FinalCTA() {
       >
         <motion.h2
           variants={fadeUp}
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white text-balance"
         >
           Give your vehicle the finish it deserves.
         </motion.h2>

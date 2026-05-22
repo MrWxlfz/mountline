@@ -90,62 +90,88 @@ const processSteps = [
 ]
 
 // High-quality public domain automotive images from Unsplash
-const galleryImages = [
-  { 
-    id: 1, 
-    alt: "Black truck exterior detail", 
-    aspect: "tall",
-    src: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=800&q=80",
-    label: "Exterior Detail"
+type GalleryCategory = "all" | "exterior" | "interior" | "protection"
+
+const galleryImages: {
+  id: number
+  alt: string
+  src: string
+  label: string
+  category: GalleryCategory
+  featured?: boolean
+}[] = [
+  {
+    id: 1,
+    alt: "Black truck exterior after full detail",
+    src: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=900&q=85",
+    label: "Exterior Detail",
+    category: "exterior",
+    featured: true,
   },
-  { 
-    id: 2, 
-    alt: "Detailed wheel and brake caliper", 
-    aspect: "square",
-    src: "https://images.unsplash.com/photo-1611651338412-8403fa6e3599?w=600&q=80",
-    label: "Wheel Detail"
+  {
+    id: 2,
+    alt: "SUV completed exterior detail",
+    src: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=900&q=85",
+    label: "Full Detail",
+    category: "exterior",
   },
-  { 
-    id: 3, 
-    alt: "Premium leather interior", 
-    aspect: "wide",
-    src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1000&q=80",
-    label: "Interior"
+  {
+    id: 3,
+    alt: "Foam hand wash process",
+    src: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=900&q=85",
+    label: "Wash Process",
+    category: "exterior",
   },
-  { 
-    id: 4, 
-    alt: "Glossy hood reflection", 
-    aspect: "square",
-    src: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&q=80",
-    label: "Paint Finish"
+  {
+    id: 4,
+    alt: "Polished wheel and brake caliper",
+    src: "https://images.unsplash.com/photo-1611651338412-8403fa6e3599?w=900&q=85",
+    label: "Wheel Detail",
+    category: "exterior",
   },
-  { 
-    id: 5, 
-    alt: "SUV after full detail", 
-    aspect: "tall",
-    src: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=80",
-    label: "Full Detail"
+  {
+    id: 5,
+    alt: "Clean premium leather seats",
+    src: "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=900&q=85",
+    label: "Leather Interior",
+    category: "interior",
+    featured: true,
   },
-  { 
-    id: 6, 
-    alt: "Foam wash in progress", 
-    aspect: "wide",
-    src: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=1000&q=80",
-    label: "Wash Process"
+  {
+    id: 6,
+    alt: "Spotless dashboard and center console",
+    src: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=900&q=85",
+    label: "Dashboard",
+    category: "interior",
   },
-  { 
-    id: 7, 
-    alt: "Sports car ceramic finish", 
-    aspect: "square",
-    src: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&q=80",
-    label: "Ceramic Coating"
+  {
+    id: 7,
+    alt: "Premium sports car interior",
+    src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900&q=85",
+    label: "Interior Detail",
+    category: "interior",
   },
-  { 
-    id: 8, 
-    alt: "Clean dashboard detail", 
-    aspect: "square",
-    src: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=600&q=80",
-    label: "Dashboard"
+  {
+    id: 8,
+    alt: "Glossy ceramic-coated hood",
+    src: "https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=900&q=85",
+    label: "Ceramic Finish",
+    category: "protection",
+    featured: true,
+  },
+  {
+    id: 9,
+    alt: "Glossy sports car paint reflection",
+    src: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=900&q=85",
+    label: "Paint Protection",
+    category: "protection",
+  },
+  {
+    id: 10,
+    alt: "Mirror-finish hood detail",
+    src: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=900&q=85",
+    label: "Deep Gloss",
+    category: "protection",
   },
 ]
 
@@ -785,9 +811,21 @@ function CeramicSection() {
 // GALLERY SECTION
 // ============================================
 
+const galleryFilters: { key: GalleryCategory; label: string }[] = [
+  { key: "all", label: "All Work" },
+  { key: "exterior", label: "Exterior" },
+  { key: "interior", label: "Interior" },
+  { key: "protection", label: "Protection" },
+]
+
 function GallerySection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const [activeFilter, setActiveFilter] = useState<GalleryCategory>("all")
+
+  const filtered = activeFilter === "all"
+    ? galleryImages
+    : galleryImages.filter((img) => img.category === activeFilter)
 
   return (
     <section id="gallery" ref={ref} className="py-20 sm:py-28 bg-[#0a0a0a] border-t border-white/10">
@@ -797,62 +835,118 @@ function GallerySection() {
           animate={isInView ? "visible" : "hidden"}
           variants={stagger}
         >
-          <motion.div variants={fadeUp} className="text-center mb-12">
-            <p className="text-sm uppercase tracking-[0.2em] text-[#c41e3a] mb-4">Our work</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white">
-              Results worth showing off.
-            </h2>
-            <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
-              A clean gallery helps customers see the finish before they book.
-            </p>
-          </motion.div>
+          {/* Header */}
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-[#c41e3a] mb-4">Our work</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white">
+                Results worth showing off.
+              </h2>
+              <p className="mt-3 text-zinc-400 max-w-xl">
+                A clean gallery helps customers see the finish before they book.
+              </p>
+            </div>
 
-          {/* Masonry Grid */}
-          <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            {galleryImages.map((image) => (
-              <div
-                key={image.id}
-                className={`group relative overflow-hidden rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer ${
-                  image.aspect === "tall"
-                    ? "row-span-2"
-                    : image.aspect === "wide"
-                    ? "col-span-2"
-                    : ""
-                }`}
-              >
-                <div
-                  className={`relative w-full ${
-                    image.aspect === "tall"
-                      ? "aspect-[3/4]"
-                      : image.aspect === "wide"
-                      ? "aspect-[2/1]"
-                      : "aspect-square"
+            {/* Filter tabs */}
+            <div className="flex flex-wrap gap-2 shrink-0">
+              {galleryFilters.map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setActiveFilter(f.key)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    activeFilter === f.key
+                      ? "bg-white text-black"
+                      : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10"
                   }`}
                 >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                    <span className="text-xs font-medium text-white bg-black/40 px-2 py-1 rounded">
-                      {image.label}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+                  {f.label}
+                </button>
+              ))}
+            </div>
           </motion.div>
 
+          {/* Featured + Grid */}
+          {activeFilter === "all" ? (
+            <motion.div variants={fadeUp} className="space-y-3 sm:space-y-4">
+              {/* Top row: one wide featured + one square */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                {/* Featured — spans 2 cols */}
+                <GalleryCard image={galleryImages[0]} className="sm:col-span-2 aspect-[16/9]" />
+                <GalleryCard image={galleryImages[4]} className="aspect-[16/9] sm:aspect-auto" />
+              </div>
+
+              {/* Middle row: four equal squares */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <GalleryCard image={galleryImages[1]} className="aspect-square" />
+                <GalleryCard image={galleryImages[2]} className="aspect-square" />
+                <GalleryCard image={galleryImages[5]} className="aspect-square" />
+                <GalleryCard image={galleryImages[7]} className="aspect-square" />
+              </div>
+
+              {/* Bottom row: square + wide featured */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <GalleryCard image={galleryImages[6]} className="aspect-[16/9] sm:aspect-auto" />
+                <GalleryCard image={galleryImages[8]} className="sm:col-span-2 aspect-[16/9]" />
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={activeFilter}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
+            >
+              {filtered.map((image, index) => (
+                <GalleryCard
+                  key={image.id}
+                  image={image}
+                  className={
+                    index === 0 && image.featured
+                      ? "sm:col-span-2 aspect-[16/9]"
+                      : "aspect-[4/3]"
+                  }
+                />
+              ))}
+            </motion.div>
+          )}
+
           <motion.p variants={fadeUp} className="mt-8 text-center text-xs text-zinc-500">
-            Sample gallery imagery — replace with client work.
+            Sample gallery imagery — replace with client work photos.
           </motion.p>
         </motion.div>
       </div>
     </section>
+  )
+}
+
+function GalleryCard({
+  image,
+  className = "",
+}: {
+  image: (typeof galleryImages)[0]
+  className?: string
+}) {
+  return (
+    <div
+      className={`group relative overflow-hidden rounded-xl border border-white/[0.08] hover:border-white/20 transition-all cursor-pointer ${className}`}
+    >
+      <Image
+        src={image.src}
+        alt={image.alt}
+        fill
+        className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+      />
+      {/* Permanent bottom label */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent pt-10 pb-4 px-4">
+        <span className="text-xs font-medium text-white/80 uppercase tracking-widest">
+          {image.label}
+        </span>
+      </div>
+      {/* Hover full overlay */}
+      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    </div>
   )
 }
 

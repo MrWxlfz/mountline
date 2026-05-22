@@ -2,9 +2,9 @@ import type { Metadata } from "next"
 import { AutoDetailingDemo } from "./auto-detailing-demo"
 
 export const metadata: Metadata = {
-  title: "Apex Auto Detail Concept | Mountline Studio",
+  title: "Summit Auto Detail Concept | Mountline Studio",
   description:
-    "A polished sample website direction for a fictional premium auto detailing business.",
+    "A premium sample website direction for a fictional mobile auto detailing business serving DFW. Created by Mountline Studio.",
 }
 
 export default function AutoDetailingDemoPage() {

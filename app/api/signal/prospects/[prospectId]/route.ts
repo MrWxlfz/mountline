@@ -97,6 +97,11 @@ export async function PATCH(
     "visible_problem",
     "relevant_demo",
     "conversation_style_reason",
+    "known_communication_context",
+    "public_brand_tone",
+    "communication_profile_reason",
+    "script_guidance",
+    "contact_readiness_reason",
     "follow_up_date",
     "assigned_to",
   ] as const
@@ -112,6 +117,13 @@ export async function PATCH(
   }
   if (parsed.data.outreach_mode) update.outreach_mode = parsed.data.outreach_mode
   if (parsed.data.conversation_style) update.conversation_style = parsed.data.conversation_style
+  if (parsed.data.suggested_communication_profile) {
+    update.suggested_communication_profile = parsed.data.suggested_communication_profile
+  }
+  if (typeof parsed.data.communication_profile_confirmed === "boolean") {
+    update.communication_profile_confirmed = parsed.data.communication_profile_confirmed
+  }
+  if (parsed.data.contact_readiness) update.contact_readiness = parsed.data.contact_readiness
   if (parsed.data.outreach_status) update.outreach_status = parsed.data.outreach_status
   if (parsed.data.locality_scope) update.locality_scope = parsed.data.locality_scope
   if (parsed.data.relationship_type) update.relationship_type = parsed.data.relationship_type

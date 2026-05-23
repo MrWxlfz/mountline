@@ -17,6 +17,10 @@ import {
   summarizeSignalBrandVoice,
   suggestSignalConversationStyle,
 } from "./conversation"
+import {
+  suggestCommunicationProfile,
+} from "./communication-profile"
+import { getContactReadiness } from "./outreach-history"
 import { getSignalPlaybook } from "./playbooks"
 import {
   buildDeterministicInitialAnalysis,
@@ -62,6 +66,8 @@ export async function runAndStoreInitialSignalAnalysis({
   const aiResult = await runInitialAiAnalysis(prospect, websiteScan)
   const output = calibrateInitialAnalysisOutput(prospect, websiteScan, aiResult?.output || fallback)
   const styleSuggestion = suggestSignalConversationStyle(prospect, websiteScan)
+  const profileSuggestion = suggestCommunicationProfile(prospect, websiteScan)
+  const contactReadiness = getContactReadiness(prospect)
   const publicCustomerPositioning = buildPublicCustomerPositioning(prospect, websiteScan)
   const brandVoiceSummary = summarizeSignalBrandVoice(prospect, websiteScan)
   const calibration = getSignalOpportunityCalibration(prospect, websiteScan)
@@ -115,6 +121,11 @@ export async function runAndStoreInitialSignalAnalysis({
       suggested_outreach_mode: output.suggested_outreach_mode,
       suggested_conversation_style: styleSuggestion.style,
       conversation_style_reason: styleSuggestion.reason,
+      communication_profile: profileSuggestion.profile,
+      communication_profile_reason: profileSuggestion.reason,
+      contact_readiness: contactReadiness.state,
+      evidence_supporting_value_band: output.reasons_to_contact,
+      discovery_confirmation_needed: output.red_flags,
       website_opportunity_score: calibration.website_opportunity_score,
       systems_opportunity_score: calibration.systems_opportunity_score,
       recommended_lane: calibration.recommended_lane,
@@ -151,6 +162,11 @@ export async function runAndStoreInitialSignalAnalysis({
     outreach_history: classifySignalOutreachHistory(prospect),
     conversation_style: styleSuggestion.style,
     conversation_style_reason: styleSuggestion.reason,
+    suggested_communication_profile: profileSuggestion.profile,
+    communication_profile_reason: profileSuggestion.reason,
+    public_brand_tone: profileSuggestion.publicBrandTone,
+    contact_readiness: contactReadiness.state,
+    contact_readiness_reason: contactReadiness.reason,
   }
 
   if (researchContext?.confirmed_official_url && !prospect.website_url) {

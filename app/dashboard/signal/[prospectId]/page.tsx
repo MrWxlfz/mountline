@@ -5,7 +5,9 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import type {
   SignalAlert,
   SignalAnalysis,
+  SignalFeedback,
   SignalOutreachDraft,
+  SignalOutreachEvent,
   SignalProspect,
 } from "@/lib/supabase/types"
 import { SignalProspectDetail } from "./signal-prospect-detail"
@@ -31,7 +33,7 @@ export default async function SignalProspectPage({
   if (!prospectData) notFound()
 
   const prospect = prospectData as SignalProspect
-  const [{ data: analyses }, { data: drafts }, { data: alerts }] = await Promise.all([
+  const [{ data: analyses }, { data: drafts }, { data: alerts }, { data: events }, { data: feedback }] = await Promise.all([
     supabase
       .from("signal_analyses")
       .select("*")
@@ -47,6 +49,16 @@ export default async function SignalProspectPage({
       .select("*")
       .eq("prospect_id", prospect.id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("signal_outreach_events")
+      .select("*")
+      .eq("prospect_id", prospect.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("signal_feedback")
+      .select("*")
+      .eq("prospect_id", prospect.id)
+      .order("created_at", { ascending: false }),
   ])
 
   return (
@@ -55,6 +67,8 @@ export default async function SignalProspectPage({
       analyses={(analyses || []) as SignalAnalysis[]}
       drafts={(drafts || []) as SignalOutreachDraft[]}
       alerts={(alerts || []) as SignalAlert[]}
+      outreachEvents={(events || []) as SignalOutreachEvent[]}
+      feedback={(feedback || []) as SignalFeedback[]}
       suppressed={await isSignalProspectSuppressed(prospect)}
     />
   )

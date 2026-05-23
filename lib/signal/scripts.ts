@@ -2,9 +2,15 @@ import "server-only"
 
 import type {
   SignalAnalysis,
+  SignalCommunicationProfile,
   SignalConversationStyle,
   SignalProspect,
 } from "@/lib/supabase/types"
+import {
+  profileToConversationStyle,
+  SIGNAL_COMMUNICATION_PROFILE_LABELS,
+  suggestCommunicationProfile,
+} from "./communication-profile"
 import {
   SIGNAL_CONVERSATION_STYLE_LABELS,
   suggestSignalConversationStyle,
@@ -21,6 +27,9 @@ export type SignalScriptStudio = {
   conversation_style: SignalConversationStyle
   conversation_style_label: string
   conversation_style_reason: string
+  communication_profile: SignalCommunicationProfile
+  communication_profile_label: string
+  communication_profile_reason: string
   first_call_opener: string
   receptionist_script: string
   voicemail_script: string
@@ -103,8 +112,8 @@ function compliment(prospect: SignalProspect, scan: SignalWebsiteScan | null) {
 
 function demoLine(analysis: SignalAnalysis | null, prospect: SignalProspect) {
   const demo = analysis?.recommended_demo || prospect.relevant_demo
-  if (demo === "auto-detailing") return "/work/auto-detailing"
-  if (demo === "barber-shop") return "/work/barber-shop"
+  if (demo === "auto-detailing") return "https://mountline.dev/work/auto-detailing"
+  if (demo === "barber-shop") return "https://mountline.dev/work/barber-shop"
   return "Relevant demo placeholder: short written concept first"
 }
 
@@ -165,6 +174,7 @@ function firstEmailDraft({
   positive,
   prospect,
   observation,
+  profile,
 }: {
   analysis: SignalAnalysis | null
   channel: string
@@ -174,6 +184,7 @@ function firstEmailDraft({
   positive: string
   prospect: SignalProspect
   observation: string
+  profile: SignalCommunicationProfile
 }) {
   if (prospect.outreach_status === "awaiting_reply" || prospect.outreach_status === "contacted") {
     return followUpDraft(prospect, analysis)
@@ -186,15 +197,41 @@ function firstEmailDraft({
         ? "Would it be alright to send a short concept, or is there a better person for website or workflow questions?"
         : "Would it be alright for Mountline to send a short concept or a few notes?"
 
-  if (prospect.outreach_mode === "local_student") {
+  if (profile === "plainspoken_owner_operator") {
+    return [
+      `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
+      "",
+      `My name is Luke. I'm local and I build websites for small businesses. I took a look at ${prospect.business_name}, and ${positive}.`,
+      "",
+      `I noticed the website could make it easier for customers to see what you offer and get in touch. I put together an example of what I mean. Would it be alright if I sent it over?`,
+      "",
+      "No pressure either way.",
+      "",
+      "Luke",
+      "Mountline Studio",
+    ].join("\n")
+  }
+
+  if (profile === "modern_casual_brand") {
+    return [
+      `Hey${prospect.contact_name ? ` ${prospect.contact_name}` : ""} -`,
+      "",
+      `I'm Luke, founder of Mountline Studio here locally. I came across ${prospect.business_name}${location ? ` in ${location}` : ""} and the brand/work looks sharp.`,
+      "",
+      `I had an idea for making the site feel just as polished and easier to book through. I built a concept in this space - cool if I send it over?`,
+      "",
+      "Luke",
+      "Mountline Studio",
+    ].join("\n")
+  }
+
+  if (prospect.outreach_mode === "local_student" || profile === "friendly_local") {
     return [
       `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
       "",
       `${firstLine} I came across ${prospect.business_name}${location ? ` in ${location}` : ""} and was genuinely impressed by ${positive}.`,
       "",
-      `One respectful observation: ${observation}. I built a general concept for detailing-style service businesses, and the first idea would be ${offer.toLowerCase()}.`,
-      "",
-      ask,
+      `I had one idea for how the site could make ${observation} easier for customers to see. I built a general concept for businesses like yours - would you be open to me sending it over?`,
       "",
       "If not, no problem at all.",
       "",
@@ -206,9 +243,9 @@ function firstEmailDraft({
   return [
     `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
     "",
-    `${firstLine} Mountline was reviewing ${prospect.business_name}${location ? ` in ${location}` : ""} and liked that ${positive}.`,
+    `${firstLine} I reviewed the public website for ${prospect.business_name}${location ? ` in ${location}` : ""} and noticed one practical opportunity.`,
     "",
-    `One practical idea stood out: ${observation}. The first thing worth reviewing is ${offer.toLowerCase()}, after confirming what would actually help the business.`,
+    `It looks like ${observation}. I would be glad to share a brief concept or a few specific recommendations if that would be useful.`,
     "",
     ask,
     "",
@@ -245,17 +282,33 @@ function readinessForStudio(studio: Omit<SignalScriptStudio, "external_readiness
 
 export function buildSignalScriptStudio({
   analysis,
+  communicationProfile,
   conversationStyle,
+  guidance,
   prospect,
   scan,
 }: {
   analysis: SignalAnalysis | null
+  communicationProfile?: SignalCommunicationProfile | null
   conversationStyle?: SignalConversationStyle | null
+  guidance?: string | null
   prospect: SignalProspect
   scan: SignalWebsiteScan | null
 }): SignalScriptStudio {
   const suggested = suggestSignalConversationStyle(prospect, scan)
-  const style = conversationStyle || prospect.conversation_style || suggested.style
+  const profileSuggestion = suggestCommunicationProfile(
+    {
+      ...prospect,
+      script_guidance: guidance || prospect.script_guidance,
+    },
+    scan,
+  )
+  const profile =
+    communicationProfile ||
+    prospect.suggested_communication_profile ||
+    analysis?.communication_profile ||
+    profileSuggestion.profile
+  const style = conversationStyle || profileToConversationStyle(profile) || prospect.conversation_style || suggested.style
   const styleReason =
     prospect.conversation_style_reason || analysis?.conversation_style_reason || suggested.reason
   const playbook = getSignalPlaybook(prospect.industry_playbook)
@@ -276,6 +329,10 @@ export function buildSignalScriptStudio({
   const first_call_opener =
     prospect.outreach_status === "awaiting_reply" || prospect.outreach_status === "contacted"
       ? "Wait for the follow-up date before calling. If a call becomes appropriate later, keep it short and reference the previous note naturally."
+      : profile === "plainspoken_owner_operator"
+        ? `Hi, my name is Luke. I'm local and I build websites for small businesses. Is this the right person for ${prospect.business_name}'s website? I had one simple idea that could make services and contact info easier for customers to find.`
+      : profile === "modern_casual_brand"
+        ? `Hey, this is Luke with Mountline Studio. Is this the right person for ${prospect.business_name}'s website or booking setup? I had one quick idea for making the site feel more polished and easier to use.`
       : prospect.outreach_mode === "local_student"
         ? `${firstLine} Is this the right person for ${prospect.business_name}'s website? ${localAsk}`
         : `${firstLine} Is this the right person for ${prospect.business_name}'s website or customer inquiry process? I noticed ${observation}. Could I send a short, specific concept, or is there a better person to ask?`
@@ -295,7 +352,7 @@ export function buildSignalScriptStudio({
     prospect.outreach_status === "awaiting_reply" || prospect.outreach_status === "contacted"
       ? `Quick follow-up on the ${offer.toLowerCase()} note I sent for ${prospect.business_name}. If it is useful, I can send the concept link. If not, no problem.`
       : prospect.outreach_mode === "local_student"
-        ? `Hi, I'm Luke - I'm a Keller High student building Mountline Studio. I came across ${prospect.business_name} and had one respectful website idea: ${observation}. Would it be okay if I sent a quick concept?`
+        ? `Hi, I'm Luke - I'm a Keller High student building Mountline Studio. I came across ${prospect.business_name} and had one respectful website idea. Would it be okay if I sent a quick concept?`
         : `Hi, this is Luke with Mountline Studio. I had one specific website idea for ${prospect.business_name}: ${observation}. Would it be alright to send a short concept?`
 
   const already_use_booking_response = bookingResponse(prospect)
@@ -317,11 +374,12 @@ export function buildSignalScriptStudio({
     positive,
     prospect,
     observation,
+    profile,
   })
 
   const proposal_angle =
     analysis?.potential_project_value_reason ||
-    `Start with ${offer.toLowerCase()}, keep the pitch tied to public evidence, then use discovery to confirm scope before discussing workflow automation.`
+    `Start with ${offer.toLowerCase()}, keep the pitch tied to public evidence, then use discovery to confirm scope before discussing any operational add-ons.`
 
   const objection_responses = {
     how_much: how_much_response,
@@ -333,6 +391,12 @@ export function buildSignalScriptStudio({
     conversation_style: style,
     conversation_style_label: SIGNAL_CONVERSATION_STYLE_LABELS[style],
     conversation_style_reason: styleReason,
+    communication_profile: profile,
+    communication_profile_label: SIGNAL_COMMUNICATION_PROFILE_LABELS[profile],
+    communication_profile_reason:
+      prospect.communication_profile_reason ||
+      analysis?.communication_profile_reason ||
+      profileSuggestion.reason,
     first_call_opener,
     receptionist_script,
     voicemail_script,
@@ -367,6 +431,12 @@ export function scriptStudioFromJson(value: unknown): SignalScriptStudio | null 
     conversation_style_label:
       record.conversation_style_label || SIGNAL_CONVERSATION_STYLE_LABELS[record.conversation_style || "friendly_local"],
     conversation_style_reason: compact(record.conversation_style_reason) || "Stored Script Studio draft.",
+    communication_profile: record.communication_profile || "friendly_local",
+    communication_profile_label:
+      record.communication_profile_label ||
+      SIGNAL_COMMUNICATION_PROFILE_LABELS[record.communication_profile || "friendly_local"],
+    communication_profile_reason:
+      compact(record.communication_profile_reason) || "Stored communication profile.",
     first_call_opener: compact(record.first_call_opener),
     receptionist_script: compact(record.receptionist_script),
     voicemail_script: compact(record.voicemail_script),

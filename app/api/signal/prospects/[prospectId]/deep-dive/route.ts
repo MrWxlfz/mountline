@@ -7,6 +7,7 @@ import {
   summarizeSignalBrandVoice,
   suggestSignalConversationStyle,
 } from "@/lib/signal/conversation"
+import { suggestCommunicationProfile } from "@/lib/signal/communication-profile"
 import {
   classifySignalLocality,
   classifySignalOutreachHistory,
@@ -149,6 +150,7 @@ export async function POST(
   deep.project_value_band = fallbackInitial.potential_project_value_band
   deep.project_value_reason = fallbackInitial.potential_project_value_reason
   const conversation = suggestSignalConversationStyle(prospect, scan)
+  const communicationProfile = suggestCommunicationProfile(prospect, scan)
   const customerPositioning = buildPublicCustomerPositioning(prospect, scan)
   const brandVoice = summarizeSignalBrandVoice(prospect, scan)
 
@@ -198,6 +200,8 @@ export async function POST(
       suggested_outreach_mode: deep.suggested_outreach_mode,
       suggested_conversation_style: conversation.style,
       conversation_style_reason: conversation.reason,
+      communication_profile: communicationProfile.profile,
+      communication_profile_reason: communicationProfile.reason,
       public_customer_positioning: customerPositioning,
       brand_voice_summary: brandVoice,
       reasons_to_contact: deep.evidence_based_opportunities.map(
@@ -217,6 +221,7 @@ export async function POST(
   const analysis = analysisData as SignalAnalysis
   const scriptStudio = buildSignalScriptStudio({
     analysis,
+    communicationProfile: communicationProfile.profile,
     conversationStyle: conversation.style,
     prospect,
     scan,
@@ -229,6 +234,8 @@ export async function POST(
       outreach_mode: deep.suggested_outreach_mode,
       conversation_style: scriptStudio.conversation_style,
       conversation_style_reason: scriptStudio.conversation_style_reason,
+      communication_profile: scriptStudio.communication_profile,
+      communication_profile_reason: scriptStudio.communication_profile_reason,
       first_contact_subject: deep.first_contact_subject,
       first_contact_email: scriptStudio.first_email_draft || deep.first_contact_email,
       permission_based_dm: scriptStudio.permission_based_dm,
@@ -274,6 +281,9 @@ export async function POST(
   updates.outreach_history = classifySignalOutreachHistory(prospect)
   updates.conversation_style = scriptStudio.conversation_style
   updates.conversation_style_reason = scriptStudio.conversation_style_reason
+  updates.suggested_communication_profile = scriptStudio.communication_profile
+  updates.communication_profile_reason = scriptStudio.communication_profile_reason
+  updates.public_brand_tone = communicationProfile.publicBrandTone
   if (
     prospect.outreach_status !== "do_not_contact" &&
     !CONTACTED_OR_FINAL_STATUSES.has(prospect.outreach_status) &&

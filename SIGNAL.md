@@ -229,6 +229,48 @@ Signal separates three concepts:
 
 Being local does not automatically mean `warm_connection`. Already emailing someone does not mean `warm_connection`. Warm connection is only allowed when explicit relationship evidence exists.
 
+## Outreach History Truth Model
+
+Signal V2.2 treats `signal_outreach_events` as the authoritative history for contact attempts. Free-text notes are useful context, but they do not silently change status or history.
+
+If notes say something like `already emailed`, `emailed waiting for response`, `DM sent`, or `called already` and no outreach event exists, Signal shows an inconsistency warning and asks the team to either:
+
+- record the prior outreach event, or
+- ignore the note for history tracking.
+
+Recording a prior outbound event updates the prospect status/history safely. For example, recording an outbound email with no reply sets the prospect to `awaiting_reply`, stores the follow-up date if provided, and prevents Signal from recommending a new first-contact pitch.
+
+Outreach event channels:
+
+- `email`
+- `call`
+- `voicemail`
+- `instagram`
+- `contact_form`
+- `text`
+- `in_person`
+- `other`
+
+Outreach remains manual. The event table records what happened; it does not send messages, make calls, submit forms, or automate follow-up.
+
+## Contact Readiness
+
+Signal stores a contact readiness state:
+
+- `verified_email_available`
+- `verified_phone_available`
+- `verified_contact_form_available`
+- `verified_social_contact_available`
+- `contact_missing`
+- `contact_history_only`
+- `suppressed`
+
+If no public contact route is saved, Signal should say: `Contact route not confirmed. Research or add contact information before outreach.`
+
+If an outreach event exists but the email/phone/route used is missing, Signal should say: `Add the email address used for this outreach so Signal can track follow-ups accurately.`
+
+The `Find Contact Route` action scans the confirmed official site with the existing SSRF-safe scanner and asks the team to confirm any email, phone, or contact/booking route before saving it.
+
 ## Conversation Styles
 
 Conversation style is separate from outreach mode. It affects tone, not identity or demographic inference.
@@ -243,6 +285,22 @@ Allowed styles:
 - `concise_busy_owner`
 
 The AI or rule-based fallback may suggest a style based only on official public brand language, business type, relationship context, or user-entered notes. Signal must never guess owner age, gender, race, income, health, religion, politics, or other sensitive traits.
+
+## Communication Profiles
+
+V2.2 adds a communication profile system for Script Studio. Profiles are based on user-entered known context, confirmed public brand tone, business structure, industry/playbook, contact role if known, and manual override. They must not infer age, gender, race, income, or other sensitive personal traits from names, photos, social profiles, or website visuals.
+
+Allowed profiles:
+
+- `plainspoken_owner_operator`: warm, patient, direct; avoid tech jargon.
+- `friendly_local`: warm local tone; Luke may mention being a Keller High student only when `local_student` mode is selected.
+- `modern_casual_brand`: upbeat, concise, polished; no forced slang.
+- `busy_operations_manager`: brief, practical, operational.
+- `formal_business`: polished, brief, professional.
+- `clinical_professional`: administrative, compliance-aware, public-site-only.
+- `warm_existing_connection`: only with explicit relationship context.
+
+Private guidance may be entered in Script Studio, such as `They already use Square; pitch keeping Square, not replacing it.` Guidance is private and should shape drafts without being copied word-for-word into external scripts unless the team explicitly writes text meant to be quoted.
 
 ## Script Studio
 
@@ -268,12 +326,29 @@ External drafts are checked before display. Drafts must not contain internal phr
 Status-aware script behavior:
 
 - `researched` / `ready_to_contact`: prepare first contact
+- `researched` with contact route missing: research contact route before outreach
 - `contacted` / `awaiting_reply` before follow-up date: wait
 - `contacted` / `awaiting_reply` when follow-up is due: prepare one respectful follow-up
 - `permission_to_send_demo`: send the relevant demo or concept
 - `demo_sent`: ask if they want a few specific recommendations
 - `interested`: prepare discovery conversation
 - `do_not_contact`: disable drafting/actions except history review
+
+After prior outreach is recorded, Script Studio should prioritize a follow-up draft and hide first-contact scripts as the primary action. Demo-send scripts use full public demo URLs such as `https://mountline.dev/work/barber-shop` and `https://mountline.dev/work/auto-detailing`.
+
+## Feedback Controls
+
+Signal detail pages include correction controls:
+
+- Wrong playbook
+- Wrong demo
+- Wrong channel
+- Wrong communication profile
+- Wrong score/lane
+- Draft sounds unnatural
+- Contact/history incorrect
+
+Corrections are stored in `signal_feedback` for that prospect and can guide regeneration. This is not global model training.
 
 ## Call Sessions
 
@@ -383,6 +458,13 @@ Calibration regression case:
 - Primary offer should focus on website presentation, packages/gallery, and request-detail flow.
 - Systems/AI should remain secondary or discovery-only unless supported by evidence.
 - External scripts must not leak internal planning phrases.
+
+V2.2 regression cases:
+
+- `18|8 Salons`, Keller TX: barber/salon playbook, `/work/barber-shop`, notes that say already emailed should show an inconsistency warning until an outreach event is recorded. After recording email sent, status should be `awaiting_reply` and next action should wait/follow up, not first contact.
+- Grumpy's Auto Detailing: auto-detailing playbook/demo, website-first lane, prior email/awaiting-reply status respected, no duplicate first-contact recommendation.
+- New independent barber not contacted: local-student mode may be appropriate, with friendly local or modern casual communication profile and permission-based first contact.
+- Medical/dental: professional studio mode, clinical professional profile, compliance warning, and no patient-data/PHI/EHR/intake AI recommendations.
 
 ## Future Roadmap
 

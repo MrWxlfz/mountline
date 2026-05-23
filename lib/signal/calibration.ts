@@ -9,9 +9,17 @@ import type {
   SignalRecommendedLane,
   SignalRelationshipType,
   SignalSuggestedChannel,
+  SignalContactReadiness,
+  SignalOutreachEvent,
 } from "@/lib/supabase/types"
 import { getSignalPlaybook, inferSignalPlaybook } from "./playbooks"
 import type { SignalWebsiteScan } from "./website"
+import {
+  deriveOutreachHistoryFromEvents,
+  getContactReadiness,
+  hasRecordedPriorOutreach,
+  hasRecordedReply,
+} from "./outreach-history"
 
 const FIRST_CONTACT_STATUSES = new Set(["researched", "needs_review", "ready_to_contact"])
 const CONTACTED_STATUSES = new Set(["contacted", "awaiting_reply"])
@@ -59,12 +67,15 @@ export function classifySignalOutreachHistory(prospect: SignalProspect): SignalO
     return prospect.outreach_history
   }
 
-  const pool = text(prospect.locality_relationship, prospect.human_notes)
-  if (includesAny(pool, ["awaiting reply", "waiting for reply"])) return "awaiting_reply"
-  if (includesAny(pool, ["already emailed", "emailed", "sent email"])) return "emailed"
-  if (includesAny(pool, ["already called", "called"])) return "called"
-  if (includesAny(pool, ["dm attempted", "sent dm", "messaged on instagram"])) return "dm_attempted"
   return "never_contacted"
+}
+
+export function classifySignalOutreachHistoryFromEvents(
+  prospect: SignalProspect,
+  events: SignalOutreachEvent[] = [],
+) {
+  if (events.length > 0) return deriveOutreachHistoryFromEvents(events)
+  return classifySignalOutreachHistory(prospect)
 }
 
 export function hasExplicitWarmRelationship(prospect: SignalProspect) {
@@ -140,25 +151,51 @@ export function getRecommendedLane({
   return "systems_discovery"
 }
 
-export function getRecommendedNextAction(prospect: SignalProspect, analysis?: SignalAnalysis | null) {
+export function getRecommendedNextAction(
+  prospect: SignalProspect,
+  analysis?: SignalAnalysis | null,
+  context?: {
+    events?: SignalOutreachEvent[]
+    contactReadiness?: SignalContactReadiness
+  },
+) {
   const status = prospect.outreach_status
+  const events = context?.events || []
+  const contactReadiness =
+    context?.contactReadiness || getContactReadiness(prospect, events).state
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const followUp = prospect.follow_up_date ? new Date(`${prospect.follow_up_date}T00:00:00`) : null
+  const latestFollowUp =
+    events.find((event) => event.follow_up_date)?.follow_up_date || prospect.follow_up_date
+  const followUp = latestFollowUp ? new Date(`${latestFollowUp}T00:00:00`) : null
   const followUpDue = Boolean(followUp && !Number.isNaN(followUp.getTime()) && followUp <= today)
   const demoRoute = getSignalDemoRoute(analysis?.recommended_demo || prospect.relevant_demo)
 
   if (status === "do_not_contact") {
     return "Do not contact. Keep this record for history only unless the team intentionally re-enables it."
   }
+  if (hasRecordedPriorOutreach(events) && !hasRecordedReply(events)) {
+    if (followUpDue) return "Send one respectful follow-up through the same approved channel."
+    return latestFollowUp
+      ? `Wait for reply until ${latestFollowUp}. Do not resend or call today.`
+      : "Wait for a response. If no reply by the follow-up date, send one short follow-up."
+  }
   if (FIRST_CONTACT_STATUSES.has(status)) {
+    if (contactReadiness === "contact_missing") {
+      return "Research contact route before outreach."
+    }
+    if (contactReadiness === "contact_history_only") {
+      return "Add the contact route used for prior outreach before planning another touch."
+    }
     return "Prepare first contact. Keep the message short, evidence-grounded, and permission-based."
   }
   if (CONTACTED_STATUSES.has(status)) {
     if (followUpDue) {
-      return "Send one short respectful follow-up. Do not resend the first pitch."
+      return "Send one respectful follow-up through the same approved channel."
     }
-    return "Wait for reply. If no response by the follow-up date, send one short follow-up. Do not call or resend the first pitch today."
+    return latestFollowUp
+      ? `Wait for reply until ${latestFollowUp}. Do not resend or call today.`
+      : "Wait for a response. If no reply by the follow-up date, send one short follow-up."
   }
   if (status === "permission_to_send_demo") {
     return demoRoute
@@ -189,6 +226,12 @@ export function externalDraftReadiness(textValue: string | null | undefined) {
     "priority",
     "Signal's current",
     "internal",
+    "public contact availability",
+    "entered business context",
+    "constructive website idea",
+    "recommended lane",
+    "Signal detected",
+    "workflow improvement",
   ]
   const hits = blocked.filter((phrase) => value.toLowerCase().includes(phrase.toLowerCase()))
   return {

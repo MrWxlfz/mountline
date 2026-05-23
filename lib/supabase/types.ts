@@ -175,6 +175,48 @@ export type SignalConversationStyle =
   | "clinical_professional"
   | "concise_busy_owner"
 
+export type SignalCommunicationProfile =
+  | "plainspoken_owner_operator"
+  | "friendly_local"
+  | "modern_casual_brand"
+  | "busy_operations_manager"
+  | "formal_business"
+  | "clinical_professional"
+  | "warm_existing_connection"
+
+export type SignalContactReadiness =
+  | "verified_email_available"
+  | "verified_phone_available"
+  | "verified_contact_form_available"
+  | "verified_social_contact_available"
+  | "contact_missing"
+  | "contact_history_only"
+  | "suppressed"
+
+export type SignalOutreachEventChannel =
+  | "email"
+  | "call"
+  | "voicemail"
+  | "instagram"
+  | "contact_form"
+  | "text"
+  | "in_person"
+  | "other"
+
+export type SignalOutreachEventType =
+  | "attempted"
+  | "delivered"
+  | "blocked"
+  | "replied"
+  | "voicemail_left"
+  | "permission_to_send_demo"
+  | "demo_sent"
+  | "follow_up_sent"
+  | "discovery_call_booked"
+  | "interested"
+  | "declined"
+  | "do_not_contact"
+
 export type SignalOutreachStatus =
   | "researched"
   | "needs_review"
@@ -249,6 +291,14 @@ export type SignalProspect = {
   outreach_history: SignalOutreachHistory
   conversation_style: SignalConversationStyle
   conversation_style_reason: string | null
+  known_communication_context: string | null
+  public_brand_tone: string | null
+  suggested_communication_profile: SignalCommunicationProfile | null
+  communication_profile_reason: string | null
+  communication_profile_confirmed: boolean
+  script_guidance: string | null
+  contact_readiness: SignalContactReadiness
+  contact_readiness_reason: string | null
   outreach_status: SignalOutreachStatus
   contacted_at: string | null
   follow_up_date: string | null
@@ -304,6 +354,11 @@ export type SignalAnalysis = {
   evidence_weighting: SignalJson | null
   recommended_next_action: string | null
   external_readiness: SignalJson | null
+  contact_readiness: SignalContactReadiness | null
+  communication_profile: SignalCommunicationProfile | null
+  communication_profile_reason: string | null
+  evidence_supporting_value_band: SignalJson | null
+  discovery_confirmation_needed: SignalJson | null
 }
 
 export type SignalOutreachDraft = {
@@ -323,6 +378,8 @@ export type SignalOutreachDraft = {
   proposal_angle: string | null
   conversation_style: SignalConversationStyle | null
   conversation_style_reason: string | null
+  communication_profile: SignalCommunicationProfile | null
+  communication_profile_reason: string | null
   script_studio: SignalJson | null
   follow_up_email: string | null
   objection_responses: SignalJson | null
@@ -350,6 +407,30 @@ export type SignalSuppression = {
   business_name: string | null
   reason: string | null
   source: string
+}
+
+export type SignalOutreachEvent = {
+  id: string
+  prospect_id: string
+  created_at: string
+  event_date: string | null
+  channel: SignalOutreachEventChannel
+  direction: "outbound" | "inbound"
+  event_type: SignalOutreachEventType
+  summary: string | null
+  follow_up_date: string | null
+  created_by: string | null
+}
+
+export type SignalFeedback = {
+  id: string
+  prospect_id: string
+  analysis_id: string | null
+  created_at: string
+  feedback_type: string
+  original_value: string | null
+  corrected_value: string | null
+  note: string | null
 }
 
 export type SignalResearchRun = {

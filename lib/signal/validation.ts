@@ -3,7 +3,11 @@ import type {
   SignalCommercialFit,
   SignalConfidence,
   SignalConversationStyle,
+  SignalCommunicationProfile,
+  SignalContactReadiness,
   SignalLocalityScope,
+  SignalOutreachEventChannel,
+  SignalOutreachEventType,
   SignalOutreachMode,
   SignalPriority,
   SignalRelationshipType,
@@ -65,6 +69,52 @@ export const signalConversationStyleSchema = z.enum([
   "formal_business",
   "clinical_professional",
   "concise_busy_owner",
+])
+
+export const signalCommunicationProfileSchema = z.enum([
+  "plainspoken_owner_operator",
+  "friendly_local",
+  "modern_casual_brand",
+  "busy_operations_manager",
+  "formal_business",
+  "clinical_professional",
+  "warm_existing_connection",
+])
+
+export const signalContactReadinessSchema = z.enum([
+  "verified_email_available",
+  "verified_phone_available",
+  "verified_contact_form_available",
+  "verified_social_contact_available",
+  "contact_missing",
+  "contact_history_only",
+  "suppressed",
+])
+
+export const signalOutreachEventChannelSchema = z.enum([
+  "email",
+  "call",
+  "voicemail",
+  "instagram",
+  "contact_form",
+  "text",
+  "in_person",
+  "other",
+])
+
+export const signalOutreachEventTypeSchema = z.enum([
+  "attempted",
+  "delivered",
+  "blocked",
+  "replied",
+  "voicemail_left",
+  "permission_to_send_demo",
+  "demo_sent",
+  "follow_up_sent",
+  "discovery_call_booked",
+  "interested",
+  "declined",
+  "do_not_contact",
 ])
 
 export const signalOutreachStatusSchema = z.enum([
@@ -144,6 +194,14 @@ export const signalProspectCreateSchema = z.object({
   outreach_history: signalOutreachHistorySchema.optional(),
   conversation_style: signalConversationStyleSchema.optional(),
   conversation_style_reason: shortNullableText,
+  known_communication_context: nullableText,
+  public_brand_tone: shortNullableText,
+  suggested_communication_profile: signalCommunicationProfileSchema.optional().nullable(),
+  communication_profile_reason: shortNullableText,
+  communication_profile_confirmed: z.boolean().optional(),
+  script_guidance: nullableText,
+  contact_readiness: signalContactReadinessSchema.optional(),
+  contact_readiness_reason: shortNullableText,
   outreach_status: signalOutreachStatusSchema.optional(),
   follow_up_date: z.string().trim().max(20).optional().nullable(),
   assigned_to: shortNullableText,
@@ -279,6 +337,27 @@ export const signalResearchConfirmSchema = z.object({
 
 export const signalScriptStudioSchema = z.object({
   conversation_style: signalConversationStyleSchema.optional(),
+  communication_profile: signalCommunicationProfileSchema.optional(),
+  guidance: nullableText,
+})
+
+export const signalOutreachEventCreateSchema = z.object({
+  channel: signalOutreachEventChannelSchema,
+  direction: z.enum(["outbound", "inbound"]).optional(),
+  event_type: signalOutreachEventTypeSchema,
+  event_date: z.string().trim().max(20).optional().nullable(),
+  summary: z.string().trim().max(1200).optional().nullable(),
+  follow_up_date: z.string().trim().max(20).optional().nullable(),
+  created_by: shortNullableText,
+  contact_value: z.string().trim().max(500).optional().nullable(),
+})
+
+export const signalFeedbackCreateSchema = z.object({
+  analysis_id: z.string().uuid().optional().nullable(),
+  feedback_type: z.string().trim().min(1).max(80),
+  original_value: z.string().trim().max(500).optional().nullable(),
+  corrected_value: z.string().trim().max(500).optional().nullable(),
+  note: z.string().trim().max(1200).optional().nullable(),
 })
 
 export const signalImportPreviewSchema = z.object({
@@ -359,6 +438,14 @@ export function normalizeProspectInput(
     outreach_history: data.outreach_history || "never_contacted",
     conversation_style: data.conversation_style || "friendly_local",
     conversation_style_reason: cleanOptionalText(data.conversation_style_reason),
+    known_communication_context: cleanOptionalText(data.known_communication_context),
+    public_brand_tone: cleanOptionalText(data.public_brand_tone),
+    suggested_communication_profile: data.suggested_communication_profile || null,
+    communication_profile_reason: cleanOptionalText(data.communication_profile_reason),
+    communication_profile_confirmed: data.communication_profile_confirmed || false,
+    script_guidance: cleanOptionalText(data.script_guidance),
+    contact_readiness: data.contact_readiness || "contact_missing",
+    contact_readiness_reason: cleanOptionalText(data.contact_readiness_reason),
     outreach_status: data.outreach_status || "researched",
     follow_up_date: cleanOptionalText(data.follow_up_date),
     assigned_to: cleanOptionalText(data.assigned_to),
@@ -440,4 +527,32 @@ export function coerceOutreachHistory(
 ): SignalOutreachHistory {
   const parsed = signalOutreachHistorySchema.safeParse(value)
   return parsed.success ? parsed.data : "never_contacted"
+}
+
+export function coerceCommunicationProfile(
+  value: string | null | undefined,
+): SignalCommunicationProfile {
+  const parsed = signalCommunicationProfileSchema.safeParse(value)
+  return parsed.success ? parsed.data : "friendly_local"
+}
+
+export function coerceContactReadiness(
+  value: string | null | undefined,
+): SignalContactReadiness {
+  const parsed = signalContactReadinessSchema.safeParse(value)
+  return parsed.success ? parsed.data : "contact_missing"
+}
+
+export function coerceOutreachEventChannel(
+  value: string | null | undefined,
+): SignalOutreachEventChannel {
+  const parsed = signalOutreachEventChannelSchema.safeParse(value)
+  return parsed.success ? parsed.data : "other"
+}
+
+export function coerceOutreachEventType(
+  value: string | null | undefined,
+): SignalOutreachEventType {
+  const parsed = signalOutreachEventTypeSchema.safeParse(value)
+  return parsed.success ? parsed.data : "attempted"
 }

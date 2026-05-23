@@ -21,7 +21,10 @@ import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "@/lib/signal/play
 import type {
   SignalAlert,
   SignalAnalysis,
+  SignalFeedback,
+  SignalCommunicationProfile,
   SignalOutreachDraft,
+  SignalOutreachEvent,
   SignalProspect,
 } from "@/lib/supabase/types"
 
@@ -79,6 +82,26 @@ const conversationStyleLabels: Record<string, string> = {
   formal_business: "Formal business",
   clinical_professional: "Clinical professional",
   concise_busy_owner: "Concise busy owner",
+}
+
+const communicationProfileLabels: Record<SignalCommunicationProfile, string> = {
+  plainspoken_owner_operator: "Plainspoken owner-operator",
+  friendly_local: "Friendly local business",
+  modern_casual_brand: "Modern casual brand",
+  busy_operations_manager: "Busy operations manager",
+  formal_business: "Formal business",
+  clinical_professional: "Clinical professional",
+  warm_existing_connection: "Warm existing connection",
+}
+
+const contactReadinessLabels: Record<string, string> = {
+  verified_email_available: "Verified email available",
+  verified_phone_available: "Verified phone available",
+  verified_contact_form_available: "Verified contact form available",
+  verified_social_contact_available: "Verified social contact available",
+  contact_missing: "Contact missing",
+  contact_history_only: "Contact history only",
+  suppressed: "Suppressed",
 }
 
 const laneLabels: Record<string, string> = {
@@ -185,16 +208,75 @@ function scoreColor(value: number | null | undefined, inverse = false) {
   return "bg-red-400"
 }
 
+function notesSuggestPriorOutreach(prospect: SignalProspect) {
+  const text = [
+    prospect.human_notes,
+    prospect.locality_relationship,
+    prospect.what_looks_good,
+    prospect.visible_problem,
+  ].filter(Boolean).join(" ")
+  return /already\s+(sent\s+an\s+)?email|emailed\s+(and\s+)?(waiting|awaiting)|waiting\s+for\s+(a\s+)?response|awaiting\s+reply|dm\s+(sent|attempted)|called\s+(already|before)?/i.test(text)
+}
+
+function hasRecordedPriorOutreach(events: SignalOutreachEvent[]) {
+  return events.some((event) => event.direction === "outbound")
+}
+
+function hasIgnoredOutreachNote(feedback: SignalFeedback[]) {
+  return feedback.some((item) => item.feedback_type === "contact_history_note_ignored")
+}
+
+function deriveContactReadiness(prospect: SignalProspect, events: SignalOutreachEvent[], suppressed: boolean) {
+  if (suppressed || prospect.outreach_status === "do_not_contact") return "suppressed"
+  if (prospect.public_email) return "verified_email_available"
+  if (prospect.public_phone) return "verified_phone_available"
+  if (prospect.public_contact_form_url) return "verified_contact_form_available"
+  if (prospect.instagram_url) return "verified_social_contact_available"
+  if (hasRecordedPriorOutreach(events)) return "contact_history_only"
+  return prospect.contact_readiness || "contact_missing"
+}
+
+function recommendedActionForUi(
+  prospect: SignalProspect,
+  events: SignalOutreachEvent[],
+  contactReadiness: string,
+  mismatch: boolean,
+  analysisAction: string | null | undefined,
+) {
+  if (mismatch) return "Confirm prior outreach before preparing scripts. Record the email sent or ignore the note."
+  if (prospect.outreach_status === "do_not_contact") return "Block outreach drafting and contact actions."
+  const hasOutbound = hasRecordedPriorOutreach(events)
+  const hasReply = events.some((event) =>
+    ["replied", "permission_to_send_demo", "discovery_call_booked", "interested", "declined"].includes(event.event_type),
+  )
+  const followUp = events.find((event) => event.follow_up_date)?.follow_up_date || prospect.follow_up_date
+  if (hasOutbound && !hasReply) {
+    if (followUp) return `Wait for a response. If no reply by ${followUp}, send one short follow-up.`
+    return "Wait for a response. If no reply by the follow-up date, send one short follow-up."
+  }
+  if (contactReadiness === "contact_missing" && ["researched", "needs_review"].includes(prospect.outreach_status)) {
+    return "Research contact route before outreach."
+  }
+  if (contactReadiness === "contact_history_only") {
+    return "Add the contact route used for prior outreach so follow-ups can be tracked accurately."
+  }
+  return analysisAction || "Review latest evidence and prepare the next manual step."
+}
+
 export function SignalProspectDetail({
   alerts,
   analyses,
   drafts,
+  feedback,
+  outreachEvents,
   prospect,
   suppressed,
 }: {
   alerts: SignalAlert[]
   analyses: SignalAnalysis[]
   drafts: SignalOutreachDraft[]
+  feedback: SignalFeedback[]
+  outreachEvents: SignalOutreachEvent[]
   prospect: SignalProspect
   suppressed: boolean
 }) {
@@ -223,6 +305,25 @@ export function SignalProspectDetail({
         : null
   const externalReady = externalReadiness?.passed !== false
   const readinessWarning = String(externalReadiness?.warning || "")
+  const contactReadiness = deriveContactReadiness(prospect, outreachEvents, suppressed)
+  const followUpMode =
+    ["contacted", "awaiting_reply"].includes(prospect.outreach_status) ||
+    hasRecordedPriorOutreach(outreachEvents)
+  const contactHistoryMismatch =
+    notesSuggestPriorOutreach(prospect) &&
+    !hasRecordedPriorOutreach(outreachEvents) &&
+    !hasIgnoredOutreachNote(feedback)
+  const displayedNextAction = recommendedActionForUi(
+    prospect,
+    outreachEvents,
+    contactReadiness,
+    contactHistoryMismatch,
+    latestAnalysis?.recommended_next_action,
+  )
+  const communicationProfile =
+    prospect.suggested_communication_profile ||
+    latestAnalysis?.communication_profile ||
+    (prospect.compliance_tier === "compliance_gated" ? "clinical_professional" : "friendly_local")
   const [working, setWorking] = useState<WorkingAction>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -230,6 +331,13 @@ export function SignalProspectDetail({
   const [conversationStyle, setConversationStyle] = useState<string>(
     prospect.conversation_style || latestAnalysis?.suggested_conversation_style || "friendly_local",
   )
+  const [profile, setProfile] = useState<string>(communicationProfile)
+  const [scriptGuidance, setScriptGuidance] = useState(prospect.script_guidance || "")
+  const [recordChannel, setRecordChannel] = useState("email")
+  const [recordEventType, setRecordEventType] = useState("delivered")
+  const [recordDate, setRecordDate] = useState(new Date().toISOString().slice(0, 10))
+  const [recordContact, setRecordContact] = useState("")
+  const [recordSummary, setRecordSummary] = useState("")
 
   const doNotContact = prospect.outreach_status === "do_not_contact" || suppressed
 
@@ -287,6 +395,175 @@ export function SignalProspectDetail({
       router.refresh()
     } catch {
       setError("Scripts could not be prepared.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const prepareScriptsWithGuidance = async () => {
+    setWorking("scripts")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/prepare-scripts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation_style: conversationStyle,
+          communication_profile: profile,
+          guidance: scriptGuidance,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Scripts could not be prepared.")
+        return
+      }
+      setMessage(data.needs_manual_review ? "Script Studio prepared, but draft needs manual review." : "Script Studio prepared.")
+      router.refresh()
+    } catch {
+      setError("Scripts could not be prepared.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const recordPriorOutreach = async (quickEmail = false) => {
+    setWorking("contacted")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/outreach-events`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          channel: quickEmail ? "email" : recordChannel,
+          event_type: quickEmail ? "delivered" : recordEventType,
+          direction: "outbound",
+          event_date: recordDate,
+          follow_up_date: followUpDate || null,
+          contact_value: quickEmail ? recordContact : recordContact,
+          summary: quickEmail
+            ? "Prior email recorded from prospect notes."
+            : recordSummary || "Prior outreach recorded from Signal detail.",
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Could not record outreach.")
+        return
+      }
+      setMessage("Prior outreach recorded.")
+      router.refresh()
+    } catch {
+      setError("Could not record outreach.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const ignoreOutreachNote = async () => {
+    setWorking("contacted")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          feedback_type: "contact_history_note_ignored",
+          original_value: prospect.human_notes,
+          note: "Team ignored prior-outreach inference from notes.",
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Could not save feedback.")
+        return
+      }
+      setMessage("Outreach note ignored for this prospect.")
+      router.refresh()
+    } catch {
+      setError("Could not save feedback.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const submitCorrection = async (feedbackType: string, originalValue?: string | null) => {
+    const corrected = window.prompt("Corrected value or short guidance?")
+    if (corrected === null) return
+    setWorking("scripts")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysis_id: latestAnalysis?.id || null,
+          feedback_type: feedbackType,
+          original_value: originalValue || null,
+          corrected_value: corrected,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Could not save feedback.")
+        return
+      }
+      setMessage("Signal correction saved for this prospect.")
+      router.refresh()
+    } catch {
+      setError("Could not save feedback.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const findContactRoute = async () => {
+    setWorking("scan")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/scan`, { method: "POST" })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Contact route research failed.")
+        return
+      }
+      const scan = data.scan || {}
+      const email = Array.isArray(scan.visible_emails) ? scan.visible_emails[0] : null
+      const phone = Array.isArray(scan.visible_phones) ? scan.visible_phones[0] : null
+      const contactForm = Array.isArray(scan.booking_links) ? scan.booking_links[0] : null
+      if (!email && !phone && !contactForm) {
+        setMessage("Scan complete. No public contact route found on scanned official pages.")
+        router.refresh()
+        return
+      }
+      const confirmed = window.confirm(
+        `Use found contact route?\n${email ? `Email: ${email}\n` : ""}${phone ? `Phone: ${phone}\n` : ""}${contactForm ? `Contact/booking: ${contactForm}` : ""}`,
+      )
+      if (!confirmed) return
+      await fetch(`/api/signal/prospects/${prospect.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          public_email: email || prospect.public_email,
+          public_phone: phone || prospect.public_phone,
+          public_contact_form_url: contactForm || prospect.public_contact_form_url,
+          contact_readiness: email
+            ? "verified_email_available"
+            : phone
+              ? "verified_phone_available"
+              : "verified_contact_form_available",
+          contact_readiness_reason: "Confirmed from official-site scan on Signal detail.",
+        }),
+      })
+      setMessage("Contact route saved.")
+      router.refresh()
+    } catch {
+      setError("Contact route research failed.")
     } finally {
       setWorking(null)
     }
@@ -427,7 +704,36 @@ export function SignalProspectDetail({
         </div>
       )}
 
-      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+      {contactHistoryMismatch && (
+        <div className="rounded-xl border border-yellow-500/25 bg-yellow-500/10 p-4 text-sm text-yellow-100">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="font-medium">Outreach history needs confirmation</p>
+              <p className="mt-1 text-yellow-100/80">
+                Your notes indicate an email was already sent, but no outreach event is recorded.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => recordPriorOutreach(true)}
+                className="rounded-lg bg-yellow-100 px-3 py-2 text-xs font-medium text-black transition-colors hover:bg-yellow-50"
+              >
+                Record email sent
+              </button>
+              <button
+                type="button"
+                onClick={ignoreOutreachNote}
+                className="rounded-lg border border-yellow-400/40 px-3 py-2 text-xs font-medium text-yellow-100 transition-colors hover:bg-yellow-400/10"
+              >
+                Ignore note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <section className="grid gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Recommended Lane</p>
           <p className="mt-2 text-lg font-semibold">
@@ -449,10 +755,25 @@ export function SignalProspectDetail({
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Recommended Next Action</p>
           <p className="mt-2 text-sm text-foreground">
-            {latestAnalysis?.recommended_next_action ||
-              (prospect.outreach_status === "awaiting_reply"
-                ? "Wait for reply. If no response by the follow-up date, send one short follow-up. Do not call or resend the first pitch today."
-                : "Review latest evidence and prepare the next manual step.")}
+            {displayedNextAction}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Contact Readiness</p>
+          <p className="mt-2 text-lg font-semibold">
+            {contactReadinessLabels[contactReadiness] || contactReadiness}
+          </p>
+          {contactReadiness === "contact_history_only" && (
+            <p className="mt-2 text-xs text-yellow-200">Add the email/phone used so follow-ups can be tracked accurately.</p>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Communication Profile</p>
+          <p className="mt-2 text-lg font-semibold">
+            {communicationProfileLabels[communicationProfile as SignalCommunicationProfile] || communicationProfile}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {prospect.communication_profile_reason || latestAnalysis?.communication_profile_reason || prospect.conversation_style_reason || latestAnalysis?.conversation_style_reason || "Based on playbook, public tone, and entered context."}
           </p>
         </div>
       </section>
@@ -495,9 +816,13 @@ export function SignalProspectDetail({
               <Sparkles className="h-4 w-4" />
               Run Deep Dive
             </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "scripts"} onClick={prepareScripts}>
+            <ActionButton disabled={doNotContact} working={working === "scripts"} onClick={prepareScriptsWithGuidance}>
               <Sparkles className="h-4 w-4" />
               Prepare Scripts
+            </ActionButton>
+            <ActionButton disabled={doNotContact} working={working === "scan"} onClick={findContactRoute}>
+              <RadioTower className="h-4 w-4" />
+              Find Contact Route
             </ActionButton>
             <ActionButton disabled={doNotContact} working={working === "session"} onClick={createCallSession}>
               <Phone className="h-4 w-4" />
@@ -550,6 +875,27 @@ export function SignalProspectDetail({
             {working === "suppress" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
             Add to Do Not Contact
           </button>
+          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-sm font-medium">Record Prior Outreach</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <select value={recordChannel} onChange={(event) => setRecordChannel(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
+                {["email", "call", "voicemail", "instagram", "contact_form", "text", "in_person", "other"].map((value) => (
+                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                ))}
+              </select>
+              <select value={recordEventType} onChange={(event) => setRecordEventType(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
+                {["attempted", "delivered", "voicemail_left", "replied", "permission_to_send_demo", "demo_sent", "follow_up_sent", "interested", "declined"].map((value) => (
+                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                ))}
+              </select>
+              <input type="date" value={recordDate} onChange={(event) => setRecordDate(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm" />
+              <input value={recordContact} onChange={(event) => setRecordContact(event.target.value)} placeholder="Email, phone, or URL used" className="h-9 rounded-lg border border-border bg-background px-3 text-sm" />
+            </div>
+            <textarea value={recordSummary} onChange={(event) => setRecordSummary(event.target.value)} placeholder="Short note about what happened" className="mt-2 min-h-16 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            <button type="button" onClick={() => recordPriorOutreach(false)} className="mt-2 inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              Save Outreach Event
+            </button>
+          </div>
         </Panel>
       </section>
 
@@ -636,11 +982,11 @@ export function SignalProspectDetail({
           <label className="block flex-1 space-y-2">
             <span className="text-sm font-medium">Conversation style</span>
             <select
-              value={conversationStyle}
-              onChange={(event) => setConversationStyle(event.target.value)}
+              value={profile}
+              onChange={(event) => setProfile(event.target.value)}
               className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
             >
-              {Object.entries(conversationStyleLabels).map(([value, label]) => (
+              {Object.entries(communicationProfileLabels).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
@@ -650,17 +996,33 @@ export function SignalProspectDetail({
           <button
             type="button"
             disabled={doNotContact || working === "scripts"}
-            onClick={prepareScripts}
+            onClick={prepareScriptsWithGuidance}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
           >
             {working === "scripts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             Prepare Scripts
           </button>
         </div>
+        <label className="mb-4 block space-y-2">
+          <span className="text-sm font-medium">Guidance for this Prospect</span>
+          <textarea
+            value={scriptGuidance}
+            onChange={(event) => setScriptGuidance(event.target.value)}
+            placeholder="Private guidance, e.g. already emailed them; generate only a follow-up, keep it simple, avoid AI."
+            className="min-h-20 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
+          />
+          <span className="text-xs text-muted-foreground">Private guidance is used to shape scripts. It should not be copied word-for-word into external drafts.</span>
+        </label>
         {latestDraft ? (
           <div className="grid gap-4 xl:grid-cols-2">
-            <DraftBlock title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
-            <DraftBlock title="DM Draft" value={latestDraft.permission_based_dm} onCopy={() => copyText(latestDraft.permission_based_dm, "DM draft")} />
+            {followUpMode ? (
+              <DraftBlock title="Follow-Up Draft" value={latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || "")} onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || ""), "Follow-up draft")} />
+            ) : (
+              <>
+                <DraftBlock title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
+                <DraftBlock title="DM Draft" value={latestDraft.permission_based_dm} onCopy={() => copyText(latestDraft.permission_based_dm, "DM draft")} />
+              </>
+            )}
             <DraftBlock title="Call Opener" value={latestDraft.owner_call_opener} onCopy={() => copyText(latestDraft.owner_call_opener, "Call opener")} />
             <DraftBlock title="Gatekeeper Script" value={latestDraft.gatekeeper_script} onCopy={() => copyText(latestDraft.gatekeeper_script, "Gatekeeper script")} />
             <DraftBlock title="Voicemail" value={latestDraft.voicemail_script} onCopy={() => copyText(latestDraft.voicemail_script, "Voicemail script")} />
@@ -671,7 +1033,7 @@ export function SignalProspectDetail({
                 <DraftBlock title="If They Ask How Much" value={String(scriptStudio.how_much_response || "")} onCopy={() => copyText(String(scriptStudio.how_much_response || ""), "Price response")} />
                 <DraftBlock title="Already Use Booking Software" value={String(scriptStudio.already_use_booking_response || "")} onCopy={() => copyText(String(scriptStudio.already_use_booking_response || ""), "Booking response")} />
                 <DraftBlock title="Already Have a Website" value={String(scriptStudio.already_have_website_response || "")} onCopy={() => copyText(String(scriptStudio.already_have_website_response || ""), "Website response")} />
-                <DraftBlock title="Follow-Up Draft" value={latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || "")} onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || ""), "Follow-up draft")} />
+                {!followUpMode && <DraftBlock title="Follow-Up Draft" value={latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || "")} onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || ""), "Follow-up draft")} />}
               </>
             )}
             <div className="rounded-lg border border-border bg-muted/30 p-3">
@@ -698,6 +1060,18 @@ export function SignalProspectDetail({
             Run a deep dive to generate draft-only outreach scripts for manual review.
           </p>
         )}
+      </Panel>
+
+      <Panel title="Correct Signal">
+        <div className="flex flex-wrap gap-2">
+          <CorrectionButton onClick={() => submitCorrection("wrong_playbook", prospect.industry_playbook)}>Wrong playbook</CorrectionButton>
+          <CorrectionButton onClick={() => submitCorrection("wrong_demo", latestAnalysis?.recommended_demo || prospect.relevant_demo)}>Wrong demo</CorrectionButton>
+          <CorrectionButton onClick={() => submitCorrection("wrong_channel", latestAnalysis?.suggested_channel)}>Wrong channel</CorrectionButton>
+          <CorrectionButton onClick={() => submitCorrection("wrong_communication_profile", communicationProfile)}>Wrong communication profile</CorrectionButton>
+          <CorrectionButton onClick={() => submitCorrection("wrong_score_lane", latestAnalysis?.recommended_lane)}>Wrong score/lane</CorrectionButton>
+          <CorrectionButton onClick={() => submitCorrection("draft_sounds_unnatural", latestDraft?.id)}>Draft sounds unnatural</CorrectionButton>
+          <CorrectionButton onClick={() => submitCorrection("contact_history_incorrect", prospect.outreach_history)}>Contact/history incorrect</CorrectionButton>
+        </div>
       </Panel>
     </div>
   )
@@ -786,6 +1160,18 @@ function ActionButton({
       className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
     >
       {working ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
+    </button>
+  )
+}
+
+function CorrectionButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+    >
+      {children}
     </button>
   )
 }

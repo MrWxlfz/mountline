@@ -59,7 +59,9 @@ export async function POST(
   const analysis = (latestAnalysis as SignalAnalysis | null) || null
   const scriptStudio = buildSignalScriptStudio({
     analysis,
+    communicationProfile: parsed.data.communication_profile || null,
     conversationStyle: parsed.data.conversation_style || analysis?.suggested_conversation_style,
+    guidance: parsed.data.guidance || null,
     prospect,
     scan: getScan(analysis),
   })
@@ -72,6 +74,8 @@ export async function POST(
       outreach_mode: analysis?.suggested_outreach_mode || prospect.outreach_mode,
       conversation_style: scriptStudio.conversation_style,
       conversation_style_reason: scriptStudio.conversation_style_reason,
+      communication_profile: scriptStudio.communication_profile,
+      communication_profile_reason: scriptStudio.communication_profile_reason,
       first_contact_subject: `${prospect.business_name} website idea`,
       first_contact_email: scriptStudio.first_email_draft,
       permission_based_dm: scriptStudio.permission_based_dm,
@@ -94,9 +98,11 @@ export async function POST(
     await supabase
       .from("signal_analyses")
       .update({
-        external_readiness: scriptStudio.external_readiness,
-        recommended_next_action: scriptStudio.recommended_next_action,
-      })
+      external_readiness: scriptStudio.external_readiness,
+      recommended_next_action: scriptStudio.recommended_next_action,
+      communication_profile: scriptStudio.communication_profile,
+      communication_profile_reason: scriptStudio.communication_profile_reason,
+    })
       .eq("id", analysis.id)
   }
 
@@ -105,8 +111,15 @@ export async function POST(
     .update({
       conversation_style: scriptStudio.conversation_style,
       conversation_style_reason: scriptStudio.conversation_style_reason,
+      suggested_communication_profile: scriptStudio.communication_profile,
+      communication_profile_reason: scriptStudio.communication_profile_reason,
+      script_guidance: parsed.data.guidance || prospect.script_guidance,
     })
     .eq("id", prospect.id)
 
-  return NextResponse.json({ draft, script_studio: scriptStudio })
+  return NextResponse.json({
+    draft,
+    script_studio: scriptStudio,
+    needs_manual_review: !scriptStudio.external_readiness.passed,
+  })
 }

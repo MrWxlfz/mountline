@@ -3,13 +3,17 @@ import type {
   SignalCommercialFit,
   SignalConfidence,
   SignalConversationStyle,
+  SignalLocalityScope,
   SignalOutreachMode,
   SignalPriority,
+  SignalRelationshipType,
   SignalRelevantDemo,
+  SignalOutreachHistory,
   SignalSuggestedChannel,
 } from "@/lib/supabase/types"
 import {
   getComplianceTierForPlaybook,
+  getSignalPlaybook,
   inferSignalPlaybook,
   type SignalPlaybookKey,
 } from "./playbooks"
@@ -27,6 +31,31 @@ export const signalOutreachModeSchema = z.enum([
   "local_student",
   "professional_studio",
   "warm_connection",
+])
+
+export const signalLocalityScopeSchema = z.enum([
+  "keller_local",
+  "dfw_nearby",
+  "remote",
+  "unknown",
+])
+
+export const signalRelationshipTypeSchema = z.enum([
+  "none",
+  "personally_visited",
+  "knows_owner",
+  "family_referral",
+  "customer",
+  "referred",
+])
+
+export const signalOutreachHistorySchema = z.enum([
+  "never_contacted",
+  "emailed",
+  "called",
+  "dm_attempted",
+  "awaiting_reply",
+  "follow_up_due",
 ])
 
 export const signalConversationStyleSchema = z.enum([
@@ -110,6 +139,9 @@ export const signalProspectCreateSchema = z.object({
   visible_problem: nullableText,
   relevant_demo: signalRelevantDemoSchema.optional().nullable(),
   outreach_mode: signalOutreachModeSchema.optional(),
+  locality_scope: signalLocalityScopeSchema.optional().nullable(),
+  relationship_type: signalRelationshipTypeSchema.optional(),
+  outreach_history: signalOutreachHistorySchema.optional(),
   conversation_style: signalConversationStyleSchema.optional(),
   conversation_style_reason: shortNullableText,
   outreach_status: signalOutreachStatusSchema.optional(),
@@ -279,9 +311,23 @@ export const signalCallOutcomeSchema = z.object({
 export function normalizeProspectInput(
   data: z.infer<typeof signalProspectCreateSchema>,
 ) {
+  const deterministicPlaybook = inferSignalPlaybook(
+    [
+      data.industry,
+      data.business_name,
+      data.human_notes,
+      data.what_looks_good,
+      data.visible_problem,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  )
   const industryPlaybook =
-    data.industry_playbook || inferSignalPlaybook(data.industry)
+    deterministicPlaybook !== "general_local_business"
+      ? deterministicPlaybook
+      : data.industry_playbook || deterministicPlaybook
   const complianceTier = getComplianceTierForPlaybook(industryPlaybook)
+  const playbook = getSignalPlaybook(industryPlaybook)
 
   return {
     business_name: data.business_name.trim(),
@@ -303,8 +349,14 @@ export function normalizeProspectInput(
     human_notes: cleanOptionalText(data.human_notes),
     what_looks_good: cleanOptionalText(data.what_looks_good),
     visible_problem: cleanOptionalText(data.visible_problem),
-    relevant_demo: data.relevant_demo || null,
+    relevant_demo:
+      playbook.relevantDemo !== "none"
+        ? playbook.relevantDemo
+        : data.relevant_demo || null,
     outreach_mode: data.outreach_mode || "professional_studio",
+    locality_scope: data.locality_scope || null,
+    relationship_type: data.relationship_type || "none",
+    outreach_history: data.outreach_history || "never_contacted",
     conversation_style: data.conversation_style || "friendly_local",
     conversation_style_reason: cleanOptionalText(data.conversation_style_reason),
     outreach_status: data.outreach_status || "researched",
@@ -367,4 +419,25 @@ export function coerceConversationStyle(
 ): SignalConversationStyle {
   const parsed = signalConversationStyleSchema.safeParse(value)
   return parsed.success ? parsed.data : "friendly_local"
+}
+
+export function coerceLocalityScope(
+  value: string | null | undefined,
+): SignalLocalityScope {
+  const parsed = signalLocalityScopeSchema.safeParse(value)
+  return parsed.success ? parsed.data : "unknown"
+}
+
+export function coerceRelationshipType(
+  value: string | null | undefined,
+): SignalRelationshipType {
+  const parsed = signalRelationshipTypeSchema.safeParse(value)
+  return parsed.success ? parsed.data : "none"
+}
+
+export function coerceOutreachHistory(
+  value: string | null | undefined,
+): SignalOutreachHistory {
+  const parsed = signalOutreachHistorySchema.safeParse(value)
+  return parsed.success ? parsed.data : "never_contacted"
 }

@@ -113,6 +113,9 @@ export async function PATCH(
   if (parsed.data.outreach_mode) update.outreach_mode = parsed.data.outreach_mode
   if (parsed.data.conversation_style) update.conversation_style = parsed.data.conversation_style
   if (parsed.data.outreach_status) update.outreach_status = parsed.data.outreach_status
+  if (parsed.data.locality_scope) update.locality_scope = parsed.data.locality_scope
+  if (parsed.data.relationship_type) update.relationship_type = parsed.data.relationship_type
+  if (parsed.data.outreach_history) update.outreach_history = parsed.data.outreach_history
   if (parsed.data.source) update.source = parsed.data.source
   if ("contacted_at" in parsed.data) update.contacted_at = parsed.data.contacted_at || null
 
@@ -135,6 +138,10 @@ export async function PATCH(
 
   if (update.outreach_status === "contacted" && !prospect.contacted_at) {
     update.contacted_at = new Date().toISOString()
+    update.outreach_history = update.outreach_history || "called"
+  }
+  if (update.outreach_status === "awaiting_reply") {
+    update.outreach_history = update.outreach_history || "awaiting_reply"
   }
 
   const { data, error } = await supabase

@@ -265,8 +265,8 @@ export const SIGNAL_PLAYBOOKS: Record<SignalPlaybookKey, SignalPlaybook> = {
 
 const PLAYBOOK_KEYWORDS: Array<[SignalPlaybookKey, string[]]> = [
   ["medical_dental", ["medical", "clinic", "doctor", "dentist", "dental", "orthodont", "healthcare", "practice"]],
-  ["auto_detailing", ["auto detail", "detailing", "car wash", "ceramic", "paint correction"]],
-  ["barber_salon", ["barber", "salon", "hair", "spa", "beauty"]],
+  ["auto_detailing", ["auto detail", "mobile detail", "car detail", "detailing", "car wash", "ceramic coating", "ceramic", "paint correction"]],
+  ["barber_salon", ["barber", "barbershop", "salon", "haircut", "hair cut", "hair", "spa", "beauty"]],
   ["hvac", ["hvac", "air conditioning", "heating", "cooling", "ac repair"]],
   [
     "roofing_contractors_home_services",

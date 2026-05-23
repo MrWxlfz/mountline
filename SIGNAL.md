@@ -91,6 +91,8 @@ The scanner:
 - does not crawl entire websites
 - avoids third-party platform scraping
 
+The scanner always starts with the confirmed official homepage. It may add one clearly linked services/packages/gallery page and one clearly linked contact/about/booking page. Contact pages are useful for reachability, but contact information alone must not be treated as proof of strong website quality. If only contact or booking pages are available, Signal shows low scan-coverage confidence and the note: `Insufficient scan coverage for visual/site-quality judgment`.
+
 The scan extracts objective signals such as titles, meta descriptions, headings, CTA words, service/pricing/location language, visible email/phone links, booking links, detected platform hints, social URLs found on the official site, image count, scanned URLs, timestamp, and supporting evidence snippets. Social URLs may be stored when found on the official website, but Signal does not fetch or scrape social pages.
 
 ## Provider Configuration
@@ -144,6 +146,24 @@ Deep dive is manual-only and intended for stronger leads. It generates evidence-
 
 Signal records the model/provider label, research provider, research query, confirmed official URL, official-source confidence, source evidence, and last researched/analyzed timestamp where available.
 
+## Deterministic Classification
+
+Known sectors are classified before AI interpretation:
+
+- Auto detailing, mobile detailing, ceramic coating, car detailing -> `auto_detailing`
+- Barber, barbershop, salon, haircut -> `barber_salon`
+- HVAC, air conditioning, heating, cooling -> `hvac`
+- Roofing, contractor, remodel, home services -> `roofing_contractors_home_services`
+- Medical, dental, dentist, orthodontist, clinic, doctor -> `medical_dental` and `compliance_gated`
+- Otherwise -> `general_local_business`
+
+Known demo matches are also deterministic:
+
+- `auto_detailing` -> `/work/auto-detailing`
+- `barber_salon` -> `/work/barber-shop`
+
+AI may interpret unknown or ambiguous cases, but it must not downgrade a deterministic known demo to `none` unless a Mountline team member manually overrides the record.
+
 ## Scores And Value Bands
 
 Signal scores:
@@ -156,6 +176,18 @@ Signal scores:
 - reachability
 - compliance risk
 - total opportunity
+
+Signal also stores:
+
+- website opportunity score
+- systems/AI opportunity score
+- recommended lane: `website_first`, `systems_discovery`, `do_not_pursue`, or `compliance_gated`
+- scan coverage confidence and note
+- evidence weighting by source type
+
+The total opportunity is no longer a flat average of unrelated services. A visually oriented local business can be an A or B website lead even when systems/AI fit is modest. AI workflow fit should not drag down a clear website-design opportunity.
+
+Website quality is separate from reachability. Visible phone, email, booking, or contact-form information improves reachability/contact-flow confidence, not visual/site-quality score.
 
 Priority bands:
 
@@ -188,6 +220,14 @@ Value bands are opportunity bands, not personal income or owner wealth estimates
 - `warm_connection`: uses only manually entered relationship context and never invents familiarity.
 
 All outreach is draft-only. The app has no prospect send endpoint and no bulk-send button.
+
+Signal separates three concepts:
+
+- Locality: `keller_local`, `dfw_nearby`, `remote`, `unknown`
+- Relationship: `none`, `personally_visited`, `knows_owner`, `family_referral`, `customer`, `referred`
+- Outreach history: `never_contacted`, `emailed`, `called`, `dm_attempted`, `awaiting_reply`, `follow_up_due`
+
+Being local does not automatically mean `warm_connection`. Already emailing someone does not mean `warm_connection`. Warm connection is only allowed when explicit relationship evidence exists.
 
 ## Conversation Styles
 
@@ -222,6 +262,18 @@ It generates:
 - one respectful follow-up draft
 
 Scripts are stored as drafts for human review. Signal does not send them.
+
+External drafts are checked before display. Drafts must not contain internal phrases such as `connection noted internally`, `value band`, `score`, `user-entered note`, `system detected`, `playbook`, `priority`, or other internal planning language. If a draft fails this check, Signal shows a warning so the team can regenerate or edit before use.
+
+Status-aware script behavior:
+
+- `researched` / `ready_to_contact`: prepare first contact
+- `contacted` / `awaiting_reply` before follow-up date: wait
+- `contacted` / `awaiting_reply` when follow-up is due: prepare one respectful follow-up
+- `permission_to_send_demo`: send the relevant demo or concept
+- `demo_sent`: ask if they want a few specific recommendations
+- `interested`: prepare discovery conversation
+- `do_not_contact`: disable drafting/actions except history review
 
 ## Call Sessions
 
@@ -319,6 +371,18 @@ Manual checklist:
 - Confirm do-not-contact disables draft/contact actions.
 - Import `Mountline.xlsx` or CSV from `/dashboard/signal/import`, select a worksheet, confirm mappings/duplicates, and save.
 - Confirm high-fit alerts appear internally only.
+
+Calibration regression case:
+
+- Prospect: `Grumpy's Auto Detailing`, Keller TX
+- Expected playbook: `auto_detailing`
+- Expected demo: `/work/auto-detailing`
+- Expected outreach mode: `local_student` unless a real explicit relationship is entered
+- If status is `awaiting_reply`, recommended next action should be: `Wait for reply. If no response by the follow-up date, send one short follow-up. Do not call or resend the first pitch today.`
+- Website quality must not be `100` solely because a contact page has contact details.
+- Primary offer should focus on website presentation, packages/gallery, and request-detail flow.
+- Systems/AI should remain secondary or discovery-only unless supported by evidence.
+- External scripts must not leak internal planning phrases.
 
 ## Future Roadmap
 

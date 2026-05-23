@@ -5,11 +5,24 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { maybeCreateSignalAlert } from "./alerts"
 import { runInitialAiAnalysis } from "./ai"
 import {
+  classifySignalLocality,
+  classifySignalOutreachHistory,
+  classifySignalRelationship,
+  deterministicRelevantDemo,
+  deterministicSignalPlaybook,
+  suggestedCalibratedOutreachMode,
+} from "./calibration"
+import {
   buildPublicCustomerPositioning,
   summarizeSignalBrandVoice,
   suggestSignalConversationStyle,
 } from "./conversation"
-import { buildDeterministicInitialAnalysis } from "./scoring"
+import { getSignalPlaybook } from "./playbooks"
+import {
+  buildDeterministicInitialAnalysis,
+  calibrateInitialAnalysisOutput,
+  getSignalOpportunityCalibration,
+} from "./scoring"
 import { scanSignalWebsite, type SignalWebsiteScan } from "./website"
 
 export type SignalResearchAnalysisContext = {
@@ -47,12 +60,14 @@ export async function runAndStoreInitialSignalAnalysis({
   const websiteScan = scan ?? (await scanSignalWebsite(prospect.website_url))
   const fallback = buildDeterministicInitialAnalysis(prospect, websiteScan)
   const aiResult = await runInitialAiAnalysis(prospect, websiteScan)
-  const output = aiResult?.output || fallback
+  const output = calibrateInitialAnalysisOutput(prospect, websiteScan, aiResult?.output || fallback)
   const styleSuggestion = suggestSignalConversationStyle(prospect, websiteScan)
   const publicCustomerPositioning = buildPublicCustomerPositioning(prospect, websiteScan)
   const brandVoiceSummary = summarizeSignalBrandVoice(prospect, websiteScan)
+  const calibration = getSignalOpportunityCalibration(prospect, websiteScan)
   const evidence = {
     website: websiteScan.evidence,
+    evidence_weighting: calibration.evidence_weighting,
     research: {
       provider: researchContext?.research_provider || null,
       query: researchContext?.research_query || null,
@@ -100,6 +115,13 @@ export async function runAndStoreInitialSignalAnalysis({
       suggested_outreach_mode: output.suggested_outreach_mode,
       suggested_conversation_style: styleSuggestion.style,
       conversation_style_reason: styleSuggestion.reason,
+      website_opportunity_score: calibration.website_opportunity_score,
+      systems_opportunity_score: calibration.systems_opportunity_score,
+      recommended_lane: calibration.recommended_lane,
+      scan_coverage_confidence: calibration.scan_coverage_confidence,
+      scan_coverage_note: calibration.scan_coverage_note,
+      evidence_weighting: calibration.evidence_weighting,
+      recommended_next_action: calibration.recommended_next_action,
       public_customer_positioning: publicCustomerPositioning,
       brand_voice_summary: brandVoiceSummary,
       research_provider: researchContext?.research_provider || null,
@@ -118,7 +140,15 @@ export async function runAndStoreInitialSignalAnalysis({
   if (analysisError) throw new Error(analysisError.message)
 
   const analysis = analysisData as SignalAnalysis
+  const deterministicPlaybook = deterministicSignalPlaybook(prospect)
   const prospectUpdate: Record<string, unknown> = {
+    industry_playbook: deterministicPlaybook,
+    compliance_tier: getSignalPlaybook(deterministicPlaybook).complianceTier,
+    relevant_demo: deterministicRelevantDemo(prospect),
+    outreach_mode: suggestedCalibratedOutreachMode(prospect),
+    locality_scope: classifySignalLocality(prospect),
+    relationship_type: classifySignalRelationship(prospect),
+    outreach_history: classifySignalOutreachHistory(prospect),
     conversation_style: styleSuggestion.style,
     conversation_style_reason: styleSuggestion.reason,
   }
@@ -137,9 +167,6 @@ export async function runAndStoreInitialSignalAnalysis({
   }
   if (websiteScan.visible_phones[0] && !prospect.public_phone) {
     prospectUpdate.public_phone = websiteScan.visible_phones[0]
-  }
-  if (output.suggested_outreach_mode && prospect.outreach_mode !== output.suggested_outreach_mode) {
-    prospectUpdate.outreach_mode = output.suggested_outreach_mode
   }
   if (
     prospect.outreach_status === "researched" &&

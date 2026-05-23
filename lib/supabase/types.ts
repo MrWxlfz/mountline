@@ -145,6 +145,28 @@ export type SignalOutreachMode =
   | "professional_studio"
   | "warm_connection"
 
+export type SignalLocalityScope =
+  | "keller_local"
+  | "dfw_nearby"
+  | "remote"
+  | "unknown"
+
+export type SignalRelationshipType =
+  | "none"
+  | "personally_visited"
+  | "knows_owner"
+  | "family_referral"
+  | "customer"
+  | "referred"
+
+export type SignalOutreachHistory =
+  | "never_contacted"
+  | "emailed"
+  | "called"
+  | "dm_attempted"
+  | "awaiting_reply"
+  | "follow_up_due"
+
 export type SignalConversationStyle =
   | "friendly_local"
   | "traditional_owner_operator"
@@ -187,6 +209,12 @@ export type SignalSuggestedChannel =
   | "warm_intro"
   | "research_more"
 
+export type SignalRecommendedLane =
+  | "website_first"
+  | "systems_discovery"
+  | "do_not_pursue"
+  | "compliance_gated"
+
 export type SignalJson = string | number | boolean | null | SignalJson[] | {
   [key: string]: SignalJson
 }
@@ -216,6 +244,9 @@ export type SignalProspect = {
   visible_problem: string | null
   relevant_demo: SignalRelevantDemo | null
   outreach_mode: SignalOutreachMode
+  locality_scope: SignalLocalityScope | null
+  relationship_type: SignalRelationshipType
+  outreach_history: SignalOutreachHistory
   conversation_style: SignalConversationStyle
   conversation_style_reason: string | null
   outreach_status: SignalOutreachStatus
@@ -265,6 +296,14 @@ export type SignalAnalysis = {
   brand_voice_summary: string | null
   suggested_conversation_style: SignalConversationStyle | null
   conversation_style_reason: string | null
+  website_opportunity_score: number | null
+  systems_opportunity_score: number | null
+  recommended_lane: SignalRecommendedLane | null
+  scan_coverage_confidence: SignalConfidence | null
+  scan_coverage_note: string | null
+  evidence_weighting: SignalJson | null
+  recommended_next_action: string | null
+  external_readiness: SignalJson | null
 }
 
 export type SignalOutreachDraft = {

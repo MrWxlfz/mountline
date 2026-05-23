@@ -81,6 +81,38 @@ const conversationStyleLabels: Record<string, string> = {
   concise_busy_owner: "Concise busy owner",
 }
 
+const laneLabels: Record<string, string> = {
+  website_first: "Website First",
+  systems_discovery: "Systems Discovery",
+  do_not_pursue: "Do Not Pursue",
+  compliance_gated: "Compliance-Gated",
+}
+
+const localityLabels: Record<string, string> = {
+  keller_local: "Keller local",
+  dfw_nearby: "DFW nearby",
+  remote: "Remote",
+  unknown: "Unknown",
+}
+
+const relationshipLabels: Record<string, string> = {
+  none: "None",
+  personally_visited: "Personally visited",
+  knows_owner: "Knows owner",
+  family_referral: "Family referral",
+  customer: "Customer",
+  referred: "Referred",
+}
+
+const outreachHistoryLabels: Record<string, string> = {
+  never_contacted: "Never contacted",
+  emailed: "Emailed",
+  called: "Called",
+  dm_attempted: "DM attempted",
+  awaiting_reply: "Awaiting reply",
+  follow_up_due: "Follow-up due",
+}
+
 function arrayFromJson(value: unknown) {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
@@ -121,6 +153,29 @@ function scriptStudioFromDraft(draft: SignalOutreachDraft | null) {
   return value as Record<string, unknown>
 }
 
+function demoRoute(value: string | null | undefined) {
+  if (value === "auto-detailing") return "/work/auto-detailing"
+  if (value === "barber-shop") return "/work/barber-shop"
+  return null
+}
+
+function evidenceWeighting(analysis: SignalAnalysis | null) {
+  const weighting = analysis?.evidence_weighting
+  return weighting && typeof weighting === "object" ? (weighting as Record<string, unknown>) : null
+}
+
+function stringList(value: unknown) {
+  if (!Array.isArray(value)) return []
+  return value.filter((item) => item !== null && item !== undefined).map((item) => {
+    if (typeof item === "string") return item
+    if (item && typeof item === "object") {
+      const record = item as Record<string, unknown>
+      return [record.signal, record.snippet, record.url].filter(Boolean).join(": ")
+    }
+    return String(item)
+  }).filter(Boolean)
+}
+
 function scoreColor(value: number | null | undefined, inverse = false) {
   if (typeof value !== "number") return "bg-muted"
   const good = inverse ? value <= 30 : value >= 75
@@ -158,6 +213,16 @@ export function SignalProspectDetail({
   const playbook = getSignalPlaybook(prospect.industry_playbook)
   const scan = getScan(latestScanAnalysis)
   const evidence = evidenceFromAnalysis(latestScanAnalysis)
+  const weighting = evidenceWeighting(latestAnalysis)
+  const selectedDemoRoute = demoRoute(latestAnalysis?.recommended_demo || prospect.relevant_demo)
+  const externalReadiness =
+    scriptStudio?.external_readiness && typeof scriptStudio.external_readiness === "object"
+        ? (scriptStudio.external_readiness as Record<string, unknown>)
+        : latestAnalysis?.external_readiness && typeof latestAnalysis.external_readiness === "object"
+          ? (latestAnalysis.external_readiness as Record<string, unknown>)
+        : null
+  const externalReady = externalReadiness?.passed !== false
+  const readinessWarning = String(externalReadiness?.warning || "")
   const [working, setWorking] = useState<WorkingAction>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -362,13 +427,46 @@ export function SignalProspectDetail({
         </div>
       )}
 
+      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Recommended Lane</p>
+          <p className="mt-2 text-lg font-semibold">
+            {latestAnalysis?.recommended_lane
+              ? laneLabels[latestAnalysis.recommended_lane] || latestAnalysis.recommended_lane
+              : "-"}
+          </p>
+          {selectedDemoRoute && (
+            <Link
+              href={selectedDemoRoute}
+              target="_blank"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Relevant demo: {selectedDemoRoute}
+            </Link>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Recommended Next Action</p>
+          <p className="mt-2 text-sm text-foreground">
+            {latestAnalysis?.recommended_next_action ||
+              (prospect.outreach_status === "awaiting_reply"
+                ? "Wait for reply. If no response by the follow-up date, send one short follow-up. Do not call or resend the first pitch today."
+                : "Review latest evidence and prepare the next manual step.")}
+          </p>
+        </div>
+      </section>
+
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <Panel title="Prospect Summary">
           <div className="grid gap-4 sm:grid-cols-2">
             <Meta label="Industry" value={prospect.industry} />
             <Meta label="Playbook" value={playbook.name} />
             <Meta label="Location" value={[prospect.city, prospect.state].filter(Boolean).join(", ") || "-"} />
-            <Meta label="Locality" value={prospect.locality_relationship || "-"} />
+            <Meta label="Locality" value={localityLabels[prospect.locality_scope || "unknown"] || prospect.locality_scope || "-"} />
+            <Meta label="Relationship" value={relationshipLabels[prospect.relationship_type || "none"] || prospect.relationship_type || "-"} />
+            <Meta label="Outreach History" value={outreachHistoryLabels[prospect.outreach_history || "never_contacted"] || prospect.outreach_history || "-"} />
+            <Meta label="Context Notes" value={prospect.locality_relationship || "-"} />
             <Meta label="Priority" value={latestAnalysis?.priority || "-"} />
             <Meta label="Overall Score" value={latestAnalysis?.overall_opportunity_score?.toString() || "-"} />
             <Meta label="Value Band" value={latestAnalysis?.potential_project_value_band || "-"} />
@@ -469,7 +567,17 @@ export function SignalProspectDetail({
               <Meta label="Scanned" value={formatDateTime(String(scan?.scanned_at || latestScanAnalysis?.created_at || ""))} />
               <Meta label="Research provider" value={latestAnalysis?.research_provider || "-"} />
               <Meta label="Official source" value={latestAnalysis?.confirmed_official_url || prospect.website_url || "-"} />
+              <Meta label="Scan coverage" value={latestAnalysis?.scan_coverage_confidence || "-"} />
+              <Meta label="Coverage note" value={latestAnalysis?.scan_coverage_note || "-"} />
             </div>
+            {weighting && (
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <EvidenceGroup title="Official Website Evidence" items={stringList(weighting.official_website_evidence)} />
+                <EvidenceGroup title="User Research Observations" items={stringList(weighting.user_research_observations)} />
+                <EvidenceGroup title="System-Derived Classification" items={[JSON.stringify(weighting.system_derived_classification || {})]} />
+                <EvidenceGroup title="AI Interpretation" items={stringList([weighting.ai_interpretation])} />
+              </div>
+            )}
             <div className="mt-3 space-y-2">
               {evidence.slice(0, 8).map((item, index) => (
                 <div key={index} className="rounded-md border border-border bg-background/50 p-2 text-xs text-muted-foreground">
@@ -485,6 +593,8 @@ export function SignalProspectDetail({
         </Panel>
 
         <Panel title="Score Breakdown">
+          <Score label="Website opportunity" value={latestAnalysis?.website_opportunity_score} />
+          <Score label="Systems/AI opportunity" value={latestAnalysis?.systems_opportunity_score} />
           <Score label="Website quality" value={latestAnalysis?.website_quality_score} />
           <Score label="Business viability" value={latestAnalysis?.business_viability_score} />
           <Score label="Operational opportunity" value={latestAnalysis?.operational_opportunity_score} />
@@ -500,7 +610,8 @@ export function SignalProspectDetail({
         <div className="grid gap-4 lg:grid-cols-2">
           <TextBlock label="Recommended primary offer" value={latestAnalysis?.recommended_primary_offer} />
           <TextBlock label="Recommended secondary offer" value={latestAnalysis?.recommended_secondary_offer} />
-          <TextBlock label="Relevant demo" value={latestAnalysis?.recommended_demo || prospect.relevant_demo} />
+          <TextBlock label="Recommended lane" value={latestAnalysis?.recommended_lane ? laneLabels[latestAnalysis.recommended_lane] || latestAnalysis.recommended_lane : null} />
+          <TextBlock label="Relevant demo" value={selectedDemoRoute || latestAnalysis?.recommended_demo || prospect.relevant_demo} />
           <TextBlock label="Commercial fit" value={latestAnalysis?.commercial_fit} />
           <TextBlock label="Public customer positioning" value={latestAnalysis?.public_customer_positioning} />
           <TextBlock label="Brand voice summary" value={latestAnalysis?.brand_voice_summary} />
@@ -516,6 +627,11 @@ export function SignalProspectDetail({
           <Meta label="Recommended channel" value={latestAnalysis?.suggested_channel ? channelLabels[latestAnalysis.suggested_channel] : "-"} />
           <Meta label="Draft created" value={formatDateTime(latestDraft?.created_at)} />
         </div>
+        {!externalReady && (
+          <div className="mb-4 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+            {readinessWarning || "This script has not passed external-readiness checks. Review before using."}
+          </div>
+        )}
         <div className="mb-4 flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row sm:items-end">
           <label className="block flex-1 space-y-2">
             <span className="text-sm font-medium">Conversation style</span>
@@ -611,6 +727,23 @@ function TextBlock({ label, value }: { label: string; value: string | null | und
     <div className="rounded-lg border border-border bg-muted/30 p-3">
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{value}</p>
+    </div>
+  )
+}
+
+function EvidenceGroup({ items, title }: { items: string[]; title: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-background/50 p-3">
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
+      {items.length > 0 ? (
+        <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+          {items.slice(0, 5).map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-xs text-muted-foreground">No stored evidence in this category yet.</p>
+      )}
     </div>
   )
 }

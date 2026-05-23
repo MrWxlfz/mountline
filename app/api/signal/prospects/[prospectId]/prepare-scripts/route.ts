@@ -74,7 +74,7 @@ export async function POST(
       conversation_style_reason: scriptStudio.conversation_style_reason,
       first_contact_subject: `${prospect.business_name} website idea`,
       first_contact_email: scriptStudio.first_email_draft,
-      permission_based_dm: null,
+      permission_based_dm: scriptStudio.permission_based_dm,
       owner_call_opener: scriptStudio.first_call_opener,
       gatekeeper_script: scriptStudio.receptionist_script,
       voicemail_script: scriptStudio.voicemail_script,
@@ -89,6 +89,16 @@ export async function POST(
     .single()
 
   if (draftError) return NextResponse.json({ error: draftError.message }, { status: 500 })
+
+  if (analysis?.id) {
+    await supabase
+      .from("signal_analyses")
+      .update({
+        external_readiness: scriptStudio.external_readiness,
+        recommended_next_action: scriptStudio.recommended_next_action,
+      })
+      .eq("id", analysis.id)
+  }
 
   await supabase
     .from("signal_prospects")

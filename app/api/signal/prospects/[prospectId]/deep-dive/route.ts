@@ -7,10 +7,22 @@ import {
   summarizeSignalBrandVoice,
   suggestSignalConversationStyle,
 } from "@/lib/signal/conversation"
+import {
+  classifySignalLocality,
+  classifySignalOutreachHistory,
+  classifySignalRelationship,
+  deterministicRelevantDemo,
+  deterministicSignalPlaybook,
+  getRecommendedNextAction,
+  suggestedCalibratedChannel,
+  suggestedCalibratedOutreachMode,
+} from "@/lib/signal/calibration"
 import { completeDeepAnalysisDrafts } from "@/lib/signal/outreach"
 import {
   buildDeterministicInitialAnalysis,
   buildFallbackDeepAnalysis,
+  calibrateInitialAnalysisOutput,
+  getSignalOpportunityCalibration,
 } from "@/lib/signal/scoring"
 import { buildSignalScriptStudio } from "@/lib/signal/scripts"
 import { scanSignalWebsite } from "@/lib/signal/website"
@@ -102,7 +114,12 @@ export async function POST(
 
   const prospect = prospectData as SignalProspect
   const scan = await scanSignalWebsite(prospect.website_url)
-  const fallbackInitial = buildDeterministicInitialAnalysis(prospect, scan)
+  const fallbackInitial = calibrateInitialAnalysisOutput(
+    prospect,
+    scan,
+    buildDeterministicInitialAnalysis(prospect, scan),
+  )
+  const opportunityCalibration = getSignalOpportunityCalibration(prospect, scan)
 
   const { data: latestAnalysis } = await supabase
     .from("signal_analyses")
@@ -113,10 +130,10 @@ export async function POST(
     .limit(1)
     .maybeSingle()
 
-  const initial = initialFromAnalysis(
+  const initial = calibrateInitialAnalysisOutput(prospect, scan, initialFromAnalysis(
     (latestAnalysis as SignalAnalysis | null) || null,
     fallbackInitial,
-  )
+  ))
   const fallbackDeep = buildFallbackDeepAnalysis(prospect, scan, initial)
   const aiResult = await runDeepAiAnalysis(prospect, scan, initial)
   const deep = completeDeepAnalysisDrafts(
@@ -125,6 +142,12 @@ export async function POST(
     initial,
     scan,
   )
+  deep.recommended_primary_offer = fallbackInitial.recommended_primary_offer
+  deep.recommended_secondary_offer = fallbackInitial.recommended_secondary_offer
+  deep.suggested_channel = suggestedCalibratedChannel(prospect, scan)
+  deep.suggested_outreach_mode = suggestedCalibratedOutreachMode(prospect)
+  deep.project_value_band = fallbackInitial.potential_project_value_band
+  deep.project_value_reason = fallbackInitial.potential_project_value_reason
   const conversation = suggestSignalConversationStyle(prospect, scan)
   const customerPositioning = buildPublicCustomerPositioning(prospect, scan)
   const brandVoice = summarizeSignalBrandVoice(prospect, scan)
@@ -146,6 +169,7 @@ export async function POST(
       evidence: {
         website: scan.evidence,
         opportunities: deep.evidence_based_opportunities,
+        weighting: opportunityCalibration.evidence_weighting,
       },
       confidence: deep.confidence,
       website_quality_score: initial.website_quality_score,
@@ -156,6 +180,13 @@ export async function POST(
       reachability_score: initial.reachability_score,
       compliance_risk_score: initial.compliance_risk_score,
       overall_opportunity_score: initial.overall_opportunity_score,
+      website_opportunity_score: opportunityCalibration.website_opportunity_score,
+      systems_opportunity_score: opportunityCalibration.systems_opportunity_score,
+      recommended_lane: opportunityCalibration.recommended_lane,
+      scan_coverage_confidence: opportunityCalibration.scan_coverage_confidence,
+      scan_coverage_note: opportunityCalibration.scan_coverage_note,
+      evidence_weighting: opportunityCalibration.evidence_weighting,
+      recommended_next_action: getRecommendedNextAction(prospect),
       priority: initial.priority,
       commercial_fit: initial.commercial_fit,
       potential_project_value_band: deep.project_value_band,
@@ -200,7 +231,7 @@ export async function POST(
       conversation_style_reason: scriptStudio.conversation_style_reason,
       first_contact_subject: deep.first_contact_subject,
       first_contact_email: scriptStudio.first_email_draft || deep.first_contact_email,
-      permission_based_dm: deep.permission_based_dm,
+      permission_based_dm: scriptStudio.permission_based_dm,
       owner_call_opener: scriptStudio.first_call_opener || deep.owner_call_opener,
       gatekeeper_script: scriptStudio.receptionist_script || deep.gatekeeper_script,
       voicemail_script: scriptStudio.voicemail_script || deep.voicemail_script,
@@ -218,6 +249,14 @@ export async function POST(
     return NextResponse.json({ error: draftError.message }, { status: 500 })
   }
 
+  await supabase
+    .from("signal_analyses")
+    .update({
+      external_readiness: scriptStudio.external_readiness,
+      recommended_next_action: scriptStudio.recommended_next_action,
+    })
+    .eq("id", analysis.id)
+
   const updates: Record<string, unknown> = {}
   if (!prospect.what_looks_good && deep.what_looks_good) {
     updates.what_looks_good = deep.what_looks_good
@@ -228,6 +267,11 @@ export async function POST(
   if (prospect.outreach_mode !== deep.suggested_outreach_mode) {
     updates.outreach_mode = deep.suggested_outreach_mode
   }
+  updates.industry_playbook = deterministicSignalPlaybook(prospect)
+  updates.relevant_demo = deterministicRelevantDemo(prospect)
+  updates.locality_scope = classifySignalLocality(prospect)
+  updates.relationship_type = classifySignalRelationship(prospect)
+  updates.outreach_history = classifySignalOutreachHistory(prospect)
   updates.conversation_style = scriptStudio.conversation_style
   updates.conversation_style_reason = scriptStudio.conversation_style_reason
   if (

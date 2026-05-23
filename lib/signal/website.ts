@@ -31,6 +31,7 @@ export type SignalPageScan = {
   phones: string[]
   links: string[]
   bookingLinks: string[]
+  socialLinks: string[]
   detectedWebsitePlatform: string | null
   detectedBookingPlatform: string | null
   imageCount: number
@@ -52,6 +53,7 @@ export type SignalWebsiteScan = {
   visible_emails: string[]
   visible_phones: string[]
   booking_links: string[]
+  social_links: string[]
   detected_website_platform: string | null
   detected_booking_platform: string | null
   image_count: number
@@ -207,6 +209,21 @@ function getBookingLinks(links: string[]) {
   }).slice(0, 12)
 }
 
+function getSocialLinks(links: string[]) {
+  return links.filter((link) => {
+    const lower = link.toLowerCase()
+    return [
+      "instagram.com",
+      "facebook.com",
+      "linkedin.com",
+      "youtube.com",
+      "tiktok.com",
+      "x.com",
+      "twitter.com",
+    ].some((word) => lower.includes(word))
+  }).slice(0, 10)
+}
+
 function snippetAround(text: string, phrase: string) {
   const lower = text.toLowerCase()
   const index = lower.indexOf(phrase.toLowerCase())
@@ -346,7 +363,7 @@ async function readLimitedText(response: Response) {
   return new TextDecoder().decode(Buffer.concat(chunks))
 }
 
-function safeSecondaryLink(homeUrl: string, links: string[]) {
+function safeSecondaryLinks(homeUrl: string, links: string[]) {
   const home = new URL(homeUrl)
   const blocked = [
     "login",
@@ -361,22 +378,32 @@ function safeSecondaryLink(homeUrl: string, links: string[]) {
     "yelp.com",
     "google.com",
   ]
-  const preferred = ["service", "services", "about", "contact"]
+  const servicePreferred = ["service", "services", "menu", "pricing", "gallery", "portfolio"]
+  const contactPreferred = ["contact", "about", "booking", "book", "appointment", "schedule"]
 
-  return links.find((link) => {
+  const candidates = links.filter((link) => {
     try {
       const url = new URL(link)
       const lower = url.toString().toLowerCase()
       return (
         url.origin === home.origin &&
         url.toString() !== home.toString() &&
-        preferred.some((word) => lower.includes(word)) &&
+        [...servicePreferred, ...contactPreferred].some((word) => lower.includes(word)) &&
         !blocked.some((word) => lower.includes(word))
       )
     } catch {
       return false
     }
-  }) || null
+  })
+
+  const serviceLink = candidates.find((link) =>
+    servicePreferred.some((word) => link.toLowerCase().includes(word)),
+  )
+  const contactLink = candidates.find((link) =>
+    contactPreferred.some((word) => link.toLowerCase().includes(word)),
+  )
+
+  return unique([serviceLink, contactLink].filter(Boolean) as string[], 2)
 }
 
 async function fetchHtml(startUrl: URL) {
@@ -465,6 +492,7 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
   const emails = extractEmails(html, text)
   const phones = extractPhones(html, text)
   const bookingLinks = getBookingLinks(links)
+  const socialLinks = getSocialLinks(links)
   const imageCount = (html.match(/<img\b/gi) || []).length
   const title = extractFirst(html, /<title[^>]*>([\s\S]*?)<\/title>/i)
   const metaDescription = extractMetaDescription(html)
@@ -518,6 +546,7 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
     phones,
     links,
     bookingLinks,
+    socialLinks,
     detectedWebsitePlatform,
     detectedBookingPlatform,
     imageCount,
@@ -547,6 +576,7 @@ export async function scanSignalWebsite(
       visible_emails: [],
       visible_phones: [],
       booking_links: [],
+      social_links: [],
       detected_website_platform: null,
       detected_booking_platform: null,
       image_count: 0,
@@ -562,12 +592,12 @@ export async function scanSignalWebsite(
       scanHtmlPage(homepage.finalUrl, homepage.status, homepage.html),
     ]
 
-    const secondaryUrl = safeSecondaryLink(
+    const secondaryUrls = safeSecondaryLinks(
       homepage.finalUrl,
       pages[0]?.links || [],
     )
 
-    if (secondaryUrl) {
+    for (const secondaryUrl of secondaryUrls) {
       try {
         const secondary = await fetchHtml(new URL(secondaryUrl))
         pages.push(scanHtmlPage(secondary.finalUrl, secondary.status, secondary.html))
@@ -597,6 +627,7 @@ export async function scanSignalWebsite(
       visible_emails: unique(pages.flatMap((page) => page.emails), 8),
       visible_phones: unique(pages.flatMap((page) => page.phones), 8),
       booking_links: unique(pages.flatMap((page) => page.bookingLinks), 12),
+      social_links: unique(pages.flatMap((page) => page.socialLinks), 10),
       detected_website_platform:
         pages.find((page) => page.detectedWebsitePlatform)?.detectedWebsitePlatform || null,
       detected_booking_platform:
@@ -624,6 +655,7 @@ export async function scanSignalWebsite(
       visible_emails: [],
       visible_phones: [],
       booking_links: [],
+      social_links: [],
       detected_website_platform: null,
       detected_booking_platform: null,
       image_count: 0,

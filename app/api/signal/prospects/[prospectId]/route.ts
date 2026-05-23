@@ -96,6 +96,7 @@ export async function PATCH(
     "what_looks_good",
     "visible_problem",
     "relevant_demo",
+    "conversation_style_reason",
     "follow_up_date",
     "assigned_to",
   ] as const
@@ -110,6 +111,7 @@ export async function PATCH(
     update.public_email = normalizeEmail(parsed.data.public_email)
   }
   if (parsed.data.outreach_mode) update.outreach_mode = parsed.data.outreach_mode
+  if (parsed.data.conversation_style) update.conversation_style = parsed.data.conversation_style
   if (parsed.data.outreach_status) update.outreach_status = parsed.data.outreach_status
   if (parsed.data.source) update.source = parsed.data.source
   if ("contacted_at" in parsed.data) update.contacted_at = parsed.data.contacted_at || null

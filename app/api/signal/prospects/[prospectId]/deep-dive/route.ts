@@ -2,15 +2,35 @@ import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { isSignalProspectSuppressed, maybeCreateSignalAlert } from "@/lib/signal/alerts"
 import { runDeepAiAnalysis } from "@/lib/signal/ai"
+import {
+  buildPublicCustomerPositioning,
+  summarizeSignalBrandVoice,
+  suggestSignalConversationStyle,
+} from "@/lib/signal/conversation"
 import { completeDeepAnalysisDrafts } from "@/lib/signal/outreach"
 import {
   buildDeterministicInitialAnalysis,
   buildFallbackDeepAnalysis,
 } from "@/lib/signal/scoring"
+import { buildSignalScriptStudio } from "@/lib/signal/scripts"
 import { scanSignalWebsite } from "@/lib/signal/website"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { SignalAnalysis, SignalProspect } from "@/lib/supabase/types"
 import type { SignalInitialAnalysisOutput } from "@/lib/signal/validation"
+
+const CONTACTED_OR_FINAL_STATUSES = new Set([
+  "contacted",
+  "awaiting_reply",
+  "permission_to_send_demo",
+  "demo_sent",
+  "interested",
+  "discovery_call",
+  "proposal_sent",
+  "won",
+  "lost",
+  "no_response",
+  "do_not_contact",
+])
 
 function initialFromAnalysis(
   analysis: SignalAnalysis | null,
@@ -105,6 +125,9 @@ export async function POST(
     initial,
     scan,
   )
+  const conversation = suggestSignalConversationStyle(prospect, scan)
+  const customerPositioning = buildPublicCustomerPositioning(prospect, scan)
+  const brandVoice = summarizeSignalBrandVoice(prospect, scan)
 
   const { data: analysisData, error: analysisError } = await supabase
     .from("signal_analyses")
@@ -142,6 +165,10 @@ export async function POST(
       recommended_demo: initial.recommended_demo,
       suggested_channel: deep.suggested_channel,
       suggested_outreach_mode: deep.suggested_outreach_mode,
+      suggested_conversation_style: conversation.style,
+      conversation_style_reason: conversation.reason,
+      public_customer_positioning: customerPositioning,
+      brand_voice_summary: brandVoice,
       reasons_to_contact: deep.evidence_based_opportunities.map(
         (opportunity) => opportunity.honest_offer_language,
       ),
@@ -157,21 +184,32 @@ export async function POST(
   }
 
   const analysis = analysisData as SignalAnalysis
+  const scriptStudio = buildSignalScriptStudio({
+    analysis,
+    conversationStyle: conversation.style,
+    prospect,
+    scan,
+  })
   const { data: draft, error: draftError } = await supabase
     .from("signal_outreach_drafts")
     .insert({
       prospect_id: prospect.id,
       analysis_id: analysis.id,
       outreach_mode: deep.suggested_outreach_mode,
+      conversation_style: scriptStudio.conversation_style,
+      conversation_style_reason: scriptStudio.conversation_style_reason,
       first_contact_subject: deep.first_contact_subject,
-      first_contact_email: deep.first_contact_email,
+      first_contact_email: scriptStudio.first_email_draft || deep.first_contact_email,
       permission_based_dm: deep.permission_based_dm,
-      owner_call_opener: deep.owner_call_opener,
-      gatekeeper_script: deep.gatekeeper_script,
-      voicemail_script: deep.voicemail_script,
-      demo_send_followup: deep.demo_send_followup,
-      discovery_call_questions: deep.discovery_call_questions,
-      proposal_angle: deep.proposal_angle,
+      owner_call_opener: scriptStudio.first_call_opener || deep.owner_call_opener,
+      gatekeeper_script: scriptStudio.receptionist_script || deep.gatekeeper_script,
+      voicemail_script: scriptStudio.voicemail_script || deep.voicemail_script,
+      demo_send_followup: scriptStudio.sure_send_it_response || deep.demo_send_followup,
+      discovery_call_questions: scriptStudio.discovery_call_questions,
+      proposal_angle: scriptStudio.proposal_angle || deep.proposal_angle,
+      script_studio: scriptStudio,
+      follow_up_email: scriptStudio.follow_up_draft,
+      objection_responses: scriptStudio.objection_responses,
     })
     .select()
     .single()
@@ -190,8 +228,11 @@ export async function POST(
   if (prospect.outreach_mode !== deep.suggested_outreach_mode) {
     updates.outreach_mode = deep.suggested_outreach_mode
   }
+  updates.conversation_style = scriptStudio.conversation_style
+  updates.conversation_style_reason = scriptStudio.conversation_style_reason
   if (
     prospect.outreach_status !== "do_not_contact" &&
+    !CONTACTED_OR_FINAL_STATUSES.has(prospect.outreach_status) &&
     !(await isSignalProspectSuppressed(prospect))
   ) {
     updates.outreach_status = "ready_to_contact"

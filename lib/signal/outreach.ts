@@ -18,7 +18,7 @@ function getSupportedObservation(
 ) {
   if (prospect.visible_problem) return prospect.visible_problem
   if (scan?.cta_words.length) {
-    return `your site already points visitors toward ${scan.cta_words.slice(0, 3).join(", ")}`
+    return `the public site already points visitors toward ${scan.cta_words.slice(0, 3).join(", ")}`
   }
   if (scan?.headings[0]) return `the public site leads with "${scan.headings[0]}"`
   if (scan?.page_title) return `the public site is titled "${scan.page_title}"`
@@ -32,7 +32,7 @@ function getCompliment(prospect: SignalProspect, scan: SignalWebsiteScan | null)
     return `the site gives visitors a starting point for ${scan.service_language.slice(0, 2).join(" and ")}`
   }
   if (scan?.visible_phones.length || prospect.public_phone) {
-    return "you make a public phone contact route available"
+    return "the business makes a public phone contact route available"
   }
   if (scan?.headings[0]) return `the site has a clear public headline around "${scan.headings[0]}"`
   return "the business has enough public information to review respectfully"
@@ -40,7 +40,7 @@ function getCompliment(prospect: SignalProspect, scan: SignalWebsiteScan | null)
 
 function getRelationshipLine(prospect: SignalProspect) {
   const relationship = compact(prospect.locality_relationship)
-  return relationship ? `I’m reaching out because of this connection: ${relationship}. ` : ""
+  return relationship ? `Relationship context entered by Mountline: ${relationship}. ` : ""
 }
 
 function getDemoLine(initial: SignalInitialAnalysisOutput) {
@@ -50,7 +50,7 @@ function getDemoLine(initial: SignalInitialAnalysisOutput) {
   if (initial.recommended_demo === "barber-shop") {
     return "Mountline has a barber-shop concept that could make the idea easier to picture."
   }
-  return "I can send a short written review first, without assuming a full project."
+  return "Mountline can send a short written review first, without assuming a full project."
 }
 
 function buildEmailIntro(
@@ -66,11 +66,11 @@ function buildEmailIntro(
     return [
       `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
       "",
-      `My name is Luke, and I’m a local Keller High student building Mountline Studio. I was looking at ${prospect.business_name} and liked that ${compliment}.`,
+      `Luke here with Mountline Studio in the Keller area. Mountline was reviewing ${prospect.business_name} and liked that ${compliment}.`,
       "",
-      `One practical idea stood out: ${observation}. I think a focused ${offer} could be worth a quick look, especially if it helps customers understand the next step faster.`,
+      `One practical idea stood out: ${observation}. A focused ${offer} could be worth a quick look, especially if it helps customers understand the next step faster.`,
       "",
-      `${getDemoLine(initial)} Would it be okay if I sent over a short concept or a few notes?`,
+      `${getDemoLine(initial)} Would it be okay for Mountline to send over a short concept or a few notes?`,
       "",
       "No pressure at all, and if this is not useful, reply no and Mountline will not follow up.",
       "",
@@ -83,11 +83,11 @@ function buildEmailIntro(
     return [
       `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
       "",
-      `${getRelationshipLine(prospect)}I’m Luke with Mountline Studio. I was reviewing ${prospect.business_name} and noticed that ${compliment}.`,
+      `${getRelationshipLine(prospect)}Luke here with Mountline Studio. Mountline was reviewing ${prospect.business_name} and noticed that ${compliment}.`,
       "",
-      `A specific opportunity may be ${observation}. Mountline could help with ${offer}, but I would want to understand how your team works before suggesting anything specific.`,
+      `A specific opportunity may be ${observation}. Mountline could help with ${offer}, but the right next step is understanding how the team works before suggesting anything specific.`,
       "",
-      "Would it be alright to send a short review or set up a quick conversation?",
+      "Would it be alright for Mountline to send a short review or set up a quick conversation?",
       "",
       "If now is not a good fit, reply no and Mountline will not follow up.",
       "",
@@ -99,11 +99,11 @@ function buildEmailIntro(
   return [
     `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
     "",
-    `Luke here with Mountline Studio. I was reviewing ${prospect.business_name} and noticed that ${compliment}.`,
+    `Luke here with Mountline Studio. Mountline was reviewing ${prospect.business_name} and noticed that ${compliment}.`,
     "",
-    `One specific opportunity may be ${observation}. Mountline focuses on practical websites and lightweight systems, so the first thing I would suggest is ${offer}.`,
+    `One specific opportunity may be ${observation}. Mountline focuses on practical websites and lightweight systems, so the first suggested starting point is ${offer}.`,
     "",
-    "Would you be open to a short conversation, or should I send over a brief written review first?",
+    "Would you be open to a short conversation, or should Mountline send over a brief written review first?",
     "",
     "If this is not relevant, reply no and Mountline will not follow up.",
     "",
@@ -112,18 +112,22 @@ function buildEmailIntro(
   ].join("\n")
 }
 
-function buildDm(prospect: SignalProspect, initial: SignalInitialAnalysisOutput, scan: SignalWebsiteScan | null) {
+function buildDm(
+  prospect: SignalProspect,
+  initial: SignalInitialAnalysisOutput,
+  scan: SignalWebsiteScan | null,
+) {
   const observation = getSupportedObservation(prospect, scan)
 
   if (initial.suggested_outreach_mode === "local_student") {
-    return `Hi, this is Luke. I’m a local Keller High student building Mountline Studio. I was looking at ${prospect.business_name} and noticed ${observation}. Would it be okay if I sent a short website idea or concept? No pressure.`
+    return `Hi, this is Luke with Mountline Studio in the Keller area. Mountline was reviewing ${prospect.business_name} and noticed ${observation}. Would it be okay for Mountline to send a short website idea or concept? No pressure.`
   }
 
   if (initial.suggested_outreach_mode === "warm_connection") {
-    return `Hi, this is Luke with Mountline Studio. ${getRelationshipLine(prospect)}I noticed ${observation}. Would it be okay if I sent a short review or idea?`
+    return `Hi, this is Luke with Mountline Studio. ${getRelationshipLine(prospect)}Mountline noticed ${observation}. Would it be okay to send a short review or idea?`
   }
 
-  return `Hi, this is Luke with Mountline Studio. I was reviewing ${prospect.business_name} and noticed ${observation}. Would you be open to a short website or workflow review?`
+  return `Hi, this is Luke with Mountline Studio. Mountline was reviewing ${prospect.business_name} and noticed ${observation}. Would you be open to a short website or workflow review?`
 }
 
 function buildOwnerCallOpener(
@@ -135,27 +139,27 @@ function buildOwnerCallOpener(
   const offer = initial.recommended_primary_offer.toLowerCase()
 
   if (initial.suggested_outreach_mode === "local_student") {
-    return `Hi, is this the right person for ${prospect.business_name}'s website or booking questions? My name is Luke. I’m a local Keller High student building Mountline Studio. I had one practical idea after looking at your public site: ${observation}. Would it be okay if I sent a short concept, or is there a better person to ask?`
+    return `Hi, is this the right person for ${prospect.business_name}'s website or booking questions? Luke with Mountline Studio here in the Keller area. Mountline had one practical idea after reviewing your public site: ${observation}. Would it be okay to send a short concept, or is there a better person to ask?`
   }
 
   if (initial.suggested_outreach_mode === "warm_connection") {
-    return `Hi, this is Luke with Mountline Studio. ${getRelationshipLine(prospect)}I had one practical observation for ${prospect.business_name}: ${observation}. Is it alright if I send a short note, or ask who handles website and operations decisions?`
+    return `Hi, this is Luke with Mountline Studio. ${getRelationshipLine(prospect)}Mountline had one practical observation for ${prospect.business_name}: ${observation}. Is it alright to send a short note, or ask who handles website and operations decisions?`
   }
 
-  return `Hi, this is Luke with Mountline Studio. Is this the right person for website or operations decisions at ${prospect.business_name}? I noticed ${observation}, and thought a ${offer} might be worth a short conversation. Would it be alright if I sent a brief review first?`
+  return `Hi, this is Luke with Mountline Studio. Is this the right person for website or operations decisions at ${prospect.business_name}? Mountline noticed ${observation}, and a ${offer} might be worth a short conversation. Would it be alright to send a brief review first?`
 }
 
 function buildGatekeeperScript(prospect: SignalProspect) {
-  return `Hi, this is Luke with Mountline Studio. I had a short website or operations question for ${prospect.business_name}. Who is usually the best person to ask about the public website, booking flow, or customer inquiry process?`
+  return `Hi, this is Luke with Mountline Studio. Mountline had a short website or operations question for ${prospect.business_name}. Who is usually the best person to ask about the public website, booking flow, or customer inquiry process?`
 }
 
 function buildVoicemail(prospect: SignalProspect, initial: SignalInitialAnalysisOutput) {
-  return `Hi, this is Luke with Mountline Studio calling about ${prospect.business_name}. I had a short, specific idea around ${initial.recommended_primary_offer.toLowerCase()} and wanted to ask permission to send it over. You can reach Mountline through the website or reply to the email I send. Thanks.`
+  return `Hi, this is Luke with Mountline Studio calling about ${prospect.business_name}. Mountline had a short, specific idea around ${initial.recommended_primary_offer.toLowerCase()} and wanted to ask permission to send it over. You can reach Mountline through the website or by email. Thanks.`
 }
 
 function buildDemoFollowup(prospect: SignalProspect, initial: SignalInitialAnalysisOutput) {
   if (initial.recommended_demo === "none") {
-    return `Thanks for being open to a review. I’ll keep it specific to ${prospect.business_name}, use only public information, and separate confirmed observations from questions for the discovery call.`
+    return `Thanks for being open to a review. Mountline will keep it specific to ${prospect.business_name}, use only public information, and separate confirmed observations from questions for the discovery call.`
   }
 
   const demoPath =

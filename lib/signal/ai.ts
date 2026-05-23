@@ -1,5 +1,6 @@
 import "server-only"
 
+import { z } from "zod"
 import type { SignalProspect } from "@/lib/supabase/types"
 import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "./playbooks"
 import type { SignalWebsiteScan } from "./website"
@@ -17,6 +18,27 @@ type AiResult<T> = {
   provider: Exclude<SignalAiProvider, "disabled">
   model: string
 }
+
+const signalImportMappingOutputSchema = z.object({
+  business_name: z.string().optional().nullable(),
+  contact_name: z.string().optional().nullable(),
+  industry: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  state: z.string().optional().nullable(),
+  website_url: z.string().optional().nullable(),
+  public_email: z.string().optional().nullable(),
+  public_phone: z.string().optional().nullable(),
+  instagram_url: z.string().optional().nullable(),
+  human_notes: z.string().optional().nullable(),
+  what_looks_good: z.string().optional().nullable(),
+  visible_problem: z.string().optional().nullable(),
+  relevant_demo: z.string().optional().nullable(),
+  outreach_status: z.string().optional().nullable(),
+  follow_up_date: z.string().optional().nullable(),
+  existing_website_platform: z.string().optional().nullable(),
+  existing_booking_platform: z.string().optional().nullable(),
+  locality_relationship: z.string().optional().nullable(),
+})
 
 const DEFAULT_OPENAI_FAST_MODEL = "gpt-4.1-mini"
 const DEFAULT_OPENAI_DEEP_MODEL = "gpt-4.1"
@@ -61,6 +83,7 @@ function compactScan(scan: SignalWebsiteScan | null) {
       visible_emails: scan.visible_emails,
       visible_phones: scan.visible_phones,
       booking_links: scan.booking_links.slice(0, 8),
+      social_links_found_on_official_site: scan.social_links?.slice(0, 8) || [],
       detected_website_platform: scan.detected_website_platform,
       detected_booking_platform: scan.detected_booking_platform,
       image_count: scan.image_count,
@@ -106,6 +129,7 @@ function safetyInstructions() {
     "Do not recommend automated cold outreach, bulk sending, scraping third-party platforms, social scraping, or form submission.",
     "All outreach is draft-only for human review.",
     "Do not overpromise AI. Keep AI/workflow ideas practical and scoped as discovery unless clearly supported.",
+    "Avoid first-person singular phrasing. Use Luke or Mountline instead of I, me, or my.",
     "If medical or dental, limit recommendations to public marketing website, public FAQ, locations/hours/contact clarity, and general non-patient-specific admin discovery.",
     `Medical/dental warning if relevant: ${MEDICAL_COMPLIANCE_WARNING}`,
     "Return only strict JSON matching the requested schema. No markdown.",
@@ -141,7 +165,8 @@ function deepPrompt(
     "Generate evidence-grounded opportunity mapping, pitch strategy, call scripts, email draft, discovery questions, warnings, and next action.",
     "Outreach drafts must be human, specific, respectful, and permission-based.",
     "Do not insult the existing website. Do not create fake urgency or fake proof. Include a respectful no-follow-up option in the email where appropriate.",
-    "For local_student mode only, identify Luke as a local Keller High student building Mountline Studio. For professional_studio, do not lead with student identity. For warm_connection, mention only relationship details entered by the user.",
+    "For local_student mode, introduce Luke as local to the Keller area and building Mountline Studio. Do not mention school, age, summer, side hustle, or agency size. For professional_studio, lead with Mountline Studio. For warm_connection, mention only relationship details entered by the user.",
+    "Opportunity types must be one of: website_redesign, photo_gallery_or_portfolio, service_or_pricing_clarity, booking_or_quote_flow, preserve_existing_booking_integration, client_portal, support_messaging, payment_link_workflow, missed_call_followup_discovery, lead_organization, estimate_request_routing, appointment_routing_discovery, faq_knowledge_base, review_request_workflow_discovery, internal_task_summary, compliance_review_required, no_recommended_offer.",
     "",
     "Return JSON with exactly these keys:",
     "what_looks_good, visible_problem, evidence_based_opportunities, recommended_primary_offer, recommended_secondary_offer, project_value_band, project_value_reason, suggested_channel, suggested_outreach_mode, first_contact_subject, first_contact_email, permission_based_dm, owner_call_opener, gatekeeper_script, voicemail_script, demo_send_followup, discovery_call_questions, proposal_angle, red_flags, compliance_warning, confidence.",
@@ -292,5 +317,37 @@ export async function runDeepAiAnalysis(
     output: parsed.data,
     provider: result.provider,
     model: result.model,
+  }
+}
+
+export async function runSignalImportMappingAi(headers: string[]) {
+  if (headers.length === 0) return null
+
+  const result = await callProvider(
+    [
+      "Map spreadsheet headers to Mountline Signal fields.",
+      "Use only the exact header strings supplied. Return JSON where each value is either an exact header string or null.",
+      "Do not infer any business facts. This is only column mapping.",
+      "Allowed keys: business_name, contact_name, industry, city, state, website_url, public_email, public_phone, instagram_url, human_notes, what_looks_good, visible_problem, relevant_demo, outreach_status, follow_up_date, existing_website_platform, existing_booking_platform, locality_relationship.",
+      `Headers: ${JSON.stringify(headers)}`,
+    ].join("\n"),
+    false,
+  )
+  if (!result) return null
+
+  const parsed = signalImportMappingOutputSchema.safeParse(result.json)
+  if (!parsed.success) return null
+
+  const mapping: Record<string, number> = {}
+  for (const [field, header] of Object.entries(parsed.data)) {
+    if (!header) continue
+    const index = headers.findIndex((candidate) => candidate === header)
+    if (index >= 0) mapping[field] = index
+  }
+
+  return {
+    provider: result.provider,
+    model: result.model,
+    mapping,
   }
 }

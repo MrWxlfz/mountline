@@ -2,6 +2,7 @@ import { z } from "zod"
 import type {
   SignalCommercialFit,
   SignalConfidence,
+  SignalConversationStyle,
   SignalOutreachMode,
   SignalPriority,
   SignalRelevantDemo,
@@ -26,6 +27,15 @@ export const signalOutreachModeSchema = z.enum([
   "local_student",
   "professional_studio",
   "warm_connection",
+])
+
+export const signalConversationStyleSchema = z.enum([
+  "friendly_local",
+  "traditional_owner_operator",
+  "modern_casual_brand",
+  "formal_business",
+  "clinical_professional",
+  "concise_busy_owner",
 ])
 
 export const signalOutreachStatusSchema = z.enum([
@@ -100,6 +110,8 @@ export const signalProspectCreateSchema = z.object({
   visible_problem: nullableText,
   relevant_demo: signalRelevantDemoSchema.optional().nullable(),
   outreach_mode: signalOutreachModeSchema.optional(),
+  conversation_style: signalConversationStyleSchema.optional(),
+  conversation_style_reason: shortNullableText,
   outreach_status: signalOutreachStatusSchema.optional(),
   follow_up_date: z.string().trim().max(20).optional().nullable(),
   assigned_to: shortNullableText,
@@ -162,16 +174,19 @@ export const signalInitialAnalysisSchema = z.object({
 
 export const signalOpportunityTypeSchema = z.enum([
   "website_redesign",
+  "photo_gallery_or_portfolio",
+  "service_or_pricing_clarity",
   "booking_or_quote_flow",
+  "preserve_existing_booking_integration",
   "client_portal",
   "support_messaging",
   "payment_link_workflow",
-  "missed_call_followup",
+  "missed_call_followup_discovery",
   "lead_organization",
-  "email_followup_drafts",
-  "appointment_routing",
+  "estimate_request_routing",
+  "appointment_routing_discovery",
   "faq_knowledge_base",
-  "review_request_workflow",
+  "review_request_workflow_discovery",
   "internal_task_summary",
   "compliance_review_required",
   "no_recommended_offer",
@@ -215,6 +230,52 @@ export const signalDeepAnalysisSchema = z.object({
 export type SignalInitialAnalysisOutput = z.infer<typeof signalInitialAnalysisSchema>
 export type SignalDeepAnalysisOutput = z.infer<typeof signalDeepAnalysisSchema>
 
+export const signalResearchResolveSchema = z.object({
+  business_name: z.string().trim().min(1, "Business name is required").max(180),
+  location: z.string().trim().min(1, "Location is required").max(160),
+  industry_hint: shortNullableText,
+  known_context: shortNullableText,
+  initial_note: nullableText,
+})
+
+export const signalResearchConfirmSchema = z.object({
+  research_run_id: z.string().uuid(),
+  candidate_url: z.string().trim().url(),
+  candidate_title: z.string().trim().max(300).optional().nullable(),
+  merge_prospect_id: z.string().uuid().optional().nullable(),
+})
+
+export const signalScriptStudioSchema = z.object({
+  conversation_style: signalConversationStyleSchema.optional(),
+})
+
+export const signalImportPreviewSchema = z.object({
+  sheet_name: z.string().trim().max(180).optional().nullable(),
+})
+
+export const signalImportCommitSchema = z.object({
+  batch_id: z.string().uuid(),
+})
+
+export const signalCallSessionCreateSchema = z.object({
+  prospect_ids: z.array(z.string().uuid()).min(1).max(5),
+})
+
+export const signalCallOutcomeSchema = z.object({
+  item_id: z.string().uuid(),
+  outcome: z.enum([
+    "no_answer",
+    "voicemail_left",
+    "permission_to_send_demo",
+    "interested",
+    "follow_up_later",
+    "not_interested",
+    "do_not_contact",
+  ]),
+  follow_up_date: z.string().trim().max(20).optional().nullable(),
+  notes: z.string().trim().max(1200).optional().nullable(),
+})
+
 export function normalizeProspectInput(
   data: z.infer<typeof signalProspectCreateSchema>,
 ) {
@@ -244,6 +305,8 @@ export function normalizeProspectInput(
     visible_problem: cleanOptionalText(data.visible_problem),
     relevant_demo: data.relevant_demo || null,
     outreach_mode: data.outreach_mode || "professional_studio",
+    conversation_style: data.conversation_style || "friendly_local",
+    conversation_style_reason: cleanOptionalText(data.conversation_style_reason),
     outreach_status: data.outreach_status || "researched",
     follow_up_date: cleanOptionalText(data.follow_up_date),
     assigned_to: cleanOptionalText(data.assigned_to),
@@ -297,4 +360,11 @@ export function coerceOutreachMode(
 ): SignalOutreachMode {
   const parsed = signalOutreachModeSchema.safeParse(value)
   return parsed.success ? parsed.data : "professional_studio"
+}
+
+export function coerceConversationStyle(
+  value: string | null | undefined,
+): SignalConversationStyle {
+  const parsed = signalConversationStyleSchema.safeParse(value)
+  return parsed.success ? parsed.data : "friendly_local"
 }

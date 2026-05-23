@@ -36,6 +36,8 @@ type WorkingAction =
   | "followup"
   | "suppress"
   | "convert"
+  | "scripts"
+  | "session"
   | null
 
 const statusLabels: Record<string, string> = {
@@ -68,6 +70,15 @@ const channelLabels: Record<string, string> = {
   contact_form: "Contact form",
   warm_intro: "Warm intro",
   research_more: "Research more",
+}
+
+const conversationStyleLabels: Record<string, string> = {
+  friendly_local: "Friendly local",
+  traditional_owner_operator: "Traditional owner-operator",
+  modern_casual_brand: "Modern casual brand",
+  formal_business: "Formal business",
+  clinical_professional: "Clinical professional",
+  concise_busy_owner: "Concise busy owner",
 }
 
 function arrayFromJson(value: unknown) {
@@ -104,6 +115,12 @@ function evidenceFromAnalysis(analysis: SignalAnalysis | null) {
   return []
 }
 
+function scriptStudioFromDraft(draft: SignalOutreachDraft | null) {
+  const value = draft?.script_studio
+  if (!value || typeof value !== "object") return null
+  return value as Record<string, unknown>
+}
+
 function scoreColor(value: number | null | undefined, inverse = false) {
   if (typeof value !== "number") return "bg-muted"
   const good = inverse ? value <= 30 : value >= 75
@@ -136,6 +153,7 @@ export function SignalProspectDetail({
     [analyses, latestAnalysis],
   )
   const latestDraft = drafts[0] || null
+  const scriptStudio = scriptStudioFromDraft(latestDraft)
   const unreadAlert = alerts.find((alert) => !alert.read_at)
   const playbook = getSignalPlaybook(prospect.industry_playbook)
   const scan = getScan(latestScanAnalysis)
@@ -144,6 +162,9 @@ export function SignalProspectDetail({
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [followUpDate, setFollowUpDate] = useState(prospect.follow_up_date || "")
+  const [conversationStyle, setConversationStyle] = useState<string>(
+    prospect.conversation_style || latestAnalysis?.suggested_conversation_style || "friendly_local",
+  )
 
   const doNotContact = prospect.outreach_status === "do_not_contact" || suppressed
 
@@ -180,6 +201,53 @@ export function SignalProspectDetail({
 
   const updateStatus = (status: string, action: WorkingAction) => {
     runAction(action, `/api/signal/prospects/${prospect.id}`, { outreach_status: status })
+  }
+
+  const prepareScripts = async () => {
+    setWorking("scripts")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/prepare-scripts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation_style: conversationStyle }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Scripts could not be prepared.")
+        return
+      }
+      setMessage("Script Studio prepared.")
+      router.refresh()
+    } catch {
+      setError("Scripts could not be prepared.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const createCallSession = async () => {
+    setWorking("session")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch("/api/signal/call-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prospect_ids: [prospect.id] }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Call session could not be created.")
+        return
+      }
+      router.push(`/dashboard/signal/call-session/${data.session.id}`)
+    } catch {
+      setError("Call session could not be created.")
+    } finally {
+      setWorking(null)
+    }
   }
 
   const copyText = async (text: string | null | undefined, label: string) => {
@@ -305,6 +373,7 @@ export function SignalProspectDetail({
             <Meta label="Overall Score" value={latestAnalysis?.overall_opportunity_score?.toString() || "-"} />
             <Meta label="Value Band" value={latestAnalysis?.potential_project_value_band || "-"} />
             <Meta label="Confidence" value={latestAnalysis?.confidence || "-"} />
+            <Meta label="Conversation Style" value={conversationStyleLabels[prospect.conversation_style] || prospect.conversation_style} />
           </div>
           <div className="mt-4 flex flex-wrap gap-2 text-sm">
             {prospect.website_url && <ContactLink href={prospect.website_url} icon="site" label="Website" />}
@@ -327,6 +396,14 @@ export function SignalProspectDetail({
             <ActionButton disabled={doNotContact} working={working === "deep"} onClick={() => runAction("deep", `/api/signal/prospects/${prospect.id}/deep-dive`)}>
               <Sparkles className="h-4 w-4" />
               Run Deep Dive
+            </ActionButton>
+            <ActionButton disabled={doNotContact} working={working === "scripts"} onClick={prepareScripts}>
+              <Sparkles className="h-4 w-4" />
+              Prepare Scripts
+            </ActionButton>
+            <ActionButton disabled={doNotContact} working={working === "session"} onClick={createCallSession}>
+              <Phone className="h-4 w-4" />
+              Prepare Call Session
             </ActionButton>
             <ActionButton disabled={doNotContact} working={working === "contacted"} onClick={() => updateStatus("contacted", "contacted")}>
               <CheckCircle2 className="h-4 w-4" />
@@ -390,6 +467,8 @@ export function SignalProspectDetail({
               <Meta label="Platform" value={String(scan?.detected_website_platform || prospect.existing_website_platform || "-")} />
               <Meta label="Booking" value={String(scan?.detected_booking_platform || prospect.existing_booking_platform || "-")} />
               <Meta label="Scanned" value={formatDateTime(String(scan?.scanned_at || latestScanAnalysis?.created_at || ""))} />
+              <Meta label="Research provider" value={latestAnalysis?.research_provider || "-"} />
+              <Meta label="Official source" value={latestAnalysis?.confirmed_official_url || prospect.website_url || "-"} />
             </div>
             <div className="mt-3 space-y-2">
               {evidence.slice(0, 8).map((item, index) => (
@@ -423,6 +502,9 @@ export function SignalProspectDetail({
           <TextBlock label="Recommended secondary offer" value={latestAnalysis?.recommended_secondary_offer} />
           <TextBlock label="Relevant demo" value={latestAnalysis?.recommended_demo || prospect.relevant_demo} />
           <TextBlock label="Commercial fit" value={latestAnalysis?.commercial_fit} />
+          <TextBlock label="Public customer positioning" value={latestAnalysis?.public_customer_positioning} />
+          <TextBlock label="Brand voice summary" value={latestAnalysis?.brand_voice_summary} />
+          <TextBlock label="Conversation style reason" value={prospect.conversation_style_reason || latestAnalysis?.conversation_style_reason} />
           <TextBlock label="Value reasoning" value={latestAnalysis?.potential_project_value_reason} />
           <TextBlock label="What not to pitch" value={arrayFromJson(latestAnalysis?.red_flags).join("\n") || latestAnalysis?.compliance_warning} />
         </div>
@@ -434,6 +516,31 @@ export function SignalProspectDetail({
           <Meta label="Recommended channel" value={latestAnalysis?.suggested_channel ? channelLabels[latestAnalysis.suggested_channel] : "-"} />
           <Meta label="Draft created" value={formatDateTime(latestDraft?.created_at)} />
         </div>
+        <div className="mb-4 flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row sm:items-end">
+          <label className="block flex-1 space-y-2">
+            <span className="text-sm font-medium">Conversation style</span>
+            <select
+              value={conversationStyle}
+              onChange={(event) => setConversationStyle(event.target.value)}
+              className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
+            >
+              {Object.entries(conversationStyleLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            disabled={doNotContact || working === "scripts"}
+            onClick={prepareScripts}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
+          >
+            {working === "scripts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            Prepare Scripts
+          </button>
+        </div>
         {latestDraft ? (
           <div className="grid gap-4 xl:grid-cols-2">
             <DraftBlock title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
@@ -443,6 +550,14 @@ export function SignalProspectDetail({
             <DraftBlock title="Voicemail" value={latestDraft.voicemail_script} onCopy={() => copyText(latestDraft.voicemail_script, "Voicemail script")} />
             <DraftBlock title="Demo Follow-Up" value={latestDraft.demo_send_followup} onCopy={() => copyText(latestDraft.demo_send_followup, "Demo follow-up")} />
             <DraftBlock title="Proposal Angle" value={latestDraft.proposal_angle} onCopy={() => copyText(latestDraft.proposal_angle, "Proposal angle")} />
+            {scriptStudio && (
+              <>
+                <DraftBlock title="If They Ask How Much" value={String(scriptStudio.how_much_response || "")} onCopy={() => copyText(String(scriptStudio.how_much_response || ""), "Price response")} />
+                <DraftBlock title="Already Use Booking Software" value={String(scriptStudio.already_use_booking_response || "")} onCopy={() => copyText(String(scriptStudio.already_use_booking_response || ""), "Booking response")} />
+                <DraftBlock title="Already Have a Website" value={String(scriptStudio.already_have_website_response || "")} onCopy={() => copyText(String(scriptStudio.already_have_website_response || ""), "Website response")} />
+                <DraftBlock title="Follow-Up Draft" value={latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || "")} onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || ""), "Follow-up draft")} />
+              </>
+            )}
             <div className="rounded-lg border border-border bg-muted/30 p-3">
               <p className="mb-2 text-sm font-medium">Discovery Questions</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
@@ -451,6 +566,16 @@ export function SignalProspectDetail({
                 ))}
               </ul>
             </div>
+            {scriptStudio && Array.isArray(scriptStudio.evidence_citations) && (
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <p className="mb-2 text-sm font-medium">Source Evidence</p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {(scriptStudio.evidence_citations as string[]).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">

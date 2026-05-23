@@ -4,46 +4,78 @@ Mountline Signal is an internal sales intelligence and opportunity-research syst
 
 **Mountline Signal prepares research and outreach drafts for human review. It must not be used for automated unsolicited bulk outreach, sensitive personal profiling, or any workflow that processes patient information.**
 
-## Safe Scope In V1
+Signal does not send emails, make calls, send DMs, send texts, submit forms, scrape Google Maps, scrape Google reviews, scrape social platforms, estimate owner personal income, infer sensitive demographics, or process PHI.
+
+## Safe Scope
 
 - Team-only dashboard routes under `/dashboard/signal`.
-- Manual prospect entry and CSV import from research already collected by the team.
-- Public website scan of the prospect homepage plus one clearly linked same-origin services/about/contact page when safe.
+- Manual prospect entry.
+- CSV/XLSX import from research already collected by the team.
+- Quick Research from an exact business name plus location through a permitted public web research provider.
+- User confirmation before a public research result becomes the official source.
+- Public scan of the confirmed official website only, with a small page limit.
 - Initial screening and manually triggered deep-dive analysis.
-- Draft-only email, DM, call opener, gatekeeper, voicemail, and demo follow-up scripts.
+- Script Studio for draft-only email, call, voicemail, objection, and follow-up scripts.
+- Manual call-session prep queues with outcome tracking.
 - Internal high-fit alerts only.
 - Do-not-contact handling through `signal_suppression_list`.
-
-Signal does not send emails, calls, DMs, texts, or forms to prospects. It does not scrape Google Maps, Google reviews, Instagram, Facebook, LinkedIn, Yelp, or protected services.
 
 ## Routes
 
 - `/dashboard/signal`
 - `/dashboard/signal/new`
+- `/dashboard/signal/research`
+- `/dashboard/signal/import`
 - `/dashboard/signal/[prospectId]`
 - `/dashboard/signal/playbooks`
 - `/dashboard/signal/alerts`
+- `/dashboard/signal/call-session/[sessionId]`
 
 All pages and APIs use the existing Mountline team-member guard. Signal is not public-facing and is not exposed to clients.
 
-## Manual Entry And CSV Import
+## Quick Research
 
-Prospects can be created from `/dashboard/signal/new` with public business details, human notes, visible website observations, contact routes, playbook, relevant demo, and outreach mode.
+Quick Research starts from a business name plus location, such as `Grumpy's Auto Detailing, Keller TX`.
 
-CSV import on `/dashboard/signal` previews rows before saving. Supported headers include:
+Flow:
 
-- business name
-- industry
-- city
+- Search permitted public web results through Tavily when `SIGNAL_RESEARCH_PROVIDER=tavily`.
+- Show candidate sources with title, URL, source type, evidence, and confidence.
+- Require the team to confirm the official business website before creating or merging a prospect.
+- Reject social, search, and directory URLs as confirmed official websites.
+- Scan only the confirmed official public website with existing SSRF protections.
+- Create or merge the prospect after duplicate checks on normalized business name, website host, email, and phone.
+- Run initial analysis and show score, offer, value band, outreach mode, and conversation style.
+
+Quick Research does not scrape Google Maps, Google reviews, Yelp, social platforms, or directory pages.
+
+## Manual Entry And Workbook Import
+
+Prospects can be created from `/dashboard/signal/new` with public business details, human notes, visible website observations, contact routes, playbook, relevant demo, outreach mode, and conversation style.
+
+Workbook import on `/dashboard/signal/import` accepts `.csv`, `.xlsx`, and `.xls` files up to 5 MB. Files are parsed server-side. Raw workbook files are not sent to AI. Signal converts rows and headers into sanitized structured data, maps obvious columns deterministically, can ask the fast AI model to map ambiguous headers only, shows duplicates, and imports only after team confirmation.
+
+Supported headers include:
+
+- business name / company
+- contact name
+- niche / industry
+- city / area
+- state
 - website
 - email
 - phone
+- instagram
 - notes
-- relevant demo
-- platform
+- what looks good
+- problem / issue
+- demo
 - status
+- follow-up
+- platform
+- booking platform
 
-CSV import is for manually collected research only. It is not automated discovery.
+Workbook import is for manually collected research only. It is not automated discovery. Imported rows do not deep-analyze automatically; the team chooses which prospects to research or analyze.
 
 ## Website Scanning
 
@@ -52,17 +84,18 @@ The scanner:
 - accepts only public `http` and `https` URLs
 - blocks localhost, loopback, private IPs, internal hostnames, `file://`, `ftp://`, and non-web protocols
 - validates DNS resolution before fetching
+- validates redirects before following them
 - uses request timeout and response-size limits
 - does not submit forms
 - does not access authentication walls
 - does not crawl entire websites
 - avoids third-party platform scraping
 
-The scan extracts objective signals such as titles, meta descriptions, headings, CTA words, service/pricing/location language, visible email/phone links, booking links, detected platform hints, image count, scanned URLs, timestamp, and supporting evidence snippets.
+The scan extracts objective signals such as titles, meta descriptions, headings, CTA words, service/pricing/location language, visible email/phone links, booking links, detected platform hints, social URLs found on the official site, image count, scanned URLs, timestamp, and supporting evidence snippets. Social URLs may be stored when found on the official website, but Signal does not fetch or scrape social pages.
 
-## AI Provider Configuration
+## Provider Configuration
 
-Environment variables:
+AI environment variables:
 
 ```text
 SIGNAL_AI_PROVIDER=gemini|openai|disabled
@@ -70,18 +103,46 @@ SIGNAL_FAST_MODEL=
 SIGNAL_DEEP_MODEL=
 GEMINI_API_KEY=
 OPENAI_API_KEY=
+```
+
+Public research environment variables:
+
+```text
+SIGNAL_RESEARCH_PROVIDER=tavily|disabled
+TAVILY_API_KEY=
+```
+
+Optional internal alert email:
+
+```text
 SIGNAL_ALERT_EMAIL=
 ```
 
+Recommended local test values:
+
+```text
+SIGNAL_AI_PROVIDER=gemini
+GEMINI_API_KEY=<Google AI Studio API key>
+SIGNAL_FAST_MODEL=gemini-3.1-flash-lite
+SIGNAL_DEEP_MODEL=gemini-3.5-flash
+SIGNAL_RESEARCH_PROVIDER=tavily
+TAVILY_API_KEY=<Tavily API key>
+SIGNAL_ALERT_EMAIL=<Mountline team alert email, optional>
+```
+
+API keys authenticate provider access. Model values are exact model IDs, not API keys. All provider variables must be configured server-side only. Never place keys in `NEXT_PUBLIC_` variables and never commit `.env` files.
+
 `SIGNAL_AI_PROVIDER=disabled` is supported. If no key exists or the provider fails, Signal stores the website scan and uses deterministic scoring with the UI note: `AI analysis unavailable; rule-based score shown.`
 
-The provider adapter is server-only. AI keys must not be exposed client-side.
+`SIGNAL_RESEARCH_PROVIDER=disabled` is supported. Manual entry and import continue to work without Tavily.
 
 ## Initial Analysis Vs Deep Dive
 
-Initial analysis is a fast screening pass. It produces score categories, priority, value band, recommended offer, suggested channel, suggested outreach mode, demo recommendation, summary, reasons to contact, red flags, and confidence.
+Initial analysis is a fast screening pass. It produces score categories, priority, value band, recommended offer, suggested channel, suggested outreach mode, demo recommendation, summary, reasons to contact, red flags, confidence, conversation style, public customer positioning, and brand voice summary.
 
 Deep dive is manual-only and intended for stronger leads. It generates evidence-based opportunities, pitch strategy, call scripts, email/DM drafts, discovery questions, warnings, and recommended next action.
+
+Signal records the model/provider label, research provider, research query, confirmed official URL, official-source confidence, source evidence, and last researched/analyzed timestamp where available.
 
 ## Scores And Value Bands
 
@@ -103,6 +164,14 @@ Priority bands:
 - C: 50-69
 - skip: below 50 or blocked by red flags
 
+Commercial fit:
+
+- `starter`
+- `business`
+- `systems`
+- `high_value`
+- `unknown`
+
 Project value bands:
 
 - `$500-$1,250`
@@ -110,7 +179,7 @@ Project value bands:
 - `$3,500-$10,000+`
 - `unknown`
 
-Value bands are opportunity bands, not personal income or owner wealth estimates.
+Value bands are opportunity bands, not personal income or owner wealth estimates. Public customer positioning must be evidence-grounded from official site copy or entered business context and must not infer sensitive personal traits.
 
 ## Outreach Modes
 
@@ -120,9 +189,59 @@ Value bands are opportunity bands, not personal income or owner wealth estimates
 
 All outreach is draft-only. The app has no prospect send endpoint and no bulk-send button.
 
+## Conversation Styles
+
+Conversation style is separate from outreach mode. It affects tone, not identity or demographic inference.
+
+Allowed styles:
+
+- `friendly_local`
+- `traditional_owner_operator`
+- `modern_casual_brand`
+- `formal_business`
+- `clinical_professional`
+- `concise_busy_owner`
+
+The AI or rule-based fallback may suggest a style based only on official public brand language, business type, relationship context, or user-entered notes. Signal must never guess owner age, gender, race, income, health, religion, politics, or other sensitive traits.
+
+## Script Studio
+
+Script Studio prepares manual scripts using official-source evidence, playbook, relationship context, detected business needs, relevant demo, outreach mode, selected conversation style, prior status, and compliance warnings.
+
+It generates:
+
+- first call opener
+- employee/receptionist line
+- voicemail
+- response when the prospect says to send it
+- response when asked about price
+- response when the business already uses Square or booking software
+- response when the business already has a website
+- discovery-call questions
+- first email draft
+- one respectful follow-up draft
+
+Scripts are stored as drafts for human review. Signal does not send them.
+
+## Call Sessions
+
+Call sessions are manual call-prep queues for one to five team-approved prospects. They show phone number, priority, score, reason worth calling, opening line, gatekeeper line, likely objection responses, demo link, discovery questions, and suppression/contact-history warnings.
+
+Outcome buttons update Signal status safely:
+
+- no answer
+- voicemail left
+- permission to send demo
+- interested
+- follow up later
+- not interested
+- do not contact
+
+Call sessions are not auto-dialers and do not send texts, emails, DMs, or forms.
+
 ## Playbooks
 
-V1 includes:
+Signal includes:
 
 - Auto Detailing
 - Barber / Salon
@@ -148,7 +267,7 @@ Optional internal email can be sent only to `SIGNAL_ALERT_EMAIL` when the existi
 
 The `signal_suppression_list` table records businesses that should not receive further outreach. Adding a prospect to do-not-contact updates its status to `do_not_contact`.
 
-Signal blocks contact-ready status for suppressed prospects and disables repeated draft-generation actions while a prospect is marked do-not-contact.
+Signal blocks contact-ready status for suppressed prospects and disables repeated script-generation actions while a prospect is marked do-not-contact.
 
 ## Medical Compliance Gating
 
@@ -163,6 +282,10 @@ Allowed early opportunities:
 - general non-patient-specific administrative discovery
 
 Do not recommend patient intake AI, clinical triage, diagnosis/support tools, patient call recording/transcription, EHR integrations, symptom-collecting appointment systems, PHI workflows, or any claim that Mountline provides HIPAA-compliant AI services.
+
+Visible warning:
+
+> Compliance-gated sector. Do not propose or build workflows involving patient information, clinical decisions, call transcription, intake data, or EHR systems without formal legal/compliance review, appropriate contracts, and approved infrastructure.
 
 ## Data Restrictions
 
@@ -185,12 +308,16 @@ Manual checklist:
 - Sign in as a non-team user and confirm dashboard access is denied.
 - Create a manual prospect and confirm redirect to detail page.
 - Create a medical/dental prospect and confirm compliance warning appears.
+- Use Quick Research with a named business and location. Confirm candidate choices appear and only an official public site can be confirmed.
+- Test Quick Research with `SIGNAL_RESEARCH_PROVIDER=disabled` or missing `TAVILY_API_KEY` and confirm setup guidance appears without breaking manual workflows.
 - Run Scan Website on a public website and confirm scanned URLs/evidence are stored.
 - Run Initial Analysis with `SIGNAL_AI_PROVIDER=disabled` and confirm rule-based scoring.
 - Run Deep Dive and confirm outreach drafts are created but not sent.
+- Prepare scripts from prospect detail, override conversation style, and confirm Script Studio drafts are stored.
+- Create a call session from one to five selected prospects and save each outcome.
 - Mark statuses, set follow-up date, and add to do-not-contact.
 - Confirm do-not-contact disables draft/contact actions.
-- Import CSV and confirm preview appears before saving.
+- Import `Mountline.xlsx` or CSV from `/dashboard/signal/import`, select a worksheet, confirm mappings/duplicates, and save.
 - Confirm high-fit alerts appear internally only.
 
 ## Future Roadmap

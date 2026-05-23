@@ -145,6 +145,14 @@ export type SignalOutreachMode =
   | "professional_studio"
   | "warm_connection"
 
+export type SignalConversationStyle =
+  | "friendly_local"
+  | "traditional_owner_operator"
+  | "modern_casual_brand"
+  | "formal_business"
+  | "clinical_professional"
+  | "concise_busy_owner"
+
 export type SignalOutreachStatus =
   | "researched"
   | "needs_review"
@@ -208,10 +216,13 @@ export type SignalProspect = {
   visible_problem: string | null
   relevant_demo: SignalRelevantDemo | null
   outreach_mode: SignalOutreachMode
+  conversation_style: SignalConversationStyle
+  conversation_style_reason: string | null
   outreach_status: SignalOutreachStatus
   contacted_at: string | null
   follow_up_date: string | null
   assigned_to: string | null
+  last_researched_at: string | null
 }
 
 export type SignalAnalysis = {
@@ -246,6 +257,14 @@ export type SignalAnalysis = {
   red_flags: SignalJson | null
   compliance_warning: string | null
   executive_summary: string | null
+  research_provider: string | null
+  research_query: string | null
+  confirmed_official_url: string | null
+  official_source_confidence: SignalConfidence | null
+  public_customer_positioning: string | null
+  brand_voice_summary: string | null
+  suggested_conversation_style: SignalConversationStyle | null
+  conversation_style_reason: string | null
 }
 
 export type SignalOutreachDraft = {
@@ -263,6 +282,11 @@ export type SignalOutreachDraft = {
   demo_send_followup: string | null
   discovery_call_questions: SignalJson | null
   proposal_angle: string | null
+  conversation_style: SignalConversationStyle | null
+  conversation_style_reason: string | null
+  script_studio: SignalJson | null
+  follow_up_email: string | null
+  objection_responses: SignalJson | null
   user_approved: boolean
   approved_at: string | null
 }
@@ -287,4 +311,69 @@ export type SignalSuppression = {
   business_name: string | null
   reason: string | null
   source: string
+}
+
+export type SignalResearchRun = {
+  id: string
+  created_at: string
+  prospect_id: string | null
+  created_prospect_id: string | null
+  business_name: string
+  location: string
+  industry_hint: string | null
+  known_context: string | null
+  initial_note: string | null
+  provider: string
+  query: string
+  status: "needs_confirmation" | "confirmed" | "merged" | "created" | "failed"
+  candidates: SignalJson
+  selected_candidate: SignalJson | null
+  confirmed_official_url: string | null
+  official_source_confidence: SignalConfidence | null
+  evidence: SignalJson
+  error: string | null
+}
+
+export type SignalImportBatch = {
+  id: string
+  created_at: string
+  source_filename: string
+  file_type: "csv" | "xlsx" | "xls"
+  sheet_name: string | null
+  row_count: number
+  headers: SignalJson
+  mapping: SignalJson
+  preview_rows: SignalJson
+  duplicate_summary: SignalJson
+  status: "previewed" | "imported" | "failed"
+  imported_count: number
+  error: string | null
+}
+
+export type SignalCallSession = {
+  id: string
+  created_at: string
+  title: string
+  status: "open" | "completed" | "archived"
+  notes: string | null
+}
+
+export type SignalCallSessionItem = {
+  id: string
+  session_id: string
+  prospect_id: string
+  created_at: string
+  position: number
+  outcome:
+    | "no_answer"
+    | "voicemail_left"
+    | "permission_to_send_demo"
+    | "interested"
+    | "follow_up_later"
+    | "not_interested"
+    | "do_not_contact"
+    | null
+  outcome_notes: string | null
+  follow_up_date: string | null
+  completed_at: string | null
 }

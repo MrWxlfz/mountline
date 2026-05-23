@@ -338,6 +338,8 @@ export function buildFallbackDeepAnalysis(
         initial.recommended_primary_offer.toLowerCase().includes("quote") ||
         initial.recommended_primary_offer.toLowerCase().includes("request")
       ? "booking_or_quote_flow"
+      : scan?.booking_links.length
+        ? "preserve_existing_booking_integration"
       : "website_redesign"
 
   return {
@@ -356,7 +358,7 @@ export function buildFallbackDeepAnalysis(
         evidence: topEvidence.length > 0 ? topEvidence : ["Human-entered prospect information only."],
         why_it_matters: complianceGated
           ? "This sector needs compliance review before any operational or AI workflow is discussed beyond public-site improvements."
-          : "The public evidence points to a practical website or workflow conversation without needing unsupported claims.",
+          : "The public evidence points to a practical website or workflow conversation. Any missed-call, admin, or follow-up workflow should be framed as worth asking about on a discovery call.",
         honest_offer_language: initial.recommended_primary_offer,
         do_not_promise: complianceGated
           ? [

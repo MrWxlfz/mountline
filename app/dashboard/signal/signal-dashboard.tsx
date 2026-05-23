@@ -8,6 +8,7 @@ import {
   BookOpen,
   ExternalLink,
   Loader2,
+  PhoneCall,
   Plus,
   RadioTower,
   Search,
@@ -180,6 +181,8 @@ export function SignalDashboard({
   const [savingImport, setSavingImport] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [creatingSession, setCreatingSession] = useState(false)
 
   const previewRows = useMemo(() => mapCsvToProspects(csvText).slice(0, 25), [csvText])
 
@@ -251,6 +254,39 @@ export function SignalDashboard({
     }
   }
 
+  const toggleSelected = (id: string) => {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : current.length >= 5
+          ? current
+          : [...current, id],
+    )
+  }
+
+  const createCallSession = async () => {
+    setCreatingSession(true)
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch("/api/signal/call-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prospect_ids: selectedIds }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Call session could not be created.")
+        return
+      }
+      window.location.href = `/dashboard/signal/call-session/${data.session.id}`
+    } catch {
+      setError("Call session could not be created.")
+    } finally {
+      setCreatingSession(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -264,13 +300,21 @@ export function SignalDashboard({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link className="signal-action signal-action-primary" href="/dashboard/signal/research">
+            <Search className="h-4 w-4" />
+            Research Business
+          </Link>
           <Link className="signal-action" href="/dashboard/signal/new">
             <Plus className="h-4 w-4" />
             Add Prospect
           </Link>
+          <Link className="signal-action" href="/dashboard/signal/import">
+            <Upload className="h-4 w-4" />
+            Import Existing Leads
+          </Link>
           <button className="signal-action" type="button" onClick={() => setImportOpen((value) => !value)}>
             <Upload className="h-4 w-4" />
-            Import CSV
+            Paste CSV
           </button>
           <Link className="signal-action" href="/dashboard/signal/playbooks">
             <BookOpen className="h-4 w-4" />
@@ -428,12 +472,30 @@ export function SignalDashboard({
         </div>
       </div>
 
+      {selectedIds.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            {selectedIds.length} prospect{selectedIds.length === 1 ? "" : "s"} selected for manual call prep.
+          </p>
+          <button
+            type="button"
+            disabled={creatingSession}
+            onClick={createCallSession}
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
+          >
+            {creatingSession ? <Loader2 className="h-4 w-4 animate-spin" /> : <PhoneCall className="h-4 w-4" />}
+            Prepare Call Session
+          </button>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1320px] text-sm">
+          <table className="w-full min-w-[1380px] text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
                 {[
+                  "",
                   "Business",
                   "Industry",
                   "City",
@@ -453,15 +515,29 @@ export function SignalDashboard({
             </thead>
             <tbody className="divide-y divide-border">
               {filteredRows.length > 0 ? (
-                filteredRows.map((row) => <SignalRow key={row.id} row={row} />)
+                filteredRows.map((row) => (
+                  <SignalRow
+                    key={row.id}
+                    row={row}
+                    selected={selectedIds.includes(row.id)}
+                    onSelect={() => toggleSelected(row.id)}
+                  />
+                ))
               ) : (
                 <tr>
-                  <td colSpan={12} className="px-4 py-12 text-center">
+                  <td colSpan={13} className="px-4 py-12 text-center">
                     <RadioTower className="mx-auto mb-3 h-8 w-8 text-muted-foreground opacity-50" />
                     <p className="font-medium">No Signal prospects match the filters</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Add a prospect or clear filters to see the pipeline.
+                      Research a business, add a prospect, or clear filters to see the pipeline.
                     </p>
+                    <Link
+                      href="/dashboard/signal/research"
+                      className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-foreground px-3 text-sm font-medium text-background"
+                    >
+                      <Search className="h-4 w-4" />
+                      Research a Business
+                    </Link>
                   </td>
                 </tr>
               )}
@@ -487,17 +563,43 @@ export function SignalDashboard({
         .signal-action:hover {
           background: var(--muted);
         }
+        .signal-action-primary {
+          background: var(--foreground);
+          color: var(--background);
+          border-color: var(--foreground);
+        }
+        .signal-action-primary:hover {
+          background: color-mix(in oklab, var(--foreground) 90%, transparent);
+        }
       `}</style>
     </div>
   )
 }
 
-function SignalRow({ row }: { row: SignalProspectRow }) {
+function SignalRow({
+  onSelect,
+  row,
+  selected,
+}: {
+  onSelect: () => void
+  row: SignalProspectRow
+  selected: boolean
+}) {
   const analysis = row.latest_analysis
   const playbook = getSignalPlaybook(row.industry_playbook)
 
   return (
     <tr className="align-top transition-colors hover:bg-muted/30">
+      <td className="px-4 py-4">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onSelect}
+          disabled={row.outreach_status === "do_not_contact"}
+          className="h-4 w-4 rounded border-border bg-muted"
+          aria-label={`Select ${row.business_name} for call session`}
+        />
+      </td>
       <td className="px-4 py-4">
         <div className="max-w-[240px]">
           <div className="flex items-center gap-2">

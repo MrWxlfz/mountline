@@ -18,6 +18,7 @@ import {
   Globe,
   ArrowUpRight,
   Radar,
+  RadioTower,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NorthlineLogo } from "@/components/northline-logo"
@@ -29,6 +30,7 @@ const navGroups = [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
       { href: "/dashboard/leads", label: "Leads", icon: Inbox },
       { href: "/dashboard/scout", label: "Scout", icon: Radar },
+      { href: "/dashboard/signal", label: "Signal", icon: RadioTower },
     ],
   },
   {
@@ -49,9 +51,11 @@ const bottomNav = [
 export function DashboardShell({
   children,
   supportOpenCount = 0,
+  signalUnreadCount = 0,
 }: {
   children: React.ReactNode
   supportOpenCount?: number
+  signalUnreadCount?: number
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -128,7 +132,21 @@ export function DashboardShell({
                           {supportOpenCount}
                         </span>
                       )}
-                      {isActive(item.href) && !(item.href === "/dashboard/support" && supportOpenCount > 0) && (
+                      {item.href === "/dashboard/signal" && signalUnreadCount > 0 && (
+                        <span
+                          className={cn(
+                            "ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                            isActive(item.href)
+                              ? "bg-background/20 text-background"
+                              : "bg-green-500/15 text-green-400",
+                          )}
+                        >
+                          {signalUnreadCount}
+                        </span>
+                      )}
+                      {isActive(item.href) &&
+                        !(item.href === "/dashboard/support" && supportOpenCount > 0) &&
+                        !(item.href === "/dashboard/signal" && signalUnreadCount > 0) && (
                         <ChevronRight className="w-3 h-3 ml-auto" />
                       )}
                     </Link>

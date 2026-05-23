@@ -129,3 +129,162 @@ export type ScoutAlert = {
   delivered_at: string | null
   delivery_error: string | null
 }
+
+export type SignalComplianceTier = "standard" | "sensitive" | "compliance_gated"
+
+export type SignalSource =
+  | "manual"
+  | "csv_import"
+  | "referral"
+  | "public_web_research"
+
+export type SignalRelevantDemo = "auto-detailing" | "barber-shop" | "none"
+
+export type SignalOutreachMode =
+  | "local_student"
+  | "professional_studio"
+  | "warm_connection"
+
+export type SignalOutreachStatus =
+  | "researched"
+  | "needs_review"
+  | "ready_to_contact"
+  | "contacted"
+  | "awaiting_reply"
+  | "permission_to_send_demo"
+  | "demo_sent"
+  | "interested"
+  | "discovery_call"
+  | "proposal_sent"
+  | "won"
+  | "lost"
+  | "no_response"
+  | "do_not_contact"
+
+export type SignalAnalysisType = "initial" | "deep_dive" | "regenerated"
+export type SignalConfidence = "low" | "medium" | "high"
+export type SignalPriority = "A" | "B" | "C" | "skip"
+export type SignalCommercialFit =
+  | "unknown"
+  | "starter"
+  | "business"
+  | "systems"
+  | "high_value"
+
+export type SignalSuggestedChannel =
+  | "call"
+  | "email"
+  | "instagram"
+  | "contact_form"
+  | "warm_intro"
+  | "research_more"
+
+export type SignalJson = string | number | boolean | null | SignalJson[] | {
+  [key: string]: SignalJson
+}
+
+export type SignalProspect = {
+  id: string
+  created_at: string
+  updated_at: string
+  business_name: string
+  contact_name: string | null
+  industry: string
+  industry_playbook: string | null
+  compliance_tier: SignalComplianceTier
+  city: string | null
+  state: string | null
+  locality_relationship: string | null
+  website_url: string | null
+  public_email: string | null
+  public_phone: string | null
+  public_contact_form_url: string | null
+  instagram_url: string | null
+  source: SignalSource
+  existing_website_platform: string | null
+  existing_booking_platform: string | null
+  human_notes: string | null
+  what_looks_good: string | null
+  visible_problem: string | null
+  relevant_demo: SignalRelevantDemo | null
+  outreach_mode: SignalOutreachMode
+  outreach_status: SignalOutreachStatus
+  contacted_at: string | null
+  follow_up_date: string | null
+  assigned_to: string | null
+}
+
+export type SignalAnalysis = {
+  id: string
+  prospect_id: string
+  created_at: string
+  analysis_type: SignalAnalysisType
+  model_provider: string | null
+  model_name: string | null
+  scanned_urls: SignalJson | null
+  website_signals: SignalJson | null
+  evidence: SignalJson | null
+  confidence: SignalConfidence | null
+  website_quality_score: number | null
+  business_viability_score: number | null
+  operational_opportunity_score: number | null
+  website_service_fit_score: number | null
+  ai_workflow_fit_score: number | null
+  reachability_score: number | null
+  compliance_risk_score: number | null
+  overall_opportunity_score: number | null
+  priority: SignalPriority | null
+  commercial_fit: SignalCommercialFit | null
+  potential_project_value_band: string | null
+  potential_project_value_reason: string | null
+  recommended_primary_offer: string | null
+  recommended_secondary_offer: string | null
+  recommended_demo: SignalRelevantDemo | null
+  suggested_channel: SignalSuggestedChannel | null
+  suggested_outreach_mode: SignalOutreachMode | null
+  reasons_to_contact: SignalJson | null
+  red_flags: SignalJson | null
+  compliance_warning: string | null
+  executive_summary: string | null
+}
+
+export type SignalOutreachDraft = {
+  id: string
+  prospect_id: string
+  analysis_id: string | null
+  created_at: string
+  outreach_mode: SignalOutreachMode
+  first_contact_subject: string | null
+  first_contact_email: string | null
+  permission_based_dm: string | null
+  owner_call_opener: string | null
+  gatekeeper_script: string | null
+  voicemail_script: string | null
+  demo_send_followup: string | null
+  discovery_call_questions: SignalJson | null
+  proposal_angle: string | null
+  user_approved: boolean
+  approved_at: string | null
+}
+
+export type SignalAlert = {
+  id: string
+  prospect_id: string
+  analysis_id: string | null
+  created_at: string
+  alert_type: string
+  title: string
+  message: string
+  read_at: string | null
+  email_alert_sent_at: string | null
+}
+
+export type SignalSuppression = {
+  id: string
+  created_at: string
+  email: string | null
+  phone: string | null
+  business_name: string | null
+  reason: string | null
+  source: string
+}

@@ -9,13 +9,23 @@ export default async function DashboardLayout({
 }) {
   await requireNorthlineTeamMember()
   const supabase = createAdminClient()
-  const { count: supportOpenCount } = await supabase
-    .from("support_threads")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "open")
+  const [{ count: supportOpenCount }, { count: signalUnreadCount }] =
+    await Promise.all([
+      supabase
+        .from("support_threads")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "open"),
+      supabase
+        .from("signal_alerts")
+        .select("*", { count: "exact", head: true })
+        .is("read_at", null),
+    ])
 
   return (
-    <DashboardShell supportOpenCount={supportOpenCount || 0}>
+    <DashboardShell
+      supportOpenCount={supportOpenCount || 0}
+      signalUnreadCount={signalUnreadCount || 0}
+    >
       {children}
     </DashboardShell>
   )

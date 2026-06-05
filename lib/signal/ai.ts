@@ -165,7 +165,7 @@ function deepPrompt(
     "Generate evidence-grounded opportunity mapping, pitch strategy, call scripts, email draft, discovery questions, warnings, and next action.",
     "Outreach drafts must be human, specific, respectful, and permission-based.",
     "Do not insult the existing website. Do not create fake urgency or fake proof. Include a respectful no-follow-up option in the email where appropriate.",
-    "For local_student mode, introduce Luke as local to the Keller area and building Mountline Studio. Do not mention school, age, summer, side hustle, or agency size. For professional_studio, lead with Mountline Studio. For warm_connection, mention only relationship details entered by the user.",
+    "For local_student mode, introduce Luke or Mountline as local to the Keller area. Do not mention school, age, summer, side hustle, or agency size. For professional_studio, lead with Mountline Studio. For warm_connection, mention only relationship details entered by the user.",
     "Opportunity types must be one of: website_redesign, photo_gallery_or_portfolio, service_or_pricing_clarity, booking_or_quote_flow, preserve_existing_booking_integration, client_portal, support_messaging, payment_link_workflow, missed_call_followup_discovery, lead_organization, estimate_request_routing, appointment_routing_discovery, faq_knowledge_base, review_request_workflow_discovery, internal_task_summary, compliance_review_required, no_recommended_offer.",
     "",
     "Return JSON with exactly these keys:",

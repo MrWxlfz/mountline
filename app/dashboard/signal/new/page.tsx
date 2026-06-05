@@ -145,7 +145,7 @@ export default function NewSignalProspectPage() {
             <option value="none">None</option>
           </Select>
           <Select label="Outreach mode" value={form.outreach_mode} onChange={(value) => updateField("outreach_mode", value)}>
-            <option value="local_student">Local student</option>
+            <option value="local_student">Warm local</option>
             <option value="professional_studio">Professional studio</option>
             <option value="warm_connection">Warm connection</option>
           </Select>

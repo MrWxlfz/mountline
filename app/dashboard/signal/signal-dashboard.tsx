@@ -59,7 +59,7 @@ const statusLabels: Record<string, string> = {
 }
 
 const modeLabels: Record<string, string> = {
-  local_student: "Local student",
+  local_student: "Warm local",
   professional_studio: "Professional",
   warm_connection: "Warm connection",
 }

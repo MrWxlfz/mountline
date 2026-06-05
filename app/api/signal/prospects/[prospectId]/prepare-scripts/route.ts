@@ -4,7 +4,11 @@ import { isSignalProspectSuppressed } from "@/lib/signal/alerts"
 import { buildSignalScriptStudio } from "@/lib/signal/scripts"
 import { signalScriptStudioSchema } from "@/lib/signal/validation"
 import { createAdminClient } from "@/lib/supabase/admin"
-import type { SignalAnalysis, SignalProspect } from "@/lib/supabase/types"
+import type {
+  SignalAnalysis,
+  SignalProspect,
+  SignalVerifiedObservation,
+} from "@/lib/supabase/types"
 import type { SignalWebsiteScan } from "@/lib/signal/website"
 
 function getScan(analysis: SignalAnalysis | null) {
@@ -57,12 +61,25 @@ export async function POST(
     .maybeSingle()
 
   const analysis = (latestAnalysis as SignalAnalysis | null) || null
+  const { data: observationRows } = await supabase
+    .from("signal_verified_observations")
+    .select("*")
+    .eq("prospect_id", prospect.id)
+    .order("created_at", { ascending: false })
+  const verifiedObservations = (observationRows || []) as SignalVerifiedObservation[]
+  const verifiedObservationText = verifiedObservations
+    .map((item) => `${item.category.replace(/_/g, " ")}: ${item.note}`)
+    .join("\n")
+  const scriptProspect = {
+    ...prospect,
+    human_notes: [prospect.human_notes, verifiedObservationText].filter(Boolean).join("\n\n") || null,
+  } as SignalProspect
   const scriptStudio = buildSignalScriptStudio({
     analysis,
     communicationProfile: parsed.data.communication_profile || null,
     conversationStyle: parsed.data.conversation_style || analysis?.suggested_conversation_style,
     guidance: parsed.data.guidance || null,
-    prospect,
+    prospect: scriptProspect,
     scan: getScan(analysis),
   })
 

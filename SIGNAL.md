@@ -103,6 +103,7 @@ AI environment variables:
 SIGNAL_AI_PROVIDER=gemini|openai|disabled
 SIGNAL_FAST_MODEL=
 SIGNAL_DEEP_MODEL=
+SIGNAL_VISUAL_MODEL=
 GEMINI_API_KEY=
 OPENAI_API_KEY=
 ```
@@ -127,6 +128,7 @@ SIGNAL_AI_PROVIDER=gemini
 GEMINI_API_KEY=<Google AI Studio API key>
 SIGNAL_FAST_MODEL=gemini-3.1-flash-lite
 SIGNAL_DEEP_MODEL=gemini-3.5-flash
+SIGNAL_VISUAL_MODEL=gemini-3.5-flash
 SIGNAL_RESEARCH_PROVIDER=tavily
 TAVILY_API_KEY=<Tavily API key>
 SIGNAL_ALERT_EMAIL=<Mountline team alert email, optional>
@@ -215,7 +217,7 @@ Value bands are opportunity bands, not personal income or owner wealth estimates
 
 ## Outreach Modes
 
-- `local_student`: warm, local, permission-based outreach for truly local or personal-fit businesses.
+- `local_student`: warm, local, permission-based outreach for truly local or personal-fit businesses. This is a legacy enum name; outward copy should say Mountline or Luke locally, not mention school.
 - `professional_studio`: concise Mountline Studio outreach for more formal or higher-value businesses.
 - `warm_connection`: uses only manually entered relationship context and never invents familiarity.
 
@@ -293,7 +295,7 @@ V2.2 adds a communication profile system for Script Studio. Profiles are based o
 Allowed profiles:
 
 - `plainspoken_owner_operator`: warm, patient, direct; avoid tech jargon.
-- `friendly_local`: warm local tone; Luke may mention being a Keller High student only when `local_student` mode is selected.
+- `friendly_local`: warm local tone; Luke may mention being local to the Keller area when appropriate, but should not mention school.
 - `modern_casual_brand`: upbeat, concise, polished; no forced slang.
 - `busy_operations_manager`: brief, practical, operational.
 - `formal_business`: polished, brief, professional.
@@ -304,7 +306,7 @@ Private guidance may be entered in Script Studio, such as `They already use Squa
 
 ## Script Studio
 
-Script Studio prepares manual scripts using official-source evidence, playbook, relationship context, detected business needs, relevant demo, outreach mode, selected conversation style, prior status, and compliance warnings.
+Script Studio prepares manual scripts using official-source evidence, visual screenshot evidence when present, verified observations, playbook, relationship context, detected business needs, relevant demo, outreach mode, selected conversation style, prior status, private guidance, and compliance warnings.
 
 It generates:
 
@@ -321,7 +323,7 @@ It generates:
 
 Scripts are stored as drafts for human review. Signal does not send them.
 
-External drafts are checked before display. Drafts must not contain internal phrases such as `connection noted internally`, `value band`, `score`, `user-entered note`, `system detected`, `playbook`, `priority`, or other internal planning language. If a draft fails this check, Signal shows a warning so the team can regenerate or edit before use.
+External drafts are checked before copy actions are enabled. Drafts must not contain internal phrases such as `score`, `priority`, `lane`, `playbook`, `Signal detected`, `user-entered note`, `internal connection`, `public contact availability`, `value band`, `workflow improvement`, `source evidence`, `entered business context`, or `system-derived classification`. They must not imply unsupported claims, insult the current website, mention assumed age or demographics, hard-sell, or recommend first contact after prior outreach exists. If a draft fails this check, Signal shows `Needs Manual Review`, disables Copy buttons, and keeps regenerate/guidance controls available.
 
 Status-aware script behavior:
 
@@ -334,7 +336,100 @@ Status-aware script behavior:
 - `interested`: prepare discovery conversation
 - `do_not_contact`: disable drafting/actions except history review
 
-After prior outreach is recorded, Script Studio should prioritize a follow-up draft and hide first-contact scripts as the primary action. Demo-send scripts use full public demo URLs such as `https://mountline.dev/work/barber-shop` and `https://mountline.dev/work/auto-detailing`.
+After prior outreach is recorded, Script Studio prioritizes a follow-up draft and hides first-contact scripts behind `View archived / alternate scripts`. Awaiting-reply records show the warning: `Do not contact through a second channel unless manually chosen.` Demo-send scripts use full public demo URLs such as `https://mountline.dev/work/barber-shop` and `https://mountline.dev/work/auto-detailing`.
+
+Private guidance affects tone and strategy only. It is never copied verbatim into outward drafts and must not turn age, gender, income, race, health, or personality guesses into facts. If guidance says prior outreach already happened but no outreach event exists, Signal asks the team to record that prior outreach instead of silently changing history.
+
+## Visual Website Audit
+
+Signal V2.3 adds team-only visual evidence on `/dashboard/signal/[prospectId]`.
+
+Allowed actions:
+
+- Upload Desktop Screenshot
+- Upload Mobile Screenshot
+- Analyze Visual Design
+- Remove Screenshot
+
+Allowed files:
+
+- PNG
+- JPEG / JPG
+- WEBP
+- maximum 5 MB each
+- one desktop and one mobile screenshot per prospect
+
+Screenshots must be public business website screenshots only. Do not upload customer portals, private dashboards, credentials, PHI, patient content, internal documents, or sensitive information.
+
+Storage:
+
+- private Supabase Storage bucket: `signal-evidence`
+- migration `202606050001_mountline_signal_v23_visual_evidence.sql` creates/updates the bucket metadata where Supabase permits SQL bucket setup
+- screenshots are stored by private storage path and displayed only through team-only API routes that create short-lived signed URLs
+- service role keys remain server-side only
+
+Visual analysis uses Gemini when configured with:
+
+```text
+SIGNAL_AI_PROVIDER=gemini
+GEMINI_API_KEY=
+SIGNAL_VISUAL_MODEL=
+```
+
+If Gemini is not configured, screenshot upload still works but `Analyze Visual Design` returns setup guidance. HTML scan alone should not mark visual design as excellent with high confidence, especially for visual industries.
+
+The visual model evaluates only visible website presentation:
+
+- first impression
+- hero clarity
+- CTA visibility
+- typography/readability
+- navigation clarity
+- services/package presentation
+- photo/gallery/proof presentation
+- booking/contact prominence
+- trust presentation
+- visual consistency
+- mobile readability only when a mobile screenshot exists
+
+It must not claim revenue loss, business performance issues, customer dissatisfaction, guaranteed improvement, or poor mobile usability without a mobile screenshot.
+
+## Opportunity Lanes
+
+Signal separates:
+
+- Website Opportunity: visual evidence, official website scan, service/package clarity, gallery/work presentation, CTA/contact prominence, booking clarity, demo relevance, human observations, and confidence.
+- Systems / AI Opportunity: visible operational complexity, user-entered observations, confirmed workflow pain, discovery-worthy questions, and compliance constraints.
+- Outreach Readiness: verified public email, phone, contact form, relationship context, suppression status, outreach history, and follow-up timing.
+- Pursuit Priority: based primarily on the strongest grounded lane, not a flat average of unrelated scores.
+
+A strong website lead can remain A/B even when systems/AI opportunity is low. Missing contact information reduces outreach readiness, not website opportunity. Unconfirmed systems opportunities should be phrased as worth asking about during discovery.
+
+Visual evidence materially affects website scoring for auto detailing, barber/salon, beauty, restaurants, and roofing/contractor/home services style prospects. For these records, Signal recommends screenshot upload for stronger scoring.
+
+## Evidence Categories
+
+Prospect detail separates evidence into:
+
+1. Official Website Evidence: URLs, headings, CTAs, booking/contact links, services, platform evidence, and scan coverage.
+2. Visual Screenshot Evidence: screenshot type, upload date, visual analysis, and confidence.
+3. Human-Entered Observations: free-text notes plus structured verified observations.
+4. System-Derived Classification: playbook, demo, platform guess, locality, outreach history, and classification logic.
+5. AI Interpretation: summary, opportunities, confidence, and assumptions.
+
+The `Add Verified Observation` action stores structured manual evidence with category, source, note, and optional URL. Sources are `manual_public_site_review`, `official_public_site`, `existing_conversation`, and `personal_relationship`.
+
+## Commercial Fit
+
+Commercial fit and value band must show:
+
+- Commercial Fit
+- Value Band
+- Confidence
+- Evidence Supporting Value Band
+- What Requires Discovery Confirmation
+
+Single local shops should usually stay starter/business unless multiple locations or confirmed systems needs exist. HVAC, contractor, medical, and dental opportunities require discovery confirmation before systems/high-value positioning. Signal must not estimate personal income, owner wealth, or sensitive customer demographics.
 
 ## Feedback Controls
 
@@ -463,7 +558,7 @@ V2.2 regression cases:
 
 - `18|8 Salons`, Keller TX: barber/salon playbook, `/work/barber-shop`, notes that say already emailed should show an inconsistency warning until an outreach event is recorded. After recording email sent, status should be `awaiting_reply` and next action should wait/follow up, not first contact.
 - Grumpy's Auto Detailing: auto-detailing playbook/demo, website-first lane, prior email/awaiting-reply status respected, no duplicate first-contact recommendation.
-- New independent barber not contacted: local-student mode may be appropriate, with friendly local or modern casual communication profile and permission-based first contact.
+- New independent barber not contacted: warm local mode may be appropriate, with friendly local or modern casual communication profile and permission-based first contact.
 - Medical/dental: professional studio mode, clinical professional profile, compliance warning, and no patient-data/PHI/EHR/intake AI recommendations.
 
 ## Future Roadmap

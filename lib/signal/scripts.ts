@@ -122,22 +122,22 @@ function identityLine(prospect: SignalProspect) {
     return "Luke with Mountline Studio."
   }
   if (prospect.outreach_mode === "local_student") {
-    return "I'm Luke - I'm a Keller High student building a small web studio called Mountline Studio."
+    return "Luke with Mountline Studio in the Keller area."
   }
-  return "I'm Luke with Mountline Studio."
+  return "Luke with Mountline Studio."
 }
 
 function howMuchResponse(analysis: SignalAnalysis | null) {
   const band = analysis?.potential_project_value_band || "unknown"
   if (band === "unknown") {
-    return "Totally fair question. I would want to understand the scope first, then send a clear range instead of guessing on the call."
+    return "Totally fair question. Mountline should understand the scope first, then send a clear range instead of guessing on the call."
   }
-  return `Totally fair question. A project like this could land around ${band} depending on scope, but I would confirm what actually needs to be built before quoting anything.`
+  return `Totally fair question. A project like this could land around ${band} depending on scope, but Mountline would confirm what actually needs to be built before quoting anything.`
 }
 
 function bookingResponse(prospect: SignalProspect) {
   const platform = prospect.existing_booking_platform || "the booking tool that already works"
-  return `That is good to keep. I would not replace ${platform} just to replace it. The useful angle would be making the customer-facing site clearer around that tool and preserving the booking or payment flow that already works.`
+  return `That is good to keep. Mountline would not replace ${platform} just to replace it. The useful angle would be making the customer-facing site clearer around that tool and preserving the booking or payment flow that already works.`
 }
 
 function websiteResponse(
@@ -146,7 +146,7 @@ function websiteResponse(
   scan: SignalWebsiteScan | null,
 ) {
   const observation = supportedObservation(prospect, analysis, scan)
-  return `That makes sense. This would not be a "your site is bad" conversation. The only reason for reaching out is one specific improvement area: ${observation}. If it is not useful, I can leave it there.`
+  return `That makes sense. This would stay respectful and specific. The only reason for reaching out is one visible improvement area: ${observation}. If it is not useful, Mountline can leave it there.`
 }
 
 function followUpDraft(prospect: SignalProspect, analysis: SignalAnalysis | null) {
@@ -156,9 +156,9 @@ function followUpDraft(prospect: SignalProspect, analysis: SignalAnalysis | null
     "",
     `Quick follow-up on the ${analysis?.recommended_primary_offer?.toLowerCase() || "website idea"} for ${prospect.business_name}.`,
     demo.startsWith("/")
-      ? `If it is useful, I can send over the concept here: ${demo}.`
-      : "If it is useful, I can send over a short written concept.",
-    "If now is not a fit, no problem - I will not keep following up.",
+      ? `If useful, Mountline can send over the concept here: ${demo}.`
+      : "If useful, Mountline can send over a short written concept.",
+    "If now is not a fit, no problem - Mountline will not keep following up.",
     "",
     "Luke",
     "Mountline Studio",
@@ -192,7 +192,7 @@ function firstEmailDraft({
 
   const ask =
     prospect.outreach_mode === "local_student"
-      ? "Would you be open to me sending a quick concept site or a few notes?"
+      ? "Would you be open to Mountline sending a quick concept site or a few notes?"
       : channel === "call"
         ? "Would it be alright to send a short concept, or is there a better person for website or workflow questions?"
         : "Would it be alright for Mountline to send a short concept or a few notes?"
@@ -201,9 +201,9 @@ function firstEmailDraft({
     return [
       `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
       "",
-      `My name is Luke. I'm local and I build websites for small businesses. I took a look at ${prospect.business_name}, and ${positive}.`,
+      `Luke with Mountline Studio in the Keller area. Mountline took a look at ${prospect.business_name}, and ${positive}.`,
       "",
-      `I noticed the website could make it easier for customers to see what you offer and get in touch. I put together an example of what I mean. Would it be alright if I sent it over?`,
+      "One thought: the website could make it easier for customers to see what you offer and get in touch. Mountline can send a short example if useful.",
       "",
       "No pressure either way.",
       "",
@@ -216,9 +216,9 @@ function firstEmailDraft({
     return [
       `Hey${prospect.contact_name ? ` ${prospect.contact_name}` : ""} -`,
       "",
-      `I'm Luke, founder of Mountline Studio here locally. I came across ${prospect.business_name}${location ? ` in ${location}` : ""} and the brand/work looks sharp.`,
+      `Luke with Mountline Studio here locally. Mountline came across ${prospect.business_name}${location ? ` in ${location}` : ""} and the brand/work looks sharp.`,
       "",
-      `I had an idea for making the site feel just as polished and easier to book through. I built a concept in this space - cool if I send it over?`,
+      "There may be a useful way to make the site feel just as polished and easier to book through. Mountline has a concept in this space if useful.",
       "",
       "Luke",
       "Mountline Studio",
@@ -229,9 +229,9 @@ function firstEmailDraft({
     return [
       `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
       "",
-      `${firstLine} I came across ${prospect.business_name}${location ? ` in ${location}` : ""} and was genuinely impressed by ${positive}.`,
+      `${firstLine} Mountline came across ${prospect.business_name}${location ? ` in ${location}` : ""} and was genuinely impressed by ${positive}.`,
       "",
-      `I had one idea for how the site could make ${observation} easier for customers to see. I built a general concept for businesses like yours - would you be open to me sending it over?`,
+      `One idea stood out for how the site could make ${observation} easier for customers to see. Mountline has a general concept for businesses like yours if useful.`,
       "",
       "If not, no problem at all.",
       "",
@@ -243,9 +243,9 @@ function firstEmailDraft({
   return [
     `Hi${prospect.contact_name ? ` ${prospect.contact_name}` : ""},`,
     "",
-    `${firstLine} I reviewed the public website for ${prospect.business_name}${location ? ` in ${location}` : ""} and noticed one practical opportunity.`,
+    `${firstLine} Mountline reviewed the public website for ${prospect.business_name}${location ? ` in ${location}` : ""} and noticed one practical opportunity.`,
     "",
-    `It looks like ${observation}. I would be glad to share a brief concept or a few specific recommendations if that would be useful.`,
+    `It looks like ${observation}. Mountline would be glad to share a brief concept or a few specific recommendations if that would be useful.`,
     "",
     ask,
     "",
@@ -325,35 +325,35 @@ export function buildSignalScriptStudio({
   const location = [prospect.city, prospect.state].filter(Boolean).join(", ")
   const recommendedNextAction = analysis?.recommended_next_action || getRecommendedNextAction(prospect, analysis)
 
-  const localAsk = `I noticed ${observation}. Would you be open to me sending a quick concept site or a few notes?`
+  const localAsk = `Mountline noticed ${observation}. Would you be open to Mountline sending a quick concept site or a few notes?`
   const first_call_opener =
     prospect.outreach_status === "awaiting_reply" || prospect.outreach_status === "contacted"
       ? "Wait for the follow-up date before calling. If a call becomes appropriate later, keep it short and reference the previous note naturally."
       : profile === "plainspoken_owner_operator"
-        ? `Hi, my name is Luke. I'm local and I build websites for small businesses. Is this the right person for ${prospect.business_name}'s website? I had one simple idea that could make services and contact info easier for customers to find.`
+        ? `Hi, Luke with Mountline Studio in the Keller area. Is this the right person for ${prospect.business_name}'s website? Mountline had one simple idea that could make services and contact info easier for customers to find.`
       : profile === "modern_casual_brand"
-        ? `Hey, this is Luke with Mountline Studio. Is this the right person for ${prospect.business_name}'s website or booking setup? I had one quick idea for making the site feel more polished and easier to use.`
+        ? `Hey, Luke with Mountline Studio. Is this the right person for ${prospect.business_name}'s website or booking setup? Mountline had one quick idea for making the site feel more polished and easier to use.`
       : prospect.outreach_mode === "local_student"
         ? `${firstLine} Is this the right person for ${prospect.business_name}'s website? ${localAsk}`
-        : `${firstLine} Is this the right person for ${prospect.business_name}'s website or customer inquiry process? I noticed ${observation}. Could I send a short, specific concept, or is there a better person to ask?`
+        : `${firstLine} Is this the right person for ${prospect.business_name}'s website or customer inquiry process? Mountline noticed ${observation}. Could Mountline send a short, specific concept, or is there a better person to ask?`
 
   const receptionist_script =
     prospect.outreach_mode === "local_student"
-      ? `Hi, this is Luke with Mountline Studio. I had a quick website question for ${prospect.business_name}. Who usually handles the website or customer inquiries?`
-      : `Hi, this is Luke with Mountline Studio. I had a short website or operations question for ${prospect.business_name}. Who usually handles the public website, marketing, or customer inquiry process?`
+      ? `Hi, Luke with Mountline Studio. Mountline had a quick website question for ${prospect.business_name}. Who usually handles the website or customer inquiries?`
+      : `Hi, Luke with Mountline Studio. Mountline had a short website or operations question for ${prospect.business_name}. Who usually handles the public website, marketing, or customer inquiry process?`
 
   const voicemail_script =
     prospect.outreach_mode === "local_student"
-      ? `Hi, this is Luke with Mountline Studio. I had one quick website idea for ${prospect.business_name} and wanted to ask if I could send it over. No pressure - thanks.`
-      : `Hi, this is Luke with Mountline Studio calling about ${prospect.business_name}. I noticed one specific public-site idea around ${offer.toLowerCase()} and wanted to ask permission to send a short concept. Thanks.`
+      ? `Hi, Luke with Mountline Studio. Mountline had one quick website idea for ${prospect.business_name} and wanted to ask permission to send it over. No pressure - thanks.`
+      : `Hi, Luke with Mountline Studio calling about ${prospect.business_name}. Mountline noticed one specific public-site idea around ${offer.toLowerCase()} and wanted to ask permission to send a short concept. Thanks.`
 
-  const sure_send_it_response = `Great, thank you. I will send a short note with the specific observation, why it may matter, and the relevant concept link: ${demoLine(analysis, prospect)}.`
+  const sure_send_it_response = `Great, thank you. Mountline will send a short note with the specific observation, why it may matter, and the relevant concept link: ${demoLine(analysis, prospect)}.`
   const permission_based_dm =
     prospect.outreach_status === "awaiting_reply" || prospect.outreach_status === "contacted"
-      ? `Quick follow-up on the ${offer.toLowerCase()} note I sent for ${prospect.business_name}. If it is useful, I can send the concept link. If not, no problem.`
+      ? `Quick follow-up on the ${offer.toLowerCase()} note Mountline sent for ${prospect.business_name}. If useful, Mountline can send the concept link. If not, no problem.`
       : prospect.outreach_mode === "local_student"
-        ? `Hi, I'm Luke - I'm a Keller High student building Mountline Studio. I came across ${prospect.business_name} and had one respectful website idea. Would it be okay if I sent a quick concept?`
-        : `Hi, this is Luke with Mountline Studio. I had one specific website idea for ${prospect.business_name}: ${observation}. Would it be alright to send a short concept?`
+        ? `Hi, Luke with Mountline Studio in the Keller area. Mountline came across ${prospect.business_name} and had one respectful website idea. Would it be okay to send a quick concept?`
+        : `Hi, Luke with Mountline Studio. Mountline had one specific website idea for ${prospect.business_name}: ${observation}. Would it be alright to send a short concept?`
 
   const already_use_booking_response = bookingResponse(prospect)
   const already_have_website_response = websiteResponse(prospect, analysis, scan)

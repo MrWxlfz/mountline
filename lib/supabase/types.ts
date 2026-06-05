@@ -257,6 +257,24 @@ export type SignalRecommendedLane =
   | "do_not_pursue"
   | "compliance_gated"
 
+export type SignalScreenshotType = "desktop" | "mobile"
+
+export type SignalVerifiedObservationCategory =
+  | "site_design"
+  | "services"
+  | "booking"
+  | "gallery"
+  | "public_contact"
+  | "reputation"
+  | "platform"
+  | "business_context"
+
+export type SignalVerifiedObservationSource =
+  | "manual_public_site_review"
+  | "official_public_site"
+  | "existing_conversation"
+  | "personal_relationship"
+
 export type SignalJson = string | number | boolean | null | SignalJson[] | {
   [key: string]: SignalJson
 }
@@ -431,6 +449,32 @@ export type SignalFeedback = {
   original_value: string | null
   corrected_value: string | null
   note: string | null
+}
+
+export type SignalVisualEvidence = {
+  id: string
+  prospect_id: string
+  created_at: string
+  screenshot_type: SignalScreenshotType
+  storage_path: string | null
+  mime_type: string | null
+  file_size_bytes: number | null
+  model_provider: string | null
+  model_name: string | null
+  analysis: SignalJson | null
+  confidence: SignalConfidence | null
+  analyzed_at: string | null
+}
+
+export type SignalVerifiedObservation = {
+  id: string
+  prospect_id: string
+  created_at: string
+  category: SignalVerifiedObservationCategory
+  source: SignalVerifiedObservationSource
+  note: string
+  url: string | null
+  created_by: string | null
 }
 
 export type SignalResearchRun = {

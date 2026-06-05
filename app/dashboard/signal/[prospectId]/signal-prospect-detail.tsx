@@ -10,12 +10,15 @@ import {
   CheckCircle2,
   Clipboard,
   ExternalLink,
+  ImageIcon,
   Loader2,
   Mail,
   Phone,
   RadioTower,
   ShieldAlert,
   Sparkles,
+  Trash2,
+  Upload,
 } from "lucide-react"
 import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "@/lib/signal/playbooks"
 import type {
@@ -26,6 +29,8 @@ import type {
   SignalOutreachDraft,
   SignalOutreachEvent,
   SignalProspect,
+  SignalVerifiedObservation,
+  SignalVisualEvidence,
 } from "@/lib/supabase/types"
 
 type WorkingAction =
@@ -41,6 +46,10 @@ type WorkingAction =
   | "convert"
   | "scripts"
   | "session"
+  | "visual_upload"
+  | "visual_analyze"
+  | "visual_remove"
+  | "observation"
   | null
 
 const statusLabels: Record<string, string> = {
@@ -61,7 +70,7 @@ const statusLabels: Record<string, string> = {
 }
 
 const modeLabels: Record<string, string> = {
-  local_student: "Local student",
+  local_student: "Warm local",
   professional_studio: "Professional studio",
   warm_connection: "Warm connection",
 }
@@ -199,6 +208,21 @@ function stringList(value: unknown) {
   }).filter(Boolean)
 }
 
+function visualAnalysisFromEvidence(evidence: SignalVisualEvidence[]) {
+  const latest = evidence.find((item) => item.analysis && typeof item.analysis === "object")
+  return latest?.analysis && typeof latest.analysis === "object"
+    ? (latest.analysis as Record<string, unknown>)
+    : null
+}
+
+function gradeForScore(value: number | null | undefined) {
+  if (typeof value !== "number") return "-"
+  if (value >= 85) return "A"
+  if (value >= 70) return "B"
+  if (value >= 50) return "C"
+  return "skip"
+}
+
 function scoreColor(value: number | null | undefined, inverse = false) {
   if (typeof value !== "number") return "bg-muted"
   const good = inverse ? value <= 30 : value >= 75
@@ -271,6 +295,8 @@ export function SignalProspectDetail({
   outreachEvents,
   prospect,
   suppressed,
+  verifiedObservations,
+  visualEvidence,
 }: {
   alerts: SignalAlert[]
   analyses: SignalAnalysis[]
@@ -279,6 +305,8 @@ export function SignalProspectDetail({
   outreachEvents: SignalOutreachEvent[]
   prospect: SignalProspect
   suppressed: boolean
+  verifiedObservations: SignalVerifiedObservation[]
+  visualEvidence: SignalVisualEvidence[]
 }) {
   const router = useRouter()
   const latestAnalysis = useMemo(
@@ -296,6 +324,9 @@ export function SignalProspectDetail({
   const scan = getScan(latestScanAnalysis)
   const evidence = evidenceFromAnalysis(latestScanAnalysis)
   const weighting = evidenceWeighting(latestAnalysis)
+  const visualAnalysis = visualAnalysisFromEvidence(visualEvidence)
+  const desktopEvidence = visualEvidence.find((item) => item.screenshot_type === "desktop")
+  const mobileEvidence = visualEvidence.find((item) => item.screenshot_type === "mobile")
   const selectedDemoRoute = demoRoute(latestAnalysis?.recommended_demo || prospect.relevant_demo)
   const externalReadiness =
     scriptStudio?.external_readiness && typeof scriptStudio.external_readiness === "object"
@@ -328,9 +359,8 @@ export function SignalProspectDetail({
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [followUpDate, setFollowUpDate] = useState(prospect.follow_up_date || "")
-  const [conversationStyle, setConversationStyle] = useState<string>(
-    prospect.conversation_style || latestAnalysis?.suggested_conversation_style || "friendly_local",
-  )
+  const conversationStyle =
+    prospect.conversation_style || latestAnalysis?.suggested_conversation_style || "friendly_local"
   const [profile, setProfile] = useState<string>(communicationProfile)
   const [scriptGuidance, setScriptGuidance] = useState(prospect.script_guidance || "")
   const [recordChannel, setRecordChannel] = useState("email")
@@ -338,8 +368,23 @@ export function SignalProspectDetail({
   const [recordDate, setRecordDate] = useState(new Date().toISOString().slice(0, 10))
   const [recordContact, setRecordContact] = useState("")
   const [recordSummary, setRecordSummary] = useState("")
+  const [screenshotType, setScreenshotType] = useState("desktop")
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null)
+  const [observationCategory, setObservationCategory] = useState("site_design")
+  const [observationSource, setObservationSource] = useState("manual_public_site_review")
+  const [observationNote, setObservationNote] = useState("")
+  const [observationUrl, setObservationUrl] = useState("")
+  const guidanceHistoryConflict =
+    /already\s+(sent\s+an\s+)?email|already\s+emailed|generate follow-up only|follow-up only|already called/i.test(scriptGuidance) &&
+    !hasRecordedPriorOutreach(outreachEvents)
 
   const doNotContact = prospect.outreach_status === "do_not_contact" || suppressed
+  const permissionMode = prospect.outreach_status === "permission_to_send_demo"
+  const demoSentMode = prospect.outreach_status === "demo_sent"
+  const discoveryMode = prospect.outreach_status === "interested" || prospect.outreach_status === "discovery_call"
+  const firstContactMode =
+    ["researched", "needs_review", "ready_to_contact"].includes(prospect.outreach_status) &&
+    !followUpMode
 
   const runAction = async (action: WorkingAction, path: string, body?: Record<string, unknown>) => {
     setWorking(action)
@@ -376,30 +421,6 @@ export function SignalProspectDetail({
     runAction(action, `/api/signal/prospects/${prospect.id}`, { outreach_status: status })
   }
 
-  const prepareScripts = async () => {
-    setWorking("scripts")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/prepare-scripts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversation_style: conversationStyle }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Scripts could not be prepared.")
-        return
-      }
-      setMessage("Script Studio prepared.")
-      router.refresh()
-    } catch {
-      setError("Scripts could not be prepared.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
   const prepareScriptsWithGuidance = async () => {
     setWorking("scripts")
     setError(null)
@@ -423,6 +444,114 @@ export function SignalProspectDetail({
       router.refresh()
     } catch {
       setError("Scripts could not be prepared.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const uploadScreenshot = async () => {
+    if (!screenshotFile) {
+      setError("Choose a screenshot file first.")
+      return
+    }
+    setWorking("visual_upload")
+    setError(null)
+    setMessage(null)
+    try {
+      const formData = new FormData()
+      formData.set("screenshot_type", screenshotType)
+      formData.set("file", screenshotFile)
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence`, {
+        method: "POST",
+        body: formData,
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.setup_needed || data.error || "Screenshot upload failed.")
+        return
+      }
+      setScreenshotFile(null)
+      setMessage("Screenshot uploaded.")
+      router.refresh()
+    } catch {
+      setError("Screenshot upload failed.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const analyzeVisualDesign = async () => {
+    setWorking("visual_analyze")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence`, {
+        method: "PATCH",
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Visual analysis failed.")
+        return
+      }
+      setMessage("Visual design analysis saved. Run Initial Analysis or Deep Dive to refresh scores.")
+      router.refresh()
+    } catch {
+      setError("Visual analysis failed.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const removeScreenshot = async (evidenceId: string) => {
+    setWorking("visual_remove")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ evidence_id: evidenceId }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Screenshot could not be removed.")
+        return
+      }
+      setMessage("Screenshot removed.")
+      router.refresh()
+    } catch {
+      setError("Screenshot could not be removed.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const addObservation = async () => {
+    setWorking("observation")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/observations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: observationCategory,
+          source: observationSource,
+          note: observationNote,
+          url: observationUrl || null,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Observation could not be saved.")
+        return
+      }
+      setObservationNote("")
+      setObservationUrl("")
+      setMessage("Verified observation saved.")
+      router.refresh()
+    } catch {
+      setError("Observation could not be saved.")
     } finally {
       setWorking(null)
     }
@@ -759,23 +888,44 @@ export function SignalProspectDetail({
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Contact Readiness</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Pursuit Priority</p>
           <p className="mt-2 text-lg font-semibold">
-            {contactReadinessLabels[contactReadiness] || contactReadiness}
-          </p>
-          {contactReadiness === "contact_history_only" && (
-            <p className="mt-2 text-xs text-yellow-200">Add the email/phone used so follow-ups can be tracked accurately.</p>
-          )}
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Communication Profile</p>
-          <p className="mt-2 text-lg font-semibold">
-            {communicationProfileLabels[communicationProfile as SignalCommunicationProfile] || communicationProfile}
+            {latestAnalysis?.priority || "-"}
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {prospect.communication_profile_reason || latestAnalysis?.communication_profile_reason || prospect.conversation_style_reason || latestAnalysis?.conversation_style_reason || "Based on playbook, public tone, and entered context."}
+            Based on the strongest grounded lane, not an average of unrelated fit.
           </p>
         </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">External Readiness</p>
+          <p className="mt-2 text-lg font-semibold">
+            {externalReady ? "Ready to Review" : "Needs Manual Review"}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {externalReady ? "Copy actions are enabled for ready drafts." : "Copy is disabled until drafts pass validation."}
+          </p>
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-4">
+        <MetricCard
+          label="Website Opportunity"
+          value={`${latestAnalysis?.website_opportunity_score ?? "-"} / ${gradeForScore(latestAnalysis?.website_opportunity_score)}`}
+        />
+        <MetricCard
+          label="Systems / AI Opportunity"
+          value={`${latestAnalysis?.systems_opportunity_score ?? "-"} / ${gradeForScore(latestAnalysis?.systems_opportunity_score)}`}
+        />
+        <MetricCard
+          label="Outreach Readiness"
+          value={contactReadinessLabels[contactReadiness] || contactReadiness}
+          note={contactReadiness === "contact_history_only" ? "Add the contact route used for prior outreach." : undefined}
+        />
+        <MetricCard
+          label="Communication Profile"
+          value={communicationProfileLabels[communicationProfile as SignalCommunicationProfile] || communicationProfile}
+          note={prospect.follow_up_date ? `Follow-up date: ${prospect.follow_up_date}` : undefined}
+        />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
@@ -899,13 +1049,116 @@ export function SignalProspectDetail({
         </Panel>
       </section>
 
+      <Panel title="Visual Website Evidence">
+        <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+          Visual evidence from uploaded public-site screenshot. Do not upload customer portals, private dashboards, credentials, PHI, or sensitive content.
+        </div>
+        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <div className="grid gap-2 sm:grid-cols-[140px_1fr]">
+              <select
+                value={screenshotType}
+                onChange={(event) => setScreenshotType(event.target.value)}
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
+              >
+                <option value="desktop">Desktop</option>
+                <option value="mobile">Mobile</option>
+              </select>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => setScreenshotFile(event.target.files?.[0] || null)}
+                className="h-10 rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <ActionButton disabled={doNotContact} working={working === "visual_upload"} onClick={uploadScreenshot}>
+                <Upload className="h-4 w-4" />
+                Upload Screenshot
+              </ActionButton>
+              <ActionButton disabled={visualEvidence.length === 0} working={working === "visual_analyze"} onClick={analyzeVisualDesign}>
+                <ImageIcon className="h-4 w-4" />
+                Analyze Visual Design
+              </ActionButton>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              PNG, JPG/JPEG, or WEBP. Maximum 5 MB. One desktop and one mobile screenshot are stored per prospect.
+            </p>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {[
+              { label: "desktop", item: desktopEvidence },
+              { label: "mobile", item: mobileEvidence },
+            ].map(({ label, item }) => (
+              <div key={label} className="rounded-lg border border-border bg-muted/30 p-3">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium capitalize">{item?.screenshot_type || label} screenshot</p>
+                  {item && (
+                    <button
+                      type="button"
+                      disabled={working === "visual_remove"}
+                      onClick={() => removeScreenshot(item.id)}
+                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {item ? (
+                  <>
+                    <img
+                      src={`/api/signal/prospects/${prospect.id}/visual-evidence/${item.id}/image`}
+                      alt={`${item.screenshot_type} screenshot evidence`}
+                      className="aspect-video w-full rounded-md border border-border object-cover"
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Uploaded {formatDateTime(item.created_at)} · {item.confidence || "not analyzed"}
+                    </p>
+                  </>
+                ) : (
+                  <div className="flex aspect-video items-center justify-center rounded-md border border-dashed border-border text-xs text-muted-foreground">
+                    Visual design not assessed.
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Visual Analysis</p>
+            {visualAnalysis ? (
+              <div className="mt-3 space-y-3">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Meta label="Visual quality" value={String(visualAnalysis.visual_quality_score ?? "-")} />
+                  <Meta label="Hero clarity" value={String(visualAnalysis.hero_clarity_score ?? "-")} />
+                  <Meta label="CTA visibility" value={String(visualAnalysis.cta_visibility_score ?? "-")} />
+                  <Meta label="Service clarity" value={String(visualAnalysis.service_clarity_score ?? "-")} />
+                  <Meta label="Gallery/proof" value={String(visualAnalysis.gallery_or_proof_score ?? "-")} />
+                  <Meta label="Mobile readability" value={String(visualAnalysis.mobile_readability_score ?? "-")} />
+                </div>
+                <TextBlock label="Evidence-grounded summary" value={String(visualAnalysis.evidence_grounded_summary || "")} />
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">Visual design not assessed.</p>
+            )}
+          </div>
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <EvidenceGroup title="Visible Improvement Opportunities" items={stringList(visualAnalysis?.visible_improvement_opportunities)} />
+            <div className="mt-3">
+              <EvidenceGroup title="What Looks Good" items={stringList(visualAnalysis?.what_looks_good)} />
+            </div>
+          </div>
+        </div>
+      </Panel>
+
       <section className="grid gap-4 xl:grid-cols-2">
         <Panel title="Research and Evidence">
-          <TextBlock label="Human notes" value={prospect.human_notes} />
-          <TextBlock label="What looks good" value={prospect.what_looks_good} />
-          <TextBlock label="Visible problem" value={prospect.visible_problem} />
           <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Website scan</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Official Website Evidence</p>
             <div className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
               <Meta label="Title" value={String(scan?.page_title || "-")} />
               <Meta label="Platform" value={String(scan?.detected_website_platform || prospect.existing_website_platform || "-")} />
@@ -916,10 +1169,16 @@ export function SignalProspectDetail({
               <Meta label="Scan coverage" value={latestAnalysis?.scan_coverage_confidence || "-"} />
               <Meta label="Coverage note" value={latestAnalysis?.scan_coverage_note || "-"} />
             </div>
+            {latestAnalysis?.scan_coverage_confidence === "low" && (
+              <p className="mt-3 rounded-md border border-yellow-500/25 bg-yellow-500/10 p-2 text-xs text-yellow-100">
+                Official scan coverage is weak. Signal should not make confident visual/site-quality claims from HTML alone; upload a screenshot or add verified observations.
+              </p>
+            )}
             {weighting && (
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <EvidenceGroup title="Official Website Evidence" items={stringList(weighting.official_website_evidence)} />
-                <EvidenceGroup title="User Research Observations" items={stringList(weighting.user_research_observations)} />
+                <EvidenceGroup title="Visual Screenshot Evidence" items={stringList((weighting.visual_screenshot_evidence as Record<string, unknown> | undefined)?.analysis ? [JSON.stringify((weighting.visual_screenshot_evidence as Record<string, unknown>).analysis)] : [])} />
+                <EvidenceGroup title="Human-Entered Observations" items={stringList(weighting.user_research_observations)} />
                 <EvidenceGroup title="System-Derived Classification" items={[JSON.stringify(weighting.system_derived_classification || {})]} />
                 <EvidenceGroup title="AI Interpretation" items={stringList([weighting.ai_interpretation])} />
               </div>
@@ -935,6 +1194,43 @@ export function SignalProspectDetail({
                 <p className="text-sm text-muted-foreground">No website evidence stored yet.</p>
               )}
             </div>
+          </div>
+          <div className="mt-4 grid gap-3">
+            <TextBlock label="Human notes" value={prospect.human_notes} />
+            <TextBlock label="What looks good" value={prospect.what_looks_good} />
+            <TextBlock label="Visible problem" value={prospect.visible_problem} />
+          </div>
+          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-sm font-medium">Add Verified Observation</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <select value={observationCategory} onChange={(event) => setObservationCategory(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
+                {["site_design", "services", "booking", "gallery", "public_contact", "reputation", "platform", "business_context"].map((value) => (
+                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                ))}
+              </select>
+              <select value={observationSource} onChange={(event) => setObservationSource(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
+                {["manual_public_site_review", "official_public_site", "existing_conversation", "personal_relationship"].map((value) => (
+                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                ))}
+              </select>
+            </div>
+            <textarea value={observationNote} onChange={(event) => setObservationNote(event.target.value)} placeholder="Verified public observation" className="mt-2 min-h-16 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            <input value={observationUrl} onChange={(event) => setObservationUrl(event.target.value)} placeholder="Optional source URL" className="mt-2 h-9 w-full rounded-lg border border-border bg-background px-3 text-sm" />
+            <button type="button" disabled={!observationNote.trim() || working === "observation"} onClick={addObservation} className="mt-2 inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
+              {working === "observation" ? "Saving..." : "Save Observation"}
+            </button>
+            {verifiedObservations.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {verifiedObservations.slice(0, 6).map((item) => (
+                  <div key={item.id} className="rounded-md border border-border bg-background/50 p-2 text-xs text-muted-foreground">
+                    <span className="text-foreground">{item.category.replace(/_/g, " ")}</span>
+                    {" "}· {item.source.replace(/_/g, " ")} · {formatDateTime(item.created_at)}
+                    <p className="mt-1 text-sm text-foreground">{item.note}</p>
+                    {item.url && <p className="mt-1 break-all">{item.url}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Panel>
 
@@ -959,6 +1255,8 @@ export function SignalProspectDetail({
           <TextBlock label="Recommended lane" value={latestAnalysis?.recommended_lane ? laneLabels[latestAnalysis.recommended_lane] || latestAnalysis.recommended_lane : null} />
           <TextBlock label="Relevant demo" value={selectedDemoRoute || latestAnalysis?.recommended_demo || prospect.relevant_demo} />
           <TextBlock label="Commercial fit" value={latestAnalysis?.commercial_fit} />
+          <TextBlock label="Evidence supporting value band" value={arrayFromJson(latestAnalysis?.evidence_supporting_value_band).join("\n")} />
+          <TextBlock label="What requires discovery confirmation" value={arrayFromJson(latestAnalysis?.discovery_confirmation_needed).join("\n")} />
           <TextBlock label="Public customer positioning" value={latestAnalysis?.public_customer_positioning} />
           <TextBlock label="Brand voice summary" value={latestAnalysis?.brand_voice_summary} />
           <TextBlock label="Conversation style reason" value={prospect.conversation_style_reason || latestAnalysis?.conversation_style_reason} />
@@ -1011,30 +1309,89 @@ export function SignalProspectDetail({
             placeholder="Private guidance, e.g. already emailed them; generate only a follow-up, keep it simple, avoid AI."
             className="min-h-20 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
           />
-          <span className="text-xs text-muted-foreground">Private guidance is used to shape scripts. It should not be copied word-for-word into external drafts.</span>
+          <span className="text-xs text-muted-foreground">Private guidance affects tone only and is never sent to the prospect.</span>
         </label>
+        {guidanceHistoryConflict && (
+          <div className="mb-4 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+            Guidance mentions prior outreach, but no outreach event is recorded. Record prior outreach before relying on follow-up-only drafts.
+          </div>
+        )}
         {latestDraft ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {followUpMode ? (
-              <DraftBlock title="Follow-Up Draft" value={latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || "")} onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || ""), "Follow-up draft")} />
-            ) : (
-              <>
-                <DraftBlock title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
-                <DraftBlock title="DM Draft" value={latestDraft.permission_based_dm} onCopy={() => copyText(latestDraft.permission_based_dm, "DM draft")} />
-              </>
+          <div className="space-y-4">
+            {followUpMode && (
+              <div className="rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+                Do not contact through a second channel unless manually chosen.
+              </div>
             )}
-            <DraftBlock title="Call Opener" value={latestDraft.owner_call_opener} onCopy={() => copyText(latestDraft.owner_call_opener, "Call opener")} />
-            <DraftBlock title="Gatekeeper Script" value={latestDraft.gatekeeper_script} onCopy={() => copyText(latestDraft.gatekeeper_script, "Gatekeeper script")} />
-            <DraftBlock title="Voicemail" value={latestDraft.voicemail_script} onCopy={() => copyText(latestDraft.voicemail_script, "Voicemail script")} />
-            <DraftBlock title="Demo Follow-Up" value={latestDraft.demo_send_followup} onCopy={() => copyText(latestDraft.demo_send_followup, "Demo follow-up")} />
-            <DraftBlock title="Proposal Angle" value={latestDraft.proposal_angle} onCopy={() => copyText(latestDraft.proposal_angle, "Proposal angle")} />
-            {scriptStudio && (
-              <>
-                <DraftBlock title="If They Ask How Much" value={String(scriptStudio.how_much_response || "")} onCopy={() => copyText(String(scriptStudio.how_much_response || ""), "Price response")} />
-                <DraftBlock title="Already Use Booking Software" value={String(scriptStudio.already_use_booking_response || "")} onCopy={() => copyText(String(scriptStudio.already_use_booking_response || ""), "Booking response")} />
-                <DraftBlock title="Already Have a Website" value={String(scriptStudio.already_have_website_response || "")} onCopy={() => copyText(String(scriptStudio.already_have_website_response || ""), "Website response")} />
-                {!followUpMode && <DraftBlock title="Follow-Up Draft" value={latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || "")} onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio.follow_up_draft || ""), "Follow-up draft")} />}
-              </>
+            {doNotContact ? (
+              <div className="rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-200">
+                Outreach scripts are disabled for do-not-contact prospects.
+              </div>
+            ) : (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {followUpMode && (
+                  <DraftBlock
+                    copyDisabled={!externalReady}
+                    title="Follow-Up Draft"
+                    value={latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || "")}
+                    onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || ""), "Follow-up draft")}
+                  />
+                )}
+                {permissionMode && (
+                  <DraftBlock
+                    copyDisabled={!externalReady}
+                    title="Demo-Send Response"
+                    value={latestDraft.demo_send_followup}
+                    onCopy={() => copyText(latestDraft.demo_send_followup, "Demo response")}
+                  />
+                )}
+                {demoSentMode && (
+                  <DraftBlock
+                    copyDisabled={!externalReady}
+                    title="Post-Demo Check-In"
+                    value={latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || "")}
+                    onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || ""), "Post-demo check-in")}
+                  />
+                )}
+                {discoveryMode && (
+                  <DraftBlock
+                    copyDisabled={!externalReady}
+                    title="Proposal Angle"
+                    value={latestDraft.proposal_angle}
+                    onCopy={() => copyText(latestDraft.proposal_angle, "Proposal angle")}
+                  />
+                )}
+                {firstContactMode && (
+                  <>
+                    <DraftBlock copyDisabled={!externalReady} title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
+                    <DraftBlock copyDisabled={!externalReady} title="Call Opener" value={latestDraft.owner_call_opener} onCopy={() => copyText(latestDraft.owner_call_opener, "Call opener")} />
+                    <DraftBlock copyDisabled={!externalReady} title="Gatekeeper Script" value={latestDraft.gatekeeper_script} onCopy={() => copyText(latestDraft.gatekeeper_script, "Gatekeeper script")} />
+                    <DraftBlock copyDisabled={!externalReady} title="Voicemail" value={latestDraft.voicemail_script} onCopy={() => copyText(latestDraft.voicemail_script, "Voicemail script")} />
+                    {latestDraft.permission_based_dm && (
+                      <DraftBlock copyDisabled={!externalReady} title="Permission-Based DM" value={latestDraft.permission_based_dm} onCopy={() => copyText(latestDraft.permission_based_dm, "DM draft")} />
+                    )}
+                  </>
+                )}
+                {scriptStudio && (
+                  <>
+                    <DraftBlock copyDisabled={!externalReady} title="If They Ask How Much" value={String(scriptStudio.how_much_response || "")} onCopy={() => copyText(String(scriptStudio.how_much_response || ""), "Price response")} />
+                    <DraftBlock copyDisabled={!externalReady} title="Already Use Booking Software" value={String(scriptStudio.already_use_booking_response || "")} onCopy={() => copyText(String(scriptStudio.already_use_booking_response || ""), "Booking response")} />
+                    <DraftBlock copyDisabled={!externalReady} title="Already Have a Website" value={String(scriptStudio.already_have_website_response || "")} onCopy={() => copyText(String(scriptStudio.already_have_website_response || ""), "Website response")} />
+                  </>
+                )}
+              </div>
+            )}
+            {!doNotContact && !firstContactMode && (
+              <details className="rounded-lg border border-border bg-muted/30 p-3">
+                <summary className="cursor-pointer text-sm font-medium">View archived / alternate scripts</summary>
+                <div className="mt-3 grid gap-4 xl:grid-cols-2">
+                  <DraftBlock copyDisabled={!externalReady} title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
+                  <DraftBlock copyDisabled={!externalReady} title="DM Draft" value={latestDraft.permission_based_dm} onCopy={() => copyText(latestDraft.permission_based_dm, "DM draft")} />
+                  <DraftBlock copyDisabled={!externalReady} title="Call Opener" value={latestDraft.owner_call_opener} onCopy={() => copyText(latestDraft.owner_call_opener, "Call opener")} />
+                  <DraftBlock copyDisabled={!externalReady} title="Gatekeeper Script" value={latestDraft.gatekeeper_script} onCopy={() => copyText(latestDraft.gatekeeper_script, "Gatekeeper script")} />
+                  <DraftBlock copyDisabled={!externalReady} title="Voicemail" value={latestDraft.voicemail_script} onCopy={() => copyText(latestDraft.voicemail_script, "Voicemail script")} />
+                </div>
+              </details>
             )}
             <div className="rounded-lg border border-border bg-muted/30 p-3">
               <p className="mb-2 text-sm font-medium">Discovery Questions</p>
@@ -1091,6 +1448,16 @@ function Meta({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className="mt-1 break-words text-sm text-foreground">{value || "-"}</p>
+    </div>
+  )
+}
+
+function MetricCard({ label, note, value }: { label: string; note?: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-2 break-words text-lg font-semibold">{value}</p>
+      {note && <p className="mt-2 text-xs text-muted-foreground">{note}</p>}
     </div>
   )
 }
@@ -1192,10 +1559,12 @@ function Score({ inverse, label, value }: { inverse?: boolean; label: string; va
 }
 
 function DraftBlock({
+  copyDisabled,
   onCopy,
   title,
   value,
 }: {
+  copyDisabled?: boolean
   onCopy: () => void
   title: string
   value: string | null | undefined
@@ -1206,7 +1575,7 @@ function DraftBlock({
         <p className="text-sm font-medium">{title}</p>
         <button
           type="button"
-          disabled={!value}
+          disabled={!value || copyDisabled}
           onClick={onCopy}
           className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
         >
@@ -1214,6 +1583,9 @@ function DraftBlock({
           Copy
         </button>
       </div>
+      {copyDisabled && (
+        <p className="mb-2 text-xs text-yellow-200">Needs Manual Review before copy is enabled.</p>
+      )}
       <p className="whitespace-pre-wrap text-sm text-muted-foreground">{value || "No draft yet."}</p>
     </div>
   )

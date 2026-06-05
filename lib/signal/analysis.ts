@@ -1,6 +1,11 @@
 import "server-only"
 
-import type { SignalAnalysis, SignalProspect } from "@/lib/supabase/types"
+import type {
+  SignalAnalysis,
+  SignalProspect,
+  SignalVerifiedObservation,
+  SignalVisualEvidence,
+} from "@/lib/supabase/types"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { maybeCreateSignalAlert } from "./alerts"
 import { runInitialAiAnalysis } from "./ai"
@@ -28,6 +33,10 @@ import {
   getSignalOpportunityCalibration,
 } from "./scoring"
 import { scanSignalWebsite, type SignalWebsiteScan } from "./website"
+import {
+  visualEvidenceForAnalysis,
+  visualValueReasons,
+} from "./visual-evidence"
 
 export type SignalResearchAnalysisContext = {
   research_provider?: string | null
@@ -62,17 +71,43 @@ export async function runAndStoreInitialSignalAnalysis({
 }) {
   const supabase = createAdminClient()
   const websiteScan = scan ?? (await scanSignalWebsite(prospect.website_url))
-  const fallback = buildDeterministicInitialAnalysis(prospect, websiteScan)
-  const aiResult = await runInitialAiAnalysis(prospect, websiteScan)
-  const output = calibrateInitialAnalysisOutput(prospect, websiteScan, aiResult?.output || fallback)
-  const styleSuggestion = suggestSignalConversationStyle(prospect, websiteScan)
-  const profileSuggestion = suggestCommunicationProfile(prospect, websiteScan)
+  const { data: visualRows } = await supabase
+    .from("signal_visual_evidence")
+    .select("*")
+    .eq("prospect_id", prospect.id)
+    .order("created_at", { ascending: false })
+  const visualEvidence = (visualRows || []) as SignalVisualEvidence[]
+  const { data: observationRows } = await supabase
+    .from("signal_verified_observations")
+    .select("*")
+    .eq("prospect_id", prospect.id)
+    .order("created_at", { ascending: false })
+  const verifiedObservations = (observationRows || []) as SignalVerifiedObservation[]
+  const verifiedObservationText = verifiedObservations
+    .map((item) => `${item.category.replace(/_/g, " ")}: ${item.note}`)
+    .join("\n")
+  const analysisProspect = {
+    ...prospect,
+    human_notes: [prospect.human_notes, verifiedObservationText].filter(Boolean).join("\n\n") || null,
+  } as SignalProspect
+  const fallback = buildDeterministicInitialAnalysis(analysisProspect, websiteScan, visualEvidence)
+  const aiResult = await runInitialAiAnalysis(analysisProspect, websiteScan)
+  const output = calibrateInitialAnalysisOutput(
+    analysisProspect,
+    websiteScan,
+    aiResult?.output || fallback,
+    visualEvidence,
+  )
+  const styleSuggestion = suggestSignalConversationStyle(analysisProspect, websiteScan)
+  const profileSuggestion = suggestCommunicationProfile(analysisProspect, websiteScan)
   const contactReadiness = getContactReadiness(prospect)
   const publicCustomerPositioning = buildPublicCustomerPositioning(prospect, websiteScan)
   const brandVoiceSummary = summarizeSignalBrandVoice(prospect, websiteScan)
-  const calibration = getSignalOpportunityCalibration(prospect, websiteScan)
+  const calibration = getSignalOpportunityCalibration(analysisProspect, websiteScan, visualEvidence)
   const evidence = {
     website: websiteScan.evidence,
+    visual_screenshot_evidence: visualEvidenceForAnalysis(visualEvidence),
+    verified_observations: verifiedObservations,
     evidence_weighting: calibration.evidence_weighting,
     research: {
       provider: researchContext?.research_provider || null,
@@ -124,7 +159,10 @@ export async function runAndStoreInitialSignalAnalysis({
       communication_profile: profileSuggestion.profile,
       communication_profile_reason: profileSuggestion.reason,
       contact_readiness: contactReadiness.state,
-      evidence_supporting_value_band: output.reasons_to_contact,
+      evidence_supporting_value_band: [
+        ...visualValueReasons(visualEvidence),
+        ...output.reasons_to_contact,
+      ].slice(0, 8),
       discovery_confirmation_needed: output.red_flags,
       website_opportunity_score: calibration.website_opportunity_score,
       systems_opportunity_score: calibration.systems_opportunity_score,
@@ -151,15 +189,15 @@ export async function runAndStoreInitialSignalAnalysis({
   if (analysisError) throw new Error(analysisError.message)
 
   const analysis = analysisData as SignalAnalysis
-  const deterministicPlaybook = deterministicSignalPlaybook(prospect)
+  const deterministicPlaybook = deterministicSignalPlaybook(analysisProspect)
   const prospectUpdate: Record<string, unknown> = {
     industry_playbook: deterministicPlaybook,
     compliance_tier: getSignalPlaybook(deterministicPlaybook).complianceTier,
-    relevant_demo: deterministicRelevantDemo(prospect),
-    outreach_mode: suggestedCalibratedOutreachMode(prospect),
-    locality_scope: classifySignalLocality(prospect),
-    relationship_type: classifySignalRelationship(prospect),
-    outreach_history: classifySignalOutreachHistory(prospect),
+    relevant_demo: deterministicRelevantDemo(analysisProspect),
+    outreach_mode: suggestedCalibratedOutreachMode(analysisProspect),
+    locality_scope: classifySignalLocality(analysisProspect),
+    relationship_type: classifySignalRelationship(analysisProspect),
+    outreach_history: classifySignalOutreachHistory(analysisProspect),
     conversation_style: styleSuggestion.style,
     conversation_style_reason: styleSuggestion.reason,
     suggested_communication_profile: profileSuggestion.profile,

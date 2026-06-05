@@ -9,6 +9,8 @@ import type {
   SignalOutreachDraft,
   SignalOutreachEvent,
   SignalProspect,
+  SignalVerifiedObservation,
+  SignalVisualEvidence,
 } from "@/lib/supabase/types"
 import { SignalProspectDetail } from "./signal-prospect-detail"
 
@@ -33,7 +35,15 @@ export default async function SignalProspectPage({
   if (!prospectData) notFound()
 
   const prospect = prospectData as SignalProspect
-  const [{ data: analyses }, { data: drafts }, { data: alerts }, { data: events }, { data: feedback }] = await Promise.all([
+  const [
+    { data: analyses },
+    { data: drafts },
+    { data: alerts },
+    { data: events },
+    { data: feedback },
+    { data: visualEvidence },
+    { data: verifiedObservations },
+  ] = await Promise.all([
     supabase
       .from("signal_analyses")
       .select("*")
@@ -59,6 +69,16 @@ export default async function SignalProspectPage({
       .select("*")
       .eq("prospect_id", prospect.id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("signal_visual_evidence")
+      .select("*")
+      .eq("prospect_id", prospect.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("signal_verified_observations")
+      .select("*")
+      .eq("prospect_id", prospect.id)
+      .order("created_at", { ascending: false }),
   ])
 
   return (
@@ -69,6 +89,8 @@ export default async function SignalProspectPage({
       alerts={(alerts || []) as SignalAlert[]}
       outreachEvents={(events || []) as SignalOutreachEvent[]}
       feedback={(feedback || []) as SignalFeedback[]}
+      visualEvidence={(visualEvidence || []) as SignalVisualEvidence[]}
+      verifiedObservations={(verifiedObservations || []) as SignalVerifiedObservation[]}
       suppressed={await isSignalProspectSuppressed(prospect)}
     />
   )

@@ -13,6 +13,13 @@ import {
 } from "./calibration"
 import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "./playbooks"
 import type { SignalWebsiteScan } from "./website"
+import type { SignalVisualEvidence } from "@/lib/supabase/types"
+import {
+  isVisualIndustry,
+  visualEvidenceForAnalysis,
+  visualSignalsForScoring,
+  visualValueReasons,
+} from "./visual-evidence"
 import {
   coerceCommercialFit,
   coerceConfidence,
@@ -283,9 +290,14 @@ function suggestedOutreachMode(prospect: SignalProspect) {
   return suggestedCalibratedOutreachMode(prospect)
 }
 
-function buildReasons(prospect: SignalProspect, scan: SignalWebsiteScan | null) {
+function buildReasons(
+  prospect: SignalProspect,
+  scan: SignalWebsiteScan | null,
+  visualEvidence: SignalVisualEvidence[] = [],
+) {
   const reasons: string[] = []
   const playbook = getSignalPlaybook(deterministicSignalPlaybook(prospect))
+  const visual = visualSignalsForScoring(visualEvidence)
 
   if (playbook.key !== "general_local_business") {
     reasons.push(`${playbook.name} playbook matches the entered industry.`)
@@ -304,6 +316,11 @@ function buildReasons(prospect: SignalProspect, scan: SignalWebsiteScan | null) 
   }
   if (prospect.public_phone || prospect.public_email || prospect.public_contact_form_url) {
     reasons.push("A public contact route is available for manual outreach.")
+  }
+  if (visual.assessed) {
+    reasons.push(`Visual screenshot evidence: ${visual.summary}`)
+  } else if (isVisualIndustry(playbook.key)) {
+    reasons.push("Upload screenshot for stronger website scoring in this visual industry.")
   }
   if (!prospect.website_url || scan?.broken_response) {
     reasons.push("Website presence needs manual review because the homepage is missing or could not be scanned.")
@@ -334,8 +351,12 @@ function buildRedFlags(prospect: SignalProspect, scan: SignalWebsiteScan | null)
 export function buildDeterministicInitialAnalysis(
   prospect: SignalProspect,
   scan: SignalWebsiteScan | null,
+  visualEvidence: SignalVisualEvidence[] = [],
 ): SignalInitialAnalysisOutput {
-  const websiteQuality = getWebsiteQualityScore(scan)
+  const visual = visualSignalsForScoring(visualEvidence)
+  const websiteQuality = visual.assessed && typeof visual.score === "number"
+    ? visual.score
+    : getWebsiteQualityScore(scan)
   const businessViability = getBusinessViabilityScore(prospect, scan)
   const operationalOpportunity = getOperationalOpportunityScore(prospect, scan)
   const websiteServiceFit = getWebsiteServiceFitScore(prospect, scan)
@@ -344,12 +365,12 @@ export function buildDeterministicInitialAnalysis(
   const complianceRisk = getComplianceRiskScore(prospect)
   const compliancePenalty = complianceRisk >= 80 ? 10 : 0
   const websiteOpportunityScore = clampScore(
-    businessViability * 0.18 +
-      operationalOpportunity * 0.18 +
-      websiteServiceFit * 0.34 +
-      reachability * 0.14 +
-      (100 - websiteQuality) * 0.1 +
-      humanResearchScore(prospect) * 0.06 -
+    websiteServiceFit * 0.42 +
+      (100 - websiteQuality) * 0.24 +
+      businessViability * 0.16 +
+      humanResearchScore(prospect) * 0.12 +
+      reachability * 0.06 +
+      visual.opportunityBoost -
       compliancePenalty,
   )
   const systemsOpportunityScore = clampScore(
@@ -367,13 +388,13 @@ export function buildDeterministicInitialAnalysis(
   const overall = lane === "systems_discovery"
     ? Math.max(systemsOpportunityScore, Math.round(websiteOpportunityScore * 0.85))
     : websiteOpportunityScore
-  const reasons = buildReasons(prospect, scan)
+  const reasons = buildReasons(prospect, scan, visualEvidence)
   const redFlags = buildRedFlags(prospect, scan)
   const priority =
     prospect.outreach_status === "do_not_contact" ? "skip" : coercePriority(overall)
   const confidence = coerceConfidence(
-    reasons.length + (scan?.evidence.length || 0),
-    Boolean(scan && !scan.broken_response),
+    reasons.length + (scan?.evidence.length || 0) + (visual.assessed ? 4 : 0),
+    Boolean(scan && !scan.broken_response) || visual.assessed,
   )
   const valueBand = getValueBand(overall, prospect)
   const playbook = getSignalPlaybook(deterministicSignalPlaybook(prospect))
@@ -415,8 +436,12 @@ export function buildDeterministicInitialAnalysis(
 export function getSignalOpportunityCalibration(
   prospect: SignalProspect,
   scan: SignalWebsiteScan | null,
+  visualEvidence: SignalVisualEvidence[] = [],
 ) {
-  const websiteQuality = getWebsiteQualityScore(scan)
+  const visual = visualSignalsForScoring(visualEvidence)
+  const websiteQuality = visual.assessed && typeof visual.score === "number"
+    ? visual.score
+    : getWebsiteQualityScore(scan)
   const businessViability = getBusinessViabilityScore(prospect, scan)
   const operationalOpportunity = getOperationalOpportunityScore(prospect, scan)
   const websiteServiceFit = getWebsiteServiceFitScore(prospect, scan)
@@ -426,12 +451,12 @@ export function getSignalOpportunityCalibration(
   const scanCoverage = getScanCoverage(scan)
   const humanScore = humanResearchScore(prospect)
   const websiteOpportunityScore = clampScore(
-    businessViability * 0.18 +
-      operationalOpportunity * 0.18 +
-      websiteServiceFit * 0.34 +
-      reachability * 0.14 +
-      (100 - websiteQuality) * 0.1 +
-      humanScore * 0.06 -
+    websiteServiceFit * 0.42 +
+      (100 - websiteQuality) * 0.24 +
+      businessViability * 0.16 +
+      humanScore * 0.12 +
+      reachability * 0.06 +
+      visual.opportunityBoost -
       (complianceRisk >= 80 ? 10 : 0),
   )
   const systemsOpportunityScore = clampScore(
@@ -454,6 +479,7 @@ export function getSignalOpportunityCalibration(
     scan_coverage_note: scanCoverage.note,
     evidence_weighting: {
       official_website_evidence: scan?.evidence || [],
+      visual_screenshot_evidence: visualEvidenceForAnalysis(visualEvidence),
       user_research_observations: [
         prospect.human_notes && `Human-entered observation: ${prospect.human_notes}`,
         prospect.what_looks_good && `Human-entered observation: ${prospect.what_looks_good}`,
@@ -477,18 +503,30 @@ export function calibrateInitialAnalysisOutput(
   prospect: SignalProspect,
   scan: SignalWebsiteScan | null,
   output: SignalInitialAnalysisOutput,
+  visualEvidence: SignalVisualEvidence[] = [],
 ): SignalInitialAnalysisOutput {
-  const calibration = getSignalOpportunityCalibration(prospect, scan)
+  const calibration = getSignalOpportunityCalibration(prospect, scan, visualEvidence)
+  const visual = visualSignalsForScoring(visualEvidence)
+  const websiteQuality = visual.assessed && typeof visual.score === "number"
+    ? visual.score
+    : getWebsiteQualityScore(scan)
   const overall = calibration.recommended_lane === "systems_discovery"
     ? Math.max(calibration.systems_opportunity_score, Math.round(calibration.website_opportunity_score * 0.85))
     : calibration.website_opportunity_score
   const priority = prospect.outreach_status === "do_not_contact" ? "skip" : coercePriority(overall)
   const scanCoverageLow = calibration.scan_coverage_confidence === "low"
-  const confidence = scanCoverageLow && output.confidence === "high" ? "medium" : output.confidence
+  const missingVisualForVisualIndustry =
+    isVisualIndustry(deterministicSignalPlaybook(prospect)) && !visual.assessed
+  const confidence =
+    (scanCoverageLow || missingVisualForVisualIndustry) && output.confidence === "high"
+      ? "medium"
+      : visual.assessed && output.confidence === "low"
+        ? "medium"
+        : output.confidence
 
   return {
     ...output,
-    website_quality_score: getWebsiteQualityScore(scan),
+    website_quality_score: websiteQuality,
     business_viability_score: getBusinessViabilityScore(prospect, scan),
     operational_opportunity_score: getOperationalOpportunityScore(prospect, scan),
     website_service_fit_score: getWebsiteServiceFitScore(prospect, scan),
@@ -505,7 +543,7 @@ export function calibrateInitialAnalysisOutput(
     recommended_secondary_offer: recommendedSecondaryOffer(prospect),
     confidence,
     executive_summary:
-      `${prospect.business_name} is calibrated as ${priority} with ${calibration.recommended_lane.replace(/_/g, " ")} as the recommended lane. ${calibration.scan_coverage_note}`,
+      `${prospect.business_name} is calibrated as ${priority} with ${calibration.recommended_lane.replace(/_/g, " ")} as the recommended lane. ${visual.assessed ? "Visual screenshot evidence is included." : calibration.scan_coverage_note}`,
   }
 }
 
@@ -517,6 +555,7 @@ export function buildFallbackDeepAnalysis(
   prospect: SignalProspect,
   scan: SignalWebsiteScan | null,
   initial: SignalInitialAnalysisOutput,
+  visualEvidence: SignalVisualEvidence[] = [],
 ): SignalDeepAnalysisOutput {
   const playbook = getSignalPlaybook(deterministicSignalPlaybook(prospect))
   const evidence = buildEvidenceMap(scan)
@@ -545,7 +584,10 @@ export function buildFallbackDeepAnalysis(
     evidence_based_opportunities: [
       {
         opportunity_type: opportunityType,
-        evidence: topEvidence.length > 0 ? topEvidence : ["Human-entered prospect information only."],
+      evidence: [
+        ...visualValueReasons(visualEvidence),
+        ...(topEvidence.length > 0 ? topEvidence : ["Human-entered prospect information only."]),
+      ].slice(0, 6),
         why_it_matters: complianceGated
           ? "This sector needs compliance review before any operational or AI workflow is discussed beyond public-site improvements."
           : "The public evidence points to a practical website or workflow conversation. Any missed-call, admin, or follow-up workflow should be framed as worth asking about on a discovery call.",

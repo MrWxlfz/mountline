@@ -28,8 +28,17 @@ import {
 import { buildSignalScriptStudio } from "@/lib/signal/scripts"
 import { scanSignalWebsite } from "@/lib/signal/website"
 import { createAdminClient } from "@/lib/supabase/admin"
-import type { SignalAnalysis, SignalProspect } from "@/lib/supabase/types"
+import type {
+  SignalAnalysis,
+  SignalProspect,
+  SignalVerifiedObservation,
+  SignalVisualEvidence,
+} from "@/lib/supabase/types"
 import type { SignalInitialAnalysisOutput } from "@/lib/signal/validation"
+import {
+  visualEvidenceForAnalysis,
+  visualValueReasons,
+} from "@/lib/signal/visual-evidence"
 
 const CONTACTED_OR_FINAL_STATUSES = new Set([
   "contacted",
@@ -114,13 +123,33 @@ export async function POST(
   }
 
   const prospect = prospectData as SignalProspect
+  const { data: visualRows } = await supabase
+    .from("signal_visual_evidence")
+    .select("*")
+    .eq("prospect_id", prospect.id)
+    .order("created_at", { ascending: false })
+  const visualEvidence = (visualRows || []) as SignalVisualEvidence[]
+  const { data: observationRows } = await supabase
+    .from("signal_verified_observations")
+    .select("*")
+    .eq("prospect_id", prospect.id)
+    .order("created_at", { ascending: false })
+  const verifiedObservations = (observationRows || []) as SignalVerifiedObservation[]
+  const verifiedObservationText = verifiedObservations
+    .map((item) => `${item.category.replace(/_/g, " ")}: ${item.note}`)
+    .join("\n")
+  const analysisProspect = {
+    ...prospect,
+    human_notes: [prospect.human_notes, verifiedObservationText].filter(Boolean).join("\n\n") || null,
+  } as SignalProspect
   const scan = await scanSignalWebsite(prospect.website_url)
   const fallbackInitial = calibrateInitialAnalysisOutput(
-    prospect,
+    analysisProspect,
     scan,
-    buildDeterministicInitialAnalysis(prospect, scan),
+    buildDeterministicInitialAnalysis(analysisProspect, scan, visualEvidence),
+    visualEvidence,
   )
-  const opportunityCalibration = getSignalOpportunityCalibration(prospect, scan)
+  const opportunityCalibration = getSignalOpportunityCalibration(analysisProspect, scan, visualEvidence)
 
   const { data: latestAnalysis } = await supabase
     .from("signal_analyses")
@@ -131,28 +160,30 @@ export async function POST(
     .limit(1)
     .maybeSingle()
 
-  const initial = calibrateInitialAnalysisOutput(prospect, scan, initialFromAnalysis(
-    (latestAnalysis as SignalAnalysis | null) || null,
-    fallbackInitial,
-  ))
-  const fallbackDeep = buildFallbackDeepAnalysis(prospect, scan, initial)
-  const aiResult = await runDeepAiAnalysis(prospect, scan, initial)
+  const initial = calibrateInitialAnalysisOutput(
+    analysisProspect,
+    scan,
+    initialFromAnalysis((latestAnalysis as SignalAnalysis | null) || null, fallbackInitial),
+    visualEvidence,
+  )
+  const fallbackDeep = buildFallbackDeepAnalysis(analysisProspect, scan, initial, visualEvidence)
+  const aiResult = await runDeepAiAnalysis(analysisProspect, scan, initial)
   const deep = completeDeepAnalysisDrafts(
-    prospect,
+    analysisProspect,
     aiResult?.output || fallbackDeep,
     initial,
     scan,
   )
   deep.recommended_primary_offer = fallbackInitial.recommended_primary_offer
   deep.recommended_secondary_offer = fallbackInitial.recommended_secondary_offer
-  deep.suggested_channel = suggestedCalibratedChannel(prospect, scan)
-  deep.suggested_outreach_mode = suggestedCalibratedOutreachMode(prospect)
+  deep.suggested_channel = suggestedCalibratedChannel(analysisProspect, scan)
+  deep.suggested_outreach_mode = suggestedCalibratedOutreachMode(analysisProspect)
   deep.project_value_band = fallbackInitial.potential_project_value_band
   deep.project_value_reason = fallbackInitial.potential_project_value_reason
-  const conversation = suggestSignalConversationStyle(prospect, scan)
-  const communicationProfile = suggestCommunicationProfile(prospect, scan)
-  const customerPositioning = buildPublicCustomerPositioning(prospect, scan)
-  const brandVoice = summarizeSignalBrandVoice(prospect, scan)
+  const conversation = suggestSignalConversationStyle(analysisProspect, scan)
+  const communicationProfile = suggestCommunicationProfile(analysisProspect, scan)
+  const customerPositioning = buildPublicCustomerPositioning(analysisProspect, scan)
+  const brandVoice = summarizeSignalBrandVoice(analysisProspect, scan)
 
   const { data: analysisData, error: analysisError } = await supabase
     .from("signal_analyses")
@@ -164,12 +195,16 @@ export async function POST(
       scanned_urls: scan.scanned_urls,
       website_signals: {
         scan,
+        visual_screenshot_evidence: visualEvidenceForAnalysis(visualEvidence),
+        verified_observations: verifiedObservations,
         evidence_based_opportunities: deep.evidence_based_opportunities,
         what_looks_good: deep.what_looks_good,
         visible_problem: deep.visible_problem,
       },
       evidence: {
         website: scan.evidence,
+        visual_screenshot_evidence: visualEvidenceForAnalysis(visualEvidence),
+        verified_observations: verifiedObservations,
         opportunities: deep.evidence_based_opportunities,
         weighting: opportunityCalibration.evidence_weighting,
       },
@@ -202,6 +237,11 @@ export async function POST(
       conversation_style_reason: conversation.reason,
       communication_profile: communicationProfile.profile,
       communication_profile_reason: communicationProfile.reason,
+      evidence_supporting_value_band: [
+        ...visualValueReasons(visualEvidence),
+        ...initial.reasons_to_contact,
+      ].slice(0, 8),
+      discovery_confirmation_needed: initial.red_flags,
       public_customer_positioning: customerPositioning,
       brand_voice_summary: brandVoice,
       reasons_to_contact: deep.evidence_based_opportunities.map(
@@ -223,7 +263,7 @@ export async function POST(
     analysis,
     communicationProfile: communicationProfile.profile,
     conversationStyle: conversation.style,
-    prospect,
+    prospect: analysisProspect,
     scan,
   })
   const { data: draft, error: draftError } = await supabase
@@ -274,8 +314,8 @@ export async function POST(
   if (prospect.outreach_mode !== deep.suggested_outreach_mode) {
     updates.outreach_mode = deep.suggested_outreach_mode
   }
-  updates.industry_playbook = deterministicSignalPlaybook(prospect)
-  updates.relevant_demo = deterministicRelevantDemo(prospect)
+  updates.industry_playbook = deterministicSignalPlaybook(analysisProspect)
+  updates.relevant_demo = deterministicRelevantDemo(analysisProspect)
   updates.locality_scope = classifySignalLocality(prospect)
   updates.relationship_type = classifySignalRelationship(prospect)
   updates.outreach_history = classifySignalOutreachHistory(prospect)

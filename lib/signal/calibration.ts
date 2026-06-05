@@ -217,26 +217,41 @@ export function getRecommendedNextAction(
 export function externalDraftReadiness(textValue: string | null | undefined) {
   const value = textValue || ""
   const blocked = [
+    "score",
+    "priority",
+    "lane",
     "connection noted internally",
     "value band",
-    "score",
     "user-entered note",
+    "entered business context",
+    "internal connection",
+    "source evidence",
+    "system-derived classification",
     "system detected",
     "playbook",
-    "priority",
     "Signal's current",
+    "Signal detected",
     "internal",
     "public contact availability",
-    "entered business context",
+    "workflow improvement",
     "constructive website idea",
     "recommended lane",
-    "Signal detected",
-    "workflow improvement",
+    "low conversion",
+    "losing customers",
+    "hurting revenue",
+    "your website is bad",
+    "your site is bad",
+    "replace your booking",
+    "ai-powered transformation",
+    "revolutionize",
+    "game-changing",
   ]
   const hits = blocked.filter((phrase) => value.toLowerCase().includes(phrase.toLowerCase()))
+  const firstContactAfterPrior = /already (emailed|called|contacted)|follow up on/i.test(value) &&
+    /first (email|contact|call)|initial outreach/i.test(value)
   return {
-    passed: hits.length === 0,
-    blockedTerms: hits,
+    passed: hits.length === 0 && !firstContactAfterPrior,
+    blockedTerms: firstContactAfterPrior ? [...hits, "first contact after prior contact"] : hits,
     warnings: hits.map((hit) => `External draft contains internal wording: ${hit}`),
   }
 }

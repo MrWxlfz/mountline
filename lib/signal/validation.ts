@@ -140,6 +140,26 @@ export const signalRelevantDemoSchema = z.enum([
   "none",
 ])
 
+export const signalScreenshotTypeSchema = z.enum(["desktop", "mobile"])
+
+export const signalVerifiedObservationCategorySchema = z.enum([
+  "site_design",
+  "services",
+  "booking",
+  "gallery",
+  "public_contact",
+  "reputation",
+  "platform",
+  "business_context",
+])
+
+export const signalVerifiedObservationSourceSchema = z.enum([
+  "manual_public_site_review",
+  "official_public_site",
+  "existing_conversation",
+  "personal_relationship",
+])
+
 export const signalSuggestedChannelSchema = z.enum([
   "call",
   "email",
@@ -358,6 +378,26 @@ export const signalFeedbackCreateSchema = z.object({
   original_value: z.string().trim().max(500).optional().nullable(),
   corrected_value: z.string().trim().max(500).optional().nullable(),
   note: z.string().trim().max(1200).optional().nullable(),
+})
+
+export const signalVerifiedObservationCreateSchema = z.object({
+  category: signalVerifiedObservationCategorySchema,
+  source: signalVerifiedObservationSourceSchema,
+  note: z.string().trim().min(1).max(1200),
+  url: z.string().trim().url().max(500).optional().or(z.literal("")).nullable(),
+})
+
+export const signalVisualAnalysisSchema = z.object({
+  visual_quality_score: scoreSchema,
+  hero_clarity_score: scoreSchema,
+  cta_visibility_score: scoreSchema,
+  service_clarity_score: scoreSchema,
+  gallery_or_proof_score: scoreSchema.nullable(),
+  mobile_readability_score: scoreSchema.nullable(),
+  what_looks_good: z.array(z.string().trim().min(1).max(180)).max(8),
+  visible_improvement_opportunities: z.array(z.string().trim().min(1).max(220)).max(8),
+  evidence_grounded_summary: z.string().trim().min(1).max(900),
+  confidence: z.enum(["low", "medium", "high"]),
 })
 
 export const signalImportPreviewSchema = z.object({

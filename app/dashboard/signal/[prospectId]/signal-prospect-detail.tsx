@@ -48,8 +48,10 @@ type WorkingAction =
   | "session"
   | "visual_upload"
   | "visual_analyze"
+  | "visual_capture"
   | "visual_remove"
   | "observation"
+  | "focus"
   | null
 
 const statusLabels: Record<string, string> = {
@@ -215,6 +217,151 @@ function visualAnalysisFromEvidence(evidence: SignalVisualEvidence[]) {
     : null
 }
 
+function stringsFromRecordArray(value: unknown, keys: string[]) {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") return null
+      const record = item as Record<string, unknown>
+      return keys.map((key) => record[key]).filter(Boolean).join(": ")
+    })
+    .filter((item): item is string => Boolean(item))
+}
+
+function buildStrategyBoxes({
+  analysis,
+  playbookQuestions,
+  prospect,
+  scan,
+  verifiedObservations,
+  visualEvidence,
+}: {
+  analysis: SignalAnalysis | null
+  playbookQuestions: string[]
+  prospect: SignalProspect
+  scan: Record<string, unknown> | null
+  verifiedObservations: SignalVerifiedObservation[]
+  visualEvidence: SignalVisualEvidence[]
+}) {
+  const facts = [
+    prospect.website_url && `Official website saved: ${prospect.website_url}`,
+    prospect.city && `Location saved: ${[prospect.city, prospect.state].filter(Boolean).join(", ")}`,
+    scan?.page_title && `Official homepage title: ${String(scan.page_title)}`,
+    ...stringsFromRecordArray(scan?.evidence, ["signal", "snippet"]).slice(0, 4),
+    ...verifiedObservations.slice(0, 4).map((item) =>
+      `${item.category.replace(/_/g, " ")}: ${item.note}${item.url ? ` (${item.url})` : ""}`,
+    ),
+    visualEvidence.some((item) => item.screenshot_type === "desktop") && "Desktop public-site screenshot is stored.",
+    visualEvidence.some((item) => item.screenshot_type === "mobile") && "Mobile public-site screenshot is stored.",
+  ].filter(Boolean) as string[]
+
+  const inferences = [
+    analysis?.recommended_lane && `Recommended lane: ${laneLabels[analysis.recommended_lane] || analysis.recommended_lane}.`,
+    analysis?.recommended_primary_offer && `A practical first offer may be: ${analysis.recommended_primary_offer}.`,
+    analysis?.recommended_secondary_offer && `Secondary opportunity to confirm later: ${analysis.recommended_secondary_offer}.`,
+    analysis?.systems_opportunity_score !== null &&
+      analysis?.systems_opportunity_score !== undefined &&
+      "Systems/workflow ideas should stay discovery-led unless confirmed by the business.",
+    prospect.existing_booking_platform && `Existing ${prospect.existing_booking_platform} booking can likely remain in place unless the team says otherwise.`,
+  ].filter(Boolean) as string[]
+
+  const questions = [
+    ...(arrayFromJson(analysis?.discovery_confirmation_needed).length
+      ? arrayFromJson(analysis?.discovery_confirmation_needed)
+      : []),
+    ...playbookQuestions,
+  ].slice(0, 8)
+
+  return {
+    facts,
+    inferences,
+    questions,
+  }
+}
+
+function buildTimeline({
+  alerts,
+  analyses,
+  drafts,
+  feedback,
+  outreachEvents,
+  prospect,
+  verifiedObservations,
+  visualEvidence,
+}: {
+  alerts: SignalAlert[]
+  analyses: SignalAnalysis[]
+  drafts: SignalOutreachDraft[]
+  feedback: SignalFeedback[]
+  outreachEvents: SignalOutreachEvent[]
+  prospect: SignalProspect
+  verifiedObservations: SignalVerifiedObservation[]
+  visualEvidence: SignalVisualEvidence[]
+}) {
+  const timeline = [
+    {
+      date: prospect.created_at,
+      category: "research",
+      title: "Prospect created",
+      detail: prospect.source.replace(/_/g, " "),
+    },
+    ...analyses.map((analysis) => ({
+      date: analysis.created_at,
+      category: analysis.analysis_type === "deep_dive" ? "analysis" : "research",
+      title: analysis.analysis_type.replace(/_/g, " "),
+      detail: analysis.recommended_primary_offer || analysis.executive_summary || analysis.model_provider || "Analysis saved",
+    })),
+    ...drafts.map((draft) => ({
+      date: draft.created_at,
+      category: "outreach",
+      title: "Draft prepared",
+      detail: draft.first_contact_subject || draft.outreach_mode,
+    })),
+    ...outreachEvents.map((event) => ({
+      date: event.event_date || event.created_at,
+      category:
+        event.event_type === "demo_sent"
+          ? "demo"
+          : event.event_type === "replied"
+            ? "reply"
+            : event.follow_up_date
+              ? "follow_up"
+              : "outreach",
+      title: event.event_type.replace(/_/g, " "),
+      detail: [event.channel, event.summary].filter(Boolean).join(": "),
+    })),
+    ...visualEvidence.map((item) => ({
+      date: item.analyzed_at || item.created_at,
+      category: item.analyzed_at ? "analysis" : "research",
+      title: `${item.screenshot_type} screenshot`,
+      detail: item.analyzed_at ? "Visual analysis saved" : "Visual evidence uploaded",
+    })),
+    ...verifiedObservations.map((item) => ({
+      date: item.created_at,
+      category: "note",
+      title: item.category.replace(/_/g, " "),
+      detail: item.note,
+    })),
+    ...feedback.map((item) => ({
+      date: item.created_at,
+      category: "correction",
+      title: item.feedback_type.replace(/_/g, " "),
+      detail: item.corrected_value || item.note || item.original_value || "Correction saved",
+    })),
+    ...alerts.map((alert) => ({
+      date: alert.created_at,
+      category: "status",
+      title: alert.title,
+      detail: alert.message,
+    })),
+  ]
+
+  return timeline
+    .filter((item) => item.date)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, 40)
+}
+
 function gradeForScore(value: number | null | undefined) {
   if (typeof value !== "number") return "-"
   if (value >= 85) return "A"
@@ -377,6 +524,24 @@ export function SignalProspectDetail({
   const guidanceHistoryConflict =
     /already\s+(sent\s+an\s+)?email|already\s+emailed|generate follow-up only|follow-up only|already called/i.test(scriptGuidance) &&
     !hasRecordedPriorOutreach(outreachEvents)
+  const strategyBoxes = buildStrategyBoxes({
+    analysis: latestAnalysis,
+    playbookQuestions: playbook.discoveryQuestions,
+    prospect,
+    scan,
+    verifiedObservations,
+    visualEvidence,
+  })
+  const timeline = buildTimeline({
+    alerts,
+    analyses,
+    drafts,
+    feedback,
+    outreachEvents,
+    prospect,
+    verifiedObservations,
+    visualEvidence,
+  })
 
   const doNotContact = prospect.outreach_status === "do_not_contact" || suppressed
   const permissionMode = prospect.outreach_status === "permission_to_send_demo"
@@ -475,6 +640,30 @@ export function SignalProspectDetail({
       router.refresh()
     } catch {
       setError("Screenshot upload failed.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const captureScreenshot = async () => {
+    setWorking("visual_capture")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence/capture`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ screenshot_type: screenshotType }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Automated screenshot capture is unavailable. Manual upload remains available.")
+        return
+      }
+      setMessage("Public homepage screenshot captured.")
+      router.refresh()
+    } catch {
+      setError("Automated screenshot capture is unavailable. Manual upload remains available.")
     } finally {
       setWorking(null)
     }
@@ -716,6 +905,37 @@ export function SignalProspectDetail({
       router.push(`/dashboard/signal/call-session/${data.session.id}`)
     } catch {
       setError("Call session could not be created.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const addToFocusMode = async () => {
+    setWorking("focus")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch("/api/signal/focus/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prospect_id: prospect.id,
+          focus_reason:
+            latestAnalysis?.executive_summary ||
+            latestAnalysis?.recommended_primary_offer ||
+            "Added from Signal prospect detail.",
+          recommended_action: displayedNextAction,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Could not add to Focus Mode.")
+        return
+      }
+      setMessage(data.existing ? "Prospect is already in Focus Mode." : "Prospect added to Focus Mode.")
+      router.refresh()
+    } catch {
+      setError("Could not add to Focus Mode.")
     } finally {
       setWorking(null)
     }
@@ -978,6 +1198,10 @@ export function SignalProspectDetail({
               <Phone className="h-4 w-4" />
               Prepare Call Session
             </ActionButton>
+            <ActionButton disabled={doNotContact} working={working === "focus"} onClick={addToFocusMode}>
+              <RadioTower className="h-4 w-4" />
+              Add to Focus Mode
+            </ActionButton>
             <ActionButton disabled={doNotContact} working={working === "contacted"} onClick={() => updateStatus("contacted", "contacted")}>
               <CheckCircle2 className="h-4 w-4" />
               Mark Contacted
@@ -1075,6 +1299,10 @@ export function SignalProspectDetail({
               <ActionButton disabled={doNotContact} working={working === "visual_upload"} onClick={uploadScreenshot}>
                 <Upload className="h-4 w-4" />
                 Upload Screenshot
+              </ActionButton>
+              <ActionButton disabled={doNotContact} working={working === "visual_capture"} onClick={captureScreenshot}>
+                <ImageIcon className="h-4 w-4" />
+                Capture Homepage
               </ActionButton>
               <ActionButton disabled={visualEvidence.length === 0} working={working === "visual_analyze"} onClick={analyzeVisualDesign}>
                 <ImageIcon className="h-4 w-4" />
@@ -1265,6 +1493,14 @@ export function SignalProspectDetail({
         </div>
       </Panel>
 
+      <Panel title="Facts, Inferences, Discovery Questions">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <EvidenceGroup title="Verified Facts" items={strategyBoxes.facts} />
+          <EvidenceGroup title="Reasonable Inferences" items={strategyBoxes.inferences} />
+          <EvidenceGroup title="Discovery Questions" items={strategyBoxes.questions} />
+        </div>
+      </Panel>
+
       <Panel title="Outreach Cockpit">
         <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <Meta label="Selected mode" value={modeLabels[prospect.outreach_mode] || prospect.outreach_mode} />
@@ -1428,6 +1664,30 @@ export function SignalProspectDetail({
           <CorrectionButton onClick={() => submitCorrection("wrong_score_lane", latestAnalysis?.recommended_lane)}>Wrong score/lane</CorrectionButton>
           <CorrectionButton onClick={() => submitCorrection("draft_sounds_unnatural", latestDraft?.id)}>Draft sounds unnatural</CorrectionButton>
           <CorrectionButton onClick={() => submitCorrection("contact_history_incorrect", prospect.outreach_history)}>Contact/history incorrect</CorrectionButton>
+        </div>
+      </Panel>
+
+      <Panel title="Timeline">
+        <div className="space-y-2">
+          {timeline.map((item, index) => (
+            <div key={`${item.date}-${item.title}-${index}`} className="rounded-lg border border-border bg-muted/30 p-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="font-medium">{item.title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{item.detail}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                  <span className="rounded-full border border-border bg-background px-2 py-0.5">
+                    {item.category}
+                  </span>
+                  <span>{formatDateTime(item.date)}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          {timeline.length === 0 && (
+            <p className="text-sm text-muted-foreground">No timeline events stored yet.</p>
+          )}
         </div>
       </Panel>
     </div>

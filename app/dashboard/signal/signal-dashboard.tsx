@@ -4,10 +4,13 @@ import { useMemo, useState } from "react"
 import Link from "next/link"
 import {
   AlertTriangle,
+  BarChart3,
   Bell,
   BookOpen,
+  CalendarCheck,
   ExternalLink,
   Loader2,
+  MapPin,
   PhoneCall,
   Plus,
   RadioTower,
@@ -15,7 +18,8 @@ import {
   Upload,
 } from "lucide-react"
 import { getSignalPlaybook, SIGNAL_PLAYBOOKS } from "@/lib/signal/playbooks"
-import type { SignalProspectRow } from "./page"
+import type { SignalCampaignRow, SignalProspectRow } from "./page"
+import type { SignalOutreachEvent } from "@/lib/supabase/types"
 
 type Filters = {
   playbook: string
@@ -170,8 +174,12 @@ function mapCsvToProspects(text: string) {
 }
 
 export function SignalDashboard({
+  campaigns,
+  events,
   initialRows,
 }: {
+  campaigns: SignalCampaignRow[]
+  events: SignalOutreachEvent[]
   initialRows: SignalProspectRow[]
 }) {
   const [rows, setRows] = useState(initialRows)
@@ -197,6 +205,71 @@ export function SignalDashboard({
     }),
     [rows],
   )
+
+  const today = new Date().toISOString().slice(0, 10)
+  const todayStrip = useMemo(
+    () => ({
+      calls: rows.filter((row) =>
+        ["ready_to_contact", "needs_review"].includes(row.outreach_status) &&
+        row.contact_readiness !== "contact_missing" &&
+        row.latest_analysis?.priority !== "skip",
+      ).length,
+      followUps: rows.filter((row) => row.follow_up_date && row.follow_up_date <= today).length,
+      demoSends: rows.filter((row) => row.outreach_status === "permission_to_send_demo").length,
+      alerts: rows.filter((row) => row.unread_alert).length,
+      researchQueue:
+        rows.filter((row) => ["researched", "needs_review"].includes(row.outreach_status)).length +
+        campaigns.reduce(
+          (sum, campaign) =>
+            sum +
+            campaign.candidates.filter((candidate) =>
+              ["approved", "needs_confirmation"].includes(candidate.candidate_status),
+            ).length,
+          0,
+        ),
+    }),
+    [campaigns, rows, today],
+  )
+
+  const priorityQueue = useMemo(
+    () =>
+      rows
+        .filter((row) =>
+          ["A", "B"].includes(row.latest_analysis?.priority || "") &&
+          !["do_not_contact", "lost", "won"].includes(row.outreach_status),
+        )
+        .sort((a, b) => {
+          const scoreA = a.latest_analysis?.overall_opportunity_score || 0
+          const scoreB = b.latest_analysis?.overall_opportunity_score || 0
+          return scoreB - scoreA
+        })
+        .slice(0, 8),
+    [rows],
+  )
+
+  const activeCampaigns = useMemo(
+    () =>
+      campaigns
+        .filter((campaign) => !["complete", "failed"].includes(campaign.status))
+        .slice(0, 4),
+    [campaigns],
+  )
+
+  const weekly = useMemo(() => {
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - 7)
+    const recentEvents = events.filter((event) => new Date(event.created_at) >= cutoff)
+    return {
+      researched: rows.filter((row) => row.last_researched_at && new Date(row.last_researched_at) >= cutoff).length,
+      qualified: rows.filter((row) => ["A", "B"].includes(row.latest_analysis?.priority || "")).length,
+      calls: recentEvents.filter((event) => ["call", "voicemail"].includes(event.channel)).length,
+      replies: recentEvents.filter((event) => ["replied", "permission_to_send_demo", "interested"].includes(event.event_type)).length,
+      demos: recentEvents.filter((event) => event.event_type === "demo_sent").length,
+      discovery: rows.filter((row) => row.outreach_status === "discovery_call").length,
+      proposals: rows.filter((row) => row.outreach_status === "proposal_sent").length,
+      won: rows.filter((row) => row.outreach_status === "won").length,
+    }
+  }, [events, rows])
 
   const filteredRows = useMemo(() => {
     return rows.filter((row) => {
@@ -296,11 +369,19 @@ export function SignalDashboard({
           </p>
           <h1 className="text-2xl font-bold tracking-tight">Signal</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Find high-fit businesses, identify real opportunities, and prepare credible outreach.
+            Build city campaigns, review public evidence, and prepare manual outreach without automating contact.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link className="signal-action signal-action-primary" href="/dashboard/signal/research">
+          <Link className="signal-action signal-action-primary" href="/dashboard/signal/focus">
+            <CalendarCheck className="h-4 w-4" />
+            Start Focus Mode
+          </Link>
+          <Link className="signal-action" href="/dashboard/signal/campaigns/new">
+            <RadioTower className="h-4 w-4" />
+            Build Campaign
+          </Link>
+          <Link className="signal-action" href="/dashboard/signal/research">
             <Search className="h-4 w-4" />
             Research Business
           </Link>
@@ -339,12 +420,128 @@ export function SignalDashboard({
         </div>
       )}
 
+      <section className="rounded-xl border border-border bg-card p-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-semibold">Today</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Actionable records from real Signal statuses.</p>
+          </div>
+          <Link href="/dashboard/signal/focus" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            Open Focus Mode
+          </Link>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <Stat label="Calls to make" value={todayStrip.calls} />
+          <Stat label="Follow-ups due" value={todayStrip.followUps} />
+          <Stat label="Demo sends waiting" value={todayStrip.demoSends} />
+          <Stat label="High-fit alerts" value={todayStrip.alerts} />
+          <Stat label="Research queue" value={todayStrip.researchQueue} />
+        </div>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold">Active Campaigns</h2>
+              <p className="mt-1 text-sm text-muted-foreground">City campaigns waiting for review or import.</p>
+            </div>
+            <Link href="/dashboard/signal/campaigns" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+              View all
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {activeCampaigns.length > 0 ? (
+              activeCampaigns.map((campaign) => {
+                const approved = campaign.candidates.filter((candidate) => candidate.candidate_status === "approved").length
+                const imported = campaign.candidates.filter((candidate) => candidate.candidate_status === "imported_to_signal").length
+                const highFit = campaign.candidates.filter((candidate) => candidate.candidate_status === "imported_to_signal").length
+                return (
+                  <Link
+                    key={campaign.id}
+                    href={`/dashboard/signal/campaigns/${campaign.id}`}
+                    className="block rounded-lg border border-border bg-muted/30 p-3 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium">{campaign.name}</p>
+                        <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {[campaign.target_city, campaign.target_state].filter(Boolean).join(", ")}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                        {campaign.status.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-4 gap-2 text-xs text-muted-foreground">
+                      <MiniStat label="Discovered" value={campaign.candidates.length} />
+                      <MiniStat label="Approved" value={approved} />
+                      <MiniStat label="Analyzed" value={imported} />
+                      <MiniStat label="A/B" value={highFit} />
+                    </div>
+                    <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">
+                      {campaign.next_action || "Review candidate sources."}
+                    </p>
+                  </Link>
+                )
+              })
+            ) : (
+              <div className="rounded-lg border border-dashed border-border p-5 text-sm text-muted-foreground">
+                No active campaigns. Build one from a city and vertical.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold">Priority Queue</h2>
+              <p className="mt-1 text-sm text-muted-foreground">A/B prospects with a manual next step.</p>
+            </div>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="space-y-2">
+            {priorityQueue.length > 0 ? (
+              priorityQueue.map((row) => (
+                <Link
+                  key={row.id}
+                  href={`/dashboard/signal/${row.id}`}
+                  className="grid gap-3 rounded-lg border border-border bg-muted/30 p-3 text-sm transition-colors hover:bg-muted/50 md:grid-cols-[80px_1fr_140px_120px]"
+                >
+                  <span className={`inline-flex h-7 w-fit items-center rounded-full border px-2.5 text-xs font-medium ${priorityClass(row.latest_analysis?.priority)}`}>
+                    {row.latest_analysis?.priority || "-"}
+                  </span>
+                  <span>
+                    <span className="block font-medium">{row.business_name}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {row.latest_analysis?.recommended_next_action || row.latest_analysis?.recommended_primary_offer || "Review next action"}
+                    </span>
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {(row.latest_analysis?.recommended_lane || "review").replace(/_/g, " ")}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {row.latest_analysis?.confidence || "unknown"} confidence
+                  </span>
+                </Link>
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed border-border p-5 text-sm text-muted-foreground">
+                No A/B priority records are waiting.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        <Stat label="Total Prospects" value={stats.total} />
-        <Stat label="A Leads" value={stats.aLeads} />
-        <Stat label="Ready to Contact" value={stats.ready} />
-        <Stat label="Awaiting Reply" value={stats.awaiting} />
-        <Stat label="Discovery Calls" value={stats.discovery} />
+        <Stat label="Total prospects" value={stats.total} />
+        <Stat label="A leads" value={stats.aLeads} />
+        <Stat label="Ready" value={stats.ready} />
+        <Stat label="Awaiting reply" value={stats.awaiting} />
+        <Stat label="Discovery calls" value={stats.discovery} />
         <Stat label="Won" value={stats.won} />
       </div>
 
@@ -490,6 +687,9 @@ export function SignalDashboard({
       )}
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="border-b border-border px-4 py-3">
+          <h2 className="font-semibold">All Prospects</h2>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1380px] text-sm">
             <thead>
@@ -545,6 +745,23 @@ export function SignalDashboard({
           </table>
         </div>
       </div>
+
+      <section className="rounded-xl border border-border bg-card p-4">
+        <div className="mb-3">
+          <h2 className="font-semibold">Weekly Scoreboard</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Based on records and outreach events stored in Signal.</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-8">
+          <Stat label="Researched" value={weekly.researched} />
+          <Stat label="Qualified" value={weekly.qualified} />
+          <Stat label="Calls made" value={weekly.calls} />
+          <Stat label="Replies" value={weekly.replies} />
+          <Stat label="Demos sent" value={weekly.demos} />
+          <Stat label="Discovery calls" value={weekly.discovery} />
+          <Stat label="Proposals" value={weekly.proposals} />
+          <Stat label="Won" value={weekly.won} />
+        </div>
+      </section>
 
       <style jsx>{`
         .signal-action {
@@ -676,6 +893,15 @@ function Stat({ label, value }: { label: string; value: number }) {
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 font-mono text-2xl font-semibold">{value}</p>
     </div>
+  )
+}
+
+function MiniStat({ label, value }: { label: string; value: number }) {
+  return (
+    <span>
+      <span className="block font-mono text-sm text-foreground">{value}</span>
+      <span className="block">{label}</span>
+    </span>
   )
 }
 

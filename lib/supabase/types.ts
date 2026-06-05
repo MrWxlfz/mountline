@@ -257,6 +257,27 @@ export type SignalRecommendedLane =
   | "do_not_pursue"
   | "compliance_gated"
 
+export type SignalCampaignStatus =
+  | "draft"
+  | "discovering"
+  | "review_candidates"
+  | "researching"
+  | "ready"
+  | "paused"
+  | "complete"
+  | "failed"
+
+export type SignalCampaignCandidateStatus =
+  | "pending_review"
+  | "approved"
+  | "rejected"
+  | "duplicate"
+  | "needs_confirmation"
+  | "imported_to_signal"
+  | "research_failed"
+
+export type SignalFocusItemStatus = "pending" | "active" | "completed" | "archived"
+
 export type SignalScreenshotType = "desktop" | "mobile"
 
 export type SignalVerifiedObservationCategory =
@@ -540,4 +561,55 @@ export type SignalCallSessionItem = {
   outcome_notes: string | null
   follow_up_date: string | null
   completed_at: string | null
+}
+
+export type SignalCampaign = {
+  id: string
+  created_at: string
+  updated_at: string
+  name: string
+  target_city: string
+  target_state: string | null
+  target_radius_miles: number | null
+  selected_playbooks: string[]
+  max_candidates: number
+  status: SignalCampaignStatus
+  discovery_provider: string | null
+  notes: string | null
+  created_by: string | null
+  last_run_at: string | null
+  next_action: string | null
+}
+
+export type SignalCampaignCandidate = {
+  id: string
+  campaign_id: string
+  created_at: string
+  business_name: string
+  city: string | null
+  state: string | null
+  industry_hint: string | null
+  candidate_url: string | null
+  likely_official_url: string | null
+  source_url: string | null
+  source_title: string | null
+  source_snippet: string | null
+  source_provider: string | null
+  official_source_confidence: SignalConfidence | null
+  candidate_status: SignalCampaignCandidateStatus
+  duplicate_prospect_id: string | null
+  reason: string | null
+}
+
+export type SignalFocusItem = {
+  id: string
+  created_at: string
+  prospect_id: string
+  campaign_id: string | null
+  status: SignalFocusItemStatus
+  focus_reason: string | null
+  recommended_action: string | null
+  due_date: string | null
+  completed_at: string | null
+  created_by: string | null
 }

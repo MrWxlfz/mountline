@@ -12,11 +12,14 @@ Signal does not send emails, make calls, send DMs, send texts, submit forms, scr
 - Manual prospect entry.
 - CSV/XLSX import from research already collected by the team.
 - Quick Research from an exact business name plus location through a permitted public web research provider.
+- City Campaigns from team-entered geography and playbook filters through a permitted public web research provider.
 - User confirmation before a public research result becomes the official source.
+- Candidate review before any discovered business becomes a prospect.
 - Public scan of the confirmed official website only, with a small page limit.
+- Optional screenshot capture of the confirmed official homepage after the same SSRF-safe website validation.
 - Initial screening and manually triggered deep-dive analysis.
 - Script Studio for draft-only email, call, voicemail, objection, and follow-up scripts.
-- Manual call-session prep queues with outcome tracking.
+- Manual call-session and Focus Mode prep queues with outcome tracking.
 - Internal high-fit alerts only.
 - Do-not-contact handling through `signal_suppression_list`.
 
@@ -26,6 +29,10 @@ Signal does not send emails, make calls, send DMs, send texts, submit forms, scr
 - `/dashboard/signal/new`
 - `/dashboard/signal/research`
 - `/dashboard/signal/import`
+- `/dashboard/signal/campaigns`
+- `/dashboard/signal/campaigns/new`
+- `/dashboard/signal/campaigns/[campaignId]`
+- `/dashboard/signal/focus`
 - `/dashboard/signal/[prospectId]`
 - `/dashboard/signal/playbooks`
 - `/dashboard/signal/alerts`
@@ -48,6 +55,37 @@ Flow:
 - Run initial analysis and show score, offer, value band, outreach mode, and conversation style.
 
 Quick Research does not scrape Google Maps, Google reviews, Yelp, social platforms, or directory pages.
+
+## City Campaigns
+
+City Campaigns are team-controlled discovery batches for a target city, optional state, optional radius, and selected playbooks. They are designed to build a review queue, not to contact prospects automatically.
+
+Flow:
+
+- Create a campaign from `/dashboard/signal/campaigns/new` with geography, playbooks, optional notes, and optional session limits.
+- Run discovery through Tavily only when `SIGNAL_RESEARCH_PROVIDER=tavily`.
+- Store search queries, source URLs, source titles, snippets, provider labels, confidence, and candidate status.
+- Mark likely official public websites as `pending_review`.
+- Mark directory, social, search, or unclear sources as `needs_confirmation`.
+- Require the team to approve, reject, or manually replace the official URL before import.
+- Run duplicate checks before import using normalized business name, website host, email, and phone.
+- Allow merge into an existing Signal prospect when the candidate is a duplicate.
+- Scan only the approved official public website before creating or merging a prospect.
+- Run initial analysis after import and add A/B imported prospects to Focus Mode.
+
+Campaign discovery does not scrape Google Maps, Google reviews, Yelp, social platforms, or directory pages. Directory and social results may be retained as source context, but they cannot be treated as the confirmed official website without team review and replacement.
+
+Candidate statuses:
+
+- `pending_review`: discovery found a likely official public site, but the team has not approved it.
+- `approved`: the team approved an official public URL for import.
+- `rejected`: the team rejected the candidate.
+- `imported_to_signal`: the candidate was created or merged into a Signal prospect.
+- `duplicate`: the candidate matched an existing prospect.
+- `needs_confirmation`: discovery found context but not a safe official source.
+- `research_failed`: import or scan failed and needs manual review.
+
+Campaign records are stored in `signal_campaigns`; candidates are stored in `signal_campaign_candidates`. Migration `202606050002_mountline_signal_v3_campaigns.sql` adds both tables and the Focus Mode queue table.
 
 ## Manual Entry And Workbook Import
 
@@ -115,6 +153,14 @@ SIGNAL_RESEARCH_PROVIDER=tavily|disabled
 TAVILY_API_KEY=
 ```
 
+Optional screenshot capture environment variables:
+
+```text
+SIGNAL_SCREENSHOT_PROVIDER=manual|browserless|disabled
+BROWSERLESS_API_KEY=
+BROWSERLESS_BASE_URL=
+```
+
 Optional internal alert email:
 
 ```text
@@ -131,6 +177,7 @@ SIGNAL_DEEP_MODEL=gemini-3.5-flash
 SIGNAL_VISUAL_MODEL=gemini-3.5-flash
 SIGNAL_RESEARCH_PROVIDER=tavily
 TAVILY_API_KEY=<Tavily API key>
+SIGNAL_SCREENSHOT_PROVIDER=manual
 SIGNAL_ALERT_EMAIL=<Mountline team alert email, optional>
 ```
 
@@ -139,6 +186,8 @@ API keys authenticate provider access. Model values are exact model IDs, not API
 `SIGNAL_AI_PROVIDER=disabled` is supported. If no key exists or the provider fails, Signal stores the website scan and uses deterministic scoring with the UI note: `AI analysis unavailable; rule-based score shown.`
 
 `SIGNAL_RESEARCH_PROVIDER=disabled` is supported. Manual entry and import continue to work without Tavily.
+
+`SIGNAL_SCREENSHOT_PROVIDER=manual` is the default and keeps screenshot collection as upload-only. `browserless` enables server-side homepage capture after the official URL passes the same website scanner safety checks. `disabled` hides automated capture guidance while manual upload can remain available.
 
 ## Initial Analysis Vs Deep Dive
 
@@ -217,7 +266,7 @@ Value bands are opportunity bands, not personal income or owner wealth estimates
 
 ## Outreach Modes
 
-- `local_student`: warm, local, permission-based outreach for truly local or personal-fit businesses. This is a legacy enum name; outward copy should say Mountline or Luke locally, not mention school.
+- `local_student`: warm, local, permission-based outreach for truly local or personal-fit businesses. This is a legacy enum name; outward copy should say Mountline locally and avoid personal-background framing.
 - `professional_studio`: concise Mountline Studio outreach for more formal or higher-value businesses.
 - `warm_connection`: uses only manually entered relationship context and never invents familiarity.
 
@@ -295,7 +344,7 @@ V2.2 adds a communication profile system for Script Studio. Profiles are based o
 Allowed profiles:
 
 - `plainspoken_owner_operator`: warm, patient, direct; avoid tech jargon.
-- `friendly_local`: warm local tone; Luke may mention being local to the Keller area when appropriate, but should not mention school.
+- `friendly_local`: warm local tone; Mountline may mention being local to the Keller area when appropriate, but should not add personal-background framing.
 - `modern_casual_brand`: upbeat, concise, polished; no forced slang.
 - `busy_operations_manager`: brief, practical, operational.
 - `formal_business`: polished, brief, professional.
@@ -348,6 +397,7 @@ Allowed actions:
 
 - Upload Desktop Screenshot
 - Upload Mobile Screenshot
+- Capture Homepage Screenshot
 - Analyze Visual Design
 - Remove Screenshot
 
@@ -360,6 +410,8 @@ Allowed files:
 - one desktop and one mobile screenshot per prospect
 
 Screenshots must be public business website screenshots only. Do not upload customer portals, private dashboards, credentials, PHI, patient content, internal documents, or sensitive information.
+
+Automated capture, when configured, is limited to the confirmed official homepage. It validates the URL with the existing scanner first, uses Browserless only from the server, stores the resulting image as private visual evidence, and never captures third-party directories, social pages, authenticated pages, forms, or customer portals. If Browserless is not configured, Signal shows setup guidance and keeps manual upload available.
 
 Storage:
 
@@ -445,6 +497,26 @@ Signal detail pages include correction controls:
 
 Corrections are stored in `signal_feedback` for that prospect and can guide regeneration. This is not global model training.
 
+## Dashboard, Timeline, And Focus Mode
+
+The main Signal dashboard shows:
+
+- Start Focus Mode and Build Campaign actions.
+- Today strip for ready, follow-up due, awaiting reply, and high-fit counts.
+- Active campaigns with reviewed/imported progress.
+- Priority queue of A/B prospects that are not suppressed.
+- Weekly scoreboard based on recorded outreach events.
+
+Prospect detail separates grounded information into:
+
+- Facts: official website scan evidence, verified contact routes, visual evidence, human-entered public observations, and recorded outreach events.
+- Reasonable inferences: labeled interpretations based on public evidence, such as website-first fit or discovery-worthy systems questions.
+- Discovery questions: items the team should ask before making claims about operations, budget, systems, or compliance-sensitive needs.
+
+Prospect detail also shows an outreach timeline built from `signal_outreach_events`, focus outcomes, follow-up dates, analysis timestamps, and visual evidence timestamps. Notes remain context; recorded events remain the source of truth for contact history.
+
+Focus Mode at `/dashboard/signal/focus` is a manual work queue for approved prospects. It supports call, follow-up, vertical, campaign, and session-size filters. Outcome buttons record events and update `signal_focus_items`; they do not call, email, text, DM, or submit forms.
+
 ## Call Sessions
 
 Call sessions are manual call-prep queues for one to five team-approved prospects. They show phone number, priority, score, reason worth calling, opening line, gatekeeper line, likely objection responses, demo link, discovery questions, and suppression/contact-history warnings.
@@ -522,6 +594,7 @@ Recommended verification:
 ```bash
 pnpm build
 pnpm lint
+node_modules/.bin/tsc --noEmit
 ```
 
 Manual checklist:
@@ -532,7 +605,15 @@ Manual checklist:
 - Create a medical/dental prospect and confirm compliance warning appears.
 - Use Quick Research with a named business and location. Confirm candidate choices appear and only an official public site can be confirmed.
 - Test Quick Research with `SIGNAL_RESEARCH_PROVIDER=disabled` or missing `TAVILY_API_KEY` and confirm setup guidance appears without breaking manual workflows.
+- Create a city campaign for a small city/playbook set, run discovery, and confirm candidates show source URL, source type, confidence, and review status.
+- Confirm directory/social/search results require confirmation and cannot be imported as official websites without replacement.
+- Approve one likely official campaign candidate, reject one weak candidate, and confirm both statuses persist.
+- Import approved campaign candidates and confirm duplicate detection, merge option, website scan, initial analysis, and imported status.
+- Confirm imported A/B prospects appear in Focus Mode.
+- Run Focus Mode with a short session limit, save outcomes, and confirm outreach events plus follow-up dates update the prospect timeline.
 - Run Scan Website on a public website and confirm scanned URLs/evidence are stored.
+- Test Capture Homepage Screenshot with `SIGNAL_SCREENSHOT_PROVIDER=manual` and confirm setup guidance appears.
+- If Browserless is configured, capture a confirmed official homepage and confirm the private screenshot appears as visual evidence.
 - Run Initial Analysis with `SIGNAL_AI_PROVIDER=disabled` and confirm rule-based scoring.
 - Run Deep Dive and confirm outreach drafts are created but not sent.
 - Prepare scripts from prospect detail, override conversation style, and confirm Script Studio drafts are stored.

@@ -169,6 +169,27 @@ export const signalSuggestedChannelSchema = z.enum([
   "research_more",
 ])
 
+export const signalCampaignStatusSchema = z.enum([
+  "draft",
+  "discovering",
+  "review_candidates",
+  "researching",
+  "ready",
+  "paused",
+  "complete",
+  "failed",
+])
+
+export const signalCampaignCandidateStatusSchema = z.enum([
+  "pending_review",
+  "approved",
+  "rejected",
+  "duplicate",
+  "needs_confirmation",
+  "imported_to_signal",
+  "research_failed",
+])
+
 const scoreSchema = z.coerce.number().int().min(0).max(100)
 const nullableText = z.string().trim().max(3000).optional().nullable()
 const shortNullableText = z.string().trim().max(300).optional().nullable()
@@ -422,6 +443,61 @@ export const signalCallOutcomeSchema = z.object({
     "follow_up_later",
     "not_interested",
     "do_not_contact",
+  ]),
+  follow_up_date: z.string().trim().max(20).optional().nullable(),
+  notes: z.string().trim().max(1200).optional().nullable(),
+})
+
+export const signalCampaignCreateSchema = z.object({
+  name: z.string().trim().min(1, "Campaign name is required").max(180),
+  target_city: z.string().trim().min(1, "City is required").max(120),
+  target_state: z.string().trim().max(60).optional().nullable(),
+  target_radius_miles: z.coerce.number().int().min(1).max(100).optional().nullable(),
+  selected_playbooks: z.array(signalPlaybookSchema).min(1, "Choose at least one vertical").max(6),
+  max_candidates: z.coerce.number().int().min(1).max(50).optional(),
+  notes: nullableText,
+})
+
+export const signalCampaignPatchSchema = z.object({
+  name: z.string().trim().min(1).max(180).optional(),
+  target_city: z.string().trim().min(1).max(120).optional(),
+  target_state: z.string().trim().max(60).optional().nullable(),
+  target_radius_miles: z.coerce.number().int().min(1).max(100).optional().nullable(),
+  selected_playbooks: z.array(signalPlaybookSchema).min(1).max(6).optional(),
+  max_candidates: z.coerce.number().int().min(1).max(50).optional(),
+  status: signalCampaignStatusSchema.optional(),
+  notes: nullableText,
+  next_action: shortNullableText,
+})
+
+export const signalCampaignCandidatePatchSchema = z.object({
+  candidate_status: signalCampaignCandidateStatusSchema.optional(),
+  likely_official_url: z.string().trim().url().max(500).optional().nullable(),
+  duplicate_prospect_id: z.string().uuid().optional().nullable(),
+  reason: nullableText,
+})
+
+export const signalFocusItemCreateSchema = z.object({
+  prospect_id: z.string().uuid(),
+  campaign_id: z.string().uuid().optional().nullable(),
+  focus_reason: z.string().trim().max(800).optional().nullable(),
+  recommended_action: z.string().trim().max(800).optional().nullable(),
+  due_date: z.string().trim().max(20).optional().nullable(),
+})
+
+export const signalFocusOutcomeSchema = z.object({
+  prospect_id: z.string().uuid(),
+  focus_item_id: z.string().uuid().optional().nullable(),
+  outcome: z.enum([
+    "no_answer",
+    "voicemail_left",
+    "permission_to_send_demo",
+    "demo_sent",
+    "follow_up_later",
+    "interested",
+    "not_interested",
+    "do_not_contact",
+    "needs_more_research",
   ]),
   follow_up_date: z.string().trim().max(20).optional().nullable(),
   notes: z.string().trim().max(1200).optional().nullable(),

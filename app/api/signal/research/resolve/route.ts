@@ -32,6 +32,7 @@ export async function POST(request: Request) {
   const { data: prospects } = await supabase.from("signal_prospects").select("*")
   const duplicates = findLikelySignalDuplicates((prospects || []) as SignalProspect[], {
     businessName: input.business_name,
+    city: input.location.split(",")[0] || null,
     websiteUrl: result.candidates[0]?.url,
   }).map((match) => ({
     prospect_id: match.prospect.id,

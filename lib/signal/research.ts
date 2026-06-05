@@ -4,6 +4,7 @@ import { getSignalPlaybook, type SignalPlaybookKey } from "./playbooks"
 import type {
   SignalCampaignCandidateStatus,
   SignalConfidence,
+  SignalDuplicateConfidence,
   SignalProspect,
 } from "@/lib/supabase/types"
 
@@ -114,6 +115,10 @@ export function normalizeSignalBusinessName(value: string | null | undefined) {
     .trim()
 }
 
+function normalizeSignalCity(value: string | null | undefined) {
+  return compactLower(value || "").replace(/[^a-z0-9]+/g, " ").trim()
+}
+
 export function normalizeSignalPhone(value: string | null | undefined) {
   const digits = (value || "").replace(/\D/g, "")
   return digits.length >= 7 ? digits.slice(-10) : ""
@@ -206,7 +211,10 @@ const CAMPAIGN_QUERY_TERMS: Record<SignalPlaybookKey, string[]> = {
     "remodeling contractor",
   ],
   medical_dental: ["dental office", "medical clinic"],
+  restaurant_food: ["restaurant", "cafe", "catering"],
+  beauty_wellness: ["day spa", "beauty studio", "wellness studio"],
   general_local_business: ["local business", "service business"],
+  unknown_needs_review: ["local business", "official website"],
 }
 
 export function buildSignalCampaignDiscoveryQueries({
@@ -569,22 +577,26 @@ export function findLikelySignalDuplicates(
     websiteUrl?: string | null
     email?: string | null
     phone?: string | null
+    city?: string | null
   },
 ) {
   const inputName = normalizeSignalBusinessName(input.businessName)
   const inputHost = normalizeSignalHostname(input.websiteUrl)
   const inputEmail = input.email?.trim().toLowerCase() || ""
   const inputPhone = normalizeSignalPhone(input.phone)
+  const inputCity = normalizeSignalCity(input.city)
 
   return prospects
     .map((prospect) => {
       let score = 0
       const reasons: string[] = []
+      let confidence: SignalDuplicateConfidence = "possible"
 
       const prospectName = normalizeSignalBusinessName(prospect.business_name)
       const prospectHost = normalizeSignalHostname(prospect.website_url)
       const prospectEmail = prospect.public_email?.trim().toLowerCase() || ""
       const prospectPhone = normalizeSignalPhone(prospect.public_phone)
+      const prospectCity = normalizeSignalCity(prospect.city)
 
       if (inputName && prospectName && inputName === prospectName) {
         score += 4
@@ -596,6 +608,11 @@ export function findLikelySignalDuplicates(
       ) {
         score += 2
         reasons.push("similar business name")
+      }
+
+      if (inputCity && prospectCity && inputCity === prospectCity) {
+        score += 2
+        reasons.push("same city")
       }
 
       if (inputHost && prospectHost && inputHost === prospectHost) {
@@ -611,9 +628,39 @@ export function findLikelySignalDuplicates(
         reasons.push("public phone")
       }
 
-      return { prospect, score, reasons }
+      if (
+        inputName &&
+        prospectName &&
+        inputCity &&
+        prospectCity &&
+        inputCity === prospectCity &&
+        (inputName.includes(prospectName) || prospectName.includes(inputName))
+      ) {
+        score += 1
+      }
+
+      if (
+        (inputHost && prospectHost && inputHost === prospectHost) ||
+        (inputPhone && prospectPhone && inputPhone === prospectPhone) ||
+        (inputEmail && prospectEmail && inputEmail === prospectEmail)
+      ) {
+        confidence = "exact"
+      } else if (
+        inputName &&
+        prospectName &&
+        inputCity &&
+        prospectCity &&
+        inputName === prospectName &&
+        inputCity === prospectCity
+      ) {
+        confidence = "likely"
+      } else if (score >= 4) {
+        confidence = "possible"
+      }
+
+      return { prospect, score, reasons, confidence }
     })
-    .filter((match) => match.score >= 4)
+    .filter((match) => match.score >= 4 || match.confidence !== "possible")
     .sort((a, b) => b.score - a.score)
     .slice(0, 5)
 }

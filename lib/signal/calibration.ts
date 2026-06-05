@@ -83,6 +83,17 @@ export function hasExplicitWarmRelationship(prospect: SignalProspect) {
 }
 
 export function deterministicSignalPlaybook(prospect: SignalProspect) {
+  if (prospect.classification_manual_override && prospect.industry_playbook) {
+    return getSignalPlaybook(prospect.industry_playbook).key
+  }
+  if (
+    prospect.classification_confidence &&
+    ["medium", "high"].includes(prospect.classification_confidence) &&
+    prospect.industry_playbook
+  ) {
+    return getSignalPlaybook(prospect.industry_playbook).key
+  }
+
   const deterministic = inferSignalPlaybook(
     text(
       prospect.industry,

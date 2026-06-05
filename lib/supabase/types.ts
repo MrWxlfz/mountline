@@ -278,6 +278,28 @@ export type SignalCampaignCandidateStatus =
 
 export type SignalFocusItemStatus = "pending" | "active" | "completed" | "archived"
 
+export type SignalClassificationSource =
+  | "manual_override"
+  | "stored_alias"
+  | "deterministic"
+  | "ai"
+  | "human_review"
+
+export type SignalDuplicateConfidence = "exact" | "likely" | "possible"
+
+export type SignalCandidateSuppressionType =
+  | "rejected"
+  | "do_not_contact"
+  | "duplicate"
+  | "irrelevant"
+  | "bad_source"
+
+export type SignalProspectAliasType =
+  | "business_name"
+  | "hostname"
+  | "phone"
+  | "email"
+
 export type SignalScreenshotType = "desktop" | "mobile"
 
 export type SignalVerifiedObservationCategory =
@@ -336,6 +358,16 @@ export type SignalProspect = {
   communication_profile_reason: string | null
   communication_profile_confirmed: boolean
   script_guidance: string | null
+  normalized_business_name: string | null
+  normalized_hostname: string | null
+  public_email_normalized: string | null
+  public_phone_normalized: string | null
+  classification_source: SignalClassificationSource | null
+  classification_confidence: SignalConfidence | null
+  classification_evidence: SignalJson | null
+  classification_manual_override: boolean
+  classified_at: string | null
+  quick_score_updated_at: string | null
   contact_readiness: SignalContactReadiness
   contact_readiness_reason: string | null
   outreach_status: SignalOutreachStatus
@@ -446,6 +478,46 @@ export type SignalSuppression = {
   business_name: string | null
   reason: string | null
   source: string
+}
+
+export type SignalClassificationAlias = {
+  id: string
+  created_at: string
+  normalized_business_name: string | null
+  normalized_hostname: string | null
+  city_normalized: string | null
+  matched_term: string | null
+  corrected_category: string
+  corrected_playbook: string | null
+  source: string
+  note: string | null
+  active: boolean
+}
+
+export type SignalCandidateSuppression = {
+  id: string
+  created_at: string
+  normalized_business_name: string | null
+  normalized_hostname: string | null
+  phone_normalized: string | null
+  public_email_normalized: string | null
+  city_normalized: string | null
+  suppression_type: SignalCandidateSuppressionType
+  reason: string | null
+  source_campaign_id: string | null
+  restored_at: string | null
+  restored_by: string | null
+}
+
+export type SignalProspectAlias = {
+  id: string
+  prospect_id: string
+  created_at: string
+  alias_type: SignalProspectAliasType
+  alias_value: string
+  normalized_value: string
+  source: string | null
+  active: boolean
 }
 
 export type SignalOutreachEvent = {
@@ -596,6 +668,16 @@ export type SignalCampaignCandidate = {
   source_snippet: string | null
   source_provider: string | null
   official_source_confidence: SignalConfidence | null
+  normalized_business_name: string | null
+  normalized_hostname: string | null
+  classified_category: string | null
+  classified_playbook: string | null
+  classification_source: SignalClassificationSource | null
+  classification_confidence: SignalConfidence | null
+  classification_evidence: SignalJson | null
+  classified_at: string | null
+  quick_score_summary: SignalJson | null
+  quick_score_updated_at: string | null
   candidate_status: SignalCampaignCandidateStatus
   duplicate_prospect_id: string | null
   reason: string | null

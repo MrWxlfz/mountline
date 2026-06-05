@@ -40,6 +40,22 @@ const signalImportMappingOutputSchema = z.object({
   locality_relationship: z.string().optional().nullable(),
 })
 
+const signalClassificationOutputSchema = z.object({
+  playbook: z.enum([
+    "auto_detailing",
+    "barber_salon",
+    "hvac",
+    "roofing_contractors_home_services",
+    "medical_dental",
+    "restaurant_food",
+    "beauty_wellness",
+    "general_local_business",
+    "unknown_needs_review",
+  ]),
+  confidence: z.enum(["low", "medium", "high"]),
+  evidence: z.array(z.string().trim().min(1).max(220)).min(1).max(6),
+})
+
 const DEFAULT_OPENAI_FAST_MODEL = "gpt-4.1-mini"
 const DEFAULT_OPENAI_DEEP_MODEL = "gpt-4.1"
 const DEFAULT_GEMINI_FAST_MODEL = "gemini-2.0-flash"
@@ -279,6 +295,35 @@ async function callProvider(prompt: string, deep = false) {
   }
 }
 
+function classificationPrompt({
+  businessName,
+  city,
+  state,
+  text,
+}: {
+  businessName: string
+  city?: string | null
+  state?: string | null
+  text: string
+}) {
+  return [
+    "Classify a local business into one Mountline Signal playbook.",
+    "Use only the supplied public business text. Be conservative.",
+    "If the category is ambiguous, return unknown_needs_review.",
+    "Return only strict JSON.",
+    "",
+    "Allowed playbooks: auto_detailing, barber_salon, hvac, roofing_contractors_home_services, medical_dental, restaurant_food, beauty_wellness, general_local_business, unknown_needs_review.",
+    "Medical/dental should win only when official content clearly indicates clinical or dental services.",
+    "Beauty or med spa content without clear medical signals should usually be beauty_wellness.",
+    "",
+    `Business: ${businessName}`,
+    `Location: ${[city, state].filter(Boolean).join(", ") || "unknown"}`,
+    "Return JSON keys: playbook, confidence, evidence.",
+    "",
+    text,
+  ].join("\n")
+}
+
 export async function runInitialAiAnalysis(
   prospect: SignalProspect,
   scan: SignalWebsiteScan | null,
@@ -349,5 +394,35 @@ export async function runSignalImportMappingAi(headers: string[]) {
     provider: result.provider,
     model: result.model,
     mapping,
+  }
+}
+
+export async function runSignalClassificationAi({
+  businessName,
+  city,
+  state,
+  text,
+}: {
+  businessName: string
+  city?: string | null
+  state?: string | null
+  text: string
+}) {
+  const result = await callProvider(
+    classificationPrompt({ businessName, city, state, text }),
+    false,
+  )
+  if (!result) return null
+
+  const parsed = signalClassificationOutputSchema.safeParse(result.json)
+  if (!parsed.success) {
+    console.error("[signal] Classification AI output invalid:", parsed.error.flatten())
+    return null
+  }
+
+  return {
+    output: parsed.data,
+    provider: result.provider,
+    model: result.model,
   }
 }

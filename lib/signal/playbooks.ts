@@ -10,7 +10,10 @@ export type SignalPlaybookKey =
   | "hvac"
   | "roofing_contractors_home_services"
   | "medical_dental"
+  | "restaurant_food"
+  | "beauty_wellness"
   | "general_local_business"
+  | "unknown_needs_review"
 
 export type SignalPlaybook = {
   key: SignalPlaybookKey
@@ -223,6 +226,80 @@ export const SIGNAL_PLAYBOOKS: Record<SignalPlaybookKey, SignalPlaybook> = {
     ],
     complianceNotes: [MEDICAL_COMPLIANCE_WARNING],
   },
+  restaurant_food: {
+    key: "restaurant_food",
+    name: "Restaurant / Food",
+    complianceTier: "standard",
+    relevantDemo: "none",
+    recommendedOutreachMode: "professional_studio",
+    idealSignals: [
+      "Menus, hours, ordering, and location clarity matter",
+      "Reservations, pickup, or catering paths affect conversion",
+      "Visual trust and food presentation are public-facing",
+      "Operational questions often repeat before ordering or booking",
+    ],
+    visibleWeaknesses: [
+      "Menu or ordering path is hard to find",
+      "Hours, locations, or contact details are unclear",
+      "Catering or event inquiries are buried",
+      "Photos and trust cues are thin",
+    ],
+    workflowOpportunities: [
+      "Menu and ordering clarity",
+      "Reservations or catering request routing",
+      "Photo and proof presentation",
+      "FAQ and event inquiry organization",
+      "Public contact flow cleanup",
+    ],
+    discoveryQuestions: [
+      "Do most customers call, walk in, reserve, or order online?",
+      "Are catering or event requests handled cleanly today?",
+      "Do customers regularly ask about hours, menu items, or locations?",
+      "Is the current ordering or reservation path helping or getting in the way?",
+    ],
+    redFlags: [
+      "No clear public menu, hours, or contact path",
+      "Requests for fake reviews or misleading urgency",
+    ],
+    complianceNotes: ["Use public business facts and visible website evidence only."],
+  },
+  beauty_wellness: {
+    key: "beauty_wellness",
+    name: "Beauty / Wellness",
+    complianceTier: "standard",
+    relevantDemo: "barber-shop",
+    recommendedOutreachMode: "local_student",
+    idealSignals: [
+      "Services, packages, and booking flow drive conversions",
+      "Photos, proof, and trust matter heavily",
+      "Recurring appointments and upsells are public-facing",
+      "A polished brand presentation influences selection",
+    ],
+    visibleWeaknesses: [
+      "Booking path exists but is hard to trust or find",
+      "Services or pricing are hard to scan",
+      "Visual presentation feels dated or inconsistent",
+      "Proof, gallery, or staff details are limited",
+    ],
+    workflowOpportunities: [
+      "Service and package clarity",
+      "Booking presentation while keeping current booking tools",
+      "Gallery and proof organization",
+      "Retail/add-on presentation",
+      "Reminder and rebooking workflow discovery",
+    ],
+    discoveryQuestions: [
+      "What booking tool do you already use and want to keep?",
+      "Do clients choose by provider, by service, or by first available?",
+      "Are packages, memberships, or add-ons important to the business?",
+      "Would clearer photos or service pages help more visitors book?",
+    ],
+    redFlags: [
+      "No public service clarity or booking route",
+      "Requests for unsupported medical claims",
+    ],
+    complianceNotes: ["Treat med spa as medical only when official content clearly indicates medical care."],
+  },
   general_local_business: {
     key: "general_local_business",
     name: "General Local Business",
@@ -261,17 +338,47 @@ export const SIGNAL_PLAYBOOKS: Record<SignalPlaybookKey, SignalPlaybook> = {
     ],
     complianceNotes: ["Use only public business facts and human-entered notes."],
   },
+  unknown_needs_review: {
+    key: "unknown_needs_review",
+    name: "Unknown / Needs Review",
+    complianceTier: "standard",
+    relevantDemo: "none",
+    recommendedOutreachMode: "professional_studio",
+    idealSignals: [
+      "Official website is confirmed but category fit is still unclear",
+      "Human review is needed before choosing a playbook",
+    ],
+    visibleWeaknesses: [
+      "Category is ambiguous or unsupported",
+      "Public service language is too limited to classify confidently",
+    ],
+    workflowOpportunities: [
+      "Confirm the real category before deeper review",
+      "Capture verified observations to support a correction",
+    ],
+    discoveryQuestions: [
+      "What does the business clearly sell or provide?",
+      "Is the official website confirmed?",
+      "What public evidence best supports the right playbook?",
+    ],
+    redFlags: [
+      "Discovery depends on unsupported assumptions",
+    ],
+    complianceNotes: ["Hold for manual review when confidence is low."],
+  },
 }
 
 const PLAYBOOK_KEYWORDS: Array<[SignalPlaybookKey, string[]]> = [
-  ["medical_dental", ["medical", "clinic", "doctor", "dentist", "dental", "orthodont", "healthcare", "practice"]],
+  ["medical_dental", ["medical", "clinic", "doctor", "dentist", "dental", "orthodont", "healthcare", "practice", "dermatology", "physician"]],
   ["auto_detailing", ["auto detail", "mobile detail", "car detail", "detailing", "car wash", "ceramic coating", "ceramic", "paint correction"]],
-  ["barber_salon", ["barber", "barbershop", "salon", "haircut", "hair cut", "hair", "spa", "beauty"]],
+  ["barber_salon", ["barber", "barbershop", "salon", "haircut", "hair cut", "fade", "beard trim", "stylist", "blowout"]],
+  ["beauty_wellness", ["beauty", "spa", "lashes", "nails", "esthetician", "facial", "wellness", "massage", "skincare", "med spa"]],
   ["hvac", ["hvac", "air conditioning", "heating", "cooling", "ac repair"]],
   [
     "roofing_contractors_home_services",
     ["roof", "contractor", "home service", "plumbing", "electric", "landscap", "construction", "remodel"],
   ],
+  ["restaurant_food", ["restaurant", "food truck", "catering", "cafe", "grill", "kitchen", "pizza", "coffee"]],
 ]
 
 export function getSignalPlaybook(key: string | null | undefined) {

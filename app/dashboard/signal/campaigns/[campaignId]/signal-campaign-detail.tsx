@@ -73,6 +73,7 @@ export function SignalCampaignDetail({
   const [candidates, setCandidates] = useState(initialCandidates)
   const [officialUrls, setOfficialUrls] = useState<Record<string, string>>({})
   const [mergeIds, setMergeIds] = useState<Record<string, string>>({})
+  const [categoryOverrides, setCategoryOverrides] = useState<Record<string, string>>({})
   const [working, setWorking] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -203,6 +204,36 @@ export function SignalCampaignDetail({
     }
   }
 
+  const quickScoreCandidate = async (candidate: SignalCampaignCandidate) => {
+    setWorking(`score:${candidate.id}`)
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(
+        `/api/signal/campaigns/${campaign.id}/candidates/${candidate.id}/quick-score`,
+        { method: "POST" },
+      )
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Candidate quick score failed.")
+        return
+      }
+      setCandidates((current) =>
+        current.map((item) => (item.id === candidate.id ? data.candidate : item)),
+      )
+      setMessage(
+        data.ai_unavailable
+          ? "Candidate quick score complete. AI unavailable; rule-based score shown."
+          : "Candidate quick score complete.",
+      )
+      router.refresh()
+    } catch {
+      setError("Candidate quick score failed.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -291,8 +322,16 @@ export function SignalCampaignDetail({
           {candidates.map((candidate) => {
             const officialUrl = officialUrls[candidate.id] ?? candidate.likely_official_url ?? candidate.candidate_url ?? ""
             const mergeId = mergeIds[candidate.id] || candidate.duplicate_prospect_id || ""
+            const categoryValue = categoryOverrides[candidate.id] || candidate.classified_playbook || "general_local_business"
             const duplicate = prospects.find((prospect) => prospect.id === candidate.duplicate_prospect_id)
             const imported = candidate.candidate_status === "imported_to_signal"
+            const quickScore = candidate.quick_score_summary && typeof candidate.quick_score_summary === "object"
+              ? (candidate.quick_score_summary as Record<string, unknown>)
+              : null
+            const quickScoreDetails =
+              quickScore?.quick_score && typeof quickScore.quick_score === "object"
+                ? (quickScore.quick_score as Record<string, unknown>)
+                : null
 
             return (
               <section key={candidate.id} className="rounded-xl border border-border bg-card p-4">
@@ -306,9 +345,12 @@ export function SignalCampaignDetail({
                       <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                         {candidate.official_source_confidence || "unknown"} confidence
                       </span>
+                      <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        {candidate.classification_confidence || "unknown"} category confidence
+                      </span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {[candidate.city, candidate.state].filter(Boolean).join(", ") || "Location unknown"} · {candidate.industry_hint || "Industry unknown"}
+                      {[candidate.city, candidate.state].filter(Boolean).join(", ") || "Location unknown"} · {(candidate.classified_playbook || candidate.industry_hint || "Industry unknown").replace(/_/g, " ")}
                     </p>
                     {candidate.source_url && (
                       <a
@@ -330,8 +372,25 @@ export function SignalCampaignDetail({
                         <p>{candidate.reason}</p>
                       </div>
                     )}
+                    {quickScoreDetails && (
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground sm:grid-cols-4">
+                        <MiniStat label="Priority" value={String(quickScoreDetails.priority || "-")} />
+                        <MiniStat label="Score" value={String(quickScoreDetails.overall_opportunity_score || "-")} />
+                        <MiniStat label="Lane" value={String(quickScoreDetails.recommended_lane || "-").replace(/_/g, " ")} />
+                        <MiniStat label="Coverage" value={String(quickScoreDetails.scan_coverage_confidence || "-")} />
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={working === `score:${candidate.id}` || !officialUrl}
+                      onClick={() => quickScoreCandidate(candidate)}
+                      className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                    >
+                      {working === `score:${candidate.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                      Quick Score
+                    </button>
                     {candidate.duplicate_prospect_id && (
                       <Link
                         href={`/dashboard/signal/${candidate.duplicate_prospect_id}`}
@@ -355,7 +414,7 @@ export function SignalCampaignDetail({
                   </div>
                 </div>
 
-                <div className="mt-4 grid gap-3 xl:grid-cols-[1.2fr_0.8fr_auto]">
+                <div className="mt-4 grid gap-3 xl:grid-cols-[1.1fr_0.8fr_0.8fr_auto]">
                   <label className="block space-y-1">
                     <span className="text-xs font-medium text-muted-foreground">Official website to use</span>
                     <input
@@ -369,6 +428,35 @@ export function SignalCampaignDetail({
                       placeholder="https://official-business-site.com"
                       className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
                     />
+                  </label>
+                  <label className="block space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground">Category</span>
+                    <select
+                      value={categoryValue}
+                      onChange={(event) =>
+                        setCategoryOverrides((current) => ({
+                          ...current,
+                          [candidate.id]: event.target.value,
+                        }))
+                      }
+                      className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
+                    >
+                      {[
+                        "auto_detailing",
+                        "barber_salon",
+                        "beauty_wellness",
+                        "hvac",
+                        "roofing_contractors_home_services",
+                        "medical_dental",
+                        "restaurant_food",
+                        "general_local_business",
+                        "unknown_needs_review",
+                      ].map((value) => (
+                        <option key={value} value={value}>
+                          {value.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className="block space-y-1">
                     <span className="text-xs font-medium text-muted-foreground">Merge into existing prospect</span>
@@ -399,6 +487,7 @@ export function SignalCampaignDetail({
                           candidate_status: "approved",
                           likely_official_url: officialUrl || null,
                           duplicate_prospect_id: mergeId || null,
+                          classified_playbook: categoryValue,
                           reason: mergeId
                             ? "Approved to merge into an existing Signal prospect."
                             : "Approved by Mountline team for official-site scan and import.",
@@ -439,6 +528,15 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded-xl border border-border bg-card p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 break-words text-sm font-semibold">{value}</p>
+    </div>
+  )
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-border bg-background/50 px-2 py-2">
+      <p className="font-mono text-sm text-foreground">{value}</p>
+      <p className="mt-1 text-[11px] uppercase tracking-wide">{label}</p>
     </div>
   )
 }

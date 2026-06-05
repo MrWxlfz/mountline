@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
+import { findSignalCandidateSuppression } from "@/lib/signal/alerts"
 import {
   findLikelySignalDuplicates,
   runSignalCampaignDiscovery,
 } from "@/lib/signal/research"
+import { classifySignalCampaignCandidate } from "@/lib/signal/classification"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type {
   SignalCampaign,
@@ -50,22 +52,38 @@ export async function POST(
 
   const { data: prospects } = await supabase.from("signal_prospects").select("*")
   const existingProspects = (prospects || []) as SignalProspect[]
-  const candidateRows = result.candidates.map((candidate) => {
+  const candidateRows = []
+  let suppressedCount = 0
+
+  for (const candidate of result.candidates) {
+    const classification = await classifySignalCampaignCandidate(candidate)
     const duplicate = findLikelySignalDuplicates(existingProspects, {
       businessName: candidate.business_name,
+      city: candidate.city,
       websiteUrl: candidate.likely_official_url || candidate.candidate_url,
     })[0]
+    const suppression = await findSignalCandidateSuppression({
+      businessName: candidate.business_name,
+      city: candidate.city,
+      hostname: candidate.likely_official_url || candidate.candidate_url,
+    })
 
-    return {
+    if (suppression) {
+      suppressedCount += 1
+      continue
+    }
+
+    candidateRows.push({
       ...candidate,
+      ...classification,
       campaign_id: campaign.id,
       candidate_status: duplicate ? "duplicate" : candidate.candidate_status,
       duplicate_prospect_id: duplicate?.prospect.id || null,
       reason: duplicate
-        ? `Possible duplicate: ${duplicate.reasons.join(", ")}. Merge or reject before import.`
+        ? `${duplicate.confidence} duplicate: ${duplicate.reasons.join(", ")}. Merge or reject before import.`
         : candidate.reason,
-    }
-  })
+    })
+  }
 
   await supabase
     .from("signal_campaign_candidates")
@@ -90,7 +108,7 @@ export async function POST(
 
   const nextStatus = result.ok && candidateRows.length > 0 ? "review_candidates" : "failed"
   const nextAction = result.ok
-    ? "Review candidate sources. Approve only official public websites, reject directories, or merge duplicates."
+    ? `Review candidate sources. Approve only official public websites, reject directories, or merge duplicates.${suppressedCount > 0 ? ` ${suppressedCount} suppressed candidate${suppressedCount === 1 ? " was" : "s were"} hidden.` : ""}`
     : result.setup_message
 
   const { data: updatedCampaign } = await supabase

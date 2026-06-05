@@ -2,7 +2,11 @@ import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { runAndStoreInitialSignalAnalysis } from "@/lib/signal/analysis"
 import { isSignalProspectSuppressed } from "@/lib/signal/alerts"
-import { getSignalPlaybook, inferSignalPlaybook } from "@/lib/signal/playbooks"
+import {
+  buildSignalClassificationFields,
+  resolveSignalClassification,
+  syncSignalProspectAliases,
+} from "@/lib/signal/classification"
 import {
   findLikelySignalDuplicates,
   isClearlyNonOfficialSignalSource,
@@ -115,6 +119,7 @@ export async function POST(
     const { data: allProspects } = await supabase.from("signal_prospects").select("*")
     const duplicates = findLikelySignalDuplicates((allProspects || []) as SignalProspect[], {
       businessName: candidate.business_name,
+      city: candidate.city || campaign.target_city,
       email: scan.visible_emails[0],
       phone: scan.visible_phones[0],
       websiteUrl: officialUrl.toString(),
@@ -152,13 +157,34 @@ export async function POST(
         continue
       }
       prospect = updated as SignalProspect
+      await syncSignalProspectAliases(
+        {
+          id: prospect.id,
+          business_name: prospect.business_name,
+          website_url: prospect.website_url,
+          public_phone: prospect.public_phone,
+          public_email: prospect.public_email,
+        },
+        "campaign_merge",
+      )
     } else {
       const industry = candidate.industry_hint || "general local business"
-      const playbook = getSignalPlaybook(inferSignalPlaybook(industry))
+      const classification = await resolveSignalClassification({
+        businessName: candidate.business_name,
+        city: candidate.city || campaign.target_city,
+        state: candidate.state || campaign.target_state,
+        industryHint: industry,
+        websiteUrl: officialUrl.toString(),
+        selectedPlaybook: candidate.classified_playbook,
+        manualOverride: candidate.classification_source === "manual_override",
+        scan,
+        sourceTitle: candidate.source_title,
+        sourceSnippet: candidate.source_snippet,
+      })
       const prospectInput = normalizeProspectInput({
         business_name: candidate.business_name,
         industry,
-        industry_playbook: playbook.key,
+        industry_playbook: classification.playbook,
         city: candidate.city || campaign.target_city,
         state: candidate.state || campaign.target_state,
         website_url: officialUrl.toString(),
@@ -172,10 +198,10 @@ export async function POST(
           `Created from Signal campaign: ${campaign.name}.`,
           candidate.source_snippet ? `Source snippet: ${candidate.source_snippet}` : null,
         ].filter(Boolean).join("\n"),
-        relevant_demo: playbook.relevantDemo,
-        outreach_mode: playbook.recommendedOutreachMode,
         outreach_status: "needs_review",
+        classification_manual_override: false,
       })
+      Object.assign(prospectInput, buildSignalClassificationFields(classification))
 
       const { data: created, error: createError } = await supabase
         .from("signal_prospects")
@@ -192,6 +218,16 @@ export async function POST(
         continue
       }
       prospect = created as SignalProspect
+      await syncSignalProspectAliases(
+        {
+          id: prospect.id,
+          business_name: prospect.business_name,
+          website_url: prospect.website_url,
+          public_phone: prospect.public_phone,
+          public_email: prospect.public_email,
+        },
+        "campaign_import",
+      )
     }
 
     if (!prospect) continue

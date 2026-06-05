@@ -13,10 +13,13 @@ import {
   classifySignalLocality,
   classifySignalOutreachHistory,
   classifySignalRelationship,
-  deterministicRelevantDemo,
-  deterministicSignalPlaybook,
   suggestedCalibratedOutreachMode,
 } from "./calibration"
+import {
+  buildSignalClassificationFields,
+  resolveSignalClassification,
+  syncSignalProspectAliases,
+} from "./classification"
 import {
   buildPublicCustomerPositioning,
   summarizeSignalBrandVoice,
@@ -98,6 +101,16 @@ export async function runAndStoreInitialSignalAnalysis({
     aiResult?.output || fallback,
     visualEvidence,
   )
+  const classification = await resolveSignalClassification({
+    businessName: prospect.business_name,
+    city: prospect.city,
+    state: prospect.state,
+    industryHint: prospect.industry,
+    websiteUrl: researchContext?.confirmed_official_url || prospect.website_url,
+    selectedPlaybook: prospect.industry_playbook,
+    manualOverride: prospect.classification_manual_override,
+    scan: websiteScan,
+  })
   const styleSuggestion = suggestSignalConversationStyle(analysisProspect, websiteScan)
   const profileSuggestion = suggestCommunicationProfile(analysisProspect, websiteScan)
   const contactReadiness = getContactReadiness(prospect)
@@ -189,11 +202,8 @@ export async function runAndStoreInitialSignalAnalysis({
   if (analysisError) throw new Error(analysisError.message)
 
   const analysis = analysisData as SignalAnalysis
-  const deterministicPlaybook = deterministicSignalPlaybook(analysisProspect)
   const prospectUpdate: Record<string, unknown> = {
-    industry_playbook: deterministicPlaybook,
-    compliance_tier: getSignalPlaybook(deterministicPlaybook).complianceTier,
-    relevant_demo: deterministicRelevantDemo(analysisProspect),
+    ...buildSignalClassificationFields(classification),
     outreach_mode: suggestedCalibratedOutreachMode(analysisProspect),
     locality_scope: classifySignalLocality(analysisProspect),
     relationship_type: classifySignalRelationship(analysisProspect),
@@ -243,6 +253,17 @@ export async function runAndStoreInitialSignalAnalysis({
       .maybeSingle()
     updatedProspect = (data as SignalProspect | null) || ({ ...prospect, ...prospectUpdate } as SignalProspect)
   }
+
+  await syncSignalProspectAliases(
+    {
+      id: updatedProspect.id,
+      business_name: updatedProspect.business_name,
+      website_url: updatedProspect.website_url,
+      public_phone: updatedProspect.public_phone,
+      public_email: updatedProspect.public_email,
+    },
+    "analysis_refresh",
+  )
 
   const alert = await maybeCreateSignalAlert(updatedProspect, analysis)
 

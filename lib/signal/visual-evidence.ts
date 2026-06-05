@@ -203,8 +203,8 @@ export function isVisualIndustry(playbookKey: string | null | undefined) {
   return [
     "auto_detailing",
     "barber_salon",
-    "beauty",
-    "restaurants",
+    "beauty_wellness",
+    "restaurant_food",
     "roofing_contractors_home_services",
   ].includes(playbookKey || "")
 }

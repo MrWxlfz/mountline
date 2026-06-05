@@ -1,7 +1,19 @@
 import "server-only"
 
 import { createAdminClient } from "@/lib/supabase/admin"
-import type { SignalAnalysis, SignalProspect } from "@/lib/supabase/types"
+import type {
+  SignalAnalysis,
+  SignalCandidateSuppressionType,
+  SignalProspect,
+} from "@/lib/supabase/types"
+import {
+  normalizeSignalCity,
+} from "./classification"
+import {
+  normalizeSignalBusinessName,
+  normalizeSignalHostname,
+  normalizeSignalPhone,
+} from "./research"
 
 function normalize(value: string | null | undefined) {
   return value?.trim().toLowerCase() || null
@@ -20,8 +32,21 @@ export async function isSignalProspectSuppressed(prospect: SignalProspect) {
   const email = normalize(prospect.public_email)
   const businessName = prospect.business_name.trim()
   const phone = prospect.public_phone?.trim() || null
+  const normalizedBusinessName = normalizeSignalBusinessName(prospect.business_name)
+  const normalizedHostname = normalizeSignalHostname(prospect.website_url)
+  const normalizedPhone = normalizeSignalPhone(prospect.public_phone)
+  const cityNormalized = normalizeSignalCity(prospect.city)
 
-  if (!email && !businessName && !phone) return false
+  if (
+    !email &&
+    !businessName &&
+    !phone &&
+    !normalizedBusinessName &&
+    !normalizedHostname &&
+    !normalizedPhone
+  ) {
+    return false
+  }
 
   const supabase = createAdminClient()
   const checks = []
@@ -59,6 +84,53 @@ export async function isSignalProspectSuppressed(prospect: SignalProspect) {
     )
   }
 
+  if (normalizedHostname) {
+    checks.push(
+      supabase
+        .from("signal_candidate_suppressions")
+        .select("id")
+        .eq("normalized_hostname", normalizedHostname)
+        .is("restored_at", null)
+        .limit(1)
+        .maybeSingle(),
+    )
+  }
+
+  if (normalizedPhone) {
+    checks.push(
+      supabase
+        .from("signal_candidate_suppressions")
+        .select("id")
+        .eq("phone_normalized", normalizedPhone)
+        .is("restored_at", null)
+        .limit(1)
+        .maybeSingle(),
+    )
+  }
+
+  if (email) {
+    checks.push(
+      supabase
+        .from("signal_candidate_suppressions")
+        .select("id")
+        .eq("public_email_normalized", email)
+        .is("restored_at", null)
+        .limit(1)
+        .maybeSingle(),
+    )
+  }
+
+  if (normalizedBusinessName) {
+    let query = supabase
+      .from("signal_candidate_suppressions")
+      .select("id")
+      .eq("normalized_business_name", normalizedBusinessName)
+      .is("restored_at", null)
+      .limit(1)
+    if (cityNormalized) query = query.eq("city_normalized", cityNormalized)
+    checks.push(query.maybeSingle())
+  }
+
   const results = await Promise.all(checks)
   results.forEach((result) => {
     if (result.error) {
@@ -88,6 +160,119 @@ export async function addSignalProspectToSuppression(
 
   if (error) throw new Error(error.message)
   return data
+}
+
+export async function addSignalCandidateSuppression({
+  businessName,
+  city,
+  email,
+  hostname,
+  phone,
+  reason,
+  sourceCampaignId,
+  suppressionType,
+}: {
+  businessName?: string | null
+  city?: string | null
+  email?: string | null
+  hostname?: string | null
+  phone?: string | null
+  reason?: string | null
+  sourceCampaignId?: string | null
+  suppressionType: SignalCandidateSuppressionType
+}) {
+  const supabase = createAdminClient()
+  const payload = {
+    normalized_business_name: normalizeSignalBusinessName(businessName) || null,
+    normalized_hostname: normalizeSignalHostname(hostname) || null,
+    phone_normalized: normalizeSignalPhone(phone) || null,
+    public_email_normalized: normalize(email),
+    city_normalized: normalizeSignalCity(city) || null,
+    suppression_type: suppressionType,
+    reason: reason || null,
+    source_campaign_id: sourceCampaignId || null,
+  }
+
+  const { data, error } = await supabase
+    .from("signal_candidate_suppressions")
+    .insert(payload)
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function findSignalCandidateSuppression({
+  businessName,
+  city,
+  email,
+  hostname,
+  phone,
+}: {
+  businessName?: string | null
+  city?: string | null
+  email?: string | null
+  hostname?: string | null
+  phone?: string | null
+}) {
+  const supabase = createAdminClient()
+  const checks = []
+  const normalizedBusinessName = normalizeSignalBusinessName(businessName)
+  const normalizedHostname = normalizeSignalHostname(hostname)
+  const normalizedPhone = normalizeSignalPhone(phone)
+  const normalizedEmail = normalize(email)
+  const cityNormalized = normalizeSignalCity(city)
+
+  if (normalizedHostname) {
+    checks.push(
+      supabase
+        .from("signal_candidate_suppressions")
+        .select("*")
+        .eq("normalized_hostname", normalizedHostname)
+        .is("restored_at", null)
+        .limit(1)
+        .maybeSingle(),
+    )
+  }
+  if (normalizedPhone) {
+    checks.push(
+      supabase
+        .from("signal_candidate_suppressions")
+        .select("*")
+        .eq("phone_normalized", normalizedPhone)
+        .is("restored_at", null)
+        .limit(1)
+        .maybeSingle(),
+    )
+  }
+  if (normalizedEmail) {
+    checks.push(
+      supabase
+        .from("signal_candidate_suppressions")
+        .select("*")
+        .eq("public_email_normalized", normalizedEmail)
+        .is("restored_at", null)
+        .limit(1)
+        .maybeSingle(),
+    )
+  }
+  if (normalizedBusinessName) {
+    let query = supabase
+      .from("signal_candidate_suppressions")
+      .select("*")
+      .eq("normalized_business_name", normalizedBusinessName)
+      .is("restored_at", null)
+      .limit(1)
+    if (cityNormalized) query = query.eq("city_normalized", cityNormalized)
+    checks.push(query.maybeSingle())
+  }
+
+  if (checks.length === 0) return null
+
+  const results = await Promise.all(checks)
+  const match = results.find((result) => Boolean(result.data))
+  return match?.data || null
 }
 
 function buildAlertEmail(prospect: SignalProspect, analysis: SignalAnalysis) {

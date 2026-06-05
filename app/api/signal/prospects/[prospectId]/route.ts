@@ -2,6 +2,11 @@ import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { isSignalProspectSuppressed } from "@/lib/signal/alerts"
 import {
+  storeManualClassificationAlias,
+  syncSignalProspectAliases,
+} from "@/lib/signal/classification"
+import type { SignalPlaybookKey } from "@/lib/signal/playbooks"
+import {
   blankToNull,
   cleanOptionalText,
   forceComplianceForIndustry,
@@ -10,6 +15,11 @@ import {
 } from "@/lib/signal/validation"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { SignalProspect } from "@/lib/supabase/types"
+import {
+  normalizeSignalBusinessName,
+  normalizeSignalHostname,
+  normalizeSignalPhone,
+} from "@/lib/signal/research"
 
 function normalizeBody(body: Record<string, unknown>) {
   return Object.fromEntries(
@@ -123,6 +133,9 @@ export async function PATCH(
   if (typeof parsed.data.communication_profile_confirmed === "boolean") {
     update.communication_profile_confirmed = parsed.data.communication_profile_confirmed
   }
+  if (typeof parsed.data.classification_manual_override === "boolean") {
+    update.classification_manual_override = parsed.data.classification_manual_override
+  }
   if (parsed.data.contact_readiness) update.contact_readiness = parsed.data.contact_readiness
   if (parsed.data.outreach_status) update.outreach_status = parsed.data.outreach_status
   if (parsed.data.locality_scope) update.locality_scope = parsed.data.locality_scope
@@ -135,7 +148,31 @@ export async function PATCH(
   const mergedPlaybook = String(update.industry_playbook || prospect.industry_playbook || "")
   if ("industry" in update || "industry_playbook" in update) {
     Object.assign(update, forceComplianceForIndustry(mergedIndustry, mergedPlaybook))
+    update.classified_at = new Date().toISOString()
+    update.classification_source = parsed.data.classification_manual_override
+      ? "manual_override"
+      : prospect.classification_source || "human_review"
+    update.classification_confidence = parsed.data.classification_manual_override
+      ? "high"
+      : prospect.classification_confidence || "low"
+    update.classification_evidence = parsed.data.classification_manual_override
+      ? [`Manual correction set ${mergedPlaybook}.`]
+      : prospect.classification_evidence
   }
+
+  const mergedWebsiteUrl = String(update.website_url || prospect.website_url || "")
+  const mergedEmail = typeof update.public_email === "string"
+    ? update.public_email
+    : prospect.public_email
+  const mergedPhone = String(update.public_phone || prospect.public_phone || "")
+  const mergedBusinessName = String(update.business_name || prospect.business_name || "")
+  update.normalized_business_name = normalizeSignalBusinessName(mergedBusinessName) || null
+  update.normalized_hostname = normalizeSignalHostname(mergedWebsiteUrl) || null
+  update.public_email_normalized =
+    typeof mergedEmail === "string" && mergedEmail.trim()
+      ? mergedEmail.trim().toLowerCase()
+      : null
+  update.public_phone_normalized = normalizeSignalPhone(mergedPhone) || null
 
   const mergedProspect = { ...prospect, ...update } as SignalProspect
   if (
@@ -165,5 +202,30 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ prospect: data })
+  const updated = data as SignalProspect
+  await syncSignalProspectAliases(
+    {
+      id: updated.id,
+      business_name: updated.business_name,
+      website_url: updated.website_url,
+      public_phone: updated.public_phone,
+      public_email: updated.public_email,
+    },
+    "prospect_patch",
+  )
+
+  if (
+    update.classification_manual_override === true &&
+    typeof updated.industry_playbook === "string"
+  ) {
+    await storeManualClassificationAlias({
+      playbook: updated.industry_playbook as SignalPlaybookKey,
+      normalizedBusinessName: updated.normalized_business_name || "",
+      hostname: updated.normalized_hostname || "",
+      city: updated.city,
+      note: "Stored from manual prospect category correction.",
+    })
+  }
+
+  return NextResponse.json({ prospect: updated })
 }

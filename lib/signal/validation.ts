@@ -28,7 +28,10 @@ export const signalPlaybookSchema = z.enum([
   "hvac",
   "roofing_contractors_home_services",
   "medical_dental",
+  "restaurant_food",
+  "beauty_wellness",
   "general_local_business",
+  "unknown_needs_review",
 ])
 
 export const signalOutreachModeSchema = z.enum([
@@ -241,6 +244,7 @@ export const signalProspectCreateSchema = z.object({
   communication_profile_reason: shortNullableText,
   communication_profile_confirmed: z.boolean().optional(),
   script_guidance: nullableText,
+  classification_manual_override: z.boolean().optional(),
   contact_readiness: signalContactReadinessSchema.optional(),
   contact_readiness_reason: shortNullableText,
   outreach_status: signalOutreachStatusSchema.optional(),
@@ -474,6 +478,7 @@ export const signalCampaignCandidatePatchSchema = z.object({
   candidate_status: signalCampaignCandidateStatusSchema.optional(),
   likely_official_url: z.string().trim().url().max(500).optional().nullable(),
   duplicate_prospect_id: z.string().uuid().optional().nullable(),
+  classified_playbook: signalPlaybookSchema.optional().nullable(),
   reason: nullableText,
 })
 
@@ -560,6 +565,7 @@ export function normalizeProspectInput(
     communication_profile_reason: cleanOptionalText(data.communication_profile_reason),
     communication_profile_confirmed: data.communication_profile_confirmed || false,
     script_guidance: cleanOptionalText(data.script_guidance),
+    classification_manual_override: data.classification_manual_override || false,
     contact_readiness: data.contact_readiness || "contact_missing",
     contact_readiness_reason: cleanOptionalText(data.contact_readiness_reason),
     outreach_status: data.outreach_status || "researched",

@@ -35,6 +35,7 @@ import type {
 
 type WorkingAction =
   | "scan"
+  | "quick_score"
   | "initial"
   | "deep"
   | "contacted"
@@ -52,6 +53,7 @@ type WorkingAction =
   | "visual_remove"
   | "observation"
   | "focus"
+  | "correct_category"
   | null
 
 const statusLabels: Record<string, string> = {
@@ -517,6 +519,14 @@ export function SignalProspectDetail({
   const [recordSummary, setRecordSummary] = useState("")
   const [screenshotType, setScreenshotType] = useState("desktop")
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null)
+  const [categoryDraft, setCategoryDraft] = useState(prospect.industry_playbook || "general_local_business")
+  const [quickScoreStages, setQuickScoreStages] = useState<Array<{
+    key: string
+    label: string
+    note?: string
+    status: "done" | "skipped"
+  }>>([])
+  const [quickScoreVisualNote, setQuickScoreVisualNote] = useState<string | null>(null)
   const [observationCategory, setObservationCategory] = useState("site_design")
   const [observationSource, setObservationSource] = useState("manual_public_site_review")
   const [observationNote, setObservationNote] = useState("")
@@ -941,6 +951,74 @@ export function SignalProspectDetail({
     }
   }
 
+  const runQuickScore = async () => {
+    setWorking("quick_score")
+    setError(null)
+    setMessage(null)
+    setQuickScoreStages([])
+    setQuickScoreVisualNote(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/quick-score`, {
+        method: "POST",
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Quick score could not complete.")
+        return
+      }
+      setQuickScoreStages(data.stages || [])
+      setQuickScoreVisualNote(data.visual_unavailable_message || null)
+      setMessage(
+        data.ai_unavailable
+          ? "Quick score complete. AI unavailable; rule-based quick score shown."
+          : "Quick score complete.",
+      )
+      router.refresh()
+    } catch {
+      setError("Quick score could not complete.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const saveCategoryCorrection = async () => {
+    setWorking("correct_category")
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          industry_playbook: categoryDraft,
+          classification_manual_override: true,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Category correction could not be saved.")
+        return
+      }
+      await fetch(`/api/signal/prospects/${prospect.id}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysis_id: latestAnalysis?.id || null,
+          feedback_type: "wrong_playbook",
+          original_value: prospect.industry_playbook,
+          corrected_value: categoryDraft,
+          note: "Manual category correction from Signal detail.",
+        }),
+      }).catch(() => null)
+      setMessage("Category correction saved.")
+      router.refresh()
+    } catch {
+      setError("Category correction could not be saved.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
   const copyText = async (text: string | null | undefined, label: string) => {
     if (!text) return
     await navigator.clipboard.writeText(text)
@@ -1153,6 +1231,8 @@ export function SignalProspectDetail({
           <div className="grid gap-4 sm:grid-cols-2">
             <Meta label="Industry" value={prospect.industry} />
             <Meta label="Playbook" value={playbook.name} />
+            <Meta label="Category confidence" value={prospect.classification_confidence || latestAnalysis?.confidence || "-"} />
+            <Meta label="Classification source" value={prospect.classification_source ? prospect.classification_source.replace(/_/g, " ") : "-"} />
             <Meta label="Location" value={[prospect.city, prospect.state].filter(Boolean).join(", ") || "-"} />
             <Meta label="Locality" value={localityLabels[prospect.locality_scope || "unknown"] || prospect.locality_scope || "-"} />
             <Meta label="Relationship" value={relationshipLabels[prospect.relationship_type || "none"] || prospect.relationship_type || "-"} />
@@ -1177,6 +1257,10 @@ export function SignalProspectDetail({
             <ActionButton working={working === "scan"} onClick={() => runAction("scan", `/api/signal/prospects/${prospect.id}/scan`)}>
               <RadioTower className="h-4 w-4" />
               Scan Website
+            </ActionButton>
+            <ActionButton disabled={doNotContact} working={working === "quick_score"} onClick={runQuickScore}>
+              <Sparkles className="h-4 w-4" />
+              Quick Score Website
             </ActionButton>
             <ActionButton disabled={doNotContact} working={working === "initial"} onClick={() => runAction("initial", `/api/signal/prospects/${prospect.id}/initial`)}>
               <Sparkles className="h-4 w-4" />
@@ -1249,6 +1333,37 @@ export function SignalProspectDetail({
             {working === "suppress" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
             Add to Do Not Contact
           </button>
+          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-sm font-medium">Quick Score Progress</p>
+            <div className="mt-3 grid gap-2">
+              {(quickScoreStages.length > 0
+                ? quickScoreStages
+                : [
+                    { key: "confirming_site", label: "Confirming official site", status: "skipped" as const },
+                    { key: "reading_homepage", label: "Reading homepage", status: "skipped" as const },
+                    { key: "checking_pages", label: "Checking services and contact routes", status: "skipped" as const },
+                    { key: "capturing_screenshot", label: "Capturing screenshot", status: "skipped" as const },
+                    { key: "analyzing_presentation", label: "Analyzing presentation", status: "skipped" as const },
+                    { key: "calculating_score", label: "Calculating score", status: "skipped" as const },
+                    { key: "ready_for_review", label: "Ready for review", status: "skipped" as const },
+                  ]).map((stage) => (
+                <div key={stage.key} className="rounded-md border border-border bg-background/60 px-3 py-2 text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between gap-3">
+                    <span>{stage.label}</span>
+                    <span className={stage.status === "done" ? "text-green-300" : "text-muted-foreground"}>
+                      {working === "quick_score" ? "running" : stage.status}
+                    </span>
+                  </div>
+                  {stage.note && <p className="mt-1">{stage.note}</p>}
+                </div>
+              ))}
+            </div>
+            {quickScoreVisualNote && (
+              <p className="mt-3 rounded-md border border-yellow-500/25 bg-yellow-500/10 p-2 text-xs text-yellow-100">
+                {quickScoreVisualNote}
+              </p>
+            )}
+          </div>
           <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
             <p className="text-sm font-medium">Record Prior Outreach</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -1656,6 +1771,47 @@ export function SignalProspectDetail({
       </Panel>
 
       <Panel title="Correct Signal">
+        <div className="mb-4 grid gap-2 sm:grid-cols-[1fr_auto]">
+          <select
+            value={categoryDraft}
+            onChange={(event) => setCategoryDraft(event.target.value)}
+            className="h-10 rounded-lg border border-border bg-muted px-3 text-sm"
+          >
+            {[
+              "auto_detailing",
+              "barber_salon",
+              "beauty_wellness",
+              "hvac",
+              "roofing_contractors_home_services",
+              "medical_dental",
+              "restaurant_food",
+              "general_local_business",
+              "unknown_needs_review",
+            ].map((value) => (
+              <option key={value} value={value}>
+                {value.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={working === "correct_category"}
+            onClick={saveCategoryCorrection}
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+          >
+            Correct Category
+          </button>
+        </div>
+        {Array.isArray(prospect.classification_evidence) && prospect.classification_evidence.length > 0 && (
+          <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Classification Evidence</p>
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              {(prospect.classification_evidence as string[]).slice(0, 6).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
           <CorrectionButton onClick={() => submitCorrection("wrong_playbook", prospect.industry_playbook)}>Wrong playbook</CorrectionButton>
           <CorrectionButton onClick={() => submitCorrection("wrong_demo", latestAnalysis?.recommended_demo || prospect.relevant_demo)}>Wrong demo</CorrectionButton>

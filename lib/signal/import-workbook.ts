@@ -312,6 +312,7 @@ export function buildSignalImportPreview({
       const duplicateMatches = mapped.business_name
         ? findLikelySignalDuplicates(existingProspects, {
             businessName: mapped.business_name,
+            city: mapped.city,
             email: mapped.public_email,
             phone: mapped.public_phone,
             websiteUrl: mapped.website_url,

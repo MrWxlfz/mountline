@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
-import { addSignalProspectToSuppression } from "@/lib/signal/alerts"
+import {
+  addSignalCandidateSuppression,
+  addSignalProspectToSuppression,
+} from "@/lib/signal/alerts"
 import { signalSuppressionSchema } from "@/lib/signal/validation"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { SignalProspect } from "@/lib/supabase/types"
@@ -37,6 +40,15 @@ export async function POST(
     prospect as SignalProspect,
     parsed.data.reason || "Added from Signal prospect detail",
   )
+  await addSignalCandidateSuppression({
+    businessName: prospect.business_name,
+    city: prospect.city,
+    email: prospect.public_email,
+    hostname: prospect.website_url,
+    phone: prospect.public_phone,
+    reason: parsed.data.reason || "Added from Signal prospect detail",
+    suppressionType: "do_not_contact",
+  })
 
   const { data: updatedProspect, error: updateError } = await supabase
     .from("signal_prospects")

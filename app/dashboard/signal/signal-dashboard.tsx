@@ -191,6 +191,7 @@ export function SignalDashboard({
   const [error, setError] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [creatingSession, setCreatingSession] = useState(false)
+  const [quickScoringId, setQuickScoringId] = useState<string | null>(null)
 
   const previewRows = useMemo(() => mapCsvToProspects(csvText).slice(0, 25), [csvText])
 
@@ -357,6 +358,32 @@ export function SignalDashboard({
       setError("Call session could not be created.")
     } finally {
       setCreatingSession(false)
+    }
+  }
+
+  const runQuickScore = async (prospectId: string) => {
+    setQuickScoringId(prospectId)
+    setError(null)
+    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospectId}/quick-score`, {
+        method: "POST",
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.error || "Quick score could not complete.")
+        return
+      }
+      setMessage(
+        data.ai_unavailable
+          ? "Quick score complete. AI unavailable; rule-based score shown."
+          : "Quick score complete.",
+      )
+      window.location.href = `/dashboard/signal/${prospectId}`
+    } catch {
+      setError("Quick score could not complete.")
+    } finally {
+      setQuickScoringId(null)
     }
   }
 
@@ -698,6 +725,7 @@ export function SignalDashboard({
                   "",
                   "Business",
                   "Industry",
+                  "Confidence",
                   "City",
                   "Primary Opportunity",
                   "Score",
@@ -707,6 +735,7 @@ export function SignalDashboard({
                   "Outreach Mode",
                   "Status",
                   "Follow-up Date",
+                  "Quick Score",
                   "Open",
                 ].map((heading) => (
                   <th key={heading} className="px-4 py-3 text-left font-medium">{heading}</th>
@@ -721,11 +750,13 @@ export function SignalDashboard({
                     row={row}
                     selected={selectedIds.includes(row.id)}
                     onSelect={() => toggleSelected(row.id)}
+                    onQuickScore={() => runQuickScore(row.id)}
+                    quickScoring={quickScoringId === row.id}
                   />
                 ))
               ) : (
                 <tr>
-                  <td colSpan={13} className="px-4 py-12 text-center">
+                  <td colSpan={15} className="px-4 py-12 text-center">
                     <RadioTower className="mx-auto mb-3 h-8 w-8 text-muted-foreground opacity-50" />
                     <p className="font-medium">No Signal prospects match the filters</p>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -795,10 +826,14 @@ export function SignalDashboard({
 
 function SignalRow({
   onSelect,
+  onQuickScore,
+  quickScoring,
   row,
   selected,
 }: {
   onSelect: () => void
+  onQuickScore: () => void
+  quickScoring: boolean
   row: SignalProspectRow
   selected: boolean
 }) {
@@ -842,6 +877,12 @@ function SignalRow({
         <div className="text-xs">{playbook.name}</div>
       </td>
       <td className="px-4 py-4 text-muted-foreground">
+        <div>{row.classification_confidence || analysis?.confidence || "-"}</div>
+        <div className="text-xs">
+          {row.classification_source ? row.classification_source.replace(/_/g, " ") : "-"}
+        </div>
+      </td>
+      <td className="px-4 py-4 text-muted-foreground">
         {[row.city, row.state].filter(Boolean).join(", ") || "-"}
       </td>
       <td className="px-4 py-4">
@@ -873,6 +914,17 @@ function SignalRow({
       </td>
       <td className="px-4 py-4 text-muted-foreground">
         {formatDate(row.follow_up_date)}
+      </td>
+      <td className="px-4 py-4">
+        <button
+          type="button"
+          disabled={quickScoring || row.outreach_status === "do_not_contact" || !row.website_url}
+          onClick={onQuickScore}
+          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
+        >
+          {quickScoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+          Quick Score
+        </button>
       </td>
       <td className="px-4 py-4">
         <Link

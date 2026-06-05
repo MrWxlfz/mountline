@@ -2,7 +2,11 @@ import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { runAndStoreInitialSignalAnalysis } from "@/lib/signal/analysis"
 import { isSignalProspectSuppressed } from "@/lib/signal/alerts"
-import { getSignalPlaybook, inferSignalPlaybook } from "@/lib/signal/playbooks"
+import {
+  buildSignalClassificationFields,
+  resolveSignalClassification,
+  syncSignalProspectAliases,
+} from "@/lib/signal/classification"
 import {
   findLikelySignalDuplicates,
   normalizeSignalHostname,
@@ -154,6 +158,7 @@ export async function POST(request: Request) {
   const { data: allProspects } = await supabase.from("signal_prospects").select("*")
   const duplicates = findLikelySignalDuplicates((allProspects || []) as SignalProspect[], {
     businessName: researchRun.business_name,
+    city: locationParts(researchRun.location).city,
     email: scan.visible_emails[0],
     phone: scan.visible_phones[0],
     websiteUrl: normalizedUrl.toString(),
@@ -197,14 +202,31 @@ export async function POST(request: Request) {
     if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
     prospect = updatedData as SignalProspect
     status = "merged"
+    await syncSignalProspectAliases(
+      {
+        id: prospect.id,
+        business_name: prospect.business_name,
+        website_url: prospect.website_url,
+        public_phone: prospect.public_phone,
+        public_email: prospect.public_email,
+      },
+      "research_merge",
+    )
   } else {
     const { city, state } = locationParts(researchRun.location)
     const industry = researchRun.industry_hint || "general local business"
-    const playbook = getSignalPlaybook(inferSignalPlaybook(industry))
+    const classification = await resolveSignalClassification({
+      businessName: researchRun.business_name,
+      city,
+      state,
+      industryHint: industry,
+      websiteUrl: normalizedUrl.toString(),
+      scan,
+    })
     const prospectInput = normalizeProspectInput({
       business_name: researchRun.business_name,
       industry,
-      industry_playbook: playbook.key,
+      industry_playbook: classification.playbook,
       city,
       state,
       locality_relationship: researchRun.known_context,
@@ -219,9 +241,9 @@ export async function POST(request: Request) {
       human_notes: researchRun.initial_note,
       what_looks_good: null,
       visible_problem: null,
-      relevant_demo: playbook.relevantDemo,
-      outreach_mode: playbook.recommendedOutreachMode,
+      classification_manual_override: false,
     })
+    Object.assign(prospectInput, buildSignalClassificationFields(classification))
 
     const { data: createdData, error: createError } = await supabase
       .from("signal_prospects")
@@ -241,6 +263,17 @@ export async function POST(request: Request) {
         .single()
       prospect = (suppressedData as SignalProspect | null) || prospect
     }
+
+    await syncSignalProspectAliases(
+      {
+        id: prospect.id,
+        business_name: prospect.business_name,
+        website_url: prospect.website_url,
+        public_phone: prospect.public_phone,
+        public_email: prospect.public_email,
+      },
+      "research_confirm",
+    )
   }
 
   const initial = await runAndStoreInitialSignalAnalysis({

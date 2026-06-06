@@ -499,23 +499,74 @@ Corrections are stored in `signal_feedback` for that prospect and can guide rege
 
 ## Dashboard, Timeline, And Focus Mode
 
-The main Signal dashboard shows:
+The main Signal dashboard is organized as a high-signal operating screen:
 
-- Start Focus Mode and Build Campaign actions.
-- Today strip for ready, follow-up due, awaiting reply, and high-fit counts.
-- Active campaigns with reviewed/imported progress.
-- Priority queue of A/B prospects that are not suppressed.
-- Weekly scoreboard based on recorded outreach events.
+- Header: `Start Focus Mode` is the primary action, `Build Campaign` is secondary, and lower-frequency actions are grouped in the overflow menu.
+- Today panel: calls ready, follow-ups due, demos waiting, research needing review, and high-fit alerts.
+- Current Priority: maximum five A/B prospects with city, category, pursuit priority, lane, next action, and confidence.
+- Active Campaigns: maximum three city campaigns with discovered, approved, quick-scored, imported/A-B progress and a clear next action.
+- All Prospects: simplified default columns for business, category, city, pursuit priority, lane, contact readiness, status, follow-up, and open action.
+- Filters: advanced filters are collapsed by default and active filters appear as removable pills.
+- Weekly Scoreboard: compact bottom section based on recorded Signal data and outreach events.
 
 Prospect detail separates grounded information into:
 
-- Facts: official website scan evidence, verified contact routes, visual evidence, human-entered public observations, and recorded outreach events.
-- Reasonable inferences: labeled interpretations based on public evidence, such as website-first fit or discovery-worthy systems questions.
-- Discovery questions: items the team should ask before making claims about operations, budget, systems, or compliance-sensitive needs.
+- Overview: concise summary, lane, next action, contact readiness, selected demo, score cards, and advanced actions.
+- Evidence: official website evidence, scan coverage, human observations, system classification, AI interpretation, and score breakdown.
+- Strategy: facts, reasonable inferences, discovery questions, offers, commercial fit, value band, and what not to pitch.
+- Scripts: current status-aware scripts, private guidance, external readiness, corrections, and archived/alternate scripts.
+- Timeline: research, scans, quick scores, corrections, outreach, replies, follow-ups, demo sends, calls, proposals, and alerts.
+- Visual Audit: screenshot preview, manual upload, auto capture when configured, visual scoring, and recapture/remove controls.
 
 Prospect detail also shows an outreach timeline built from `signal_outreach_events`, focus outcomes, follow-up dates, analysis timestamps, and visual evidence timestamps. Notes remain context; recorded events remain the source of truth for contact history.
 
-Focus Mode at `/dashboard/signal/focus` is a manual work queue for approved prospects. It supports call, follow-up, vertical, campaign, and session-size filters. Outcome buttons record events and update `signal_focus_items`; they do not call, email, text, DM, or submit forms.
+Focus Mode at `/dashboard/signal/focus` is a manual work queue for approved prospects. It supports call, follow-up, vertical, campaign, and session-size filters in a compact setup drawer. After setup, the page emphasizes one current action item, shows progress such as `1 of 4`, and keeps the upcoming queue secondary. The main item shows why it deserves attention, a short script, verified contact route, relevant demo, and outcome actions. Objections, discovery questions, evidence, alternate scripts, and timeline detail stay behind secondary/collapsible sections.
+
+Awaiting-reply prospects must not appear as new call targets before their follow-up date. They should appear in the follow-up queue only when due and should clearly say: `Wait until the scheduled follow-up date.`
+
+Outcome buttons record events and update `signal_focus_items`; they do not call, email, text, DM, or submit forms.
+
+## Campaign UX
+
+Campaign detail uses a staged research funnel:
+
+1. Discover
+2. Review Candidates
+3. Confirm Official Sites
+4. Quick Score
+5. Prioritize
+6. Add to Focus Mode
+
+Candidate rows prioritize business name, city, category confidence, likely official site, source, duplicate/suppression state, quick-score state, and evidence. Row actions are grouped in an overflow menu so the row does not become a wall of buttons. Preserved actions include approve, reject from campaign, reject permanently, mark duplicate, merge/select an existing prospect, not a duplicate, confirm official site, quick score, and add to Focus Mode after import.
+
+## Dashboard UI Components
+
+Mountline OS dashboard screens should prefer the shared primitives in `components/dashboard/dashboard-ui.tsx` before adding page-specific styling:
+
+- `PageHeader`
+- `PrimaryAction`
+- `SecondaryAction`
+- `MetricStrip`
+- `StatusBadge`
+- `EmptyState`
+- `ActionRow`
+- `CompactTable`
+- `SectionPanel`
+
+These components keep the internal dashboard black, graphite, readable, and restrained. Use blue for active intelligence states, muted green for ready/success, amber for waiting/review, and red only for suppression, blocking errors, or risk.
+
+## Clerk Sidebar Profile
+
+The dashboard shell uses Clerk as the source of truth for the active team member display. The sidebar profile should use Clerk profile data only:
+
+- avatar from `user.imageUrl` through Clerk's `UserButton`
+- `user.fullName` when available
+- fallback to `user.firstName`
+- fallback to the primary email username
+- fallback to `Team Member`
+- primary email address shown below the display name
+
+Do not create a duplicate Supabase user-profile system solely for this display. The existing server-side Mountline team-member authorization remains the access control source for dashboard routes.
 
 ## Call Sessions
 
@@ -599,6 +650,12 @@ node_modules/.bin/tsc --noEmit
 
 Manual checklist:
 
+- Confirm the dashboard sidebar shows the active Clerk user's avatar, name, and primary email, with loading and fallback states.
+- Confirm `/dashboard` starts with actionable Needs Attention rows, not non-actionable metric cards.
+- Confirm `/dashboard/signal` has one primary action, one secondary action, overflow actions, collapsed filters, active filter pills, readable priority queue, readable active campaigns, and a simplified All Prospects table.
+- Confirm `/dashboard/signal/focus` shows compact setup, one emphasized current item, upcoming queue, outcome save/advance behavior, and no premature awaiting-reply call targets before due dates.
+- Confirm `/dashboard/signal/campaigns/[campaignId]` shows the staged funnel and grouped candidate actions while preserving approve/reject/duplicate/merge/quick-score/import/focus behavior.
+- Confirm `/dashboard/signal/[prospectId]` uses Overview, Evidence, Strategy, Scripts, Timeline, and Visual Audit tabs with Quick Score and Add to Focus visible in the header.
 - Sign in as a Mountline team member and confirm `/dashboard/signal` loads.
 - Sign in as a non-team user and confirm dashboard access is denied.
 - Create a manual prospect and confirm redirect to detail page.

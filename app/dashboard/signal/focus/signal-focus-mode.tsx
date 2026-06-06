@@ -7,11 +7,21 @@ import {
   ArrowLeft,
   Calendar,
   CheckCircle2,
+  ChevronDown,
   ExternalLink,
   Loader2,
   PhoneCall,
   RadioTower,
 } from "lucide-react"
+import {
+  EmptyState,
+  MetricStrip,
+  PageHeader,
+  SectionPanel,
+  SecondaryAction,
+  StatusBadge,
+  priorityTone,
+} from "@/components/dashboard/dashboard-ui"
 import { getSignalPlaybook } from "@/lib/signal/playbooks"
 import type {
   SignalAnalysis,
@@ -104,7 +114,11 @@ function buildFocusItems(rows: SignalFocusProspectRow[]): FocusItem[] {
   }
 
   rows
-    .filter((row) => row.focus_item)
+    .filter((row) => {
+      if (!row.focus_item) return false
+      if (row.prospect.outreach_status !== "awaiting_reply") return true
+      return isDue(row.prospect.follow_up_date)
+    })
     .forEach((row) =>
       add(
         row,
@@ -143,6 +157,7 @@ function buildFocusItems(rows: SignalFocusProspectRow[]): FocusItem[] {
 
   rows
     .filter((row) => row.prospect.outreach_status === "awaiting_reply")
+    .filter((row) => isDue(row.prospect.follow_up_date))
     .forEach((row) =>
       add(
         row,
@@ -243,6 +258,7 @@ export function SignalFocusMode({
   const [verticalFocus, setVerticalFocus] = useState("")
   const [campaignId, setCampaignId] = useState("")
   const [sessionLength, setSessionLength] = useState("45")
+  const [setupOpen, setSetupOpen] = useState(true)
   const [followUpDates, setFollowUpDates] = useState<Record<string, string>>({})
   const [working, setWorking] = useState<string | null>(null)
   const [completed, setCompleted] = useState<string[]>([])
@@ -264,6 +280,9 @@ export function SignalFocusMode({
     const callItems = items.filter((item) => item.lane !== "follow_up").slice(0, calls + 4)
     return [...followUpItems, ...callItems]
   }, [callCount, campaignId, completed, followUpCount, rows, verticalFocus])
+
+  const currentItem = focusItems[0] || null
+  const remainingItems = focusItems.slice(1)
 
   const weekly = useMemo(() => {
     const cutoff = new Date()
@@ -314,30 +333,19 @@ export function SignalFocusMode({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4">
-          <Link href="/dashboard/signal" className="rounded-lg p-2 transition-colors hover:bg-muted">
-            <ArrowLeft className="h-5 w-5" />
+    <div className="space-y-7">
+      <PageHeader
+        eyebrow="Mountline Signal"
+        title="Focus Mode"
+        subtitle="Work through today's most important outreach actions."
+        meta={
+          <Link href="/dashboard/signal" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Signal
           </Link>
-          <div>
-            <p className="mb-1 text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Mountline Signal
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight">Focus Mode</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Decide what deserves attention today. Signal does not call, text, email, DM, or submit forms.
-            </p>
-          </div>
-        </div>
-        <Link
-          href="/dashboard/signal/campaigns/new"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <RadioTower className="h-4 w-4" />
-          Build Campaign
-        </Link>
-      </div>
+        }
+        actions={<SecondaryAction href="/dashboard/signal/campaigns/new" icon={RadioTower}>Build Campaign</SecondaryAction>}
+      />
 
       {(message || error) && (
         <div
@@ -351,57 +359,66 @@ export function SignalFocusMode({
         </div>
       )}
 
-      <section className="rounded-xl border border-border bg-card p-4">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-          <Field label="Calls to prepare" type="number" value={callCount} onChange={setCallCount} />
-          <Field label="Follow-ups to handle" type="number" value={followUpCount} onChange={setFollowUpCount} />
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-muted-foreground">Vertical focus</span>
-            <select value={verticalFocus} onChange={(event) => setVerticalFocus(event.target.value)} className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm">
-              <option value="">Any vertical</option>
-              {Array.from(new Set(rows.map((row) => row.prospect.industry_playbook).filter(Boolean))).map((key) => (
-                <option key={key || ""} value={key || ""}>{getSignalPlaybook(key).name}</option>
-              ))}
-            </select>
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-muted-foreground">Campaign</span>
-            <select value={campaignId} onChange={(event) => setCampaignId(event.target.value)} className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm">
-              <option value="">Any campaign</option>
-              {campaigns.map((campaign) => (
-                <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
-              ))}
-            </select>
-          </label>
-          <Field label="Session length" type="number" value={sessionLength} onChange={setSessionLength} />
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Current plan: {focusItems.length} item{focusItems.length === 1 ? "" : "s"} for about {sessionLength || "45"} minutes.
-        </p>
-      </section>
+      <SectionPanel>
+        <button
+          type="button"
+          onClick={() => setSetupOpen((value) => !value)}
+          className="flex w-full items-center justify-between gap-3 text-left"
+        >
+          <span>
+            <span className="block font-semibold">Session Setup</span>
+            <span className="mt-1 block text-sm text-muted-foreground">
+              {focusItems.length} item{focusItems.length === 1 ? "" : "s"} · about {sessionLength || "45"} minutes
+              {campaignId ? ` · ${campaigns.find((campaign) => campaign.id === campaignId)?.name || "selected campaign"}` : ""}
+            </span>
+          </span>
+          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${setupOpen ? "rotate-180" : ""}`} />
+        </button>
+        {setupOpen && (
+          <div className="mt-4 grid gap-3 border-t border-border pt-4 md:grid-cols-2 xl:grid-cols-5">
+            <Field label="Calls to prepare" type="number" value={callCount} onChange={setCallCount} />
+            <Field label="Follow-ups" type="number" value={followUpCount} onChange={setFollowUpCount} />
+            <label className="block space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">Vertical focus</span>
+              <select value={verticalFocus} onChange={(event) => setVerticalFocus(event.target.value)} className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm">
+                <option value="">Any vertical</option>
+                {Array.from(new Set(rows.map((row) => row.prospect.industry_playbook).filter(Boolean))).map((key) => (
+                  <option key={key || ""} value={key || ""}>{getSignalPlaybook(key).name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">Campaign</span>
+              <select value={campaignId} onChange={(event) => setCampaignId(event.target.value)} className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm">
+                <option value="">Any campaign</option>
+                {campaigns.map((campaign) => (
+                  <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+                ))}
+              </select>
+            </label>
+            <Field label="Session length" type="number" value={sessionLength} onChange={setSessionLength} />
+          </div>
+        )}
+      </SectionPanel>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-8">
-        <Score label="Researched" value={weekly.researched} />
-        <Score label="Qualified" value={weekly.qualified} />
-        <Score label="Calls made" value={weekly.calls} />
-        <Score label="Replies" value={weekly.replies} />
-        <Score label="Demos sent" value={weekly.demos} />
-        <Score label="Discovery calls" value={weekly.discovery} />
-        <Score label="Proposals" value={weekly.proposals} />
-        <Score label="Won" value={weekly.won} />
-      </section>
+      <MetricStrip
+        items={[
+          { label: "Researched", value: weekly.researched },
+          { label: "Qualified", value: weekly.qualified },
+          { label: "Calls", value: weekly.calls },
+          { label: "Replies", value: weekly.replies },
+          { label: "Demos sent", value: weekly.demos },
+        ]}
+      />
 
-      {focusItems.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
-          <Calendar className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="font-medium">No Focus Mode items match the current filters</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add prospects from campaign review, set follow-up dates, or clear the filters.
-          </p>
-        </div>
+      {!currentItem ? (
+        <EmptyState title="No Focus Mode items match the current filters" icon={Calendar}>
+          Add prospects from campaign review, set follow-up dates, or clear the filters.
+        </EmptyState>
       ) : (
-        <div className="space-y-4">
-          {focusItems.map((item) => {
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          {(() => {
+            const item = currentItem
             const playbook = getSignalPlaybook(item.prospect.industry_playbook)
             const studio = scriptStudio(item.draft)
             const demo = demoPath(item.analysis?.recommended_demo || item.prospect.relevant_demo)
@@ -416,11 +433,11 @@ export function SignalFocusMode({
               "Keep the conversation specific and avoid unsupported claims."
 
             return (
-              <section key={`${item.prospect.id}:${item.lane}`} className="rounded-xl border border-border bg-card p-5">
+              <section key={`${item.prospect.id}:${item.lane}`} className="rounded-lg border border-border bg-card p-5">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                      {item.lane_label}
+                      {item.lane_label} · 1 of {focusItems.length}
                     </p>
                     <h2 className="mt-1 text-xl font-semibold">{item.prospect.business_name}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -428,13 +445,19 @@ export function SignalFocusMode({
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <Badge value={`Priority ${item.analysis?.priority || "-"}`} />
-                    <Badge value={item.analysis?.recommended_lane ? laneLabels[item.analysis.recommended_lane] || item.analysis.recommended_lane : "Lane unknown"} />
-                    <Badge value={`Confidence ${item.analysis?.confidence || "-"}`} />
+                    <StatusBadge tone={priorityTone(item.analysis?.priority)}>Priority {item.analysis?.priority || "-"}</StatusBadge>
+                    <StatusBadge>{item.analysis?.recommended_lane ? laneLabels[item.analysis.recommended_lane] || item.analysis.recommended_lane : "Lane unknown"}</StatusBadge>
+                    <StatusBadge>{item.analysis?.confidence || "unknown"} confidence</StatusBadge>
                   </div>
                 </div>
 
-                <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr_0.8fr]">
+                {item.lane === "awaiting_reply" && (
+                  <div className="mt-4 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+                    Wait until the scheduled follow-up date.
+                  </div>
+                )}
+
+                <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_1fr_0.8fr]">
                   <Panel title="Why this deserves attention">
                     <p>{item.why}</p>
                     <p className="mt-3 text-foreground">{item.next_action}</p>
@@ -465,27 +488,36 @@ export function SignalFocusMode({
                   </Panel>
                 </div>
 
-                <div className="mt-4 grid gap-4 xl:grid-cols-3">
+                <div className="mt-4 grid gap-4 xl:grid-cols-2">
                   <Panel title="Short script">
                     <p>{opener}</p>
                   </Panel>
-                  <Panel title="Objections">
-                    <p>{objection}</p>
-                  </Panel>
-                  <Panel title="Discovery questions">
-                    {questions.length > 0 ? (
-                      <ul className="space-y-2">
-                        {questions.map((question) => (
-                          <li key={question}>{question}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>{playbook.discoveryQuestions[0] || "Confirm what actually matters before proposing scope."}</p>
-                    )}
-                  </Panel>
+                  <details className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                    <summary className="cursor-pointer text-xs font-medium uppercase tracking-wider text-foreground">
+                      Secondary detail
+                    </summary>
+                    <div className="mt-3 space-y-4">
+                      <div>
+                        <p className="mb-1 text-xs font-medium text-foreground">Objections</p>
+                        <p>{objection}</p>
+                      </div>
+                      <div>
+                        <p className="mb-1 text-xs font-medium text-foreground">Discovery questions</p>
+                        {questions.length > 0 ? (
+                          <ul className="space-y-2">
+                            {questions.map((question) => (
+                              <li key={question}>{question}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>{playbook.discoveryQuestions[0] || "Confirm what actually matters before proposing scope."}</p>
+                        )}
+                      </div>
+                    </div>
+                  </details>
                 </div>
 
-                <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-9">
+                <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                   {Object.entries(outcomeLabels).map(([outcome, label]) => (
                     <button
                       key={outcome}
@@ -507,7 +539,27 @@ export function SignalFocusMode({
                 </div>
               </section>
             )
-          })}
+          })()}
+
+          <SectionPanel title="Up Next" description={`${remainingItems.length} item${remainingItems.length === 1 ? "" : "s"} after this one.`}>
+            <div className="space-y-2">
+              {remainingItems.length > 0 ? (
+                remainingItems.slice(0, 8).map((item) => (
+                  <div key={`${item.prospect.id}:${item.lane}`} className="rounded-lg border border-border bg-muted/20 p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium">{item.prospect.business_name}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{item.lane_label}</p>
+                      </div>
+                      <StatusBadge tone={priorityTone(item.analysis?.priority)}>{item.analysis?.priority || "-"}</StatusBadge>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">This is the last item in the current session.</p>
+              )}
+            </div>
+          </SectionPanel>
         </div>
       )}
     </div>
@@ -536,23 +588,6 @@ function Field({
         className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm"
       />
     </label>
-  )
-}
-
-function Score({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono text-xl font-semibold">{value}</p>
-    </div>
-  )
-}
-
-function Badge({ value }: { value: string }) {
-  return (
-    <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-muted-foreground">
-      {value}
-    </span>
   )
 }
 

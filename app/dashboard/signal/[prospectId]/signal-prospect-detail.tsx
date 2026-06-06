@@ -13,6 +13,7 @@ import {
   ImageIcon,
   Loader2,
   Mail,
+  MoreHorizontal,
   Phone,
   RadioTower,
   ShieldAlert,
@@ -20,6 +21,20 @@ import {
   Trash2,
   Upload,
 } from "lucide-react"
+import {
+  PageHeader,
+  PrimaryAction,
+  SecondaryAction,
+  StatusBadge,
+  priorityTone,
+} from "@/components/dashboard/dashboard-ui"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "@/lib/signal/playbooks"
 import type {
   SignalAlert,
@@ -1077,20 +1092,49 @@ export function SignalProspectDetail({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/signal" className="rounded-lg p-2 transition-colors hover:bg-muted">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <div className="min-w-0 flex-1">
-          <p className="mb-1 text-xs font-mono uppercase tracking-widest text-muted-foreground">
-            Mountline Signal
-          </p>
-          <h1 className="truncate text-2xl font-bold tracking-tight">{prospect.business_name}</h1>
-          <p className="text-sm text-muted-foreground">
-            {playbook.name} · {statusLabels[prospect.outreach_status] || prospect.outreach_status}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Mountline Signal"
+        title={prospect.business_name}
+        subtitle={`${playbook.name} · ${[prospect.city, prospect.state].filter(Boolean).join(", ") || "Location unknown"}`}
+        meta={
+          <Link href="/dashboard/signal" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Signal
+          </Link>
+        }
+        actions={
+          <>
+            <PrimaryAction disabled={doNotContact || working === "quick_score"} onClick={runQuickScore} icon={working === "quick_score" ? Loader2 : Sparkles}>
+              Quick Score
+            </PrimaryAction>
+            <SecondaryAction disabled={doNotContact || working === "focus"} onClick={addToFocusMode} icon={RadioTower}>
+              Add to Focus Mode
+            </SecondaryAction>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button type="button" className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                  <MoreHorizontal className="h-4 w-4" />
+                  More
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onSelect={() => runAction("scan", `/api/signal/prospects/${prospect.id}/scan`)}>
+                  Scan Website
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={doNotContact} onSelect={prepareScriptsWithGuidance}>
+                  Prepare Scripts
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={doNotContact} onSelect={createCallSession}>
+                  Prepare Call Session
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={doNotContact} onSelect={convert}>
+                  Convert to Lead
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
       {(message || error) && (
         <div
@@ -1160,6 +1204,16 @@ export function SignalProspectDetail({
         </div>
       )}
 
+      <Tabs defaultValue="overview" className="space-y-5">
+        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-lg border border-border bg-card p-1">
+          {["Overview", "Evidence", "Strategy", "Scripts", "Timeline", "Visual Audit"].map((tab) => (
+            <TabsTrigger key={tab} value={tab.toLowerCase().replace(" ", "-")} className="flex-none px-3">
+              {tab}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-5">
       <section className="grid gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Recommended Lane</p>
@@ -1388,6 +1442,9 @@ export function SignalProspectDetail({
         </Panel>
       </section>
 
+        </TabsContent>
+
+        <TabsContent value="visual-audit" className="space-y-5">
       <Panel title="Visual Website Evidence">
         <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
           Visual evidence from uploaded public-site screenshot. Do not upload customer portals, private dashboards, credentials, PHI, or sensitive content.
@@ -1497,7 +1554,9 @@ export function SignalProspectDetail({
           </div>
         </div>
       </Panel>
+        </TabsContent>
 
+        <TabsContent value="evidence" className="space-y-5">
       <section className="grid gap-4 xl:grid-cols-2">
         <Panel title="Research and Evidence">
           <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
@@ -1590,7 +1649,9 @@ export function SignalProspectDetail({
           <Score label="Total opportunity" value={latestAnalysis?.overall_opportunity_score} />
         </Panel>
       </section>
+        </TabsContent>
 
+        <TabsContent value="strategy" className="space-y-5">
       <Panel title="Offer Strategy">
         <div className="grid gap-4 lg:grid-cols-2">
           <TextBlock label="Recommended primary offer" value={latestAnalysis?.recommended_primary_offer} />
@@ -1615,7 +1676,9 @@ export function SignalProspectDetail({
           <EvidenceGroup title="Discovery Questions" items={strategyBoxes.questions} />
         </div>
       </Panel>
+        </TabsContent>
 
+        <TabsContent value="scripts" className="space-y-5">
       <Panel title="Outreach Cockpit">
         <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <Meta label="Selected mode" value={modeLabels[prospect.outreach_mode] || prospect.outreach_mode} />
@@ -1822,7 +1885,9 @@ export function SignalProspectDetail({
           <CorrectionButton onClick={() => submitCorrection("contact_history_incorrect", prospect.outreach_history)}>Contact/history incorrect</CorrectionButton>
         </div>
       </Panel>
+        </TabsContent>
 
+        <TabsContent value="timeline" className="space-y-5">
       <Panel title="Timeline">
         <div className="space-y-2">
           {timeline.map((item, index) => (
@@ -1846,6 +1911,8 @@ export function SignalProspectDetail({
           )}
         </div>
       </Panel>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

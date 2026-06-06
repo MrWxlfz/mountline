@@ -16,7 +16,27 @@ import {
   RadioTower,
   Search,
   Upload,
+  MoreHorizontal,
+  SlidersHorizontal,
+  X,
 } from "lucide-react"
+import {
+  CompactTable,
+  EmptyState,
+  MetricStrip,
+  PageHeader,
+  PrimaryAction,
+  SectionPanel,
+  SecondaryAction,
+  StatusBadge,
+  priorityTone,
+} from "@/components/dashboard/dashboard-ui"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { getSignalPlaybook, SIGNAL_PLAYBOOKS } from "@/lib/signal/playbooks"
 import type { SignalCampaignRow, SignalProspectRow } from "./page"
 import type { SignalOutreachEvent } from "@/lib/supabase/types"
@@ -83,22 +103,6 @@ function formatDate(value: string | null) {
     month: "short",
     day: "numeric",
   })
-}
-
-function scoreClass(score: number | null | undefined) {
-  if (typeof score !== "number") return "text-muted-foreground"
-  if (score >= 85) return "text-green-400"
-  if (score >= 70) return "text-blue-400"
-  if (score >= 50) return "text-yellow-400"
-  return "text-red-400"
-}
-
-function priorityClass(priority: string | null | undefined) {
-  if (priority === "A") return "border-green-500/30 bg-green-500/10 text-green-300"
-  if (priority === "B") return "border-blue-500/30 bg-blue-500/10 text-blue-300"
-  if (priority === "C") return "border-yellow-500/30 bg-yellow-500/10 text-yellow-300"
-  if (priority === "skip") return "border-red-500/30 bg-red-500/10 text-red-300"
-  return "border-border bg-muted text-muted-foreground"
 }
 
 function parseCsv(text: string) {
@@ -184,6 +188,7 @@ export function SignalDashboard({
 }) {
   const [rows, setRows] = useState(initialRows)
   const [filters, setFilters] = useState(emptyFilters)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
   const [csvText, setCsvText] = useState("")
   const [savingImport, setSavingImport] = useState(false)
@@ -290,6 +295,14 @@ export function SignalDashboard({
     })
   }, [filters, rows])
 
+  const activeFilters = useMemo(
+    () =>
+      Object.entries(filters)
+        .filter(([, value]) => Boolean(value))
+        .map(([key, value]) => ({ key, value })),
+    [filters],
+  )
+
   const saveImport = async () => {
     setSavingImport(true)
     setError(null)
@@ -388,52 +401,56 @@ export function SignalDashboard({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p className="mb-1 text-xs font-mono uppercase tracking-widest text-muted-foreground">
-            Mountline Signal
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight">Signal</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Build city campaigns, review public evidence, and prepare manual outreach without automating contact.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link className="signal-action signal-action-primary" href="/dashboard/signal/focus">
-            <CalendarCheck className="h-4 w-4" />
-            Start Focus Mode
-          </Link>
-          <Link className="signal-action" href="/dashboard/signal/campaigns/new">
-            <RadioTower className="h-4 w-4" />
-            Build Campaign
-          </Link>
-          <Link className="signal-action" href="/dashboard/signal/research">
-            <Search className="h-4 w-4" />
-            Research Business
-          </Link>
-          <Link className="signal-action" href="/dashboard/signal/new">
-            <Plus className="h-4 w-4" />
-            Add Prospect
-          </Link>
-          <Link className="signal-action" href="/dashboard/signal/import">
-            <Upload className="h-4 w-4" />
-            Import Existing Leads
-          </Link>
-          <button className="signal-action" type="button" onClick={() => setImportOpen((value) => !value)}>
-            <Upload className="h-4 w-4" />
-            Paste CSV
-          </button>
-          <Link className="signal-action" href="/dashboard/signal/playbooks">
-            <BookOpen className="h-4 w-4" />
-            Playbooks
-          </Link>
-          <Link className="signal-action" href="/dashboard/signal/alerts">
-            <Bell className="h-4 w-4" />
-            Alerts
-          </Link>
-        </div>
-      </div>
+    <div className="space-y-7">
+      <PageHeader
+        eyebrow="Mountline Signal"
+        title="Signal"
+        subtitle="Build local campaigns, review evidence, and prepare credible outreach."
+        actions={
+          <>
+            <PrimaryAction href="/dashboard/signal/focus" icon={CalendarCheck}>
+              Start Focus Mode
+            </PrimaryAction>
+            <SecondaryAction href="/dashboard/signal/campaigns/new" icon={RadioTower}>
+              Build Campaign
+            </SecondaryAction>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  More
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/signal/research"><Search className="h-4 w-4" />Research a Business</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/signal/new"><Plus className="h-4 w-4" />Add Prospect</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/signal/import"><Upload className="h-4 w-4" />Import Existing Leads</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setImportOpen((value) => !value)}>
+                  <Upload className="h-4 w-4" />Paste CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/signal/playbooks"><BookOpen className="h-4 w-4" />Playbooks</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/signal/alerts"><Bell className="h-4 w-4" />Alerts</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/signal?status=do_not_contact"><AlertTriangle className="h-4 w-4" />Suppressed Prospects</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
       {(message || error) && (
         <div
@@ -447,104 +464,49 @@ export function SignalDashboard({
         </div>
       )}
 
-      <section className="rounded-xl border border-border bg-card p-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-semibold">Today</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Actionable records from real Signal statuses.</p>
-          </div>
-          <Link href="/dashboard/signal/focus" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-            Open Focus Mode
-          </Link>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <Stat label="Calls to make" value={todayStrip.calls} />
-          <Stat label="Follow-ups due" value={todayStrip.followUps} />
-          <Stat label="Demo sends waiting" value={todayStrip.demoSends} />
-          <Stat label="High-fit alerts" value={todayStrip.alerts} />
-          <Stat label="Research queue" value={todayStrip.researchQueue} />
-        </div>
-      </section>
+      <SectionPanel
+        title="Today"
+        description="The queues that deserve attention before adding more prospects."
+        action={<Link href="/dashboard/signal/focus" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Open Focus Mode</Link>}
+      >
+        <MetricStrip
+          items={[
+            { href: "/dashboard/signal/focus", label: "Calls ready", value: todayStrip.calls, tone: todayStrip.calls ? "blue" : "default" },
+            { href: "/dashboard/signal/focus", label: "Follow-ups due", value: todayStrip.followUps, tone: todayStrip.followUps ? "green" : "default" },
+            { href: "/dashboard/signal", label: "Demos waiting", value: todayStrip.demoSends, tone: todayStrip.demoSends ? "amber" : "default" },
+            { href: "/dashboard/signal", label: "Research review", value: todayStrip.researchQueue, tone: todayStrip.researchQueue ? "amber" : "default" },
+            { href: "/dashboard/signal/alerts", label: "High-fit alerts", value: todayStrip.alerts, tone: todayStrip.alerts ? "blue" : "default" },
+          ]}
+        />
+      </SectionPanel>
 
-      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <h2 className="font-semibold">Active Campaigns</h2>
-              <p className="mt-1 text-sm text-muted-foreground">City campaigns waiting for review or import.</p>
-            </div>
-            <Link href="/dashboard/signal/campaigns" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              View all
-            </Link>
-          </div>
+      <section className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+        <SectionPanel
+          title="Current Priority"
+          description="The strongest actionable prospects, capped to keep the queue readable."
+          action={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+        >
           <div className="space-y-3">
-            {activeCampaigns.length > 0 ? (
-              activeCampaigns.map((campaign) => {
-                const approved = campaign.candidates.filter((candidate) => candidate.candidate_status === "approved").length
-                const imported = campaign.candidates.filter((candidate) => candidate.candidate_status === "imported_to_signal").length
-                const highFit = campaign.candidates.filter((candidate) => candidate.candidate_status === "imported_to_signal").length
-                return (
-                  <Link
-                    key={campaign.id}
-                    href={`/dashboard/signal/campaigns/${campaign.id}`}
-                    className="block rounded-lg border border-border bg-muted/30 p-3 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium">{campaign.name}</p>
-                        <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <MapPin className="h-3.5 w-3.5" />
-                          {[campaign.target_city, campaign.target_state].filter(Boolean).join(", ")}
-                        </p>
-                      </div>
-                      <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                        {campaign.status.replace(/_/g, " ")}
-                      </span>
-                    </div>
-                    <div className="mt-3 grid grid-cols-4 gap-2 text-xs text-muted-foreground">
-                      <MiniStat label="Discovered" value={campaign.candidates.length} />
-                      <MiniStat label="Approved" value={approved} />
-                      <MiniStat label="Analyzed" value={imported} />
-                      <MiniStat label="A/B" value={highFit} />
-                    </div>
-                    <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">
-                      {campaign.next_action || "Review candidate sources."}
-                    </p>
-                  </Link>
-                )
-              })
-            ) : (
-              <div className="rounded-lg border border-dashed border-border p-5 text-sm text-muted-foreground">
-                No active campaigns. Build one from a city and vertical.
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <h2 className="font-semibold">Priority Queue</h2>
-              <p className="mt-1 text-sm text-muted-foreground">A/B prospects with a manual next step.</p>
-            </div>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="space-y-2">
             {priorityQueue.length > 0 ? (
-              priorityQueue.map((row) => (
+              priorityQueue.slice(0, 5).map((row) => (
                 <Link
                   key={row.id}
                   href={`/dashboard/signal/${row.id}`}
-                  className="grid gap-3 rounded-lg border border-border bg-muted/30 p-3 text-sm transition-colors hover:bg-muted/50 md:grid-cols-[80px_1fr_140px_120px]"
+                  className="grid gap-3 rounded-lg border border-border bg-muted/20 p-4 text-sm transition-colors hover:bg-muted/35 lg:grid-cols-[1fr_110px_140px_120px]"
                 >
-                  <span className={`inline-flex h-7 w-fit items-center rounded-full border px-2.5 text-xs font-medium ${priorityClass(row.latest_analysis?.priority)}`}>
-                    {row.latest_analysis?.priority || "-"}
-                  </span>
-                  <span>
-                    <span className="block font-medium">{row.business_name}</span>
+                  <span className="min-w-0">
+                    <span className="block font-medium text-foreground">{row.business_name}</span>
                     <span className="mt-1 block text-xs text-muted-foreground">
+                      {[row.city, row.state].filter(Boolean).join(", ") || "Location unknown"} · {getSignalPlaybook(row.industry_playbook).name}
+                    </span>
+                    <span className="mt-2 block line-clamp-2 text-sm text-muted-foreground">
                       {row.latest_analysis?.recommended_next_action || row.latest_analysis?.recommended_primary_offer || "Review next action"}
                     </span>
+                  </span>
+                  <span>
+                    <StatusBadge tone={priorityTone(row.latest_analysis?.priority)}>
+                      Priority {row.latest_analysis?.priority || "-"}
+                    </StatusBadge>
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {(row.latest_analysis?.recommended_lane || "review").replace(/_/g, " ")}
@@ -555,22 +517,80 @@ export function SignalDashboard({
                 </Link>
               ))
             ) : (
-              <div className="rounded-lg border border-dashed border-border p-5 text-sm text-muted-foreground">
-                No A/B priority records are waiting.
-              </div>
+              <EmptyState title="Nothing urgent is waiting" icon={RadioTower}>
+                Review the research queue or build a campaign when the pipeline needs new prospects.
+              </EmptyState>
             )}
           </div>
-        </div>
+        </SectionPanel>
+
+        <SectionPanel
+          title="Active Campaigns"
+          description="City research funnels waiting for review, import, or scoring."
+          action={<Link href="/dashboard/signal/campaigns" className="text-sm text-muted-foreground transition-colors hover:text-foreground">View all campaigns</Link>}
+        >
+          <div className="space-y-3">
+            {activeCampaigns.length > 0 ? (
+              activeCampaigns.slice(0, 3).map((campaign) => {
+                const approved = campaign.candidates.filter((candidate) => candidate.candidate_status === "approved").length
+                const imported = campaign.candidates.filter((candidate) => candidate.candidate_status === "imported_to_signal").length
+                const quickScored = campaign.candidates.filter((candidate) => candidate.quick_score_summary).length
+                const progress = campaign.candidates.length
+                  ? Math.round(((approved + imported) / campaign.candidates.length) * 100)
+                  : 0
+                return (
+                <Link
+                  key={campaign.id}
+                  href={`/dashboard/signal/campaigns/${campaign.id}`}
+                  className="block rounded-lg border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/35"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{campaign.name}</p>
+                      <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {[campaign.target_city, campaign.target_state].filter(Boolean).join(", ")}
+                      </p>
+                    </div>
+                    <StatusBadge>{campaign.status.replace(/_/g, " ")}</StatusBadge>
+                  </div>
+                  <div className="mt-4 h-1.5 rounded-full bg-muted">
+                    <div className="h-full rounded-full bg-blue-400" style={{ width: `${Math.min(progress, 100)}%` }} />
+                  </div>
+                  <div className="mt-3 grid grid-cols-4 gap-2 text-xs text-muted-foreground">
+                    <MiniStat label="Discovered" value={campaign.candidates.length} />
+                    <MiniStat label="Approved" value={approved} />
+                    <MiniStat label="Scored" value={quickScored} />
+                    <MiniStat label="A/B" value={imported} />
+                  </div>
+                  <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">
+                    {campaign.next_action || "Review candidates and confirm official sites."}
+                  </p>
+                </Link>
+                )
+              })
+            ) : (
+              <EmptyState
+                title="No campaigns running"
+                icon={RadioTower}
+                action={<PrimaryAction href="/dashboard/signal/campaigns/new" icon={RadioTower}>Build Campaign</PrimaryAction>}
+              >
+                No campaigns running. Build a city campaign to discover and review prospects.
+              </EmptyState>
+            )}
+          </div>
+        </SectionPanel>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        <Stat label="Total prospects" value={stats.total} />
-        <Stat label="A leads" value={stats.aLeads} />
-        <Stat label="Ready" value={stats.ready} />
-        <Stat label="Awaiting reply" value={stats.awaiting} />
-        <Stat label="Discovery calls" value={stats.discovery} />
-        <Stat label="Won" value={stats.won} />
-      </div>
+      <MetricStrip
+        items={[
+          { label: "Total prospects", value: stats.total },
+          { label: "A leads", value: stats.aLeads, tone: stats.aLeads ? "green" : "default" },
+          { label: "Ready", value: stats.ready, tone: stats.ready ? "blue" : "default" },
+          { label: "Awaiting reply", value: stats.awaiting, tone: stats.awaiting ? "amber" : "default" },
+          { label: "Discovery calls", value: stats.discovery },
+        ]}
+      />
 
       {importOpen && (
         <div className="rounded-xl border border-border bg-card p-5">
@@ -638,62 +658,112 @@ export function SignalDashboard({
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card p-4">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-          <FilterSelect label="Playbook" value={filters.playbook} onChange={(value) => setFilters({ ...filters, playbook: value })}>
-            <option value="">All playbooks</option>
-            {Object.values(SIGNAL_PLAYBOOKS).map((playbook) => (
-              <option key={playbook.key} value={playbook.key}>{playbook.name}</option>
-            ))}
-          </FilterSelect>
-          <FilterSelect label="Priority" value={filters.priority} onChange={(value) => setFilters({ ...filters, priority: value })}>
-            <option value="">Any priority</option>
-            {["A", "B", "C", "skip"].map((priority) => <option key={priority} value={priority}>{priority}</option>)}
-          </FilterSelect>
-          <FilterSelect label="Compliance" value={filters.compliance} onChange={(value) => setFilters({ ...filters, compliance: value })}>
-            <option value="">Any tier</option>
-            <option value="standard">Standard</option>
-            <option value="sensitive">Sensitive</option>
-            <option value="compliance_gated">Compliance gated</option>
-          </FilterSelect>
-          <FilterSelect label="Status" value={filters.status} onChange={(value) => setFilters({ ...filters, status: value })}>
-            <option value="">Any status</option>
-            {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </FilterSelect>
-          <FilterSelect label="Outreach mode" value={filters.mode} onChange={(value) => setFilters({ ...filters, mode: value })}>
-            <option value="">Any mode</option>
-            {Object.entries(modeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </FilterSelect>
-          <FilterSelect label="Channel" value={filters.channel} onChange={(value) => setFilters({ ...filters, channel: value })}>
-            <option value="">Any channel</option>
-            {Object.entries(channelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </FilterSelect>
-          <FilterSelect label="Demo" value={filters.demo} onChange={(value) => setFilters({ ...filters, demo: value })}>
-            <option value="">Any demo</option>
-            <option value="auto-detailing">Auto detailing</option>
-            <option value="barber-shop">Barber shop</option>
-            <option value="none">None</option>
-          </FilterSelect>
-          <FilterSelect label="Value band" value={filters.valueBand} onChange={(value) => setFilters({ ...filters, valueBand: value })}>
-            <option value="">Any band</option>
-            <option value="$500-$1,250">$500-$1,250</option>
-            <option value="$1,250-$3,500">$1,250-$3,500</option>
-            <option value="$3,500-$10,000+">$3,500-$10,000+</option>
-            <option value="unknown">Unknown</option>
-          </FilterSelect>
-          <label className="block space-y-1 xl:col-span-2">
-            <span className="text-xs font-medium text-muted-foreground">City</span>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                value={filters.city}
-                onChange={(event) => setFilters({ ...filters, city: event.target.value })}
-                className="h-9 w-full rounded-md border border-border bg-muted pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
-                placeholder="Filter city or state"
-              />
-            </div>
-          </label>
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="font-semibold">All Prospects</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {filteredRows.length} of {rows.length} prospects shown.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((value) => !value)}
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Filters
+              {activeFilters.length > 0 && (
+                <span className="rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[10px] text-blue-300">
+                  {activeFilters.length}
+                </span>
+              )}
+            </button>
+            {activeFilters.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setFilters(emptyFilters)}
+                className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+                Clear
+              </button>
+            )}
+          </div>
         </div>
+        {activeFilters.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {activeFilters.map((filter) => (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={() => setFilters({ ...filters, [filter.key]: "" })}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+              >
+                {filter.key}: {filter.value}
+                <X className="h-3 w-3" />
+              </button>
+            ))}
+          </div>
+        )}
+        {filtersOpen && (
+          <div className="mt-4 grid gap-3 rounded-lg border border-border bg-muted/20 p-4 md:grid-cols-2 xl:grid-cols-5">
+            <FilterSelect label="Playbook" value={filters.playbook} onChange={(value) => setFilters({ ...filters, playbook: value })}>
+              <option value="">All playbooks</option>
+              {Object.values(SIGNAL_PLAYBOOKS).map((playbook) => (
+                <option key={playbook.key} value={playbook.key}>{playbook.name}</option>
+              ))}
+            </FilterSelect>
+            <FilterSelect label="Priority" value={filters.priority} onChange={(value) => setFilters({ ...filters, priority: value })}>
+              <option value="">Any priority</option>
+              {["A", "B", "C", "skip"].map((priority) => <option key={priority} value={priority}>{priority}</option>)}
+            </FilterSelect>
+            <FilterSelect label="Compliance" value={filters.compliance} onChange={(value) => setFilters({ ...filters, compliance: value })}>
+              <option value="">Any tier</option>
+              <option value="standard">Standard</option>
+              <option value="sensitive">Sensitive</option>
+              <option value="compliance_gated">Compliance gated</option>
+            </FilterSelect>
+            <FilterSelect label="Status" value={filters.status} onChange={(value) => setFilters({ ...filters, status: value })}>
+              <option value="">Any status</option>
+              {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </FilterSelect>
+            <FilterSelect label="Outreach mode" value={filters.mode} onChange={(value) => setFilters({ ...filters, mode: value })}>
+              <option value="">Any mode</option>
+              {Object.entries(modeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </FilterSelect>
+            <FilterSelect label="Channel" value={filters.channel} onChange={(value) => setFilters({ ...filters, channel: value })}>
+              <option value="">Any channel</option>
+              {Object.entries(channelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </FilterSelect>
+            <FilterSelect label="Demo" value={filters.demo} onChange={(value) => setFilters({ ...filters, demo: value })}>
+              <option value="">Any demo</option>
+              <option value="auto-detailing">Auto detailing</option>
+              <option value="barber-shop">Barber shop</option>
+              <option value="none">None</option>
+            </FilterSelect>
+            <FilterSelect label="Value band" value={filters.valueBand} onChange={(value) => setFilters({ ...filters, valueBand: value })}>
+              <option value="">Any band</option>
+              <option value="$500-$1,250">$500-$1,250</option>
+              <option value="$1,250-$3,500">$1,250-$3,500</option>
+              <option value="$3,500-$10,000+">$3,500-$10,000+</option>
+              <option value="unknown">Unknown</option>
+            </FilterSelect>
+            <label className="block space-y-1 xl:col-span-2">
+              <span className="text-xs font-medium text-muted-foreground">City</span>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={filters.city}
+                  onChange={(event) => setFilters({ ...filters, city: event.target.value })}
+                  className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
+                  placeholder="Filter city or state"
+                />
+              </div>
+            </label>
+          </div>
+        )}
       </div>
 
       {selectedIds.length > 0 && (
@@ -713,29 +783,20 @@ export function SignalDashboard({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border px-4 py-3">
-          <h2 className="font-semibold">All Prospects</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1380px] text-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
+        <CompactTable minWidth="980px">
             <thead>
               <tr className="border-b border-border bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
                 {[
                   "",
                   "Business",
-                  "Industry",
-                  "Confidence",
+                  "Category",
                   "City",
-                  "Primary Opportunity",
-                  "Score",
                   "Priority",
-                  "Value Band",
-                  "Suggested Channel",
-                  "Outreach Mode",
+                  "Lane",
+                  "Contact Readiness",
                   "Status",
-                  "Follow-up Date",
-                  "Quick Score",
+                  "Follow-Up",
                   "Open",
                 ].map((heading) => (
                   <th key={heading} className="px-4 py-3 text-left font-medium">{heading}</th>
@@ -756,7 +817,7 @@ export function SignalDashboard({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={15} className="px-4 py-12 text-center">
+                  <td colSpan={10} className="px-4 py-12 text-center">
                     <RadioTower className="mx-auto mb-3 h-8 w-8 text-muted-foreground opacity-50" />
                     <p className="font-medium">No Signal prospects match the filters</p>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -773,8 +834,7 @@ export function SignalDashboard({
                 </tr>
               )}
             </tbody>
-          </table>
-        </div>
+          </CompactTable>
       </div>
 
       <section className="rounded-xl border border-border bg-card p-4">
@@ -793,33 +853,6 @@ export function SignalDashboard({
           <Stat label="Won" value={weekly.won} />
         </div>
       </section>
-
-      <style jsx>{`
-        .signal-action {
-          display: inline-flex;
-          height: 2.25rem;
-          align-items: center;
-          gap: 0.5rem;
-          border-radius: 0.5rem;
-          border: 1px solid var(--border);
-          padding: 0 0.75rem;
-          font-size: 0.875rem;
-          font-weight: 500;
-          color: var(--foreground);
-          transition: background-color 150ms ease, color 150ms ease;
-        }
-        .signal-action:hover {
-          background: var(--muted);
-        }
-        .signal-action-primary {
-          background: var(--foreground);
-          color: var(--background);
-          border-color: var(--foreground);
-        }
-        .signal-action-primary:hover {
-          background: color-mix(in oklab, var(--foreground) 90%, transparent);
-        }
-      `}</style>
     </div>
   )
 }
@@ -877,63 +910,42 @@ function SignalRow({
         <div className="text-xs">{playbook.name}</div>
       </td>
       <td className="px-4 py-4 text-muted-foreground">
-        <div>{row.classification_confidence || analysis?.confidence || "-"}</div>
-        <div className="text-xs">
-          {row.classification_source ? row.classification_source.replace(/_/g, " ") : "-"}
-        </div>
-      </td>
-      <td className="px-4 py-4 text-muted-foreground">
         {[row.city, row.state].filter(Boolean).join(", ") || "-"}
       </td>
       <td className="px-4 py-4">
-        <p className="max-w-[260px] line-clamp-2 text-muted-foreground">
-          {analysis?.recommended_primary_offer || "Run analysis"}
-        </p>
+        <StatusBadge tone={priorityTone(analysis?.priority)}>{analysis?.priority || "-"}</StatusBadge>
       </td>
-      <td className={`px-4 py-4 font-mono text-lg font-semibold ${scoreClass(analysis?.overall_opportunity_score)}`}>
-        {analysis?.overall_opportunity_score ?? "-"}
+      <td className="px-4 py-4 text-muted-foreground">
+        {analysis?.recommended_lane ? analysis.recommended_lane.replace(/_/g, " ") : "-"}
+      </td>
+      <td className="px-4 py-4 text-muted-foreground">
+        {row.contact_readiness.replace(/_/g, " ")}
       </td>
       <td className="px-4 py-4">
-        <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${priorityClass(analysis?.priority)}`}>
-          {analysis?.priority || "-"}
-        </span>
-      </td>
-      <td className="px-4 py-4 text-muted-foreground">
-        {analysis?.potential_project_value_band || "-"}
-      </td>
-      <td className="px-4 py-4 text-muted-foreground">
-        {analysis?.suggested_channel ? channelLabels[analysis.suggested_channel] : "-"}
-      </td>
-      <td className="px-4 py-4 text-muted-foreground">
-        {modeLabels[row.outreach_mode] || row.outreach_mode}
-      </td>
-      <td className="px-4 py-4">
-        <span className="inline-flex rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-          {statusLabels[row.outreach_status] || row.outreach_status}
-        </span>
+        <StatusBadge>{statusLabels[row.outreach_status] || row.outreach_status}</StatusBadge>
       </td>
       <td className="px-4 py-4 text-muted-foreground">
         {formatDate(row.follow_up_date)}
       </td>
       <td className="px-4 py-4">
-        <button
-          type="button"
-          disabled={quickScoring || row.outreach_status === "do_not_contact" || !row.website_url}
-          onClick={onQuickScore}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
-        >
-          {quickScoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
-          Quick Score
-        </button>
-      </td>
-      <td className="px-4 py-4">
-        <Link
-          href={`/dashboard/signal/${row.id}`}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          Open
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={quickScoring || row.outreach_status === "do_not_contact" || !row.website_url}
+            onClick={onQuickScore}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
+          >
+            {quickScoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+            Score
+          </button>
+          <Link
+            href={`/dashboard/signal/${row.id}`}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            Open
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </td>
     </tr>
   )

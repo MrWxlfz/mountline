@@ -9,11 +9,28 @@ import {
   CheckCircle2,
   ExternalLink,
   Loader2,
+  MoreHorizontal,
   RadioTower,
   Search,
   UserPlus,
   XCircle,
 } from "lucide-react"
+import {
+  EmptyState,
+  MetricStrip,
+  PageHeader,
+  PrimaryAction,
+  SecondaryAction,
+  SectionPanel,
+  StatusBadge,
+} from "@/components/dashboard/dashboard-ui"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { getSignalPlaybook } from "@/lib/signal/playbooks"
 import type {
   SignalCampaign,
@@ -58,6 +75,15 @@ function formatDate(value: string | null | undefined) {
     minute: "2-digit",
   })
 }
+
+const campaignStages = [
+  "Discover",
+  "Review Candidates",
+  "Confirm Official Sites",
+  "Quick Score",
+  "Prioritize",
+  "Add to Focus Mode",
+]
 
 export function SignalCampaignDetail({
   campaign: initialCampaign,
@@ -235,50 +261,29 @@ export function SignalCampaignDetail({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4">
-          <Link href="/dashboard/signal/campaigns" className="rounded-lg p-2 transition-colors hover:bg-muted">
-            <ArrowLeft className="h-5 w-5" />
+    <div className="space-y-7">
+      <PageHeader
+        eyebrow="Mountline Signal"
+        title={campaign.name}
+        subtitle={`${[campaign.target_city, campaign.target_state].filter(Boolean).join(", ")} · ${playbooks.join(", ")}`}
+        meta={
+          <Link href="/dashboard/signal/campaigns" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Campaigns
           </Link>
-          <div>
-            <p className="mb-1 text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Mountline Signal
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight">{campaign.name}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {[campaign.target_city, campaign.target_state].filter(Boolean).join(", ")} · {playbooks.join(", ")}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            disabled={working === "discover"}
-            onClick={runDiscover}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
-          >
-            {working === "discover" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Discover Candidates
-          </button>
-          <button
-            type="button"
-            disabled={working === "import" || counts.approved === 0}
-            onClick={importApproved}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-          >
-            {working === "import" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-            Import Approved
-          </button>
-          <Link
-            href="/dashboard/signal/focus"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <RadioTower className="h-4 w-4" />
-            Focus Mode
-          </Link>
-        </div>
-      </div>
+        }
+        actions={
+          <>
+            <PrimaryAction onClick={runDiscover} disabled={working === "discover"} icon={working === "discover" ? Loader2 : Search}>
+              Discover Candidates
+            </PrimaryAction>
+            <SecondaryAction onClick={importApproved} disabled={working === "import" || counts.approved === 0} icon={working === "import" ? Loader2 : UserPlus}>
+              Import Approved
+            </SecondaryAction>
+            <SecondaryAction href="/dashboard/signal/focus" icon={RadioTower}>Focus Mode</SecondaryAction>
+          </>
+        }
+      />
 
       {(message || error) && (
         <div
@@ -292,31 +297,37 @@ export function SignalCampaignDetail({
         </div>
       )}
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
-        <Stat label="Status" value={statusLabels[campaign.status] || campaign.status} />
-        <Stat label="Discovered" value={String(counts.discovered)} />
-        <Stat label="Approved" value={String(counts.approved)} />
-        <Stat label="Imported" value={String(counts.imported)} />
-        <Stat label="Confirm" value={String(counts.confirm)} />
-        <Stat label="Duplicates" value={String(counts.duplicate)} />
-        <Stat label="Last run" value={formatDate(campaign.last_run_at)} />
-      </section>
+      <SectionPanel>
+        <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
+          {campaignStages.map((stage, index) => (
+            <div key={stage} className="rounded-lg border border-border bg-muted/20 p-3">
+              <p className="font-mono text-xs text-muted-foreground">{index + 1}</p>
+              <p className="mt-1 text-sm font-medium">{stage}</p>
+            </div>
+          ))}
+        </div>
+      </SectionPanel>
 
-      <div className="rounded-xl border border-border bg-card p-4">
-        <p className="text-sm font-medium">Next action</p>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <MetricStrip
+        items={[
+          { label: "Status", value: statusLabels[campaign.status] || campaign.status },
+          { label: "Discovered", value: counts.discovered },
+          { label: "Approved", value: counts.approved, tone: counts.approved ? "green" : "default" },
+          { label: "Imported", value: counts.imported },
+          { label: "Confirm", value: counts.confirm, tone: counts.confirm ? "amber" : "default" },
+        ]}
+      />
+
+      <SectionPanel title="Next Action">
+        <p className="text-sm text-muted-foreground">
           {campaign.next_action || "Run discovery, then approve only confirmed official public websites."}
         </p>
-      </div>
+      </SectionPanel>
 
       {candidates.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
-          <RadioTower className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="font-medium">No candidates yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Run discovery when provider keys are configured, or keep this campaign as a manual planning record.
-          </p>
-        </div>
+        <EmptyState title="No candidates yet" icon={RadioTower}>
+          Run discovery when provider keys are configured, or keep this campaign as a manual planning record.
+        </EmptyState>
       ) : (
         <div className="space-y-3">
           {candidates.map((candidate) => {
@@ -342,12 +353,8 @@ export function SignalCampaignDetail({
                       <span className={`rounded-full border px-2 py-0.5 text-xs ${badgeClass(candidate.candidate_status)}`}>
                         {candidateStatusLabels[candidate.candidate_status] || candidate.candidate_status}
                       </span>
-                      <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                        {candidate.official_source_confidence || "unknown"} confidence
-                      </span>
-                      <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                        {candidate.classification_confidence || "unknown"} category confidence
-                      </span>
+                      <StatusBadge>{candidate.official_source_confidence || "unknown"} site</StatusBadge>
+                      <StatusBadge>{candidate.classification_confidence || "unknown"} category</StatusBadge>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {[candidate.city, candidate.state].filter(Boolean).join(", ") || "Location unknown"} · {(candidate.classified_playbook || candidate.industry_hint || "Industry unknown").replace(/_/g, " ")}
@@ -381,40 +388,119 @@ export function SignalCampaignDetail({
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      disabled={working === `score:${candidate.id}` || !officialUrl}
-                      onClick={() => quickScoreCandidate(candidate)}
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-                    >
-                      {working === `score:${candidate.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                      Quick Score
-                    </button>
-                    {candidate.duplicate_prospect_id && (
-                      <Link
-                        href={`/dashboard/signal/${candidate.duplicate_prospect_id}`}
-                        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        {duplicate ? `Open ${duplicate.business_name}` : "Open prospect"}
-                      </Link>
-                    )}
-                    {imported && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        disabled={working === `focus:${candidate.id}`}
-                        onClick={() => addToFocus(candidate)}
-                        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
-                        {working === `focus:${candidate.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <RadioTower className="h-4 w-4" />}
-                        Add to Focus
+                        <MoreHorizontal className="h-4 w-4" />
+                        Actions
                       </button>
-                    )}
-                  </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-60">
+                      <DropdownMenuItem
+                        disabled={working === candidate.id || imported}
+                        onSelect={() =>
+                          updateCandidate(candidate, {
+                            candidate_status: "approved",
+                            likely_official_url: officialUrl || null,
+                            duplicate_prospect_id: mergeId || null,
+                            classified_playbook: categoryValue,
+                            reason: mergeId
+                              ? "Approved to merge into an existing Signal prospect."
+                              : "Approved by Mountline team for official-site scan and import.",
+                          })
+                        }
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        Approve
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={working === candidate.id || imported}
+                        onSelect={() =>
+                          updateCandidate(candidate, {
+                            candidate_status: "rejected",
+                            reason: "Rejected during campaign source review.",
+                          })
+                        }
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Reject From Campaign
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={working === candidate.id || imported}
+                        onSelect={() =>
+                          updateCandidate(candidate, {
+                            candidate_status: "rejected",
+                            reason: "Rejected permanently from campaign review.",
+                          })
+                        }
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Reject Permanently
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        disabled={working === candidate.id || imported}
+                        onSelect={() =>
+                          updateCandidate(candidate, {
+                            candidate_status: "duplicate",
+                            duplicate_prospect_id: mergeId || candidate.duplicate_prospect_id,
+                            reason: "Marked duplicate during campaign review.",
+                          })
+                        }
+                      >
+                        Mark Duplicate
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={working === candidate.id || imported}
+                        onSelect={() =>
+                          updateCandidate(candidate, {
+                            candidate_status: "pending_review",
+                            duplicate_prospect_id: null,
+                            reason: "Marked not a duplicate during campaign review.",
+                          })
+                        }
+                      >
+                        Not a Duplicate
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={working === candidate.id || imported}
+                        onSelect={() =>
+                          updateCandidate(candidate, {
+                            candidate_status: "needs_confirmation",
+                            likely_official_url: officialUrl || null,
+                            reason: "Official website needs confirmation.",
+                          })
+                        }
+                      >
+                        Confirm Official Site
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem disabled={working === `score:${candidate.id}` || !officialUrl} onSelect={() => quickScoreCandidate(candidate)}>
+                        <Search className="h-4 w-4" />
+                        Quick Score
+                      </DropdownMenuItem>
+                      {imported && (
+                        <DropdownMenuItem disabled={working === `focus:${candidate.id}`} onSelect={() => addToFocus(candidate)}>
+                          <RadioTower className="h-4 w-4" />
+                          Add to Focus Mode
+                        </DropdownMenuItem>
+                      )}
+                      {candidate.duplicate_prospect_id && (
+                        <DropdownMenuItem asChild>
+                          <Link href={`/dashboard/signal/${candidate.duplicate_prospect_id}`}>
+                            <ExternalLink className="h-4 w-4" />
+                            {duplicate ? `Open ${duplicate.business_name}` : "Open prospect"}
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
 
-                <div className="mt-4 grid gap-3 xl:grid-cols-[1.1fr_0.8fr_0.8fr_auto]">
+                <div className="mt-4 grid gap-3 xl:grid-cols-[1.1fr_0.8fr_0.8fr]">
                   <label className="block space-y-1">
                     <span className="text-xs font-medium text-muted-foreground">Official website to use</span>
                     <input
@@ -478,41 +564,6 @@ export function SignalCampaignDetail({
                       ))}
                     </select>
                   </label>
-                  <div className="flex flex-wrap items-end gap-2">
-                    <button
-                      type="button"
-                      disabled={working === candidate.id || imported}
-                      onClick={() =>
-                        updateCandidate(candidate, {
-                          candidate_status: "approved",
-                          likely_official_url: officialUrl || null,
-                          duplicate_prospect_id: mergeId || null,
-                          classified_playbook: categoryValue,
-                          reason: mergeId
-                            ? "Approved to merge into an existing Signal prospect."
-                            : "Approved by Mountline team for official-site scan and import.",
-                        })
-                      }
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-foreground px-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
-                    >
-                      {working === candidate.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                      Approve
-                    </button>
-                    <button
-                      type="button"
-                      disabled={working === candidate.id || imported}
-                      onClick={() =>
-                        updateCandidate(candidate, {
-                          candidate_status: "rejected",
-                          reason: "Rejected during campaign source review.",
-                        })
-                      }
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-red-500/25 px-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
-                    >
-                      <XCircle className="h-4 w-4" />
-                      Reject
-                    </button>
-                  </div>
                 </div>
               </section>
             )
@@ -523,16 +574,7 @@ export function SignalCampaignDetail({
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 break-words text-sm font-semibold">{value}</p>
-    </div>
-  )
-}
-
-function MiniStat({ label, value }: { label: string; value: string }) {
+function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-md border border-border bg-background/50 px-2 py-2">
       <p className="font-mono text-sm text-foreground">{value}</p>

@@ -13,11 +13,14 @@ export default async function MountlineIdPage({ searchParams }: MountlineIdPageP
   const redirectUrl = portalRedirect
     ? `/auth/redirect?redirect_url=${encodeURIComponent(portalRedirect)}`
     : "/auth/redirect"
+  const useCustomFlow =
+    process.env.NEXT_PUBLIC_MOUNTLINE_ID_CUSTOM_FLOW !== "false" &&
+    params.mountline_id_fallback !== "clerk"
 
   const { userId } = await auth()
   if (userId) {
     redirect(redirectUrl)
   }
 
-  return <MountlineIdForm redirectUrl={redirectUrl} />
+  return <MountlineIdForm redirectUrl={redirectUrl} useCustomFlow={useCustomFlow} />
 }

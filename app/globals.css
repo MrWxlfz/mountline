@@ -564,3 +564,19 @@ html {
 .theme-toggle svg {
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* Mountline ID keeps Clerk stable while enforcing the local auth surface sizing. */
+.mountline-id-auth .cl-formFieldInput,
+.mountline-id-auth .cl-formFieldInputGroup {
+  min-height: 44px !important;
+  height: 44px !important;
+}
+
+.mountline-id-auth .cl-formFieldInputGroup .cl-formFieldInput {
+  min-height: 42px !important;
+  height: 42px !important;
+}
+
+.mountline-id-auth .cl-formFieldInputShowPasswordButton {
+  min-height: 32px !important;
+}

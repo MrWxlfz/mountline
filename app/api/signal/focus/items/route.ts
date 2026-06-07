@@ -52,6 +52,7 @@ export async function POST(request: Request) {
     .insert({
       prospect_id: prospect.id,
       campaign_id: parsed.data.campaign_id || null,
+      market_id: parsed.data.market_id || null,
       focus_reason: parsed.data.focus_reason || null,
       recommended_action: parsed.data.recommended_action || null,
       due_date: parsed.data.due_date || new Date().toISOString().slice(0, 10),

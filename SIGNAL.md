@@ -32,6 +32,9 @@ Signal does not send emails, make calls, send DMs, send texts, submit forms, scr
 - `/dashboard/signal/campaigns`
 - `/dashboard/signal/campaigns/new`
 - `/dashboard/signal/campaigns/[campaignId]`
+- `/dashboard/signal/markets`
+- `/dashboard/signal/markets/new`
+- `/dashboard/signal/markets/[marketId]`
 - `/dashboard/signal/focus`
 - `/dashboard/signal/[prospectId]`
 - `/dashboard/signal/playbooks`
@@ -149,16 +152,27 @@ OPENAI_API_KEY=
 Public research environment variables:
 
 ```text
-SIGNAL_RESEARCH_PROVIDER=tavily|disabled
+SIGNAL_RESEARCH_PROVIDER=tavily|firecrawl|hybrid|disabled
 TAVILY_API_KEY=
+FIRECRAWL_API_KEY=
 ```
 
 Optional screenshot capture environment variables:
 
 ```text
-SIGNAL_SCREENSHOT_PROVIDER=manual|browserless|disabled
+SIGNAL_SCREENSHOT_PROVIDER=browserless|firecrawl|manual|disabled
 BROWSERLESS_API_KEY=
 BROWSERLESS_BASE_URL=
+```
+
+Market cost-control environment variables:
+
+```text
+SIGNAL_MARKET_MAX_CANDIDATES=25
+SIGNAL_FIRECRAWL_MAX_PAGES_PER_CANDIDATE=3
+SIGNAL_FIRECRAWL_MAX_CREDITS_PER_MARKET=150
+SIGNAL_VISUAL_SHORTLIST_THRESHOLD=70
+SIGNAL_VISUAL_MAX_SCREENSHOTS_PER_MARKET=8
 ```
 
 Optional internal alert email:
@@ -188,6 +202,8 @@ API keys authenticate provider access. Model values are exact model IDs, not API
 `SIGNAL_RESEARCH_PROVIDER=disabled` is supported. Manual entry and import continue to work without Tavily.
 
 `SIGNAL_SCREENSHOT_PROVIDER=manual` is the default and keeps screenshot collection as upload-only. `browserless` enables server-side homepage capture after the official URL passes the same website scanner safety checks. `disabled` hides automated capture guidance while manual upload can remain available.
+
+`SIGNAL_RESEARCH_PROVIDER=hybrid` uses Tavily for lightweight public discovery and Firecrawl for complementary discovery plus official-site extraction where configured. Firecrawl is never used to crawl whole sites by default; market depth limits control how many official-site pages are read per candidate.
 
 ## Initial Analysis Vs Deep Dive
 
@@ -497,15 +513,62 @@ Signal detail pages include correction controls:
 
 Corrections are stored in `signal_feedback` for that prospect and can guide regeneration. This is not global model training.
 
+## Market Builder V4
+
+Signal V4 adds `/dashboard/signal/markets` as the autonomous market builder. A Mountline team member enters a city/service area, one or more industries, a candidate limit, and a research depth, then reviews an estimated usage budget before running the market.
+
+Market stages:
+
+1. Discovery: Tavily, Firecrawl, or hybrid public web search finds plausible local businesses and likely official websites.
+2. Suppression: existing rejected, duplicate, and do-not-contact records are hidden by default and counted in market progress.
+3. Duplicate detection: candidates are compared by hostname, public email, phone, normalized name plus city, aliases, and prior corrections.
+4. Official-site resolution: directories, social pages, and search result pages are not treated as official sites without human confirmation.
+5. Lightweight evidence extraction: the existing SSRF-safe scanner reads the confirmed official site, and Firecrawl can scrape/map only a limited number of relevant official-site pages.
+6. Preliminary scoring: deterministic scoring plus the fast AI provider, when configured, calculates website opportunity, systems opportunity, outreach readiness, pursuit priority, lane, demo, and confidence.
+7. Visual shortlist: candidates above `SIGNAL_VISUAL_SHORTLIST_THRESHOLD` are flagged for desktop screenshot review up to `SIGNAL_VISUAL_MAX_SCREENSHOTS_PER_MARKET`.
+8. Review queue: ranked candidates can be approved into Signal and optionally added to Focus Mode. Signal still never sends outreach automatically.
+
+Research depth:
+
+- `quick`: homepage only
+- `balanced`: homepage plus up to two relevant official-site pages, capped by `SIGNAL_FIRECRAWL_MAX_PAGES_PER_CANDIDATE`
+- `deep`: homepage plus deeper relevant official-site pages, still capped by the market page/credit settings
+
+Cost controls:
+
+- markets store `estimated_credit_budget` before the run and `actual_credit_usage` as the run progresses
+- the run stops Firecrawl extraction before `SIGNAL_FIRECRAWL_MAX_CREDITS_PER_MARKET`
+- per-candidate Firecrawl pages are capped
+- screenshot shortlists are capped
+- provider setup failures are stored as market messages and partial candidates remain reviewable
+
+Market evidence graph:
+
+- `Verified Facts`: official URLs, scanned headings, public contact routes, booking links, service/pricing/location language, platform signals, and Firecrawl official-site excerpts
+- `Reasonable Inferences`: category classification, lane, priority, and scoring interpretation
+- `Discovery Questions`: playbook questions that should be asked manually before pitching systems work
+
+AI interpretations must not be stored as verified facts. Systems opportunities, especially HVAC, contractor, medical, or dental workflows, should be phrased as discovery questions unless the public site or human-entered context supports them directly.
+
+## Communication Engine V4
+
+Signal uses a principles-based communication system: warm, clear, concise, plainspoken, confident, permission-based, specific, respectful, low-pressure, not robotic, not corporate, not fake-casual, no forced slang, no unsupported claims, and no fake urgency.
+
+The `signal_script_feedback` table stores draft feedback such as `Too corporate`, `Too long`, `Wrong assumption`, `Good opener`, and `Use edited version as guidance`. Feedback is retrieval context for future draft generation and review; it is not model training or fine-tuning. Private guidance should shape strategy without leaking verbatim into outward scripts.
+
+The `signal_prompt_templates` table stores internal prompt registry defaults for quick score, deep analysis, category classification, visual analysis, first call, gatekeeper, voicemail, follow-up, demo send, objection response, and discovery questions. The registry is internal only and not exposed publicly.
+
+Every outward-facing draft still needs validation for unsupported claims, internal terminology, AI leakage, private guidance leakage, demographic assumptions, fake familiarity, duplicate first-contact after prior outreach, jargon mismatch, aggressive tone, and unnecessary hype. Failed drafts should stay in manual review until regenerated or edited.
+
 ## Dashboard, Timeline, And Focus Mode
 
 The main Signal dashboard is organized as a high-signal operating screen:
 
-- Header: `Start Focus Mode` is the primary action, `Build Campaign` is secondary, and lower-frequency actions are grouped in the overflow menu.
+- Header: `Build Market` is the primary action, `Start Focus Mode` is secondary, and lower-frequency actions are grouped in the overflow menu.
 - Today panel: calls ready, follow-ups due, demos waiting, research needing review, and high-fit alerts.
-- Current Priority: maximum five A/B prospects with city, category, pursuit priority, lane, next action, and confidence.
-- Active Campaigns: maximum three city campaigns with discovered, approved, quick-scored, imported/A-B progress and a clear next action.
-- All Prospects: simplified default columns for business, category, city, pursuit priority, lane, contact readiness, status, follow-up, and open action.
+- Best Prospects: maximum five A/B prospects with city, category, pursuit priority, lane, next action, and confidence.
+- Markets: maximum three recent market scans with discovered, scored, A/B, usage, progress, and a clear next action.
+- All Prospects: behind `View All Prospects`, with simplified columns for business, category, city, pursuit priority, lane, contact readiness, status, follow-up, and open action.
 - Filters: advanced filters are collapsed by default and active filters appear as removable pills.
 - Weekly Scoreboard: compact bottom section based on recorded Signal data and outreach events.
 
@@ -652,7 +715,16 @@ Manual checklist:
 
 - Confirm the dashboard sidebar shows the active Clerk user's avatar, name, and primary email, with loading and fallback states.
 - Confirm `/dashboard` starts with actionable Needs Attention rows, not non-actionable metric cards.
-- Confirm `/dashboard/signal` has one primary action, one secondary action, overflow actions, collapsed filters, active filter pills, readable priority queue, readable active campaigns, and a simplified All Prospects table.
+- Confirm `/dashboard/signal` has one primary action, one secondary action, overflow actions, readable best-prospect queue, readable recent markets, and the full prospect table behind `View All Prospects`.
+- Confirm `/dashboard/signal` uses `Build Market` as the primary action, `Start Focus Mode` as secondary, shows Today, Markets, Best Prospects, Activity/scoreboard context, and keeps the complete prospect table behind `View All Prospects`.
+- Create `/dashboard/signal/markets/new` with city `Keller`, state `TX`, industry `auto_detailing`, 10 candidates, and balanced depth. Confirm the estimate shows Tavily operations, Firecrawl pages, screenshot count, fast-analysis count, and estimated budget before running.
+- Run the Keller Auto Detailing market in hybrid mode. Confirm suppressed businesses are counted/hidden by default, likely duplicates are marked, official sites are resolved or sent to Needs Confirmation, Firecrawl evidence is stored when configured, top prospects are ranked, screenshot shortlist flags are generated, and one approved prospect can be added to Focus Mode.
+- Run a Keller HVAC market and confirm HVAC classification, no unsupported missed-call claim, and systems opportunities stay as discovery questions unless supported by evidence.
+- Run a barber/salon market and confirm `18|8` is never classified as HVAC, Square is preserved when visible, and the barber demo appears only for relevant barber/salon or beauty/wellness records.
+- Mark a market candidate rejected permanently, rerun the market, confirm it remains hidden by default, then restore it from the suppressed tab.
+- Test missing Firecrawl with Tavily enabled. Confirm Tavily-only discovery works and the UI explains reduced evidence mode through setup messages.
+- Test missing Tavily with Firecrawl enabled. Confirm Firecrawl-only discovery works when supported and provider mode/usage are visible.
+- Submit script feedback through the feedback API or UI path when present: edit a draft, mark `Too corporate`, save a better version, and confirm the feedback row is available as retrieval context without copying private guidance verbatim.
 - Confirm `/dashboard/signal/focus` shows compact setup, one emphasized current item, upcoming queue, outcome save/advance behavior, and no premature awaiting-reply call targets before due dates.
 - Confirm `/dashboard/signal/campaigns/[campaignId]` shows the staged funnel and grouped candidate actions while preserving approve/reject/duplicate/merge/quick-score/import/focus behavior.
 - Confirm `/dashboard/signal/[prospectId]` uses Overview, Evidence, Strategy, Scripts, Timeline, and Visual Audit tabs with Quick Score and Add to Focus visible in the header.

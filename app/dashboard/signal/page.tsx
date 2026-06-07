@@ -5,6 +5,8 @@ import type {
   SignalAnalysis,
   SignalCampaign,
   SignalCampaignCandidate,
+  SignalMarket,
+  SignalMarketCandidate,
   SignalOutreachEvent,
   SignalProspect,
 } from "@/lib/supabase/types"
@@ -19,9 +21,14 @@ export type SignalCampaignRow = SignalCampaign & {
   candidates: SignalCampaignCandidate[]
 }
 
+export type SignalMarketRow = SignalMarket & {
+  candidates: SignalMarketCandidate[]
+}
+
 async function getSignalData(): Promise<{
   campaigns: SignalCampaignRow[]
   events: SignalOutreachEvent[]
+  markets: SignalMarketRow[]
   rows: SignalProspectRow[]
 }> {
   const supabase = createAdminClient()
@@ -31,6 +38,8 @@ async function getSignalData(): Promise<{
     { data: alerts },
     { data: campaigns },
     { data: candidates },
+    { data: markets },
+    { data: marketCandidates },
     { data: events },
   ] =
     await Promise.all([
@@ -56,6 +65,14 @@ async function getSignalData(): Promise<{
         .select("*")
         .order("created_at", { ascending: false }),
       supabase
+        .from("signal_markets")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("signal_market_candidates")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
         .from("signal_outreach_events")
         .select("*")
         .order("created_at", { ascending: false }),
@@ -63,7 +80,7 @@ async function getSignalData(): Promise<{
 
   if (prospectError) {
     console.error("[signal] Prospect fetch failed:", prospectError.message)
-    return { campaigns: [], events: [], rows: [] }
+    return { campaigns: [], events: [], markets: [], rows: [] }
   }
 
   const latestAnalysisByProspect = new Map<string, SignalAnalysis>()
@@ -99,9 +116,23 @@ async function getSignalData(): Promise<{
     candidates: candidatesByCampaign.get(campaign.id) || [],
   }))
 
+  const candidatesByMarket = new Map<string, SignalMarketCandidate[]>()
+  ;((marketCandidates || []) as SignalMarketCandidate[]).forEach((candidate) => {
+    candidatesByMarket.set(candidate.market_id, [
+      ...(candidatesByMarket.get(candidate.market_id) || []),
+      candidate,
+    ])
+  })
+
+  const marketRows = ((markets || []) as SignalMarket[]).map((market) => ({
+    ...market,
+    candidates: candidatesByMarket.get(market.id) || [],
+  }))
+
   return {
     campaigns: campaignRows,
     events: (events || []) as SignalOutreachEvent[],
+    markets: marketRows,
     rows,
   }
 }
@@ -114,6 +145,7 @@ export default async function SignalPage() {
     <SignalDashboard
       campaigns={data.campaigns}
       events={data.events}
+      markets={data.markets}
       initialRows={data.rows}
     />
   )

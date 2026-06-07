@@ -267,6 +267,59 @@ export type SignalCampaignStatus =
   | "complete"
   | "failed"
 
+export type SignalMarketStatus =
+  | "draft"
+  | "discovering"
+  | "deduplicating"
+  | "researching"
+  | "scoring"
+  | "ready_for_review"
+  | "paused"
+  | "completed"
+  | "failed"
+
+export type SignalMarketResearchDepth = "quick" | "balanced" | "deep"
+
+export type SignalResearchProviderMode =
+  | "tavily"
+  | "firecrawl"
+  | "hybrid"
+  | "disabled"
+
+export type SignalScreenshotProviderMode =
+  | "browserless"
+  | "firecrawl"
+  | "manual"
+  | "disabled"
+
+export type SignalAiProviderMode = "gemini" | "openai" | "disabled"
+
+export type SignalMarketCandidateResearchState =
+  | "discovered"
+  | "suppressed"
+  | "duplicate"
+  | "needs_confirmation"
+  | "official_site_resolved"
+  | "researching"
+  | "quick_scored"
+  | "visual_shortlisted"
+  | "approved"
+  | "imported_to_signal"
+  | "rejected"
+  | "failed"
+
+export type SignalMarketCandidateQuickScoreState =
+  | "not_started"
+  | "scored"
+  | "ai_unavailable"
+  | "failed"
+
+export type SignalMarketCandidateSuppressionState =
+  | "clear"
+  | "suppressed"
+  | "market_rejected"
+  | "restored"
+
 export type SignalCampaignCandidateStatus =
   | "pending_review"
   | "approved"
@@ -505,6 +558,7 @@ export type SignalCandidateSuppression = {
   suppression_type: SignalCandidateSuppressionType
   reason: string | null
   source_campaign_id: string | null
+  source_market_id: string | null
   restored_at: string | null
   restored_by: string | null
 }
@@ -542,6 +596,46 @@ export type SignalFeedback = {
   original_value: string | null
   corrected_value: string | null
   note: string | null
+}
+
+export type SignalScriptFeedback = {
+  id: string
+  created_at: string
+  prospect_id: string | null
+  draft_id: string | null
+  script_type: string | null
+  feedback_type: string
+  rating: number | null
+  original_text: string | null
+  edited_text: string | null
+  note: string | null
+  reusable_lesson: string | null
+  active: boolean
+  created_by: string | null
+}
+
+export type SignalPromptTemplate = {
+  id: string
+  created_at: string
+  updated_at: string
+  name: string
+  prompt_type:
+    | "quick_score"
+    | "deep_analysis"
+    | "category_classification"
+    | "visual_analysis"
+    | "first_call"
+    | "gatekeeper"
+    | "voicemail"
+    | "follow_up"
+    | "demo_send"
+    | "objection_response"
+    | "discovery_questions"
+  version: number
+  active: boolean
+  content: string
+  notes: string | null
+  created_by: string | null
 }
 
 export type SignalVisualEvidence = {
@@ -653,6 +747,28 @@ export type SignalCampaign = {
   next_action: string | null
 }
 
+export type SignalMarket = {
+  id: string
+  created_at: string
+  updated_at: string
+  name: string
+  city: string
+  state: string | null
+  radius_miles: number | null
+  industries: string[]
+  max_candidates: number
+  research_depth: SignalMarketResearchDepth
+  status: SignalMarketStatus
+  provider_mode: SignalResearchProviderMode | null
+  progress: SignalJson | null
+  estimated_credit_budget: number | null
+  actual_credit_usage: SignalJson | null
+  notes: string | null
+  created_by: string | null
+  last_run_at: string | null
+  next_action: string | null
+}
+
 export type SignalCampaignCandidate = {
   id: string
   campaign_id: string
@@ -683,11 +799,58 @@ export type SignalCampaignCandidate = {
   reason: string | null
 }
 
+export type SignalMarketCandidate = {
+  id: string
+  market_id: string
+  created_at: string
+  updated_at: string
+  business_name: string
+  city: string | null
+  state: string | null
+  industry_hint: string | null
+  category: string | null
+  category_confidence: SignalConfidence | null
+  candidate_url: string | null
+  likely_official_url: string | null
+  confirmed_official_url: string | null
+  official_source_confidence: SignalConfidence | null
+  source_urls: SignalJson | null
+  provider_sources: SignalJson | null
+  duplicate_state: SignalDuplicateConfidence | "none" | null
+  duplicate_prospect_id: string | null
+  suppression_state: SignalMarketCandidateSuppressionState | null
+  suppression_id: string | null
+  research_state: SignalMarketCandidateResearchState
+  quick_score_state: SignalMarketCandidateQuickScoreState | null
+  preliminary_priority: SignalPriority | null
+  confidence: SignalConfidence | null
+  imported_prospect_id: string | null
+  website_opportunity_score: number | null
+  systems_opportunity_score: number | null
+  outreach_readiness_score: number | null
+  pursuit_priority: string | null
+  recommended_lane: SignalRecommendedLane | null
+  relevant_demo: SignalRelevantDemo | null
+  visual_state: string | null
+  quick_score_summary: SignalJson | null
+  evidence_graph: SignalJson | null
+  website_scan: SignalJson | null
+  firecrawl_evidence: SignalJson | null
+  normalized_business_name: string | null
+  normalized_hostname: string | null
+  classified_at: string | null
+  error_message: string | null
+  rejected_at: string | null
+  restored_at: string | null
+  approved_at: string | null
+}
+
 export type SignalFocusItem = {
   id: string
   created_at: string
   prospect_id: string
   campaign_id: string | null
+  market_id: string | null
   status: SignalFocusItemStatus
   focus_reason: string | null
   recommended_action: string | null

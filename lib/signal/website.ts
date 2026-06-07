@@ -363,7 +363,7 @@ async function readLimitedText(response: Response) {
   return new TextDecoder().decode(Buffer.concat(chunks))
 }
 
-function safeSecondaryLinks(homeUrl: string, links: string[]) {
+function safeSecondaryLinks(homeUrl: string, links: string[], limit = 2) {
   const home = new URL(homeUrl)
   const blocked = [
     "login",
@@ -403,7 +403,7 @@ function safeSecondaryLinks(homeUrl: string, links: string[]) {
     contactPreferred.some((word) => link.toLowerCase().includes(word)),
   )
 
-  return unique([serviceLink, contactLink].filter(Boolean) as string[], 2)
+  return unique([serviceLink, contactLink].filter(Boolean) as string[], limit)
 }
 
 async function fetchHtml(startUrl: URL) {
@@ -556,6 +556,7 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
 
 export async function scanSignalWebsite(
   websiteUrl: string | null | undefined,
+  options: { maxSecondaryPages?: number } = {},
 ): Promise<SignalWebsiteScan> {
   const startedAt = new Date().toISOString()
   const normalized = normalizeSignalUrl(websiteUrl)
@@ -595,6 +596,7 @@ export async function scanSignalWebsite(
     const secondaryUrls = safeSecondaryLinks(
       homepage.finalUrl,
       pages[0]?.links || [],
+      options.maxSecondaryPages ?? 2,
     )
 
     for (const secondaryUrl of secondaryUrls) {

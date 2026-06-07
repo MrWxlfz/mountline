@@ -170,6 +170,7 @@ export async function addSignalCandidateSuppression({
   phone,
   reason,
   sourceCampaignId,
+  sourceMarketId,
   suppressionType,
 }: {
   businessName?: string | null
@@ -179,6 +180,7 @@ export async function addSignalCandidateSuppression({
   phone?: string | null
   reason?: string | null
   sourceCampaignId?: string | null
+  sourceMarketId?: string | null
   suppressionType: SignalCandidateSuppressionType
 }) {
   const supabase = createAdminClient()
@@ -191,6 +193,7 @@ export async function addSignalCandidateSuppression({
     suppression_type: suppressionType,
     reason: reason || null,
     source_campaign_id: sourceCampaignId || null,
+    source_market_id: sourceMarketId || null,
   }
 
   const { data, error } = await supabase

@@ -6,7 +6,7 @@ import {
 } from "./visual-evidence"
 import { scanSignalWebsite } from "./website"
 
-type ScreenshotProvider = "manual" | "browserless" | "disabled"
+type ScreenshotProvider = "manual" | "browserless" | "firecrawl" | "disabled"
 
 export type SignalScreenshotCaptureResult =
   | {
@@ -25,7 +25,7 @@ export type SignalScreenshotCaptureResult =
 
 function getScreenshotProvider(): ScreenshotProvider {
   const provider = process.env.SIGNAL_SCREENSHOT_PROVIDER?.trim().toLowerCase()
-  if (provider === "browserless" || provider === "disabled") return provider
+  if (provider === "browserless" || provider === "firecrawl" || provider === "disabled") return provider
   return "manual"
 }
 
@@ -62,6 +62,8 @@ export async function captureSignalHomepageScreenshot({
       setup_message:
         provider === "manual"
           ? "Automated capture is set to manual. Upload a public homepage screenshot instead."
+          : provider === "firecrawl"
+            ? "Firecrawl screenshot mode is available for market shortlist tracking. Use Browserless for stored prospect screenshots."
           : "Automated screenshot capture is disabled.",
     }
   }

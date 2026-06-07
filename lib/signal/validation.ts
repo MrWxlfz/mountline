@@ -183,6 +183,42 @@ export const signalCampaignStatusSchema = z.enum([
   "failed",
 ])
 
+export const signalMarketStatusSchema = z.enum([
+  "draft",
+  "discovering",
+  "deduplicating",
+  "researching",
+  "scoring",
+  "ready_for_review",
+  "paused",
+  "completed",
+  "failed",
+])
+
+export const signalMarketResearchDepthSchema = z.enum(["quick", "balanced", "deep"])
+
+export const signalResearchProviderModeSchema = z.enum([
+  "tavily",
+  "firecrawl",
+  "hybrid",
+  "disabled",
+])
+
+export const signalMarketCandidateResearchStateSchema = z.enum([
+  "discovered",
+  "suppressed",
+  "duplicate",
+  "needs_confirmation",
+  "official_site_resolved",
+  "researching",
+  "quick_scored",
+  "visual_shortlisted",
+  "approved",
+  "imported_to_signal",
+  "rejected",
+  "failed",
+])
+
 export const signalCampaignCandidateStatusSchema = z.enum([
   "pending_review",
   "approved",
@@ -482,9 +518,62 @@ export const signalCampaignCandidatePatchSchema = z.object({
   reason: nullableText,
 })
 
+export const signalMarketCreateSchema = z.object({
+  name: z.string().trim().min(1, "Market name is required").max(180),
+  city: z.string().trim().min(1, "City is required").max(120),
+  state: z.string().trim().max(60).optional().nullable(),
+  radius_miles: z.coerce.number().int().min(1).max(100).optional().nullable(),
+  industries: z.array(signalPlaybookSchema).min(1, "Choose at least one industry").max(8),
+  max_candidates: z.coerce.number().int().min(1).max(50).optional(),
+  research_depth: signalMarketResearchDepthSchema.optional(),
+  notes: nullableText,
+})
+
+export const signalMarketPatchSchema = z.object({
+  name: z.string().trim().min(1).max(180).optional(),
+  city: z.string().trim().min(1).max(120).optional(),
+  state: z.string().trim().max(60).optional().nullable(),
+  radius_miles: z.coerce.number().int().min(1).max(100).optional().nullable(),
+  industries: z.array(signalPlaybookSchema).min(1).max(8).optional(),
+  max_candidates: z.coerce.number().int().min(1).max(50).optional(),
+  research_depth: signalMarketResearchDepthSchema.optional(),
+  status: signalMarketStatusSchema.optional(),
+  notes: nullableText,
+  next_action: shortNullableText,
+})
+
+export const signalMarketCandidatePatchSchema = z.object({
+  confirmed_official_url: z.string().trim().url().max(500).optional().nullable(),
+  likely_official_url: z.string().trim().url().max(500).optional().nullable(),
+  duplicate_prospect_id: z.string().uuid().optional().nullable(),
+  duplicate_state: z.enum(["none", "exact", "likely", "possible"]).optional().nullable(),
+  category: signalPlaybookSchema.optional().nullable(),
+  research_state: signalMarketCandidateResearchStateSchema.optional(),
+  suppression_state: z.enum(["clear", "suppressed", "market_rejected", "restored"]).optional().nullable(),
+  reason: nullableText,
+})
+
+export const signalMarketCandidateApproveSchema = z.object({
+  add_to_focus: z.boolean().optional(),
+  merge_prospect_id: z.string().uuid().optional().nullable(),
+})
+
+export const signalScriptFeedbackCreateSchema = z.object({
+  prospect_id: z.string().uuid().optional().nullable(),
+  draft_id: z.string().uuid().optional().nullable(),
+  script_type: z.string().trim().max(80).optional().nullable(),
+  feedback_type: z.string().trim().min(1).max(80),
+  rating: z.coerce.number().int().min(1).max(5).optional().nullable(),
+  original_text: z.string().trim().max(5000).optional().nullable(),
+  edited_text: z.string().trim().max(5000).optional().nullable(),
+  note: z.string().trim().max(1200).optional().nullable(),
+  reusable_lesson: z.string().trim().max(1200).optional().nullable(),
+})
+
 export const signalFocusItemCreateSchema = z.object({
   prospect_id: z.string().uuid(),
   campaign_id: z.string().uuid().optional().nullable(),
+  market_id: z.string().uuid().optional().nullable(),
   focus_reason: z.string().trim().max(800).optional().nullable(),
   recommended_action: z.string().trim().max(800).optional().nullable(),
   due_date: z.string().trim().max(20).optional().nullable(),

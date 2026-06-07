@@ -38,7 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getSignalPlaybook, SIGNAL_PLAYBOOKS } from "@/lib/signal/playbooks"
-import type { SignalCampaignRow, SignalProspectRow } from "./page"
+import type { SignalCampaignRow, SignalMarketRow, SignalProspectRow } from "./page"
 import type { SignalOutreachEvent } from "@/lib/supabase/types"
 
 type Filters = {
@@ -180,10 +180,12 @@ function mapCsvToProspects(text: string) {
 export function SignalDashboard({
   campaigns,
   events,
+  markets,
   initialRows,
 }: {
   campaigns: SignalCampaignRow[]
   events: SignalOutreachEvent[]
+  markets: SignalMarketRow[]
   initialRows: SignalProspectRow[]
 }) {
   const [rows, setRows] = useState(initialRows)
@@ -197,6 +199,7 @@ export function SignalDashboard({
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [creatingSession, setCreatingSession] = useState(false)
   const [quickScoringId, setQuickScoringId] = useState<string | null>(null)
+  const [showAllProspects, setShowAllProspects] = useState(false)
 
   const previewRows = useMemo(() => mapCsvToProspects(csvText).slice(0, 25), [csvText])
 
@@ -232,9 +235,17 @@ export function SignalDashboard({
               ["approved", "needs_confirmation"].includes(candidate.candidate_status),
             ).length,
           0,
+        ) +
+        markets.reduce(
+          (sum, market) =>
+            sum +
+            market.candidates.filter((candidate) =>
+              ["needs_confirmation", "official_site_resolved"].includes(candidate.research_state),
+            ).length,
+          0,
         ),
     }),
-    [campaigns, rows, today],
+    [campaigns, markets, rows, today],
   )
 
   const priorityQueue = useMemo(
@@ -253,12 +264,12 @@ export function SignalDashboard({
     [rows],
   )
 
-  const activeCampaigns = useMemo(
+  const recentMarkets = useMemo(
     () =>
-      campaigns
-        .filter((campaign) => !["complete", "failed"].includes(campaign.status))
+      markets
+        .filter((market) => !["completed", "failed"].includes(market.status))
         .slice(0, 4),
-    [campaigns],
+    [markets],
   )
 
   const weekly = useMemo(() => {
@@ -405,14 +416,14 @@ export function SignalDashboard({
       <PageHeader
         eyebrow="Mountline Signal"
         title="Signal"
-        subtitle="Build local campaigns, review evidence, and prepare credible outreach."
+        subtitle="Build markets, review evidence, approve prospects, and prepare credible manual outreach."
         actions={
           <>
-            <PrimaryAction href="/dashboard/signal/focus" icon={CalendarCheck}>
-              Start Focus Mode
+            <PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>
+              Build Market
             </PrimaryAction>
-            <SecondaryAction href="/dashboard/signal/campaigns/new" icon={RadioTower}>
-              Build Campaign
+            <SecondaryAction href="/dashboard/signal/focus" icon={CalendarCheck}>
+              Start Focus Mode
             </SecondaryAction>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -427,6 +438,9 @@ export function SignalDashboard({
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/signal/research"><Search className="h-4 w-4" />Research a Business</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/signal/campaigns/new"><RadioTower className="h-4 w-4" />Build Campaign</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/signal/new"><Plus className="h-4 w-4" />Add Prospect</Link>
@@ -482,7 +496,7 @@ export function SignalDashboard({
 
       <section className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <SectionPanel
-          title="Current Priority"
+          title="Best Prospects"
           description="The strongest actionable prospects, capped to keep the queue readable."
           action={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
         >
@@ -518,64 +532,67 @@ export function SignalDashboard({
               ))
             ) : (
               <EmptyState title="Nothing urgent is waiting" icon={RadioTower}>
-                Review the research queue or build a campaign when the pipeline needs new prospects.
+                Review the research queue or build a market when the pipeline needs new prospects.
               </EmptyState>
             )}
           </div>
         </SectionPanel>
 
         <SectionPanel
-          title="Active Campaigns"
-          description="City research funnels waiting for review, import, or scoring."
-          action={<Link href="/dashboard/signal/campaigns" className="text-sm text-muted-foreground transition-colors hover:text-foreground">View all campaigns</Link>}
+          title="Markets"
+          description="Recent autonomous scans with review status, progress, top opportunities, and usage."
+          action={<Link href="/dashboard/signal/markets" className="text-sm text-muted-foreground transition-colors hover:text-foreground">View all markets</Link>}
         >
           <div className="space-y-3">
-            {activeCampaigns.length > 0 ? (
-              activeCampaigns.slice(0, 3).map((campaign) => {
-                const approved = campaign.candidates.filter((candidate) => candidate.candidate_status === "approved").length
-                const imported = campaign.candidates.filter((candidate) => candidate.candidate_status === "imported_to_signal").length
-                const quickScored = campaign.candidates.filter((candidate) => candidate.quick_score_summary).length
-                const progress = campaign.candidates.length
-                  ? Math.round(((approved + imported) / campaign.candidates.length) * 100)
+            {recentMarkets.length > 0 ? (
+              recentMarkets.slice(0, 3).map((market) => {
+                const scored = market.candidates.filter((candidate) => candidate.quick_score_state && candidate.quick_score_state !== "not_started").length
+                const imported = market.candidates.filter((candidate) => candidate.imported_prospect_id).length
+                const top = market.candidates.filter((candidate) => ["A", "B"].includes(candidate.preliminary_priority || "")).length
+                const usage = market.actual_credit_usage && typeof market.actual_credit_usage === "object"
+                  ? market.actual_credit_usage as Record<string, unknown>
+                  : null
+                const progress = market.candidates.length
+                  ? Math.round(((scored + imported) / market.candidates.length) * 100)
                   : 0
                 return (
                 <Link
-                  key={campaign.id}
-                  href={`/dashboard/signal/campaigns/${campaign.id}`}
+                  key={market.id}
+                  href={`/dashboard/signal/markets/${market.id}`}
                   className="block rounded-lg border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/35"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-medium">{campaign.name}</p>
+                      <p className="font-medium">{market.name}</p>
                       <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5" />
-                        {[campaign.target_city, campaign.target_state].filter(Boolean).join(", ")}
+                        {[market.city, market.state].filter(Boolean).join(", ")}
                       </p>
                     </div>
-                    <StatusBadge>{campaign.status.replace(/_/g, " ")}</StatusBadge>
+                    <StatusBadge>{market.status.replace(/_/g, " ")}</StatusBadge>
                   </div>
                   <div className="mt-4 h-1.5 rounded-full bg-muted">
                     <div className="h-full rounded-full bg-blue-400" style={{ width: `${Math.min(progress, 100)}%` }} />
                   </div>
                   <div className="mt-3 grid grid-cols-4 gap-2 text-xs text-muted-foreground">
-                    <MiniStat label="Discovered" value={campaign.candidates.length} />
-                    <MiniStat label="Approved" value={approved} />
-                    <MiniStat label="Scored" value={quickScored} />
-                    <MiniStat label="A/B" value={imported} />
+                    <MiniStat label="Discovered" value={market.candidates.length} />
+                    <MiniStat label="Scored" value={scored} />
+                    <MiniStat label="A/B" value={top} />
+                    <MiniStat label="Usage" value={Number(usage?.firecrawl_credits || 0)} />
                   </div>
                   <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">
-                    {campaign.next_action || "Review candidates and confirm official sites."}
+                    {market.next_action || "Run or review this market."}
                   </p>
                 </Link>
                 )
               })
             ) : (
               <EmptyState
-                title="No campaigns running"
+                title="No markets running"
                 icon={RadioTower}
-                action={<PrimaryAction href="/dashboard/signal/campaigns/new" icon={RadioTower}>Build Campaign</PrimaryAction>}
+                action={<PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>Build Market</PrimaryAction>}
               >
-                No campaigns running. Build a city campaign to discover and review prospects.
+                Build a market to discover and rank prospects with evidence.
               </EmptyState>
             )}
           </div>
@@ -658,6 +675,29 @@ export function SignalDashboard({
         </div>
       )}
 
+      {!showAllProspects ? (
+        <SectionPanel
+          title="All Prospects"
+          description={`${rows.length} prospects are stored in Signal. Keep the main screen focused and open the full table only when needed.`}
+          action={
+            <button
+              type="button"
+              onClick={() => setShowAllProspects(true)}
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <ExternalLink className="h-4 w-4" />
+              View All Prospects
+            </button>
+          }
+        >
+          <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+            <span>{stats.total} total prospects</span>
+            <span>{stats.ready} ready to contact</span>
+            <span>{todayStrip.researchQueue} research items need review</span>
+          </div>
+        </SectionPanel>
+      ) : (
+        <>
       <div className="rounded-lg border border-border bg-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -836,6 +876,8 @@ export function SignalDashboard({
             </tbody>
           </CompactTable>
       </div>
+        </>
+      )}
 
       <section className="rounded-xl border border-border bg-card p-4">
         <div className="mb-3">

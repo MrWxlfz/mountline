@@ -26,6 +26,10 @@ function statusTone(status: string) {
 }
 
 function progressValue(market: MarketRow) {
+  if (market.progress && typeof market.progress === "object" && !Array.isArray(market.progress)) {
+    const progress = market.progress as Record<string, unknown>
+    if (typeof progress.progress_percent === "number") return progress.progress_percent
+  }
   const total = market.candidates.length
   if (!total) return 0
   const done = market.candidates.filter((candidate) =>
@@ -73,7 +77,7 @@ export default async function SignalMarketsPage() {
         eyebrow="Mountline Signal"
         title="Markets"
         subtitle="Autonomous market scans stay inside Signal for review, confirmation, and manual approval."
-        actions={<PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>Build Market</PrimaryAction>}
+        actions={<PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>Find Prospects</PrimaryAction>}
       />
 
       <MetricStrip
@@ -126,7 +130,7 @@ export default async function SignalMarketsPage() {
                     <div className="mt-3 flex flex-wrap gap-2 text-xs">
                       {top.map((candidate) => (
                         <span key={candidate.id} className="rounded-full border border-border bg-card px-2 py-1 text-muted-foreground">
-                          {candidate.business_name} · {candidate.preliminary_priority}
+                          {candidate.canonical_business_name || candidate.business_name} · {candidate.preliminary_priority}
                         </span>
                       ))}
                     </div>
@@ -139,9 +143,9 @@ export default async function SignalMarketsPage() {
           <EmptyState
             title="No markets yet"
             icon={RadioTower}
-            action={<PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>Build Market</PrimaryAction>}
+            action={<PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>Find Prospects</PrimaryAction>}
           >
-            Build a small pilot market to discover prospects, score public website evidence, and prepare review.
+            Start a focused market to discover prospects, score public website evidence, and prepare review.
           </EmptyState>
         )}
       </SectionPanel>

@@ -550,6 +550,12 @@ Market evidence graph:
 
 AI interpretations must not be stored as verified facts. Systems opportunities, especially HVAC, contractor, medical, or dental workflows, should be phrased as discovery questions unless the public site or human-entered context supports them directly.
 
+## Market Progress V5
+
+Market runs persist a snapshot on `signal_markets.progress` and append durable activity rows to `signal_market_events`. The browser reads the same persisted state through the team-only market API and polls every 1-2 seconds while a market is discovering, deduplicating, researching, or scoring. Polling stops when the market is ready, failed, or paused. This keeps progress visible after navigation without fake timers or client-only progress.
+
+The current staged route handler is sufficient for small controlled markets because it persists after each stage and candidate checkpoint. A durable workflow system becomes appropriate if markets need long background execution after request timeouts, concurrent worker retries, scheduled resumptions, or provider calls that should continue when no browser tab is open.
+
 ## Communication Engine V4
 
 Signal uses a principles-based communication system: warm, clear, concise, plainspoken, confident, permission-based, specific, respectful, low-pressure, not robotic, not corporate, not fake-casual, no forced slang, no unsupported claims, and no fake urgency.
@@ -564,7 +570,7 @@ Every outward-facing draft still needs validation for unsupported claims, intern
 
 The main Signal dashboard is organized as a high-signal operating screen:
 
-- Header: `Build Market` is the primary action, `Start Focus Mode` is secondary, and lower-frequency actions are grouped in the overflow menu.
+- Header: `Find Prospects` is the primary action, `Start Focus Mode` is secondary, and lower-frequency actions are grouped in the overflow menu.
 - Today panel: calls ready, follow-ups due, demos waiting, research needing review, and high-fit alerts.
 - Best Prospects: maximum five A/B prospects with city, category, pursuit priority, lane, next action, and confidence.
 - Markets: maximum three recent market scans with discovered, scored, A/B, usage, progress, and a clear next action.
@@ -716,7 +722,7 @@ Manual checklist:
 - Confirm the dashboard sidebar shows the active Clerk user's avatar, name, and primary email, with loading and fallback states.
 - Confirm `/dashboard` starts with actionable Needs Attention rows, not non-actionable metric cards.
 - Confirm `/dashboard/signal` has one primary action, one secondary action, overflow actions, readable best-prospect queue, readable recent markets, and the full prospect table behind `View All Prospects`.
-- Confirm `/dashboard/signal` uses `Build Market` as the primary action, `Start Focus Mode` as secondary, shows Today, Markets, Best Prospects, Activity/scoreboard context, and keeps the complete prospect table behind `View All Prospects`.
+- Confirm `/dashboard/signal` uses `Find Prospects` as the primary action, `Start Focus Mode` as secondary, shows Today, Recent Markets, Best Prospects, Activity/scoreboard context, and keeps the complete prospect table behind `View All Prospects`.
 - Create `/dashboard/signal/markets/new` with city `Keller`, state `TX`, industry `auto_detailing`, 10 candidates, and balanced depth. Confirm the estimate shows Tavily operations, Firecrawl pages, screenshot count, fast-analysis count, and estimated budget before running.
 - Run the Keller Auto Detailing market in hybrid mode. Confirm suppressed businesses are counted/hidden by default, likely duplicates are marked, official sites are resolved or sent to Needs Confirmation, Firecrawl evidence is stored when configured, top prospects are ranked, screenshot shortlist flags are generated, and one approved prospect can be added to Focus Mode.
 - Run a Keller HVAC market and confirm HVAC classification, no unsupported missed-call claim, and systems opportunities stay as discovery questions unless supported by evidence.

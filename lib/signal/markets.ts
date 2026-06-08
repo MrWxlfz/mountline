@@ -7,6 +7,11 @@ import {
   resolveSignalClassification,
   syncSignalProspectAliases,
 } from "./classification"
+import {
+  identityFields,
+  resolveMarketCandidateIdentityFromOfficialEvidence,
+  resolveMarketCandidateIdentityFromSearch,
+} from "./identity"
 import { runAndStoreInitialSignalAnalysis } from "./analysis"
 import {
   estimateSignalMarketUsage,
@@ -43,6 +48,8 @@ import type {
   SignalJson,
   SignalMarket,
   SignalMarketCandidate,
+  SignalMarketEvent,
+  SignalMarketEventStage,
   SignalMarketResearchDepth,
   SignalProspect,
   SignalRecommendedLane,
@@ -51,8 +58,12 @@ import type {
 
 type MarketProgress = {
   stage: string
+  stage_label: string
   steps: Array<{ key: string; label: string; status: "pending" | "running" | "done" | "failed" }>
   counts: Record<string, number>
+  progress_current: number
+  progress_total: number
+  progress_percent: number
   usage: Record<string, unknown>
   setup_messages: string[]
   updated_at: string
@@ -70,13 +81,17 @@ type MarketUsage = {
 }
 
 const MARKET_STEPS = [
-  { key: "discovery", label: "Finding businesses" },
-  { key: "suppression", label: "Removing rejected matches" },
-  { key: "duplicates", label: "Detecting duplicates" },
-  { key: "official_sites", label: "Confirming official sites" },
-  { key: "evidence", label: "Reading public websites" },
-  { key: "scoring", label: "Calculating opportunity" },
-  { key: "review", label: "Preparing ranked review" },
+  { key: "initializing", label: "Preparing research" },
+  { key: "discovering", label: "Finding businesses" },
+  { key: "normalizing", label: "Normalizing results" },
+  { key: "suppressing", label: "Skipping rejected matches" },
+  { key: "deduplicating", label: "Detecting duplicates" },
+  { key: "resolving_sites", label: "Verifying official sites" },
+  { key: "scraping_sites", label: "Reading public websites" },
+  { key: "classifying", label: "Classifying businesses" },
+  { key: "quick_scoring", label: "Calculating opportunity" },
+  { key: "screenshot_shortlist", label: "Preparing visual shortlist" },
+  { key: "ranking", label: "Preparing ranked review" },
 ]
 
 const MARKET_QUERY_TERMS: Record<SignalPlaybookKey, string[]> = {
@@ -107,10 +122,20 @@ function nowIso() {
   return new Date().toISOString()
 }
 
-function stepProgress(stage: string, counts: Record<string, number>, usage: MarketUsage, setupMessages: string[] = []): MarketProgress {
+function stepProgress(
+  stage: SignalMarketEventStage,
+  counts: Record<string, number>,
+  usage: MarketUsage,
+  setupMessages: string[] = [],
+  progressCurrent = 0,
+  progressTotal = 0,
+): MarketProgress {
   const activeIndex = MARKET_STEPS.findIndex((step) => step.key === stage)
+  const current = Math.max(0, progressCurrent)
+  const total = Math.max(0, progressTotal)
   return {
     stage,
+    stage_label: MARKET_STEPS[activeIndex]?.label || stage.replace(/_/g, " "),
     steps: MARKET_STEPS.map((step, index) => ({
       ...step,
       status:
@@ -123,6 +148,9 @@ function stepProgress(stage: string, counts: Record<string, number>, usage: Mark
               : "pending",
     })),
     counts,
+    progress_current: current,
+    progress_total: total,
+    progress_percent: total > 0 ? Math.round((current / total) * 100) : 0,
     usage,
     setup_messages: setupMessages,
     updated_at: nowIso(),
@@ -131,9 +159,13 @@ function stepProgress(stage: string, counts: Record<string, number>, usage: Mark
 
 function completedProgress(counts: Record<string, number>, usage: MarketUsage, setupMessages: string[] = []): MarketProgress {
   return {
-    stage: "review",
+    stage: "ready",
+    stage_label: "Ready for review",
     steps: MARKET_STEPS.map((step) => ({ ...step, status: "done" })),
     counts,
+    progress_current: counts.quick_scored + counts.failed + counts.needs_review + counts.duplicates + counts.suppressed,
+    progress_total: Math.max(1, counts.discovered),
+    progress_percent: 100,
     usage,
     setup_messages: setupMessages,
     updated_at: nowIso(),
@@ -463,13 +495,105 @@ async function updateMarket(
   await supabase.from("signal_markets").update(update).eq("id", marketId)
 }
 
+async function addMarketEvent({
+  candidateId,
+  eventType,
+  marketId,
+  message,
+  metadata,
+  progressCurrent,
+  progressTotal,
+  stage,
+}: {
+  marketId: string
+  eventType: string
+  stage: SignalMarketEventStage
+  message: string
+  candidateId?: string | null
+  progressCurrent?: number | null
+  progressTotal?: number | null
+  metadata?: Record<string, unknown> | null
+}) {
+  const supabase = createAdminClient()
+  const { error } = await supabase.from("signal_market_events").insert({
+    market_id: marketId,
+    event_type: eventType,
+    stage,
+    message,
+    candidate_id: candidateId || null,
+    progress_current: progressCurrent ?? null,
+    progress_total: progressTotal ?? null,
+    metadata: metadata || null,
+  })
+  if (error) {
+    console.error("[signal] Market event insert failed:", error.message)
+  }
+}
+
+async function updateMarketProgress({
+  counts,
+  marketId,
+  message,
+  nextAction,
+  setupMessages = [],
+  stage,
+  status,
+  usage,
+  progressCurrent = 0,
+  progressTotal = 0,
+}: {
+  marketId: string
+  status: SignalMarket["status"]
+  stage: SignalMarketEventStage
+  message: string
+  nextAction: string
+  counts: Record<string, number>
+  usage: MarketUsage
+  setupMessages?: string[]
+  progressCurrent?: number
+  progressTotal?: number
+}) {
+  await updateMarket(marketId, {
+    status,
+    progress: stepProgress(stage, counts, usage, setupMessages, progressCurrent, progressTotal),
+    actual_credit_usage: usage,
+    next_action: nextAction,
+  })
+  await addMarketEvent({
+    marketId,
+    eventType: "stage",
+    stage,
+    message,
+    progressCurrent,
+    progressTotal,
+    metadata: {
+      counts,
+      usage,
+    },
+  })
+}
+
+async function marketIsPaused(marketId: string) {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from("signal_markets")
+    .select("status")
+    .eq("id", marketId)
+    .maybeSingle()
+  return data?.status === "paused"
+}
+
 async function collectFirecrawlEvidence({
   depth,
+  candidateId,
+  marketId,
   officialUrl,
   scan,
   usage,
 }: {
   depth: SignalMarketResearchDepth
+  marketId: string
+  candidateId: string
   officialUrl: string
   scan: SignalWebsiteScan | null
   usage: MarketUsage
@@ -479,6 +603,14 @@ async function collectFirecrawlEvidence({
   if (providerMode !== "firecrawl" && providerMode !== "hybrid") return []
   if (!process.env.FIRECRAWL_API_KEY) {
     usage.setup_messages.push("Firecrawl evidence extraction skipped because FIRECRAWL_API_KEY is missing.")
+    await addMarketEvent({
+      marketId,
+      candidateId,
+      eventType: "provider_degraded",
+      stage: "scraping_sites",
+      message: "Firecrawl evidence skipped because FIRECRAWL_API_KEY is missing.",
+      metadata: { official_url: officialUrl },
+    })
     return []
   }
 
@@ -492,6 +624,16 @@ async function collectFirecrawlEvidence({
   usage.firecrawl_credits += mapped.creditsUsed
   const urls = selectUsefulUrls(officialUrl, scan, mapped.links, maxPages)
   const evidence: SignalFirecrawlPageEvidence[] = []
+  await addMarketEvent({
+    marketId,
+    candidateId,
+    eventType: "firecrawl_plan",
+    stage: "scraping_sites",
+    message: `Firecrawl will read ${urls.length} official-site page${urls.length === 1 ? "" : "s"}.`,
+    progressCurrent: 0,
+    progressTotal: urls.length,
+    metadata: { urls },
+  })
 
   for (const url of urls) {
     if (usage.firecrawl_pages >= config.maxFirecrawlCreditsPerMarket) {
@@ -507,6 +649,18 @@ async function collectFirecrawlEvidence({
     usage.firecrawl_credits += page.credits_used
     if (page.error) usage.setup_messages.push(page.error)
     evidence.push(page)
+    await addMarketEvent({
+      marketId,
+      candidateId,
+      eventType: page.error ? "firecrawl_page_failed" : "firecrawl_page_scraped",
+      stage: "scraping_sites",
+      message: page.error
+        ? `Firecrawl could not read ${url}.`
+        : `Scanned ${page.title || new URL(url).hostname}.`,
+      progressCurrent: evidence.length,
+      progressTotal: urls.length,
+      metadata: { url, error: page.error, credits_used: page.credits_used },
+    })
   }
 
   return evidence
@@ -515,10 +669,12 @@ async function collectFirecrawlEvidence({
 async function scoreMarketCandidate({
   candidate,
   depth,
+  marketId,
   usage,
 }: {
   candidate: SignalMarketCandidate
   depth: SignalMarketResearchDepth
+  marketId: string
   usage: MarketUsage
 }) {
   const officialUrl = normalizeSignalUrl(candidate.confirmed_official_url || candidate.likely_official_url)
@@ -535,17 +691,59 @@ async function scoreMarketCandidate({
   }
 
   const pageLimit = firecrawlPageLimitForDepth(depth)
+  await addMarketEvent({
+    marketId,
+    candidateId: candidate.id,
+    eventType: "site_scan_started",
+    stage: "scraping_sites",
+    message: `Reading ${candidate.canonical_business_name || candidate.business_name} official website.`,
+    metadata: { official_url: officialUrl.toString(), page_limit: pageLimit },
+  })
   const scan = await scanSignalWebsite(officialUrl.toString(), {
     maxSecondaryPages: Math.max(0, pageLimit - 1),
   })
+  await addMarketEvent({
+    marketId,
+    candidateId: candidate.id,
+    eventType: scan.broken_response ? "site_scan_failed" : "site_scan_completed",
+    stage: "scraping_sites",
+    message: scan.broken_response
+      ? `${candidate.canonical_business_name || candidate.business_name} official site could not be scanned.`
+      : `Scanned ${scan.scanned_urls.length} official-site page${scan.scanned_urls.length === 1 ? "" : "s"} for ${candidate.canonical_business_name || candidate.business_name}.`,
+    metadata: { scanned_urls: scan.scanned_urls, error: scan.error },
+  })
   const firecrawlEvidence = await collectFirecrawlEvidence({
     depth,
+    marketId,
+    candidateId: candidate.id,
     officialUrl: officialUrl.toString(),
     scan,
     usage,
   })
+  const identity = await resolveMarketCandidateIdentityFromOfficialEvidence({
+    candidateName: candidate.canonical_business_name || candidate.business_name,
+    city: candidate.city,
+    state: candidate.state,
+    officialUrl: officialUrl.toString(),
+    scan,
+    firecrawlEvidence,
+  })
+  await addMarketEvent({
+    marketId,
+    candidateId: candidate.id,
+    eventType: identity.requires_confirmation ? "identity_needs_confirmation" : "identity_resolved",
+    stage: "resolving_sites",
+    message: identity.requires_confirmation
+      ? `${identity.canonical_business_name} needs identity confirmation.`
+      : `Resolved business identity as ${identity.canonical_business_name}.`,
+    metadata: {
+      canonical_business_name: identity.canonical_business_name,
+      confidence: identity.resolution_confidence,
+      evidence: identity.resolution_evidence,
+    },
+  })
   const classification = await resolveSignalClassification({
-    businessName: candidate.business_name,
+    businessName: identity.canonical_business_name,
     city: candidate.city,
     state: candidate.state,
     industryHint: candidate.industry_hint,
@@ -560,6 +758,7 @@ async function scoreMarketCandidate({
     ...buildTemporaryMarketProspect({
       candidate: {
         ...candidate,
+        business_name: identity.canonical_business_name,
         confirmed_official_url: officialUrl.toString(),
       },
       classificationPlaybook: classification.playbook,
@@ -615,6 +814,11 @@ async function scoreMarketCandidate({
   }
 
   const update = {
+    ...identityFields({
+      ...identity,
+      search_result_title: candidate.search_result_title,
+      search_result_url: candidate.search_result_url,
+    }),
     category: classification.playbook,
     category_confidence: classification.confidence,
     confirmed_official_url: officialUrl.toString(),
@@ -713,19 +917,34 @@ export async function runSignalMarketBuild(marketId: string) {
   }
 
   await updateMarket(market.id, {
-    status: "discovering",
     provider_mode: estimate.provider_mode,
     estimated_credit_budget: estimate.estimated_credit_budget,
-    progress: stepProgress("discovery", counts, usage),
-    actual_credit_usage: usage,
     last_run_at: nowIso(),
-    next_action: "Finding candidate businesses from permitted public web research.",
+  })
+  await updateMarketProgress({
+    marketId: market.id,
+    status: "discovering",
+    stage: "initializing",
+    message: `Starting ${market.name}.`,
+    nextAction: "Preparing market discovery.",
+    counts,
+    usage,
   })
 
   const queries = buildSignalMarketDiscoveryQueries({
     city: market.city,
     state: market.state,
     industries,
+  })
+  await updateMarketProgress({
+    marketId: market.id,
+    status: "discovering",
+    stage: "discovering",
+    message: `Searching ${queries.length} public-web quer${queries.length === 1 ? "y" : "ies"}.`,
+    nextAction: "Finding candidate businesses from permitted public web research.",
+    counts,
+    usage,
+    progressTotal: queries.length,
   })
   const providerSearch = await searchSignalResearchProviders({
     queries,
@@ -738,12 +957,30 @@ export async function runSignalMarketBuild(marketId: string) {
 
   const discoveryResults = dedupeSearchResults(providerSearch.results).slice(0, market.max_candidates)
   counts.discovered = discoveryResults.length
+  await addMarketEvent({
+    marketId: market.id,
+    eventType: "discovery_completed",
+    stage: "discovering",
+    message: `Found ${discoveryResults.length} candidate result${discoveryResults.length === 1 ? "" : "s"}.`,
+    progressCurrent: discoveryResults.length,
+    progressTotal: market.max_candidates,
+    metadata: {
+      queries,
+      provider_mode: providerSearch.provider_mode,
+      setup_messages: providerSearch.setup_messages,
+    },
+  })
 
-  await updateMarket(market.id, {
+  await updateMarketProgress({
+    marketId: market.id,
     status: "deduplicating",
-    progress: stepProgress("suppression", counts, usage, usage.setup_messages),
-    actual_credit_usage: usage,
-    next_action: "Filtering suppressed records and likely duplicates.",
+    stage: "normalizing",
+    message: "Normalizing candidate names and domains.",
+    nextAction: "Filtering suppressed records and likely duplicates.",
+    counts,
+    usage,
+    setupMessages: usage.setup_messages,
+    progressTotal: discoveryResults.length,
   })
 
   const { data: prospects } = await supabase.from("signal_prospects").select("*")
@@ -786,9 +1023,27 @@ export async function runSignalMarketBuild(marketId: string) {
     ])
 
   const candidateRows: Array<Record<string, unknown>> = []
-  for (const result of discoveryResults) {
-    const businessName = extractBusinessNameFromSearch(result)
+  for (const [index, result] of discoveryResults.entries()) {
+    await updateMarketProgress({
+      marketId: market.id,
+      status: "deduplicating",
+      stage: "normalizing",
+      message: `Normalizing result ${index + 1} of ${discoveryResults.length}.`,
+      nextAction: "Resolving candidate names and official domains.",
+      counts,
+      usage,
+      setupMessages: usage.setup_messages,
+      progressCurrent: index + 1,
+      progressTotal: discoveryResults.length,
+    })
     const sourceType = classifySignalResearchUrl(result.url)
+    const preliminaryName = extractBusinessNameFromSearch(result)
+    const identity = await resolveMarketCandidateIdentityFromSearch({
+      city: market.city,
+      state: market.state,
+      result,
+    })
+    const businessName = identity.canonical_business_name || preliminaryName
     const likelyOfficialUrl = sourceType === "likely_official_site" ? result.url : null
     const lockedKey = [
       normalizeSignalBusinessName(businessName),
@@ -806,8 +1061,16 @@ export async function runSignalMarketBuild(marketId: string) {
       city: market.city,
       websiteUrl: likelyOfficialUrl || result.url,
     })[0]
+    const resolvedIdentity = duplicate?.prospect
+      ? await resolveMarketCandidateIdentityFromSearch({
+          city: market.city,
+          state: market.state,
+          result,
+          existingProspect: duplicate.prospect,
+        })
+      : identity
     const classification = await resolveSignalClassification({
-      businessName,
+      businessName: resolvedIdentity.canonical_business_name || businessName,
       city: market.city,
       state: market.state,
       industryHint: getSignalPlaybook(industries[0] as SignalPlaybookKey).name,
@@ -819,10 +1082,34 @@ export async function runSignalMarketBuild(marketId: string) {
     if (suppression) counts.suppressed += 1
     if (duplicate) counts.duplicates += 1
     if (likelyOfficialUrl && !suppression && !duplicate) counts.official_sites_resolved += 1
+    await addMarketEvent({
+      marketId: market.id,
+      eventType: suppression ? "candidate_suppressed" : duplicate ? "candidate_duplicate" : "candidate_discovered",
+      stage: suppression ? "suppressing" : duplicate ? "deduplicating" : "resolving_sites",
+      message: suppression
+        ? `Skipped suppressed result: ${resolvedIdentity.canonical_business_name}.`
+        : duplicate
+          ? `Removed duplicate: ${resolvedIdentity.canonical_business_name}.`
+          : likelyOfficialUrl
+            ? `Confirmed likely official website for ${resolvedIdentity.canonical_business_name}.`
+            : `${resolvedIdentity.canonical_business_name} needs official-site confirmation.`,
+      progressCurrent: index + 1,
+      progressTotal: discoveryResults.length,
+      metadata: {
+        url: result.url,
+        source_type: sourceType,
+        confidence: resolvedIdentity.resolution_confidence,
+      },
+    })
 
     candidateRows.push({
       market_id: market.id,
-      business_name: businessName,
+      business_name: resolvedIdentity.canonical_business_name || businessName,
+      ...identityFields({
+        ...resolvedIdentity,
+        search_result_title: result.title,
+        search_result_url: result.url,
+      }),
       city: market.city,
       state: market.state,
       industry_hint: getSignalPlaybook(classification.playbook).name,
@@ -856,7 +1143,11 @@ export async function runSignalMarketBuild(marketId: string) {
       quick_score_state: "not_started",
       confidence: classification.confidence,
       normalized_business_name: classification.normalizedBusinessName || null,
-      normalized_hostname: classification.normalizedHostname || normalizeSignalHostname(likelyOfficialUrl || result.url) || null,
+      normalized_hostname:
+        resolvedIdentity.normalized_hostname ||
+        classification.normalizedHostname ||
+        normalizeSignalHostname(likelyOfficialUrl || result.url) ||
+        null,
       classified_at: classification.classifiedAt,
       error_message: suppression
         ? "Suppressed by prior rejection or do-not-contact rule."
@@ -875,35 +1166,94 @@ export async function runSignalMarketBuild(marketId: string) {
   if (insertError) {
     await updateMarket(market.id, {
       status: "failed",
-      progress: { ...stepProgress("discovery", counts, usage, usage.setup_messages), error: insertError.message },
+      progress: { ...stepProgress("failed", counts, usage, usage.setup_messages), error: insertError.message },
       actual_credit_usage: usage,
       next_action: insertError.message,
+    })
+    await addMarketEvent({
+      marketId: market.id,
+      eventType: "candidate_insert_failed",
+      stage: "failed",
+      message: insertError.message,
+      metadata: { counts },
     })
     throw new Error(insertError.message)
   }
 
-  await updateMarket(market.id, {
+  await updateMarketProgress({
+    marketId: market.id,
     status: "researching",
-    progress: stepProgress("evidence", counts, usage, usage.setup_messages),
-    actual_credit_usage: usage,
-    next_action: "Reading confirmed official public sites for the strongest candidates.",
+    stage: "scraping_sites",
+    message: `Researching ${counts.official_sites_resolved} confirmed official site${counts.official_sites_resolved === 1 ? "" : "s"}.`,
+    nextAction: "Reading confirmed official public sites for the strongest candidates.",
+    counts,
+    usage,
+    setupMessages: usage.setup_messages,
+    progressTotal: counts.official_sites_resolved,
   })
 
   const candidates = ((insertedCandidates || []) as SignalMarketCandidate[])
     .filter((candidate) => candidate.research_state === "official_site_resolved")
     .slice(0, market.max_candidates)
 
-  for (const candidate of candidates) {
+  for (const [index, candidate] of candidates.entries()) {
     if (usage.stopped_reason) break
+    if (await marketIsPaused(market.id)) {
+      await updateMarketProgress({
+        marketId: market.id,
+        status: "paused",
+        stage: "paused",
+        message: "Market paused after a safe checkpoint.",
+        nextAction: "Resume when ready. Completed candidate evidence is preserved.",
+        counts,
+        usage,
+        setupMessages: usage.setup_messages,
+        progressCurrent: index,
+        progressTotal: candidates.length,
+      })
+      const { data: pausedMarket } = await supabase
+        .from("signal_markets")
+        .select("*")
+        .eq("id", market.id)
+        .single()
+      const { data: pausedCandidates } = await supabase
+        .from("signal_market_candidates")
+        .select("*")
+        .eq("market_id", market.id)
+        .order("website_opportunity_score", { ascending: false, nullsFirst: false })
+      const { data: pausedEvents } = await supabase
+        .from("signal_market_events")
+        .select("*")
+        .eq("market_id", market.id)
+        .order("created_at", { ascending: false })
+        .limit(80)
+      return {
+        market: pausedMarket as SignalMarket,
+        candidates: (pausedCandidates || []) as SignalMarketCandidate[],
+        events: (pausedEvents || []) as SignalMarketEvent[],
+        usage,
+        estimate,
+      }
+    }
     await supabase
       .from("signal_market_candidates")
       .update({ research_state: "researching" })
       .eq("id", candidate.id)
+    await addMarketEvent({
+      marketId: market.id,
+      candidateId: candidate.id,
+      eventType: "candidate_research_started",
+      stage: "scraping_sites",
+      message: `Researching ${candidate.canonical_business_name || candidate.business_name}.`,
+      progressCurrent: index + 1,
+      progressTotal: candidates.length,
+    })
 
     try {
       const scored = await scoreMarketCandidate({
         candidate,
         depth: market.research_depth,
+        marketId: market.id,
         usage,
       })
       const candidateUpdate = scored.update as Record<string, unknown>
@@ -918,6 +1268,25 @@ export async function runSignalMarketBuild(marketId: string) {
       if (candidateUpdate.research_state === "visual_shortlisted") counts.visual_shortlisted += 1
       if (candidateUpdate.preliminary_priority === "A") counts.a_leads += 1
       if (candidateUpdate.preliminary_priority === "B") counts.b_leads += 1
+      await addMarketEvent({
+        marketId: market.id,
+        candidateId: candidate.id,
+        eventType: "candidate_ranked",
+        stage:
+          candidateUpdate.research_state === "visual_shortlisted"
+            ? "screenshot_shortlist"
+            : "quick_scoring",
+        message: `${String(candidateUpdate.canonical_business_name || candidate.canonical_business_name || candidate.business_name)} ranked ${candidateUpdate.preliminary_priority || "for review"}.`,
+        progressCurrent: index + 1,
+        progressTotal: candidates.length,
+        metadata: {
+          priority: candidateUpdate.preliminary_priority,
+          lane: candidateUpdate.recommended_lane,
+          website_opportunity_score: candidateUpdate.website_opportunity_score,
+          systems_opportunity_score: candidateUpdate.systems_opportunity_score,
+          visual_state: candidateUpdate.visual_state,
+        },
+      })
     } catch (error) {
       counts.failed += 1
       await supabase
@@ -928,13 +1297,28 @@ export async function runSignalMarketBuild(marketId: string) {
           error_message: error instanceof Error ? error.message : "Candidate scoring failed.",
         })
         .eq("id", candidate.id)
+      await addMarketEvent({
+        marketId: market.id,
+        candidateId: candidate.id,
+        eventType: "candidate_failed",
+        stage: "failed",
+        message: `${candidate.canonical_business_name || candidate.business_name} failed: ${error instanceof Error ? error.message : "Candidate scoring failed."}`,
+        progressCurrent: index + 1,
+        progressTotal: candidates.length,
+      })
     }
 
-    await updateMarket(market.id, {
+    await updateMarketProgress({
+      marketId: market.id,
       status: "scoring",
-      progress: stepProgress("scoring", counts, usage, usage.setup_messages),
-      actual_credit_usage: usage,
-      next_action: "Scoring candidates and preparing the review queue.",
+      stage: "quick_scoring",
+      message: `Scored ${counts.quick_scored} of ${candidates.length} candidate${candidates.length === 1 ? "" : "s"}.`,
+      nextAction: "Scoring candidates and preparing the review queue.",
+      counts,
+      usage,
+      setupMessages: usage.setup_messages,
+      progressCurrent: index + 1,
+      progressTotal: candidates.length,
     })
   }
 
@@ -949,9 +1333,24 @@ export async function runSignalMarketBuild(marketId: string) {
 
   await updateMarket(market.id, {
     status: finalStatus,
-    progress: completedProgress(counts, usage, usage.setup_messages),
+    progress:
+      finalStatus === "ready_for_review"
+        ? completedProgress(counts, usage, usage.setup_messages)
+        : { ...stepProgress("failed", counts, usage, usage.setup_messages), error: nextAction },
     actual_credit_usage: usage,
     next_action: usage.stopped_reason ? `${nextAction} ${usage.stopped_reason}` : nextAction,
+  })
+  await addMarketEvent({
+    marketId: market.id,
+    eventType: finalStatus === "ready_for_review" ? "market_ready" : "market_failed",
+    stage: finalStatus === "ready_for_review" ? "ready" : "failed",
+    message:
+      finalStatus === "ready_for_review"
+        ? `Research complete. ${counts.a_leads + counts.b_leads} strong prospect${counts.a_leads + counts.b_leads === 1 ? "" : "s"} are ready to review.`
+        : nextAction,
+    progressCurrent: counts.discovered,
+    progressTotal: Math.max(1, counts.discovered),
+    metadata: { counts, usage },
   })
 
   const { data: updatedMarket } = await supabase
@@ -964,10 +1363,17 @@ export async function runSignalMarketBuild(marketId: string) {
     .select("*")
     .eq("market_id", market.id)
     .order("website_opportunity_score", { ascending: false, nullsFirst: false })
+  const { data: updatedEvents } = await supabase
+    .from("signal_market_events")
+    .select("*")
+    .eq("market_id", market.id)
+    .order("created_at", { ascending: false })
+    .limit(80)
 
   return {
     market: updatedMarket as SignalMarket,
     candidates: (updatedCandidates || []) as SignalMarketCandidate[],
+    events: (updatedEvents || []) as SignalMarketEvent[],
     usage,
     estimate,
   }
@@ -995,7 +1401,7 @@ function mergeMarketCandidateFields(
     update.existing_booking_platform = scan.detected_booking_platform
   }
   if (!existing.human_notes) {
-    update.human_notes = `Created or refreshed from Signal market candidate: ${candidate.business_name}.`
+    update.human_notes = `Created or refreshed from Signal market candidate: ${candidate.canonical_business_name || candidate.business_name}.`
   }
 
   return update
@@ -1046,8 +1452,9 @@ export async function approveSignalMarketCandidate({
   }
 
   const { data: allProspects } = await supabase.from("signal_prospects").select("*")
+  const approvedBusinessName = candidate.canonical_business_name || candidate.business_name
   const duplicates = findLikelySignalDuplicates((allProspects || []) as SignalProspect[], {
-    businessName: candidate.business_name,
+    businessName: approvedBusinessName,
     city: candidate.city || market.city,
     email: scan.visible_emails[0],
     phone: scan.visible_phones[0],
@@ -1073,7 +1480,7 @@ export async function approveSignalMarketCandidate({
     prospect = updated as SignalProspect
   } else {
     const classification = await resolveSignalClassification({
-      businessName: candidate.business_name,
+      businessName: approvedBusinessName,
       city: candidate.city || market.city,
       state: candidate.state || market.state,
       industryHint: candidate.industry_hint,
@@ -1083,7 +1490,7 @@ export async function approveSignalMarketCandidate({
       scan,
     })
     const prospectInput = normalizeProspectInput({
-      business_name: candidate.business_name,
+      business_name: approvedBusinessName,
       industry: candidate.industry_hint || getSignalPlaybook(classification.playbook).name,
       industry_playbook: classification.playbook,
       city: candidate.city || market.city,

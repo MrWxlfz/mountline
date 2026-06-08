@@ -420,7 +420,7 @@ export function SignalDashboard({
         actions={
           <>
             <PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>
-              Build Market
+              Find Prospects
             </PrimaryAction>
             <SecondaryAction href="/dashboard/signal/focus" icon={CalendarCheck}>
               Start Focus Mode
@@ -539,8 +539,8 @@ export function SignalDashboard({
         </SectionPanel>
 
         <SectionPanel
-          title="Markets"
-          description="Recent autonomous scans with review status, progress, top opportunities, and usage."
+          title="Recent Markets"
+          description="Latest research runs with review status, progress, top opportunities, and usage."
           action={<Link href="/dashboard/signal/markets" className="text-sm text-muted-foreground transition-colors hover:text-foreground">View all markets</Link>}
         >
           <div className="space-y-3">
@@ -590,7 +590,7 @@ export function SignalDashboard({
               <EmptyState
                 title="No markets running"
                 icon={RadioTower}
-                action={<PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>Build Market</PrimaryAction>}
+                action={<PrimaryAction href="/dashboard/signal/markets/new" icon={RadioTower}>Find Prospects</PrimaryAction>}
               >
                 Build a market to discover and rank prospects with evidence.
               </EmptyState>

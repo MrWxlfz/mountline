@@ -21,6 +21,9 @@ export type SignalPageScan = {
   status: number
   title: string | null
   metaDescription: string | null
+  openGraphSiteName: string | null
+  jsonLdNames: string[]
+  logoAltText: string[]
   headings: string[]
   textExcerpt: string
   ctaWords: string[]
@@ -45,6 +48,9 @@ export type SignalWebsiteScan = {
   pages: SignalPageScan[]
   page_title: string | null
   meta_description: string | null
+  open_graph_site_name: string | null
+  json_ld_names: string[]
+  logo_alt_text: string[]
   headings: string[]
   cta_words: string[]
   service_language: string[]
@@ -106,6 +112,81 @@ function extractMetaDescription(html: string) {
       /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["'][^>]*>/i,
     )
   )
+}
+
+function extractOpenGraphSiteName(html: string) {
+  return (
+    extractFirst(
+      html,
+      /<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    ) ||
+    extractFirst(
+      html,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:site_name["'][^>]*>/i,
+    ) ||
+    extractFirst(
+      html,
+      /<meta[^>]+name=["']application-name["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+    )
+  )
+}
+
+function walkJsonForNames(value: unknown, names: string[]) {
+  if (!value || names.length >= 8) return
+  if (Array.isArray(value)) {
+    value.forEach((item) => walkJsonForNames(item, names))
+    return
+  }
+  if (typeof value !== "object") return
+
+  const object = value as Record<string, unknown>
+  const type = object["@type"]
+  const types = Array.isArray(type) ? type : [type]
+  const isBusinessLike = types.some(
+    (item) =>
+      typeof item === "string" &&
+      /LocalBusiness|Organization|Corporation|Store|AutomotiveBusiness|HealthAndBeautyBusiness|Dentist|Restaurant|HomeAndConstructionBusiness/i.test(item),
+  )
+
+  if (isBusinessLike && typeof object.name === "string") {
+    names.push(object.name)
+  }
+
+  Object.values(object).forEach((item) => walkJsonForNames(item, names))
+}
+
+function extractJsonLdNames(html: string) {
+  const names: string[] = []
+  const pattern = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
+  let match: RegExpExecArray | null
+
+  while ((match = pattern.exec(html)) && names.length < 8) {
+    const text = decodeHtml(match[1]).trim()
+    if (!text) continue
+    try {
+      walkJsonForNames(JSON.parse(text), names)
+    } catch {
+      continue
+    }
+  }
+
+  return unique(names, 8)
+}
+
+function extractLogoAltText(html: string) {
+  const values: string[] = []
+  const pattern = /<img\b[^>]*>/gi
+  let match: RegExpExecArray | null
+
+  while ((match = pattern.exec(html)) && values.length < 8) {
+    const tag = match[0]
+    const lower = tag.toLowerCase()
+    if (!lower.includes("logo") && !lower.includes("brand")) continue
+    const alt = extractFirst(tag, /\salt=["']([^"']+)["']/i)
+    if (alt) values.push(alt)
+  }
+
+  return unique(values, 8)
 }
 
 function extractHeadings(html: string) {
@@ -496,6 +577,9 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
   const imageCount = (html.match(/<img\b/gi) || []).length
   const title = extractFirst(html, /<title[^>]*>([\s\S]*?)<\/title>/i)
   const metaDescription = extractMetaDescription(html)
+  const openGraphSiteName = extractOpenGraphSiteName(html)
+  const jsonLdNames = extractJsonLdNames(html)
+  const logoAltText = extractLogoAltText(html)
   const headings = extractHeadings(html)
   const detectedWebsitePlatform = detectWebsitePlatform(html)
   const detectedBookingPlatform = detectBookingPlatform(links, html)
@@ -505,6 +589,15 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
   if (metaDescription) {
     addEvidence(evidence, url, "Meta description", metaDescription, "high")
   }
+  jsonLdNames.slice(0, 4).forEach((name) =>
+    addEvidence(evidence, url, "Structured business identity", name, "high"),
+  )
+  if (openGraphSiteName) {
+    addEvidence(evidence, url, "Open Graph site name", openGraphSiteName, "high")
+  }
+  logoAltText.slice(0, 3).forEach((alt) =>
+    addEvidence(evidence, url, "Logo alt identity", alt, "medium"),
+  )
   headings.slice(0, 4).forEach((heading) =>
     addEvidence(evidence, url, "Heading", heading, "high"),
   )
@@ -536,6 +629,9 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
     status,
     title,
     metaDescription,
+    openGraphSiteName,
+    jsonLdNames,
+    logoAltText,
     headings,
     textExcerpt: text.slice(0, 1600),
     ctaWords,
@@ -569,6 +665,9 @@ export async function scanSignalWebsite(
       pages: [],
       page_title: null,
       meta_description: null,
+      open_graph_site_name: null,
+      json_ld_names: [],
+      logo_alt_text: [],
       headings: [],
       cta_words: [],
       service_language: [],
@@ -618,6 +717,9 @@ export async function scanSignalWebsite(
       pages,
       page_title: pages[0]?.title || null,
       meta_description: pages[0]?.metaDescription || null,
+      open_graph_site_name: pages.find((page) => page.openGraphSiteName)?.openGraphSiteName || null,
+      json_ld_names: unique(pages.flatMap((page) => page.jsonLdNames), 8),
+      logo_alt_text: unique(pages.flatMap((page) => page.logoAltText), 8),
       headings: unique(pages.flatMap((page) => page.headings), 18),
       cta_words: unique(pages.flatMap((page) => page.ctaWords), 12),
       service_language: unique(pages.flatMap((page) => page.serviceLanguage), 12),
@@ -649,6 +751,9 @@ export async function scanSignalWebsite(
       pages: [],
       page_title: null,
       meta_description: null,
+      open_graph_site_name: null,
+      json_ld_names: [],
+      logo_alt_text: [],
       headings: [],
       cta_words: [],
       service_language: [],

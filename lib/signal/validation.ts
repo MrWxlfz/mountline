@@ -543,6 +543,7 @@ export const signalMarketPatchSchema = z.object({
 })
 
 export const signalMarketCandidatePatchSchema = z.object({
+  canonical_business_name: z.string().trim().min(1).max(180).optional().nullable(),
   confirmed_official_url: z.string().trim().url().max(500).optional().nullable(),
   likely_official_url: z.string().trim().url().max(500).optional().nullable(),
   duplicate_prospect_id: z.string().uuid().optional().nullable(),

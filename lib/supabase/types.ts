@@ -280,6 +280,23 @@ export type SignalMarketStatus =
 
 export type SignalMarketResearchDepth = "quick" | "balanced" | "deep"
 
+export type SignalMarketEventStage =
+  | "initializing"
+  | "discovering"
+  | "normalizing"
+  | "suppressing"
+  | "deduplicating"
+  | "resolving_sites"
+  | "scraping_sites"
+  | "classifying"
+  | "quick_scoring"
+  | "screenshot_shortlist"
+  | "visual_analysis"
+  | "ranking"
+  | "ready"
+  | "failed"
+  | "paused"
+
 export type SignalResearchProviderMode =
   | "tavily"
   | "firecrawl"
@@ -769,6 +786,32 @@ export type SignalMarket = {
   next_action: string | null
 }
 
+export type SignalMarketEvent = {
+  id: string
+  market_id: string
+  created_at: string
+  event_type: string
+  stage: SignalMarketEventStage
+  message: string
+  candidate_id: string | null
+  progress_current: number | null
+  progress_total: number | null
+  metadata: SignalJson | null
+}
+
+export type SignalIdentityCorrection = {
+  id: string
+  created_at: string
+  market_id: string | null
+  candidate_id: string | null
+  normalized_hostname: string | null
+  previous_business_name: string | null
+  corrected_business_name: string
+  reason: string | null
+  created_by: string | null
+  active: boolean
+}
+
 export type SignalCampaignCandidate = {
   id: string
   campaign_id: string
@@ -813,6 +856,16 @@ export type SignalMarketCandidate = {
   candidate_url: string | null
   likely_official_url: string | null
   confirmed_official_url: string | null
+  search_result_title: string | null
+  search_result_url: string | null
+  normalized_hostname: string | null
+  likely_official_site: boolean | null
+  extracted_business_name: string | null
+  canonical_business_name: string | null
+  resolution_confidence: SignalConfidence | null
+  resolution_evidence: SignalJson | null
+  requires_confirmation: boolean
+  identity_updated_at: string | null
   official_source_confidence: SignalConfidence | null
   source_urls: SignalJson | null
   provider_sources: SignalJson | null
@@ -837,7 +890,6 @@ export type SignalMarketCandidate = {
   website_scan: SignalJson | null
   firecrawl_evidence: SignalJson | null
   normalized_business_name: string | null
-  normalized_hostname: string | null
   classified_at: string | null
   error_message: string | null
   rejected_at: string | null

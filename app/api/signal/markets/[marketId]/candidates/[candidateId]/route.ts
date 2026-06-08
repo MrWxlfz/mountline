@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { addSignalCandidateSuppression } from "@/lib/signal/alerts"
 import { resolveSignalClassification } from "@/lib/signal/classification"
-import { isClearlyNonOfficialSignalSource } from "@/lib/signal/research"
+import { isClearlyNonOfficialSignalSource, normalizeSignalBusinessName, normalizeSignalHostname } from "@/lib/signal/research"
 import { signalMarketCandidatePatchSchema } from "@/lib/signal/validation"
 import { normalizeSignalUrl } from "@/lib/signal/website"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -38,6 +38,38 @@ export async function PATCH(
 
   const update: Record<string, unknown> = {}
 
+  if (parsed.data.canonical_business_name) {
+    const correctedName = parsed.data.canonical_business_name.trim()
+    const hostname = normalizeSignalHostname(
+      existing.confirmed_official_url || existing.likely_official_url || existing.candidate_url,
+    )
+    update.business_name = correctedName
+    update.canonical_business_name = correctedName
+    update.extracted_business_name = correctedName
+    update.normalized_business_name = normalizeSignalBusinessName(correctedName) || null
+    update.resolution_confidence = "high"
+    update.requires_confirmation = false
+    update.identity_updated_at = new Date().toISOString()
+    update.resolution_evidence = [
+      {
+        source: "manual_correction",
+        value: correctedName,
+        confidence: "high",
+        note: "Corrected by Mountline team during market review.",
+      },
+    ]
+    await supabase.from("signal_identity_corrections").insert({
+      market_id: marketId,
+      candidate_id: candidateId,
+      normalized_hostname: hostname || null,
+      previous_business_name: existing.canonical_business_name || existing.business_name,
+      corrected_business_name: correctedName,
+      reason: parsed.data.reason || "Manual identity correction from market review.",
+      created_by: authCheck.access.emails[0] || authCheck.access.userId,
+      active: true,
+    })
+  }
+
   const officialUrl = parsed.data.confirmed_official_url || parsed.data.likely_official_url
   if (officialUrl) {
     const normalized = normalizeSignalUrl(officialUrl)
@@ -53,6 +85,7 @@ export async function PATCH(
     update.likely_official_url = normalized.toString()
     update.confirmed_official_url = normalized.toString()
     update.official_source_confidence = "medium"
+    update.normalized_hostname = normalizeSignalHostname(normalized.toString()) || null
     update.research_state = "official_site_resolved"
   }
 
@@ -125,6 +158,38 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data) return NextResponse.json({ error: "Candidate not found." }, { status: 404 })
+
+  const eventStage =
+    parsed.data.canonical_business_name || parsed.data.confirmed_official_url || parsed.data.likely_official_url
+      ? "resolving_sites"
+      : parsed.data.duplicate_state && parsed.data.duplicate_state !== "none"
+        ? "deduplicating"
+        : parsed.data.suppression_state === "suppressed" || parsed.data.research_state === "rejected"
+          ? "suppressing"
+          : parsed.data.suppression_state === "restored"
+            ? "ranking"
+            : "ranking"
+  const eventMessage =
+    parsed.data.canonical_business_name
+      ? `Updated identity for ${parsed.data.canonical_business_name}.`
+      : parsed.data.confirmed_official_url || parsed.data.likely_official_url
+        ? `Confirmed official website for ${data.canonical_business_name || data.business_name}.`
+        : parsed.data.duplicate_state && parsed.data.duplicate_state !== "none"
+          ? `Marked ${data.canonical_business_name || data.business_name} as a duplicate.`
+          : parsed.data.suppression_state === "suppressed"
+            ? `Suppressed ${data.canonical_business_name || data.business_name}.`
+            : parsed.data.suppression_state === "restored"
+              ? `Restored ${data.canonical_business_name || data.business_name}.`
+              : `Updated ${data.canonical_business_name || data.business_name}.`
+
+  await supabase.from("signal_market_events").insert({
+    market_id: marketId,
+    candidate_id: candidateId,
+    event_type: "manual_review_update",
+    stage: eventStage,
+    message: eventMessage,
+    metadata: { update },
+  })
 
   if (
     parsed.data.research_state === "rejected" &&

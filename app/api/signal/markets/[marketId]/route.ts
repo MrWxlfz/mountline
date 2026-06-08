@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { cleanOptionalText, signalMarketPatchSchema } from "@/lib/signal/validation"
 import { createAdminClient } from "@/lib/supabase/admin"
-import type { SignalMarket } from "@/lib/supabase/types"
+import type { SignalMarket, SignalMarketEvent } from "@/lib/supabase/types"
 
 export async function GET(
   request: Request,
@@ -13,7 +13,11 @@ export async function GET(
 
   const { marketId } = await params
   const supabase = createAdminClient()
-  const [{ data: market, error: marketError }, { data: candidates, error: candidateError }] =
+  const [
+    { data: market, error: marketError },
+    { data: candidates, error: candidateError },
+    { data: events, error: eventError },
+  ] =
     await Promise.all([
       supabase.from("signal_markets").select("*").eq("id", marketId).maybeSingle(),
       supabase
@@ -21,13 +25,24 @@ export async function GET(
         .select("*")
         .eq("market_id", marketId)
         .order("website_opportunity_score", { ascending: false, nullsFirst: false }),
+      supabase
+        .from("signal_market_events")
+        .select("*")
+        .eq("market_id", marketId)
+        .order("created_at", { ascending: false })
+        .limit(80),
     ])
 
   if (marketError) return NextResponse.json({ error: marketError.message }, { status: 500 })
   if (candidateError) return NextResponse.json({ error: candidateError.message }, { status: 500 })
+  if (eventError) return NextResponse.json({ error: eventError.message }, { status: 500 })
   if (!market) return NextResponse.json({ error: "Market not found." }, { status: 404 })
 
-  return NextResponse.json({ market, candidates: candidates || [] })
+  return NextResponse.json({
+    market: market as SignalMarket,
+    candidates: candidates || [],
+    events: (events || []) as SignalMarketEvent[],
+  })
 }
 
 export async function PATCH(

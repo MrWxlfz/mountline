@@ -9,8 +9,8 @@ interface MetricItem {
 
 const metrics: MetricItem[] = [
   { value: "7–14 days", label: "Typical starter launch" },
-  { value: "$500+", label: "Starter websites" },
-  { value: "$149/mo", label: "Monthly care" },
+  { value: "$350+", label: "Starter websites" },
+  { value: "$35-$50/mo", label: "Monthly care" },
   { value: "Client portals", label: "Available for projects" },
   { value: "Mobile-first", label: "Built by default" },
 ]

@@ -84,21 +84,23 @@ const processSteps = ["Review", "Plan", "Build", "Launch", "Support"]
 const pricing = [
   {
     name: "Starter Site",
-    price: "From $500",
+    price: "$350",
     copy: "A focused one-page website for a business that needs a sharper public presence.",
+    disclaimer: "Actual finished site pricing may vary slightly based on final scope.",
     includes: ["Responsive design", "Contact or quote path", "Basic launch setup"],
   },
   {
     name: "Business Website",
-    price: "From $1,250",
+    price: "$1,250",
     copy: "A stronger multi-section or multi-page site for services, proof, and conversion.",
     includes: ["Service structure", "Concept direction", "Client portal included"],
     featured: true,
   },
   {
     name: "Care & Systems",
-    price: "From $149/mo",
+    price: "$35-$50/mo",
     copy: "Ongoing website care, edits, practical workflows, and small systems after launch.",
+    disclaimer: "Actual monthly price varies significantly based on the systems you already have.",
     includes: ["Monthly updates", "Support requests", "Useful system add-ons"],
   },
 ]
@@ -741,8 +743,16 @@ export function MountlineHomepage() {
                 }`}
               >
                 <p className="text-sm font-medium text-zinc-400">{plan.name}</p>
-                <p className="mt-4 text-3xl font-semibold tracking-tight text-white">{plan.price}</p>
-                <p className="mt-4 min-h-20 text-sm leading-7 text-zinc-300">{plan.copy}</p>
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.22em] text-blue-200/70">
+                  Starting from:
+                </p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{plan.price}</p>
+                <div className="mt-4 min-h-32">
+                  <p className="text-sm leading-7 text-zinc-300">{plan.copy}</p>
+                  {"disclaimer" in plan && plan.disclaimer ? (
+                    <p className="mt-3 text-xs leading-5 text-zinc-500">{plan.disclaimer}</p>
+                  ) : null}
+                </div>
                 <div className="mt-6 space-y-3 border-t border-white/10 pt-6">
                   {plan.includes.map((item) => (
                     <div key={item} className="flex items-center gap-3 text-sm text-zinc-300">

@@ -1,0 +1,10 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Nordin;Luke;;;
+FN:Luke Nordin
+ORG:Mountline Studio
+TITLE:Founder
+ADR;TYPE=WORK:;;Keller;Texas;;;
+EMAIL;TYPE=WORK:hello@mountline.dev
+URL:https://mountline.dev/luke
+END:VCARD

@@ -11,6 +11,7 @@ export type LeadFormData = {
   service_needed?: string
   budget_range?: string
   message?: string
+  source?: "website" | "luke_qr_page"
 }
 
 export type SubmitLeadResult = {
@@ -21,7 +22,8 @@ export type SubmitLeadResult = {
 export async function submitLead(data: LeadFormData): Promise<SubmitLeadResult> {
   try {
     const supabase = await createClient()
-    
+    const source = data.source === "luke_qr_page" ? "luke_qr_page" : "website"
+
     const { error } = await supabase.from("leads").insert({
       name: data.name,
       business_name: data.business_name || null,
@@ -31,7 +33,7 @@ export async function submitLead(data: LeadFormData): Promise<SubmitLeadResult> 
       service_needed: data.service_needed || null,
       budget_range: data.budget_range || null,
       message: data.message || null,
-      source: "website",
+      source,
       status: "new",
     })
 

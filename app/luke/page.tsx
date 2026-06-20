@@ -5,24 +5,25 @@ import {
   ArrowRight,
   ArrowUpRight,
   BriefcaseBusiness,
+  Check,
   CheckCircle2,
   ContactRound,
-  ExternalLink,
   FileText,
   Globe2,
   Mail,
   MapPin,
   MessageSquareText,
-  Phone,
   Send,
   UserRound,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react"
+import { MountlineLogo } from "@/components/mountline-logo"
+import { QuickAuditForm } from "./quick-audit-form"
 
 const contact = {
-  // Public contact values only. Add Luke's public NFC/text number here when ready.
+  // Public contact values only. Add Luke's public text number here when ready.
   phoneNumber: "",
-  phoneLabel: "Text Luke",
   email: "hello@mountline.dev",
   homepageUrl: "https://mountline.dev",
   homepageLabel: "mountline.dev",
@@ -33,14 +34,14 @@ const pageUrl = `${contact.homepageUrl}/luke`
 export const metadata: Metadata = {
   title: "Luke Nordin — Mountline Studio",
   description:
-    "Luke Nordin, founder of Mountline Studio in Keller, Texas. Clean websites and practical online systems for local businesses.",
+    "Clean websites and practical online systems for local businesses from Luke Nordin and Mountline Studio in Keller, Texas.",
   alternates: {
     canonical: "/luke",
   },
   openGraph: {
     title: "Luke Nordin — Mountline Studio",
     description:
-      "Clean websites, concept previews, client portals, and simple lead systems for local businesses.",
+      "Send a business name, website, or Instagram for a free quick audit from Mountline Studio.",
     url: pageUrl,
     siteName: "Mountline Studio",
     images: [
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Luke Nordin — Mountline Studio",
     description:
-      "Local websites and simple online systems from Mountline Studio.",
+      "Clean websites and practical online systems for local businesses.",
     images: ["/luke-profile.jpg"],
   },
 }
@@ -68,58 +69,51 @@ const capabilities: Array<{
   icon: LucideIcon
 }> = [
   {
-    title: "Simple business websites",
-    copy: "Clear pages that explain the business, services, proof, and next step.",
+    title: "Business websites",
+    copy: "Clear pages that explain services, proof, pricing cues, and the next step.",
     icon: Globe2,
   },
   {
-    title: "Website concept previews",
-    copy: "A focused preview can show what a sharper online presence could look like.",
+    title: "Quote & contact flows",
+    copy: "Make it easier for customers to ask for a quote, book, or send details.",
     icon: FileText,
   },
   {
-    title: "Contact forms & call buttons",
-    copy: "Make it easier for customers to call, request a quote, or send details.",
-    icon: Phone,
+    title: "Client portals",
+    copy: "Project links, updates, forms, payment links, and next steps in one place.",
+    icon: BriefcaseBusiness,
   },
   {
-    title: "Client portals / appointment flows",
-    copy: "Small systems can keep project links, updates, forms, and next steps organized.",
-    icon: BriefcaseBusiness,
+    title: "Lead systems",
+    copy: "Simple internal tools to track prospects, follow-ups, and customer requests.",
+    icon: UsersRound,
   },
 ]
 
-const previews: Array<{
-  title: string
-  copy: string
-  href?: string
-}> = [
+const previews = [
   {
     title: "Auto detailing website concept",
-    copy: "Packages, proof, and a cleaner path for customers to request detailing work.",
+    copy: "Packages, service proof, and a clearer path to request detailing work.",
     href: "/work/auto-detailing",
   },
   {
     title: "Barber shop website concept",
-    copy: "Services, location details, and appointment-focused calls to action.",
+    copy: "Services, location details, and an appointment-focused customer path.",
     href: "/work/barber-shop",
   },
   {
     title: "Pet grooming website concept",
-    copy: "A practical preview category for service businesses with bookings and clear pricing.",
+    copy: "Services, local information, FAQs, and a practical grooming request flow.",
+    href: "/work/pet-grooming",
   },
 ]
 
-function BrandMark() {
-  return (
-    <div className="flex items-center gap-2 text-white" aria-label="Mountline">
-      <span className="grid size-8 place-items-center border border-white/10 bg-white/[0.03]">
-        <span className="h-4 w-px bg-white" />
-      </span>
-      <span className="text-base font-semibold tracking-tight lowercase">mountline</span>
-    </div>
-  )
-}
+const bestFit = [
+  "Local service businesses",
+  "Barbers, detailers, groomers, contractors, med spas, and small shops",
+  "Businesses that need a cleaner website, quote flow, booking path, or client portal",
+  "Owners who want something simple, fast, and easy to understand",
+]
 
 function SectionHeading({
   eyebrow,
@@ -143,40 +137,29 @@ function SectionHeading({
   )
 }
 
-function ContactButton({
+function ActionLink({
   href,
   icon: Icon,
   label,
   variant = "secondary",
 }: {
-  href?: string
+  href: string
   icon: LucideIcon
   label: string
   variant?: "primary" | "secondary" | "quiet"
 }) {
-  const base =
-    "inline-flex min-h-12 w-full items-center justify-center gap-2 border px-4 py-3 text-sm font-semibold transition-colors"
-  const variants = {
+  const styles = {
     primary: "border-white bg-white text-black hover:bg-zinc-200",
     secondary:
       "border-white/12 bg-white/[0.03] text-white hover:border-white/25 hover:bg-white/[0.06]",
-    quiet: "border-white/10 bg-transparent text-zinc-200 hover:border-white/20 hover:bg-white/[0.04]",
-  }
-
-  if (!href) {
-    return (
-      <span
-        aria-disabled="true"
-        className={`${base} ${variants.secondary} cursor-not-allowed opacity-45`}
-      >
-        <Icon className="size-4" />
-        {label}
-      </span>
-    )
+    quiet: "border-white/10 bg-transparent text-zinc-300 hover:border-white/20 hover:text-white",
   }
 
   return (
-    <a className={`${base} ${variants[variant]}`} href={href}>
+    <a
+      href={href}
+      className={`inline-flex min-h-12 w-full items-center justify-center gap-2 border px-4 py-3 text-sm font-semibold transition-colors ${styles[variant]}`}
+    >
       <Icon className="size-4" />
       {label}
     </a>
@@ -184,8 +167,17 @@ function ContactButton({
 }
 
 export default function LukePage() {
-  const phoneHref = contact.phoneNumber ? `tel:${contact.phoneNumber}` : undefined
-  const emailHref = `mailto:${contact.email}?subject=Mountline%20website%20conversation`
+  const emailHref =
+    `mailto:${contact.email}?subject=Free%20quick%20audit&body=` +
+    encodeURIComponent(
+      "Hey Luke, I scanned your card. My business is [business name]. Can you take a quick look at my website or Instagram?",
+    )
+  const smsHref = contact.phoneNumber
+    ? `sms:${contact.phoneNumber}?&body=${encodeURIComponent(
+        "Hey Luke, I scanned your card. My business is [business name]. Can you take a quick look at my website?",
+      )}`
+    : undefined
+  const primaryAuditHref = smsHref || "#quick-audit"
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -196,17 +188,17 @@ export default function LukePage() {
           backgroundImage:
             "linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px)",
           backgroundSize: "34px 34px",
-          maskImage: "linear-gradient(to bottom, black, black 48%, transparent 88%)",
+          maskImage: "linear-gradient(to bottom, black, black 40%, transparent 82%)",
         }}
       />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-[720px] flex-col px-4 pb-10 pt-4 sm:px-6 sm:pt-6">
-        <header className="flex items-center justify-between gap-3 border border-white/10 bg-black/70 px-3 py-3 backdrop-blur">
+        <header className="flex items-center justify-between gap-3 border border-white/10 bg-black/75 px-3 py-3 backdrop-blur">
           <Link href="/" aria-label="Mountline home">
-            <BrandMark />
+            <MountlineLogo size="sm" inverted />
           </Link>
           <div className="flex items-center gap-2">
-            <span className="hidden border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 min-[390px]:inline-flex">
+            <span className="hidden border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 min-[410px]:inline-flex">
               Local websites & business systems
             </span>
             <Link
@@ -220,16 +212,16 @@ export default function LukePage() {
         </header>
 
         <section className="pt-5">
-          <div className="border border-white/10 bg-zinc-950/88 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.5)] backdrop-blur sm:p-5">
-            <div className="grid gap-5 sm:grid-cols-[172px_1fr] sm:items-center">
-              <div className="mx-auto w-full max-w-[188px] sm:mx-0">
+          <div className="border border-white/10 bg-zinc-950/90 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.5)] backdrop-blur sm:p-5">
+            <div className="grid grid-cols-[104px_1fr] items-start gap-4 sm:grid-cols-[150px_1fr] sm:gap-5">
+              <div className="w-full max-w-[104px] sm:max-w-[150px]">
                 <div className="relative aspect-square overflow-hidden rounded-[8px] border border-white/10 bg-zinc-900">
                   <Image
                     src="/luke-profile.jpg"
                     alt="Luke Nordin, founder of Mountline Studio."
                     fill
                     priority
-                    sizes="(max-width: 640px) 188px, 172px"
+                    sizes="(max-width: 639px) 104px, 150px"
                     className="object-cover [object-position:45%_44%]"
                   />
                 </div>
@@ -245,67 +237,122 @@ export default function LukePage() {
                     <UserRound className="size-3.5" />
                     Founder
                   </span>
+                  <span className="hidden items-center border border-white/10 bg-white/[0.03] px-2.5 py-1.5 min-[480px]:inline-flex">
+                    Mountline Studio
+                  </span>
                 </div>
-
-                <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
+                <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:mt-4 sm:text-4xl">
                   Luke Nordin
                 </h1>
-                <p className="mt-2 text-sm font-medium text-zinc-300">
+                <p className="mt-2 text-sm font-medium text-zinc-400">
                   Founder, Mountline Studio
                 </p>
-                <p className="mt-4 text-base leading-7 text-zinc-200">
-                  Mountline builds clean websites and simple online systems for local
-                  businesses.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs text-zinc-400">
-                  {["Local founder", "Website concepts", "Client portals", "Lead systems"].map(
-                    (item) => (
-                      <span key={item} className="border border-white/10 px-2.5 py-1.5">
-                        {item}
-                      </span>
-                    ),
-                  )}
-                </div>
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <ContactButton
-                href={phoneHref}
+            <div className="mt-6 border-t border-white/10 pt-6">
+              <p className="text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
+                Mountline builds clean websites and simple online systems for local
+                businesses.
+              </p>
+              <p className="mt-4 text-base leading-7 text-zinc-300">
+                If a website, quote form, booking flow, or customer follow-up feels
+                messy, Mountline can make it clearer and easier to use.
+              </p>
+              <div className="mt-5 border-l-2 border-white bg-white/[0.035] px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300">
+                  Scanned Luke&apos;s card?
+                </p>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  Send a business name, website, or Instagram. Luke will reply with
+                  2–3 specific things worth improving.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-[1.35fr_1fr_1fr]">
+              <ActionLink
+                href={primaryAuditHref}
                 icon={MessageSquareText}
-                label={contact.phoneLabel}
+                label="Get a free quick audit"
                 variant="primary"
               />
-              <ContactButton href={emailHref} icon={Mail} label="Email Luke" />
-              <Link
-                href="/"
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 border border-white/10 bg-transparent px-4 py-3 text-sm font-semibold text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
-              >
-                <ExternalLink className="size-4" />
-                View Mountline
-              </Link>
+              <ActionLink href="#examples" icon={ArrowRight} label="View examples" />
+              <ActionLink href={emailHref} icon={Mail} label="Email Luke" />
             </div>
           </div>
         </section>
 
-        <section className="border-b border-white/10 py-9">
-          <SectionHeading title="Why you're seeing this" />
-          <p className="mt-4 text-base leading-7 text-zinc-300">
-            If Mountline stopped by your business, it is because something specific
-            stood out: strong local reputation, unclear online presence, or a simple
-            opportunity to make it easier for customers to contact you.
-          </p>
-          <p className="mt-4 text-sm leading-6 text-zinc-500">
-            This is a local, practical conversation about the parts of a website or
-            customer flow that can make the business easier to trust and contact.
+        <section id="quick-audit" className="scroll-mt-4 border-b border-white/10 py-8">
+          <div className="grid gap-5 sm:grid-cols-[0.82fr_1.18fr] sm:items-start">
+            <SectionHeading
+              eyebrow="No-cost first step"
+              title="Free quick audit"
+              copy="Send a business name, website, or Instagram. Luke will reply with 2–3 specific ideas to make the online presence clearer, easier to trust, and easier to contact."
+            />
+            <QuickAuditForm />
+          </div>
+        </section>
+
+        <section id="examples" className="scroll-mt-4 border-b border-white/10 py-8">
+          <SectionHeading
+            eyebrow="Concept previews"
+            title="See how Mountline thinks"
+            copy="Practical examples for local service businesses. These are concept previews, not claimed client projects."
+          />
+          <div className="mt-5 grid gap-3">
+            {previews.map((preview) => (
+              <article
+                key={preview.title}
+                className="flex flex-col gap-4 border border-white/10 bg-zinc-950/70 p-4 min-[520px]:flex-row min-[520px]:items-center min-[520px]:justify-between"
+              >
+                <div>
+                  <h3 className="text-base font-semibold text-white">{preview.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">{preview.copy}</p>
+                </div>
+                <Link
+                  href={preview.href}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-white/12 bg-white/[0.03] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/[0.06]"
+                >
+                  View preview
+                  <ArrowRight className="size-4" />
+                </Link>
+              </article>
+            ))}
+          </div>
+          <p className="mt-4 text-xs leading-5 text-zinc-500">
+            Concept previews are examples and are not official websites unless
+            approved by the business.
           </p>
         </section>
 
-        <section className="border-b border-white/10 py-9">
-          <SectionHeading
-            eyebrow="Practical help"
-            title="What Mountline helps with"
-          />
+        <section className="border-b border-white/10 py-8">
+          <SectionHeading title="Why Luke gave you this card" />
+          <p className="mt-4 text-base leading-7 text-zinc-300">
+            Mountline builds practical websites, forms, portals, and customer flows
+            for local businesses. If the current online setup makes it harder for
+            customers to trust, contact, or book the business, Mountline can
+            probably help.
+          </p>
+        </section>
+
+        <section className="border-b border-white/10 py-8">
+          <SectionHeading eyebrow="Good fit" title="Best fit for" />
+          <div className="mt-5 grid gap-2">
+            {bestFit.map((item) => (
+              <div
+                key={item}
+                className="flex items-start gap-3 border border-white/10 bg-white/[0.025] px-4 py-3"
+              >
+                <Check className="mt-0.5 size-4 shrink-0 text-zinc-300" />
+                <p className="text-sm leading-6 text-zinc-300">{item}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-b border-white/10 py-8">
+          <SectionHeading eyebrow="Practical help" title="What Mountline helps with" />
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {capabilities.map((item) => {
               const Icon = item.icon
@@ -322,80 +369,43 @@ export default function LukePage() {
           </div>
         </section>
 
-        <section className="border-b border-white/10 py-9">
-          <SectionHeading
-            eyebrow="Concept previews"
-            title="Recent work / concept previews"
-            copy="These previews show how Mountline structures practical websites for local service businesses."
-          />
-          <div className="mt-5 grid gap-3">
-            {previews.map((preview) => (
-              <article
-                key={preview.title}
-                className="flex flex-col gap-4 border border-white/10 bg-zinc-950/70 p-4 min-[520px]:flex-row min-[520px]:items-center min-[520px]:justify-between"
-              >
-                <div>
-                  <h3 className="text-base font-semibold text-white">{preview.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">{preview.copy}</p>
-                </div>
-                {preview.href ? (
-                  <Link
-                    href={preview.href}
-                    className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-white/12 bg-white/[0.03] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/[0.06]"
-                  >
-                    View preview
-                    <ArrowRight className="size-4" />
-                  </Link>
-                ) : (
-                  <span className="inline-flex min-h-11 shrink-0 items-center justify-center border border-white/10 px-4 py-2.5 text-sm font-medium text-zinc-500">
-                    Preview not available
-                  </span>
-                )}
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="border-b border-white/10 py-9">
+        <section className="border-b border-white/10 py-8">
           <div className="border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-            <SectionHeading title="Contact Luke" />
-            <div className="mt-5 grid gap-3">
-              <ContactButton
-                href={phoneHref}
+            <SectionHeading
+              title="Ready for a quick look?"
+              copy="Send Luke the business name, website, or Instagram. Mountline will point out what should be improved first."
+            />
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <ActionLink
+                href={primaryAuditHref}
                 icon={Send}
-                label={contact.phoneLabel}
+                label="Get free quick audit"
                 variant="primary"
               />
-              <ContactButton href={emailHref} icon={Mail} label={contact.email} />
-              <a
+              <ActionLink href={emailHref} icon={Mail} label={contact.email} />
+              <ActionLink
                 href={contact.homepageUrl}
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 border border-white/10 bg-transparent px-4 py-3 text-sm font-semibold text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
-              >
-                <Globe2 className="size-4" />
-                Visit {contact.homepageLabel}
-              </a>
-              <a
+                icon={Globe2}
+                label={`Visit ${contact.homepageLabel}`}
+                variant="quiet"
+              />
+              <ActionLink
                 href="/luke-nordin.vcf"
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 border border-white/10 bg-transparent px-4 py-3 text-sm font-semibold text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
-              >
-                <ContactRound className="size-4" />
-                Save contact
-              </a>
+                icon={ContactRound}
+                label="Save contact"
+                variant="quiet"
+              />
             </div>
           </div>
         </section>
 
-        <section className="border-b border-white/10 py-8">
+        <section className="border-b border-white/10 py-7">
           <div className="flex gap-3 text-sm leading-6 text-zinc-400">
             <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-zinc-300" />
             <div>
               <p className="font-medium text-zinc-200">Built by Mountline Studio</p>
               <p className="mt-1">
                 Small, practical websites and systems for local businesses.
-              </p>
-              <p className="mt-3 text-xs leading-5 text-zinc-500">
-                Concept previews are examples and are not official websites unless
-                approved by the business.
               </p>
             </div>
           </div>

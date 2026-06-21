@@ -2,29 +2,27 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import {
-  ArrowRight,
   ArrowUpRight,
+  Bot,
   BriefcaseBusiness,
   Check,
   CheckCircle2,
   ContactRound,
-  FileText,
   Globe2,
   Mail,
   MapPin,
   MessageSquareText,
-  Send,
+  Phone,
   UserRound,
-  UsersRound,
   type LucideIcon,
 } from "lucide-react"
+import { DemoGallery } from "@/components/demo-gallery"
 import { MountlineLogo } from "@/components/mountline-logo"
-import { QuickAuditForm } from "./quick-audit-form"
 
 const contact = {
-  // Public contact values only. Add Luke's public text number here when ready.
-  phoneNumber: "",
-  email: "hello@mountline.dev",
+  phoneNumber: "+18178801028",
+  phoneLabel: "(817) 880-1028",
+  email: "luke.nordin@icloud.com",
   homepageUrl: "https://mountline.dev",
   homepageLabel: "mountline.dev",
 }
@@ -32,16 +30,16 @@ const contact = {
 const pageUrl = `${contact.homepageUrl}/luke`
 
 export const metadata: Metadata = {
-  title: "Luke Nordin — Mountline Studio",
+  title: "Luke Nordin | Mountline Studio",
   description:
-    "Clean websites and practical online systems for local businesses from Luke Nordin and Mountline Studio in Keller, Texas.",
+    "Meet Luke Nordin, founder of Mountline Studio in Keller, Texas. Websites, AI-powered systems, and practical tools for local businesses.",
   alternates: {
     canonical: "/luke",
   },
   openGraph: {
-    title: "Luke Nordin — Mountline Studio",
+    title: "Luke Nordin | Mountline Studio",
     description:
-      "Send a business name, website, or Instagram for a free quick audit from Mountline Studio.",
+      "Websites, AI-powered systems, and practical tools for local businesses.",
     url: pageUrl,
     siteName: "Mountline Studio",
     images: [
@@ -56,9 +54,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Luke Nordin — Mountline Studio",
+    title: "Luke Nordin | Mountline Studio",
     description:
-      "Clean websites and practical online systems for local businesses.",
+      "Websites, AI-powered systems, and practical tools for local businesses.",
     images: ["/luke-profile.jpg"],
   },
 }
@@ -70,49 +68,26 @@ const capabilities: Array<{
 }> = [
   {
     title: "Business websites",
-    copy: "Clear pages that explain services, proof, pricing cues, and the next step.",
+    copy: "I build super clear, mobile-friendly websites that feel true and matched to your business, helping customers know what to do next and trust you from the first impression.",
     icon: Globe2,
   },
   {
-    title: "Quote & contact flows",
-    copy: "Make it easier for customers to ask for a quote, book, or send details.",
-    icon: FileText,
-  },
-  {
-    title: "Client portals",
-    copy: "Project links, updates, forms, payment links, and next steps in one place.",
+    title: "Your Mountline client portal",
+    copy: "Every project includes a private portal inside Mountline's CRM. We can live chat, share inspiration, track status, handle support, and keep working together from kickoff through launch and beyond.",
     icon: BriefcaseBusiness,
   },
   {
-    title: "Lead systems",
-    copy: "Simple internal tools to track prospects, follow-ups, and customer requests.",
-    icon: UsersRound,
-  },
-]
-
-const previews = [
-  {
-    title: "Auto detailing website concept",
-    copy: "Packages, service proof, and a clearer path to request detailing work.",
-    href: "/work/auto-detailing",
-  },
-  {
-    title: "Barber shop website concept",
-    copy: "Services, location details, and an appointment-focused customer path.",
-    href: "/work/barber-shop",
-  },
-  {
-    title: "Pet grooming website concept",
-    copy: "Services, local information, FAQs, and a practical grooming request flow.",
-    href: "/work/pet-grooming",
+    title: "AI-powered systems",
+    copy: "I build practical tools that help organize leads, follow-ups, customer requests, and repetitive work without making the business harder to run.",
+    icon: Bot,
   },
 ]
 
 const bestFit = [
-  "Local service businesses",
-  "Barbers, detailers, groomers, contractors, med spas, and small shops",
-  "Businesses that need a cleaner website, quote flow, booking path, or client portal",
-  "Owners who want something simple, fast, and easy to understand",
+  "Local businesses in Keller and the surrounding area",
+  "Barbers, detailers, groomers, contractors, med spas, restaurants, churches, and independent shops",
+  "Businesses that need a stronger website or a smarter way to handle leads and customer requests",
+  "Owners who value clear communication, practical ideas, and straightforward work",
 ]
 
 function SectionHeading({
@@ -168,16 +143,12 @@ function ActionLink({
 
 export default function LukePage() {
   const emailHref =
-    `mailto:${contact.email}?subject=Free%20quick%20audit&body=` +
+    `mailto:${contact.email}?subject=Mountline%20Studio&body=` +
     encodeURIComponent(
-      "Hey Luke, I scanned your card. My business is [business name]. Can you take a quick look at my website or Instagram?",
+      "Hey Luke, it was great meeting you. My business is [business name].",
     )
-  const smsHref = contact.phoneNumber
-    ? `sms:${contact.phoneNumber}?&body=${encodeURIComponent(
-        "Hey Luke, I scanned your card. My business is [business name]. Can you take a quick look at my website?",
-      )}`
-    : undefined
-  const primaryAuditHref = smsHref || "#quick-audit"
+  const smsHref = `sms:${contact.phoneNumber}`
+  const phoneHref = `tel:${contact.phoneNumber}`
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -252,73 +223,49 @@ export default function LukePage() {
 
             <div className="mt-6 border-t border-white/10 pt-6">
               <p className="text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
-                Mountline builds clean websites and simple online systems for local
-                businesses.
-              </p>
-              <p className="mt-4 text-base leading-7 text-zinc-300">
-                If a website, quote form, booking flow, or customer follow-up feels
-                messy, Mountline can make it clearer and easier to use.
+                Hey, I&apos;m Luke! I&apos;m the founder of Mountline Studio here in
+                Keller. I build websites, AI-powered systems, and simple tools that
+                make running a business a little easier.
               </p>
               <div className="mt-5 border-l-2 border-white bg-white/[0.035] px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300">
-                  Scanned Luke&apos;s card?
+                  Scanned my card?
                 </p>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">
-                  Send a business name, website, or Instagram. Luke will reply with
-                  2–3 specific things worth improving.
+                  It was a pleasure to meet you. Send me your business name, website,
+                  or social media so I can get a better, more personal look at what
+                  you do. If I showed you a personalized demo, remind me and I&apos;ll
+                  send your link over too.
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-[1.35fr_1fr_1fr]">
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <ActionLink
-                href={primaryAuditHref}
+                href={smsHref}
                 icon={MessageSquareText}
-                label="Get a free quick audit"
+                label="Text me"
                 variant="primary"
               />
-              <ActionLink href="#examples" icon={ArrowRight} label="View examples" />
-              <ActionLink href={emailHref} icon={Mail} label="Email Luke" />
+              <ActionLink
+                href="/luke-nordin.vcf"
+                icon={ContactRound}
+                label="Save my contact"
+              />
+              <ActionLink href="#examples" icon={ArrowUpRight} label="See my work" />
+              <ActionLink href={emailHref} icon={Mail} label="Email me" />
             </div>
-          </div>
-        </section>
-
-        <section id="quick-audit" className="scroll-mt-4 border-b border-white/10 py-8">
-          <div className="grid gap-5 sm:grid-cols-[0.82fr_1.18fr] sm:items-start">
-            <SectionHeading
-              eyebrow="No-cost first step"
-              title="Free quick audit"
-              copy="Send a business name, website, or Instagram. Luke will reply with 2–3 specific ideas to make the online presence clearer, easier to trust, and easier to contact."
-            />
-            <QuickAuditForm />
           </div>
         </section>
 
         <section id="examples" className="scroll-mt-4 border-b border-white/10 py-8">
           <SectionHeading
-            eyebrow="Concept previews"
-            title="See how Mountline thinks"
-            copy="Practical examples for local service businesses. These are concept previews, not claimed client projects."
+            eyebrow="Live demos"
+            title="See what I've built"
+            copy="Open any card to see the current demo."
           />
-          <div className="mt-5 grid gap-3">
-            {previews.map((preview) => (
-              <article
-                key={preview.title}
-                className="flex flex-col gap-4 border border-white/10 bg-zinc-950/70 p-4 min-[520px]:flex-row min-[520px]:items-center min-[520px]:justify-between"
-              >
-                <div>
-                  <h3 className="text-base font-semibold text-white">{preview.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">{preview.copy}</p>
-                </div>
-                <Link
-                  href={preview.href}
-                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-white/12 bg-white/[0.03] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/[0.06]"
-                >
-                  View preview
-                  <ArrowRight className="size-4" />
-                </Link>
-              </article>
-            ))}
+          <div className="mt-5">
+            <DemoGallery layout="compact" />
           </div>
           <p className="mt-4 text-xs leading-5 text-zinc-500">
             Concept previews are examples and are not official websites unless
@@ -327,12 +274,13 @@ export default function LukePage() {
         </section>
 
         <section className="border-b border-white/10 py-8">
-          <SectionHeading title="Why Luke gave you this card" />
+          <SectionHeading title="Why I gave you this card" />
           <p className="mt-4 text-base leading-7 text-zinc-300">
-            Mountline builds practical websites, forms, portals, and customer flows
-            for local businesses. If the current online setup makes it harder for
-            customers to trust, contact, or book the business, Mountline can
-            probably help.
+            I gave you this card because I saw something I liked about your business
+            and thought I might be able to help! Maybe your work is great, but your
+            site is lacking modern-day design or features that drive customers.
+            Either way, I wanted to introduce myself and give you an easy way to see
+            my work.
           </p>
         </section>
 
@@ -352,8 +300,8 @@ export default function LukePage() {
         </section>
 
         <section className="border-b border-white/10 py-8">
-          <SectionHeading eyebrow="Practical help" title="What Mountline helps with" />
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <SectionHeading eyebrow="Practical help" title="What I can build" />
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {capabilities.map((item) => {
               const Icon = item.icon
               return (
@@ -370,29 +318,40 @@ export default function LukePage() {
         </section>
 
         <section className="border-b border-white/10 py-8">
-          <div className="border border-white/10 bg-white/[0.025] p-4 sm:p-5">
-            <SectionHeading
-              title="Ready for a quick look?"
-              copy="Send Luke the business name, website, or Instagram. Mountline will point out what should be improved first."
+          <div className="luke-cta-grid relative overflow-hidden border border-white/15 bg-zinc-950 p-5 sm:p-7">
+            <div
+              aria-hidden
+              className="absolute inset-x-0 top-0 h-px bg-white/60 shadow-[0_0_24px_rgba(255,255,255,0.55)]"
             />
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="relative">
+              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-zinc-500">
+                Let&apos;s build something useful
+              </p>
+              <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Let me help customers trust your business before they even call.
+              </h2>
+              <p className="mt-4 max-w-xl text-base leading-7 text-zinc-300">
+                A strong website should feel clear, trustworthy, and easy to use. I
+                can help you get there without making the process complicated.
+              </p>
+            </div>
+            <div className="relative mt-6 grid gap-3 sm:grid-cols-2">
               <ActionLink
-                href={primaryAuditHref}
-                icon={Send}
-                label="Get free quick audit"
+                href={smsHref}
+                icon={MessageSquareText}
+                label="Text me"
                 variant="primary"
               />
-              <ActionLink href={emailHref} icon={Mail} label={contact.email} />
+              <ActionLink href={emailHref} icon={Mail} label="Email me" />
               <ActionLink
-                href={contact.homepageUrl}
-                icon={Globe2}
-                label={`Visit ${contact.homepageLabel}`}
-                variant="quiet"
+                href={phoneHref}
+                icon={Phone}
+                label={`Call ${contact.phoneLabel}`}
               />
               <ActionLink
                 href="/luke-nordin.vcf"
                 icon={ContactRound}
-                label="Save contact"
+                label="Save my contact"
                 variant="quiet"
               />
             </div>
@@ -405,7 +364,8 @@ export default function LukePage() {
             <div>
               <p className="font-medium text-zinc-200">Built by Mountline Studio</p>
               <p className="mt-1">
-                Small, practical websites and systems for local businesses.
+                Thoughtful websites and useful tools for local businesses around
+                Keller.
               </p>
             </div>
           </div>

@@ -5,6 +5,10 @@ FN:Luke Nordin
 ORG:Mountline Studio
 TITLE:Founder
 ADR;TYPE=WORK:;;Keller;Texas;;;
-EMAIL;TYPE=WORK:hello@mountline.dev
+TEL;TYPE=CELL:+18178801028
+EMAIL;TYPE=INTERNET:luke.nordin@icloud.com
 URL:https://mountline.dev/luke
+PHOTO;VALUE=URI:https://mountline.dev/luke-profile.jpg
+NOTE:Founder of Mountline Studio. Websites\, AI-powered systems\, and
+ practical tools for local businesses.
 END:VCARD

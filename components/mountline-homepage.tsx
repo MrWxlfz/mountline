@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { DemoGallery } from "./demo-gallery"
 import { NorthlineLogo } from "./northline-logo"
 
 const navItems = [
@@ -46,27 +47,6 @@ const proofPoints = [
     label: "After the yes",
     title: "A private project space instead of scattered updates.",
     copy: "Client portals keep previews, next steps, support messages, useful links, and payment status organized in one place.",
-  },
-]
-
-const conceptBuilds = [
-  {
-    title: "Auto Detailing",
-    eyebrow: "Packages, proof, booking path",
-    description:
-      "A polished service site built around visual trust: packages, ceramic protection, gallery moments, and a clear request path.",
-    href: "/work/auto-detailing",
-    image: "/work-previews/auto-detailing.jpg",
-    alt: "Auto detailing concept website preview",
-  },
-  {
-    title: "Barber Shop",
-    eyebrow: "Services, locations, appointments",
-    description:
-      "A premium local shop concept with service clarity, team context, location details, and appointment-focused calls to action.",
-    href: "/work/barber-shop",
-    image: "/work-previews/barber-shop.jpg",
-    alt: "Barber shop concept website preview",
   },
 ]
 
@@ -533,7 +513,7 @@ export function MountlineHomepage() {
                 onClick={() => scrollToId("work")}
                 className="group inline-flex w-full items-center justify-center gap-2 border border-white/12 bg-white/[0.02] px-6 py-4 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/25 sm:w-auto"
               >
-                See concept builds
+                See live demos
                 <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </button>
             </div>
@@ -586,52 +566,18 @@ export function MountlineHomepage() {
       <section id="work" className="px-4 py-20 sm:px-6 lg:py-28">
         <div className="mx-auto max-w-7xl">
           <SectionIntro
-            eyebrow="Concept builds"
-            title="Real previews, not abstract mockups."
-            copy="A small portfolio of existing concept builds that show the visual direction Mountline can bring to local service businesses."
+            eyebrow="Live demos"
+            title="Open the work and explore it."
+            copy="A growing set of concept sites across local business categories. Each card opens the current build."
           />
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-2">
-            {conceptBuilds.map((build, index) => (
-              <motion.article
-                key={build.title}
-                initial={{ opacity: 0, y: 26 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.55, delay: index * 0.1 }}
-                className="group"
-              >
-                <Link href={build.href} className="block">
-                  <div className="overflow-hidden border border-white/10 bg-zinc-950 transition-all duration-300 group-hover:-translate-y-1 group-hover:border-blue-200/35">
-                    <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950">
-                      <Image
-                        src={build.image}
-                        alt={build.alt}
-                        fill
-                        className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.035]"
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-5 border-t border-white/10 p-6 sm:flex-row sm:items-end sm:justify-between">
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-[0.22em] text-blue-100/70">
-                          {build.eyebrow}
-                        </p>
-                        <h3 className="mt-3 text-2xl font-semibold text-white">{build.title}</h3>
-                        <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-300">
-                          {build.description}
-                        </p>
-                      </div>
-                      <span className="inline-flex items-center gap-2 text-sm font-medium text-white">
-                        View build
-                        <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </motion.article>
-            ))}
+          <div className="mt-14">
+            <DemoGallery />
           </div>
+          <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-zinc-500">
+            Concept previews are examples and are not official websites unless
+            approved by the business.
+          </p>
         </div>
       </section>
 

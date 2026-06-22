@@ -87,7 +87,7 @@ const bestFit = [
   "Local businesses in Keller and the surrounding area",
   "Barbers, detailers, groomers, contractors, med spas, restaurants, churches, and independent shops",
   "Businesses that need a stronger website or a smarter way to handle leads and customer requests",
-  "Owners who value clear communication, practical ideas, and straightforward work",
+  "Owners who want honest communication and work that actually gets done",
 ]
 
 function SectionHeading({
@@ -225,7 +225,8 @@ export default function LukePage() {
               <p className="text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
                 Hey, I&apos;m Luke! I&apos;m the founder of Mountline Studio here in
                 Keller. I build websites, AI-powered systems, and simple tools that
-                make running a business a little easier.
+                that help local businesses look credible, get found, and make it easy
+                for customers to reach out.
               </p>
               <div className="mt-5 border-l-2 border-white bg-white/[0.035] px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300">
@@ -262,7 +263,7 @@ export default function LukePage() {
           <SectionHeading
             eyebrow="Live demos"
             title="See what I've built"
-            copy="Open any card to see the current demo."
+            copy="These are real, working sites — open any card to see the live demo."
           />
           <div className="mt-5">
             <DemoGallery layout="compact" />
@@ -364,8 +365,7 @@ export default function LukePage() {
             <div>
               <p className="font-medium text-zinc-200">Built by Mountline Studio</p>
               <p className="mt-1">
-                Thoughtful websites and useful tools for local businesses around
-                Keller.
+                Built in Keller. Built for businesses that want to be taken seriously.
               </p>
             </div>
           </div>

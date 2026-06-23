@@ -225,8 +225,8 @@ export default function LukePage() {
               <p className="text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
                 Hey, I&apos;m Luke! I&apos;m the founder of Mountline Studio here in
                 Keller. I build websites, AI-powered systems, and simple tools that
-                that help local businesses look credible, get found, and make it easy
-                for customers to reach out.
+                that help local businesses look credible, get found, and actually hear
+                from customers.
               </p>
               <div className="mt-5 border-l-2 border-white bg-white/[0.035] px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300">

@@ -26,6 +26,7 @@ Signal does not send emails, make calls, send DMs, send texts, submit forms, scr
 ## Routes
 
 - `/dashboard/signal`
+- `/dashboard/signal/runs/[runId]`
 - `/dashboard/signal/new`
 - `/dashboard/signal/research`
 - `/dashboard/signal/import`
@@ -42,6 +43,30 @@ Signal does not send emails, make calls, send DMs, send texts, submit forms, scr
 - `/dashboard/signal/call-session/[sessionId]`
 
 All pages and APIs use the existing Mountline team-member guard. Signal is not public-facing and is not exposed to clients.
+
+## Lead Runs
+
+`/dashboard/signal` is the internal lead-engine entry point. A team member enters a city or metro area, an optional radius, a lead count, an industry preference, and optional plain-language notes. Signal then creates a persisted run and advances it in short, resumable stages:
+
+- setting up the market
+- finding public-web candidates
+- filtering chains, duplicates, and suppressed businesses
+- checking likely official public websites
+- scoring evidence-backed opportunities
+- writing draft-only sales packs
+- ranking the strongest independent local leads
+
+The page never exposes provider/depth/budget controls. It shows provider setup warnings only when a required server-side key is absent. A run is safe to refresh because its status, event feed, candidates, evidence, scoring, and generated drafts are persisted.
+
+The radius is passed into discovery as a public-search preference, not represented as a verified drive-time claim. Signal requires public city/area evidence before ranking a lead and labels any unverified distance as a manual check rather than inventing precision.
+
+The additive lead-run schema is defined by `202607090001_mountline_signal_lead_runs.sql`, `202607090002_mountline_signal_lead_run_hardening.sql`, and `202607090003_mountline_signal_run_evidence_integrity.sql`. Apply all three in order before opening a live run.
+
+Lead runs search permitted public web results and scan only likely official public sites that pass the existing SSRF-safe website validation. They do not scrape Google Maps, Google reviews, directory pages, login-gated pages, or social platforms. A public social link may be kept as source context when it appears in a search result or on an official site, but Signal does not fetch the social page.
+
+High-likelihood chains and franchises are excluded before costly website or AI work. Medium chain likelihood remains visible only when public evidence leaves a strong independent-local reason to continue. Ignoring a lead adds its normalized public business identity to the existing suppression flow so it is not silently resurfaced in later runs.
+
+Each ranked lead includes the public evidence used, confidence, chain rationale, an evidence-based communication-profile tag list, a draft sales pack, and a clearly labeled concept-preview/Lovable prompt. Sales packs are draft-only; no contact action is sent or submitted automatically.
 
 ## Quick Research
 
@@ -201,6 +226,8 @@ API keys authenticate provider access. Model values are exact model IDs, not API
 
 `SIGNAL_RESEARCH_PROVIDER=disabled` is supported. Manual entry and import continue to work without Tavily.
 
+When no explicit provider mode is set, Lead Runs use configured server-side keys automatically: Tavily for discovery, Firecrawl for official-site extraction, and Gemini or OpenAI for sales-pack drafting. An explicit `disabled` setting always wins. Missing Firecrawl or AI keys degrade gracefully to scanner evidence or deterministic draft generation; missing Tavily prevents new automated discovery while leaving the Signal UI and legacy/manual workflows available.
+
 `SIGNAL_SCREENSHOT_PROVIDER=manual` is the default and keeps screenshot collection as upload-only. `browserless` enables server-side homepage capture after the official URL passes the same website scanner safety checks. `disabled` hides automated capture guidance while manual upload can remain available.
 
 `SIGNAL_RESEARCH_PROVIDER=hybrid` uses Tavily for lightweight public discovery and Firecrawl for complementary discovery plus official-site extraction where configured. Firecrawl is never used to crawl whole sites by default; market depth limits control how many official-site pages are read per candidate.
@@ -232,6 +259,21 @@ Known demo matches are also deterministic:
 AI may interpret unknown or ambiguous cases, but it must not downgrade a deterministic known demo to `none` unless a Mountline team member manually overrides the record.
 
 ## Scores And Value Bands
+
+### Lead-run scoring
+
+Lead Runs use a separate, evidence-first score model. Each dimension stores its value, rationale, supporting evidence, and unknowns:
+
+- fit
+- website opportunity
+- contact friction
+- trust gap
+- walk-in viability
+- demo potential
+- urgency
+- confidence
+
+The final rank is an opportunity composite reduced by confidence and chain risk. Weak evidence must lower confidence and ranking rather than create a confident-looking number. Website scanning cannot prove mobile visual quality, reputation, owner facts, or urgency by itself, so those points remain unknown or are explicitly labeled as hypotheses unless public evidence supports them.
 
 Signal scores:
 

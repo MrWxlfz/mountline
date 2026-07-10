@@ -1,4 +1,5 @@
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
+import { getSignalLeadRunProviderSetup } from "@/lib/signal/lead-runs"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type {
   SignalAlert,
@@ -7,11 +8,26 @@ import type {
   SignalCampaignCandidate,
   SignalMarket,
   SignalMarketCandidate,
-  SignalOutreachEvent,
+  SignalRun,
+  SignalRunEvent,
+  SignalRunLead,
   SignalProspect,
 } from "@/lib/supabase/types"
-import { SignalDashboard } from "./signal-dashboard"
+import { SignalLeadEngine } from "./signal-lead-engine"
 
+export const dynamic = "force-dynamic"
+
+const activeRunStatuses = new Set<SignalRun["status"]>([
+  "queued",
+  "discovering",
+  "checking",
+  "scoring",
+  "writing_packs",
+  "ranking",
+])
+
+// Kept as type-only compatibility exports for the legacy Signal dashboard.
+// The rebuilt landing page no longer loads those unbounded datasets.
 export type SignalProspectRow = SignalProspect & {
   latest_analysis: SignalAnalysis | null
   unread_alert: SignalAlert | null
@@ -25,128 +41,89 @@ export type SignalMarketRow = SignalMarket & {
   candidates: SignalMarketCandidate[]
 }
 
-async function getSignalData(): Promise<{
-  campaigns: SignalCampaignRow[]
-  events: SignalOutreachEvent[]
-  markets: SignalMarketRow[]
-  rows: SignalProspectRow[]
-}> {
+async function getLeadEngineData() {
   const supabase = createAdminClient()
-  const [
-    { data: prospects, error: prospectError },
-    { data: analyses },
-    { data: alerts },
-    { data: campaigns },
-    { data: candidates },
-    { data: markets },
-    { data: marketCandidates },
-    { data: events },
-  ] =
+  const [{ data: runs, error: runsError }, { data: savedLeads, error: savedLeadsError }] =
     await Promise.all([
+      supabase.from("signal_runs").select("*").order("created_at", { ascending: false }).limit(12),
       supabase
-        .from("signal_prospects")
+        .from("signal_run_leads")
         .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("signal_analyses")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("signal_alerts")
-        .select("*")
-        .is("read_at", null)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("signal_campaigns")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("signal_campaign_candidates")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("signal_markets")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("signal_market_candidates")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("signal_outreach_events")
-        .select("*")
-        .order("created_at", { ascending: false }),
+        .eq("status", "saved")
+        .order("updated_at", { ascending: false })
+        .limit(5),
     ])
 
-  if (prospectError) {
-    console.error("[signal] Prospect fetch failed:", prospectError.message)
-    return { campaigns: [], events: [], markets: [], rows: [] }
+  if (runsError || savedLeadsError) {
+    const error = runsError || savedLeadsError
+    console.error("[signal] Lead-run summary fetch failed:", error?.message)
+    return {
+      activeEvents: [] as SignalRunEvent[],
+      activeLeads: [] as SignalRunLead[],
+      activeRun: null,
+      runs: [] as SignalRun[],
+      savedLeads: [] as SignalRunLead[],
+      storageMessage: "Signal lead-run storage is not ready yet. Apply the Signal lead-run migrations, then refresh this page.",
+    }
   }
 
-  const latestAnalysisByProspect = new Map<string, SignalAnalysis>()
-  ;((analyses || []) as SignalAnalysis[]).forEach((analysis) => {
-    if (!latestAnalysisByProspect.has(analysis.prospect_id)) {
-      latestAnalysisByProspect.set(analysis.prospect_id, analysis)
+  const typedRuns = (runs || []) as SignalRun[]
+  const activeRun = typedRuns.find((run) => activeRunStatuses.has(run.status)) || null
+
+  if (!activeRun) {
+    return {
+      activeEvents: [] as SignalRunEvent[],
+      activeLeads: [] as SignalRunLead[],
+      activeRun: null,
+      runs: typedRuns,
+      savedLeads: (savedLeads || []) as SignalRunLead[],
+      storageMessage: null,
     }
-  })
+  }
 
-  const unreadAlertByProspect = new Map<string, SignalAlert>()
-  ;((alerts || []) as SignalAlert[]).forEach((alert) => {
-    if (!unreadAlertByProspect.has(alert.prospect_id)) {
-      unreadAlertByProspect.set(alert.prospect_id, alert)
-    }
-  })
-
-  const rows = ((prospects || []) as SignalProspect[]).map((prospect) => ({
-    ...prospect,
-    latest_analysis: latestAnalysisByProspect.get(prospect.id) || null,
-    unread_alert: unreadAlertByProspect.get(prospect.id) || null,
-  }))
-
-  const candidatesByCampaign = new Map<string, SignalCampaignCandidate[]>()
-  ;((candidates || []) as SignalCampaignCandidate[]).forEach((candidate) => {
-    candidatesByCampaign.set(candidate.campaign_id, [
-      ...(candidatesByCampaign.get(candidate.campaign_id) || []),
-      candidate,
-    ])
-  })
-
-  const campaignRows = ((campaigns || []) as SignalCampaign[]).map((campaign) => ({
-    ...campaign,
-    candidates: candidatesByCampaign.get(campaign.id) || [],
-  }))
-
-  const candidatesByMarket = new Map<string, SignalMarketCandidate[]>()
-  ;((marketCandidates || []) as SignalMarketCandidate[]).forEach((candidate) => {
-    candidatesByMarket.set(candidate.market_id, [
-      ...(candidatesByMarket.get(candidate.market_id) || []),
-      candidate,
-    ])
-  })
-
-  const marketRows = ((markets || []) as SignalMarket[]).map((market) => ({
-    ...market,
-    candidates: candidatesByMarket.get(market.id) || [],
-  }))
+  const [{ data: activeEvents }, { data: activeLeads }] = await Promise.all([
+    supabase
+      .from("signal_run_events")
+      .select("*")
+      .eq("run_id", activeRun.id)
+      .order("created_at", { ascending: false })
+      .limit(10),
+    supabase
+      .from("signal_run_leads")
+      .select("*")
+      .eq("run_id", activeRun.id)
+      .order("rank", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true })
+      .limit(25),
+  ])
 
   return {
-    campaigns: campaignRows,
-    events: (events || []) as SignalOutreachEvent[],
-    markets: marketRows,
-    rows,
+    activeEvents: (activeEvents || []) as SignalRunEvent[],
+    activeLeads: (activeLeads || []) as SignalRunLead[],
+    activeRun,
+    runs: typedRuns,
+    savedLeads: (savedLeads || []) as SignalRunLead[],
+    storageMessage: null,
   }
 }
 
 export default async function SignalPage() {
   await requireNorthlineTeamMember()
-  const data = await getSignalData()
+  const [data, providerSetup] = await Promise.all([
+    getLeadEngineData(),
+    Promise.resolve(getSignalLeadRunProviderSetup()),
+  ])
 
   return (
-    <SignalDashboard
-      campaigns={data.campaigns}
-      events={data.events}
-      markets={data.markets}
-      initialRows={data.rows}
+    <SignalLeadEngine
+      initialActiveEvents={data.activeEvents}
+      initialActiveLeads={data.activeLeads}
+      initialActiveRun={data.activeRun}
+      initialRuns={data.runs}
+      initialSavedLeads={data.savedLeads}
+      providerSetup={providerSetup}
+      storageMessage={data.storageMessage}
+      userName="Luke"
     />
   )
 }

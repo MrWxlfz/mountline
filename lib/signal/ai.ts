@@ -3,6 +3,7 @@ import "server-only"
 import { z } from "zod"
 import type { SignalProspect } from "@/lib/supabase/types"
 import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "./playbooks"
+import { getSignalAiProviderMode } from "./providers"
 import type { SignalWebsiteScan } from "./website"
 import {
   signalDeepAnalysisSchema,
@@ -56,15 +57,40 @@ const signalClassificationOutputSchema = z.object({
   evidence: z.array(z.string().trim().min(1).max(220)).min(1).max(6),
 })
 
+const signalLeadSalesPackSchema = z.object({
+  why_this_fits: z.string().trim().min(1).max(1200),
+  what_stood_out: z.array(z.string().trim().min(1).max(320)).min(1).max(6),
+  likely_pain_points: z.array(
+    z.object({
+      statement: z.string().trim().min(1).max(360),
+      basis: z.enum(["evidence", "hypothesis"]),
+    }),
+  ).min(1).max(5),
+  recommended_offer: z.string().trim().min(1).max(420),
+  pricing_angle: z.string().trim().min(1).max(420),
+  pitch_angle: z.string().trim().min(1).max(500),
+  best_first_action: z.enum(["walk_in", "call", "text_email", "research_more"]),
+  walk_in_script: z.string().trim().min(1).max(1800),
+  call_script: z.string().trim().min(1).max(1800),
+  follow_up_message: z.string().trim().min(1).max(1800),
+  objection_handling: z.array(
+    z.object({
+      objection: z.string().trim().min(1).max(240),
+      response: z.string().trim().min(1).max(900),
+    }),
+  ).min(5).max(6),
+  what_to_avoid: z.array(z.string().trim().min(1).max(280)).min(1).max(6),
+  risks_to_verify: z.array(z.string().trim().min(1).max(280)).max(6),
+  lovable_prompt: z.string().trim().min(1).max(7000),
+})
+
 const DEFAULT_OPENAI_FAST_MODEL = "gpt-4.1-mini"
 const DEFAULT_OPENAI_DEEP_MODEL = "gpt-4.1"
 const DEFAULT_GEMINI_FAST_MODEL = "gemini-2.0-flash"
 const DEFAULT_GEMINI_DEEP_MODEL = "gemini-2.0-flash"
 
 function getProvider(): SignalAiProvider {
-  const provider = process.env.SIGNAL_AI_PROVIDER?.trim().toLowerCase()
-  if (provider === "gemini" || provider === "openai") return provider
-  return "disabled"
+  return getSignalAiProviderMode()
 }
 
 function cleanJsonText(text: string) {
@@ -355,6 +381,55 @@ export async function runDeepAiAnalysis(
   const parsed = signalDeepAnalysisSchema.safeParse(result.json)
   if (!parsed.success) {
     console.error("[signal] Deep AI output invalid:", parsed.error.flatten())
+    return null
+  }
+
+  return {
+    output: parsed.data,
+    provider: result.provider,
+    model: result.model,
+  }
+}
+
+export type SignalLeadSalesPackOutput = z.infer<typeof signalLeadSalesPackSchema>
+
+export async function runSignalLeadSalesPackAi(input: {
+  businessName: string
+  city: string | null
+  industry: string | null
+  websiteStatus: string
+  publicFacts: string[]
+  evidence: Array<{ label: string; excerpt: string; url?: string | null }>
+  scoreSummary: string
+}) {
+  const result = await callProvider(
+    [
+      "Create a practical, evidence-grounded Mountline Signal sales pack for one local business.",
+      safetyInstructions(),
+      "Do not use first-person singular in scripts. Describe Mountline as a local founder-led studio; do not mention school, age, or personal background.",
+      "Use only the supplied public facts and evidence. State uncertain items as hypotheses. Never imply a concept preview is the business's official website.",
+      "The Lovable prompt must request a clearly labeled concept preview, mobile-first design, verified facts only, placeholders for unknown facts, and no invented reviews, pricing, services, logos, or testimonials.",
+      "For objections, include: who Mountline is, how the business was found, already have Facebook, already have a website, and too busy.",
+      "Return only strict JSON with exactly these keys: why_this_fits, what_stood_out, likely_pain_points, recommended_offer, pricing_angle, pitch_angle, best_first_action, walk_in_script, call_script, follow_up_message, objection_handling, what_to_avoid, risks_to_verify, lovable_prompt.",
+      "",
+      `Business: ${input.businessName}`,
+      `Location: ${input.city || "unknown"}`,
+      `Industry: ${input.industry || "unknown"}`,
+      `Website status: ${input.websiteStatus}`,
+      `Public facts: ${input.publicFacts.join(" | ") || "No additional public facts confirmed."}`,
+      `Score summary: ${input.scoreSummary}`,
+      "Evidence:",
+      ...input.evidence.slice(0, 10).map((item) =>
+        `- ${item.label}: ${item.excerpt}${item.url ? ` (${item.url})` : ""}`,
+      ),
+    ].join("\n"),
+    true,
+  )
+  if (!result) return null
+
+  const parsed = signalLeadSalesPackSchema.safeParse(result.json)
+  if (!parsed.success) {
+    console.error("[signal] Lead sales pack output invalid:", parsed.error.flatten())
     return null
   }
 

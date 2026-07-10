@@ -63,6 +63,13 @@ export type SignalMarketRuntimeConfig = {
   visualMaxScreenshotsPerMarket: number
 }
 
+export type SignalAiProviderSetup = {
+  provider: SignalAiProviderMode
+  enabled: boolean
+  missing_env: string[]
+  message: string | null
+}
+
 const FIRECRAWL_BASE_URL = "https://api.firecrawl.dev/v2"
 
 function clean(value: string | null | undefined) {
@@ -80,9 +87,15 @@ function bounded(value: number, min: number, max: number) {
 
 export function getSignalResearchProviderMode(): SignalResearchProviderMode {
   const provider = process.env.SIGNAL_RESEARCH_PROVIDER?.trim().toLowerCase()
+  if (provider === "disabled") return "disabled"
   if (provider === "tavily" || provider === "firecrawl" || provider === "hybrid") {
     return provider
   }
+  // Lead runs should work from the keys already configured for Signal. An
+  // explicit provider mode still wins for teams that need to constrain usage.
+  if (process.env.TAVILY_API_KEY && process.env.FIRECRAWL_API_KEY) return "hybrid"
+  if (process.env.TAVILY_API_KEY) return "tavily"
+  if (process.env.FIRECRAWL_API_KEY) return "firecrawl"
   return "disabled"
 }
 
@@ -101,8 +114,35 @@ export function getSignalScreenshotProviderMode(): SignalScreenshotProviderMode 
 
 export function getSignalAiProviderMode(): SignalAiProviderMode {
   const provider = process.env.SIGNAL_AI_PROVIDER?.trim().toLowerCase()
+  if (provider === "disabled") return "disabled"
   if (provider === "gemini" || provider === "openai") return provider
+  if (process.env.GEMINI_API_KEY) return "gemini"
+  if (process.env.OPENAI_API_KEY) return "openai"
   return "disabled"
+}
+
+export function getSignalAiProviderSetup(): SignalAiProviderSetup {
+  const provider = getSignalAiProviderMode()
+  if (provider === "disabled") {
+    const explicitlyDisabled = process.env.SIGNAL_AI_PROVIDER?.trim().toLowerCase() === "disabled"
+    return {
+      provider,
+      enabled: false,
+      missing_env: explicitlyDisabled ? [] : ["GEMINI_API_KEY or OPENAI_API_KEY"],
+      message: explicitlyDisabled
+        ? "AI generation is disabled. Signal will use deterministic scoring and sales-pack fallbacks."
+        : "No AI key is configured. Signal will use deterministic scoring and sales-pack fallbacks.",
+    }
+  }
+
+  const requiredKey = provider === "gemini" ? "GEMINI_API_KEY" : "OPENAI_API_KEY"
+  const hasKey = Boolean(process.env[requiredKey])
+  return {
+    provider,
+    enabled: hasKey,
+    missing_env: hasKey ? [] : [requiredKey],
+    message: hasKey ? null : `${provider === "gemini" ? "Gemini" : "OpenAI"} is selected, but ${requiredKey} is missing.`,
+  }
 }
 
 export function getSignalMarketRuntimeConfig(): SignalMarketRuntimeConfig {
@@ -227,6 +267,31 @@ async function tavilySearch(query: string, maxResults: number) {
         }
       })
       .filter(Boolean) as SignalProviderSearchResult[],
+  }
+}
+
+/**
+ * Lead Runs deliberately keep discovery on Tavily. Firecrawl is used after a
+ * public official URL passes the website scanner's SSRF-safe validation.
+ */
+export async function searchSignalTavilyPublicWeb({
+  maxResults,
+  query,
+}: {
+  maxResults: number
+  query: string
+}) {
+  try {
+    const response = await tavilySearch(query, maxResults)
+    return {
+      results: response.results,
+      setup_messages: response.setupMessage ? [response.setupMessage] : [],
+    }
+  } catch (error) {
+    return {
+      results: [] as SignalProviderSearchResult[],
+      setup_messages: [error instanceof Error ? error.message : "Tavily search failed."],
+    }
   }
 }
 

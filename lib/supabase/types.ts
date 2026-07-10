@@ -910,3 +910,123 @@ export type SignalFocusItem = {
   completed_at: string | null
   created_by: string | null
 }
+
+export type SignalRunStatus =
+  | "queued"
+  | "discovering"
+  | "checking"
+  | "scoring"
+  | "writing_packs"
+  | "ranking"
+  | "completed"
+  | "partial"
+  | "failed"
+
+export type SignalRunLeadStatus =
+  | "candidate"
+  | "researching"
+  | "ready"
+  | "saved"
+  | "ignored"
+  | "excluded"
+  | "failed"
+
+export type SignalRunWebsiteStatus =
+  | "no_site"
+  | "weak_site"
+  | "decent_site"
+  | "strong_site"
+  | "social_only"
+  | "unknown"
+
+export type SignalRun = {
+  id: string
+  created_at: string
+  updated_at: string
+  created_by: string | null
+  market_type: "city" | "metro"
+  location: string
+  radius_miles: number
+  lead_limit: number
+  industry_focus: string
+  custom_industry: string | null
+  notes: string | null
+  status: SignalRunStatus
+  current_stage: string
+  progress_percent: number
+  provider_status: SignalJson
+  provider_errors: SignalJson
+  summary: SignalJson
+  error_message: string | null
+  completed_at: string | null
+  execution_cursor: SignalJson
+  lease_token: string | null
+  lease_expires_at: string | null
+  started_at: string | null
+  heartbeat_at: string | null
+  attempt_count: number
+}
+
+export type SignalRunEvent = {
+  id: string
+  run_id: string
+  created_at: string
+  stage: string
+  message: string
+  progress_percent: number | null
+  metadata: SignalJson | null
+}
+
+export type SignalRunLead = {
+  id: string
+  run_id: string
+  created_at: string
+  updated_at: string
+  rank: number | null
+  status: SignalRunLeadStatus
+  business_name: string
+  industry: string | null
+  city: string | null
+  state: string | null
+  address: string | null
+  website_url: string | null
+  phone: string | null
+  public_email: string | null
+  social_links: SignalJson
+  source_urls: SignalJson
+  website_status: SignalRunWebsiteStatus
+  chain_likelihood: number
+  chain_reason: string | null
+  is_independent_likely: boolean
+  independent_confidence: number
+  final_score: number | null
+  confidence_score: number | null
+  score_breakdown: SignalJson
+  key_reasons: SignalJson
+  website_analysis: SignalJson
+  communication_profile: SignalJson
+  sales_pack: SignalJson | null
+  lovable_prompt: string | null
+  risks: SignalJson
+  next_steps: SignalJson
+  raw_research: SignalJson
+  research_error: string | null
+  identity_key: string | null
+  normalized_business_name: string | null
+  normalized_hostname: string | null
+  normalized_phone: string | null
+  chain_evidence: SignalJson
+}
+
+export type SignalRunLeadEvidence = {
+  id: string
+  run_id: string
+  lead_id: string
+  created_at: string
+  evidence_type: string
+  source_url: string | null
+  source_title: string | null
+  excerpt: string | null
+  confidence: SignalConfidence | null
+  metadata: SignalJson | null
+}

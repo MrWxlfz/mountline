@@ -34,6 +34,7 @@ export type SignalFirecrawlPageEvidence = {
   description: string | null
   markdown_excerpt: string | null
   links: string[]
+  branding: Record<string, unknown> | null
   credits_used: number
   error: string | null
 }
@@ -71,6 +72,26 @@ export type SignalAiProviderSetup = {
 }
 
 const FIRECRAWL_BASE_URL = "https://api.firecrawl.dev/v2"
+
+async function fetchSignalProvider(
+  url: string,
+  init: Omit<RequestInit, "signal">,
+  timeoutMs: number,
+  attempts = 2,
+) {
+  let lastError: unknown = null
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) })
+      if (response.ok || (response.status !== 429 && response.status < 500) || attempt === attempts) return response
+      lastError = new Error(`Provider returned retryable status ${response.status}.`)
+    } catch (error) {
+      lastError = error
+      if (attempt === attempts) throw error
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Research provider request failed.")
+}
 
 function clean(value: string | null | undefined) {
   return value?.replace(/\s+/g, " ").trim() || ""
@@ -228,7 +249,7 @@ async function tavilySearch(query: string, maxResults: number) {
     }
   }
 
-  const response = await fetch("https://api.tavily.com/search", {
+  const response = await fetchSignalProvider("https://api.tavily.com/search", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -239,8 +260,7 @@ async function tavilySearch(query: string, maxResults: number) {
       include_raw_content: false,
       max_results: maxResults,
     }),
-    signal: AbortSignal.timeout(15_000),
-  })
+  }, 15_000)
 
   if (!response.ok) {
     return {
@@ -305,7 +325,7 @@ async function firecrawlSearch(query: string, maxResults: number) {
     }
   }
 
-  const response = await fetch(`${FIRECRAWL_BASE_URL}/search`, {
+  const response = await fetchSignalProvider(`${FIRECRAWL_BASE_URL}/search`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -319,8 +339,7 @@ async function firecrawlSearch(query: string, maxResults: number) {
       timeout: 60_000,
       ignoreInvalidURLs: true,
     }),
-    signal: AbortSignal.timeout(25_000),
-  })
+  }, 25_000)
 
   if (!response.ok) {
     return {
@@ -427,7 +446,7 @@ export async function mapFirecrawlSite(url: string, limit: number) {
   const apiKey = process.env.FIRECRAWL_API_KEY
   if (!apiKey) return { links: [] as Array<{ url: string; title: string | null; description: string | null }>, creditsUsed: 0 }
 
-  const response = await fetch(`${FIRECRAWL_BASE_URL}/map`, {
+  const response = await fetchSignalProvider(`${FIRECRAWL_BASE_URL}/map`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -442,8 +461,7 @@ export async function mapFirecrawlSite(url: string, limit: number) {
       timeout: 15_000,
       location: { country: "US", languages: ["en-US"] },
     }),
-    signal: AbortSignal.timeout(20_000),
-  })
+  }, 20_000)
 
   if (!response.ok) return { links: [], creditsUsed: 0 }
   const data = await response.json()
@@ -470,12 +488,13 @@ export async function scrapeFirecrawlPage(url: string): Promise<SignalFirecrawlP
       description: null,
       markdown_excerpt: null,
       links: [],
+      branding: null,
       credits_used: 0,
       error: "FIRECRAWL_API_KEY is missing.",
     }
   }
 
-  const response = await fetch(`${FIRECRAWL_BASE_URL}/scrape`, {
+  const response = await fetchSignalProvider(`${FIRECRAWL_BASE_URL}/scrape`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -483,15 +502,16 @@ export async function scrapeFirecrawlPage(url: string): Promise<SignalFirecrawlP
     },
     body: JSON.stringify({
       url,
-      formats: ["markdown", "links"],
+      formats: ["markdown", "links", "branding"],
       onlyMainContent: true,
+      maxAge: 604_800_000,
+      storeInCache: true,
       timeout: 30_000,
       removeBase64Images: true,
       blockAds: true,
       location: { country: "US", languages: ["en-US"] },
     }),
-    signal: AbortSignal.timeout(35_000),
-  })
+  }, 35_000)
 
   if (!response.ok) {
     return {
@@ -501,6 +521,7 @@ export async function scrapeFirecrawlPage(url: string): Promise<SignalFirecrawlP
       description: null,
       markdown_excerpt: null,
       links: [],
+      branding: null,
       credits_used: 0,
       error: `Firecrawl scrape failed with status ${response.status}.`,
     }
@@ -520,6 +541,9 @@ export async function scrapeFirecrawlPage(url: string): Promise<SignalFirecrawlP
     links: Array.isArray(data?.data?.links)
       ? data.data.links.filter((link: unknown): link is string => typeof link === "string").slice(0, 40)
       : [],
+    branding: data?.data?.branding && typeof data.data.branding === "object"
+      ? data.data.branding as Record<string, unknown>
+      : null,
     credits_used: Number(data?.creditsUsed || data?.credits_used || 0) || 1,
     error: null,
   }

@@ -58,6 +58,9 @@ const signalClassificationOutputSchema = z.object({
 })
 
 const signalLeadSalesPackSchema = z.object({
+  lead_briefing: z.string().trim().min(1).max(1400),
+  strongest_honest_angle: z.string().trim().min(1).max(500),
+  fifteen_second_opener: z.string().trim().min(1).max(700),
   why_this_fits: z.string().trim().min(1).max(1200),
   what_stood_out: z.array(z.string().trim().min(1).max(320)).min(1).max(6),
   likely_pain_points: z.array(
@@ -72,7 +75,10 @@ const signalLeadSalesPackSchema = z.object({
   best_first_action: z.enum(["walk_in", "call", "text_email", "research_more"]),
   walk_in_script: z.string().trim().min(1).max(1800),
   call_script: z.string().trim().min(1).max(1800),
+  discovery_questions: z.array(z.string().trim().min(1).max(420)).min(3).max(6),
   follow_up_message: z.string().trim().min(1).max(1800),
+  follow_up_text: z.string().trim().min(1).max(900),
+  follow_up_email: z.string().trim().min(1).max(1800),
   objection_handling: z.array(
     z.object({
       objection: z.string().trim().min(1).max(240),
@@ -81,7 +87,16 @@ const signalLeadSalesPackSchema = z.object({
   ).min(5).max(6),
   what_to_avoid: z.array(z.string().trim().min(1).max(280)).min(1).max(6),
   risks_to_verify: z.array(z.string().trim().min(1).max(280)).max(6),
+  next_action_checklist: z.array(z.string().trim().min(1).max(280)).min(3).max(8),
   lovable_prompt: z.string().trim().min(1).max(7000),
+})
+
+const signalChainClassificationSchema = z.object({
+  classification: z.enum(["independent", "likely_independent", "local_multi_location", "likely_franchise", "chain", "uncertain"]),
+  probability: z.number().int().min(0).max(100),
+  evidence: z.array(z.string().trim().min(1).max(300)).min(1).max(6),
+  reason: z.string().trim().min(1).max(500),
+  location_count_estimate: z.number().int().min(1).max(10000).nullable(),
 })
 
 const DEFAULT_OPENAI_FAST_MODEL = "gpt-4.1-mini"
@@ -393,6 +408,31 @@ export async function runDeepAiAnalysis(
 
 export type SignalLeadSalesPackOutput = z.infer<typeof signalLeadSalesPackSchema>
 
+export async function runSignalChainClassificationAi(input: {
+  businessName: string
+  websiteUrl: string | null
+  evidence: string[]
+}) {
+  const prompt = [
+    "Classify whether this public business entity is independent, a local multi-location business, a franchise, or a chain.",
+    safetyInstructions(),
+    "Known-chain registry and deterministic hard blocks are handled outside this model. Be conservative: absence of franchise wording is not proof of independence.",
+    "Return exactly: classification, probability, evidence, reason, location_count_estimate.",
+    "classification must be independent, likely_independent, local_multi_location, likely_franchise, chain, or uncertain.",
+    `Business: ${input.businessName}`,
+    `Website: ${input.websiteUrl || "unknown"}`,
+    `Collected public evidence: ${input.evidence.join(" | ") || "No useful evidence."}`,
+  ].join("\n")
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const result = await callProvider(prompt, false)
+    if (!result) continue
+    const parsed = signalChainClassificationSchema.safeParse(result.json)
+    if (parsed.success) return { output: parsed.data, provider: result.provider, model: result.model }
+    console.error(`[signal] Chain classification output invalid (attempt ${attempt}):`, parsed.error.flatten())
+  }
+  return null
+}
+
 export async function runSignalLeadSalesPackAi(input: {
   businessName: string
   city: string | null
@@ -401,16 +441,28 @@ export async function runSignalLeadSalesPackAi(input: {
   publicFacts: string[]
   evidence: Array<{ label: string; excerpt: string; url?: string | null }>
   scoreSummary: string
+  verifiedContact: string[]
+  websiteFindings: string[]
+  communicationProfile: string[]
+  strongestOpportunity: string
+  uncertainties: string[]
+  forbiddenClaims: string[]
+  recommendedChannel: string
 }) {
-  const result = await callProvider(
-    [
+  const prompt = [
       "Create a practical, evidence-grounded Mountline Signal sales pack for one local business.",
       safetyInstructions(),
-      "Do not use first-person singular in scripts. Describe Mountline as a local founder-led studio; do not mention school, age, or personal background.",
+      "Voice: sharp, energetic, socially aware, respectful, conversational, and prepared. Never sound like an agency automation platform.",
+      "Do not use first-person singular. Use 'Luke with Mountline', 'Mountline', 'we', or 'our'. Never mention school, age, seasons, friends, or side-hustle framing.",
       "Use only the supplied public facts and evidence. State uncertain items as hypotheses. Never imply a concept preview is the business's official website.",
+      "The script must fail a swap test: changing only the business name must not make it usable for another lead. Anchor every opener and follow-up to a supplied verified fact.",
+      "Choose one strongest honest angle. Do not bundle every Mountline service. Recommend the smallest credible first offer and a realistic price range.",
+      "The walk-in script must be a short dialogue sequence with greeting, reason, specific compliment, observation, permission to show a concept, 2–3 discovery questions, smallest offer, soft close, contact exchange, and graceful busy exit—not a monologue.",
+      "The call opening must ask permission and immediately explain the specific reason for the call.",
+      "Avoid: optimize your digital footprint, leverage synergies, transformational growth, scale, premium digital solutions, and unsupported revenue claims.",
       "The Lovable prompt must request a clearly labeled concept preview, mobile-first design, verified facts only, placeholders for unknown facts, and no invented reviews, pricing, services, logos, or testimonials.",
-      "For objections, include: who Mountline is, how the business was found, already have Facebook, already have a website, and too busy.",
-      "Return only strict JSON with exactly these keys: why_this_fits, what_stood_out, likely_pain_points, recommended_offer, pricing_angle, pitch_angle, best_first_action, walk_in_script, call_script, follow_up_message, objection_handling, what_to_avoid, risks_to_verify, lovable_prompt.",
+      "For objections, tailor brief answers for: who Mountline is, how the business was found, already have Facebook, enough business, not technical, already have a website, need to think, send it, too busy, and cost. Return 6 of the most relevant.",
+      "Return only strict JSON with exactly these keys: lead_briefing, strongest_honest_angle, fifteen_second_opener, why_this_fits, what_stood_out, likely_pain_points, recommended_offer, pricing_angle, pitch_angle, best_first_action, walk_in_script, call_script, discovery_questions, follow_up_message, follow_up_text, follow_up_email, objection_handling, what_to_avoid, risks_to_verify, next_action_checklist, lovable_prompt.",
       "",
       `Business: ${input.businessName}`,
       `Location: ${input.city || "unknown"}`,
@@ -418,26 +470,33 @@ export async function runSignalLeadSalesPackAi(input: {
       `Website status: ${input.websiteStatus}`,
       `Public facts: ${input.publicFacts.join(" | ") || "No additional public facts confirmed."}`,
       `Score summary: ${input.scoreSummary}`,
+      `Verified contact: ${input.verifiedContact.join(" | ") || "No direct contact fact verified."}`,
+      `Website findings: ${input.websiteFindings.join(" | ") || "Website findings incomplete."}`,
+      `Communication profile: ${input.communicationProfile.join(" | ") || "No communication hypothesis beyond direct and respectful."}`,
+      `Strongest opportunity: ${input.strongestOpportunity}`,
+      `Recommended first channel: ${input.recommendedChannel}`,
+      `Uncertainties that must be stated or verified: ${input.uncertainties.join(" | ") || "None listed."}`,
+      `Forbidden claims: ${input.forbiddenClaims.join(" | ") || "Do not add unsupported facts."}`,
       "Evidence:",
       ...input.evidence.slice(0, 10).map((item) =>
         `- ${item.label}: ${item.excerpt}${item.url ? ` (${item.url})` : ""}`,
       ),
-    ].join("\n"),
-    true,
-  )
-  if (!result) return null
+    ].join("\n")
 
-  const parsed = signalLeadSalesPackSchema.safeParse(result.json)
-  if (!parsed.success) {
-    console.error("[signal] Lead sales pack output invalid:", parsed.error.flatten())
-    return null
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const result = await callProvider(prompt, true)
+    if (!result) continue
+    const parsed = signalLeadSalesPackSchema.safeParse(result.json)
+    if (parsed.success) {
+      return {
+        output: parsed.data,
+        provider: result.provider,
+        model: result.model,
+      }
+    }
+    console.error(`[signal] Lead sales pack output invalid (attempt ${attempt}):`, parsed.error.flatten())
   }
-
-  return {
-    output: parsed.data,
-    provider: result.provider,
-    model: result.model,
-  }
+  return null
 }
 
 export async function runSignalImportMappingAi(headers: string[]) {

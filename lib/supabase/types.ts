@@ -1016,6 +1016,30 @@ export type SignalRunLead = {
   normalized_hostname: string | null
   normalized_phone: string | null
   chain_evidence: SignalJson
+  canonical_name: string | null
+  canonical_name_confidence: number | null
+  entity_status: "verified" | "likely" | "ambiguous" | "generic_result" | "directory" | "rejected" | null
+  entity_rejection_reason: string | null
+  identity_evidence_count: number
+  identity_evidence_summary: SignalJson
+  chain_classification: "independent" | "likely_independent" | "local_multi_location" | "likely_franchise" | "chain" | "uncertain" | null
+  chain_probability: number | null
+  chain_reasons: SignalJson
+  location_count_estimate: number | null
+  geographic_status: "confirmed_in_market" | "confirmed_within_radius" | "near_market" | "unclear" | "outside_market" | null
+  verified_city: string | null
+  verified_address: string | null
+  distance_estimate_miles: number | null
+  geographic_confidence: number | null
+  geographic_evidence: SignalJson
+  opportunity_score: number | null
+  ranking_score: number | null
+  confidence_components: SignalJson
+  qualification_status: "qualified" | "rejected" | "incomplete" | null
+  rejection_reason: string | null
+  script_generation_type: "ai" | "deterministic_fallback" | null
+  prompt_version: string | null
+  evaluation_metadata: SignalJson
 }
 
 export type SignalRunLeadEvidence = {
@@ -1029,4 +1053,8 @@ export type SignalRunLeadEvidence = {
   excerpt: string | null
   confidence: SignalConfidence | null
   metadata: SignalJson | null
+  source_tier: 1 | 2 | 3 | null
+  reliability_score: number | null
+  extracted_fact: string | null
+  retrieved_at: string
 }

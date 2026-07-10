@@ -6,7 +6,7 @@ import {
   addSignalCandidateSuppression,
   findSignalCandidateSuppression,
 } from "./alerts"
-import { runSignalLeadSalesPackAi } from "./ai"
+import { runSignalChainClassificationAi, runSignalLeadSalesPackAi } from "./ai"
 import {
   getSignalAiProviderSetup,
   getSignalMarketRuntimeConfig,
@@ -22,7 +22,21 @@ import {
   normalizeSignalPhone,
 } from "./research"
 import { normalizeSignalCity } from "./classification"
+import {
+  assessSignalChain,
+  assessSignalEntityName,
+  assessSignalGeography,
+  calculateSignalConfidence,
+  calculateSignalOpportunity,
+  qualifySignalLead,
+  resolveSignalDiscoveryEntity,
+  signalDuplicateKey,
+  type SignalChainClassification,
+  type SignalEntityStatus,
+  type SignalGeographicStatus,
+} from "./quality"
 import { scanSignalWebsite, type SignalWebsiteScan } from "./website"
+import { selectSignalSalesPack } from "./sales-grounding"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type {
   SignalConfidence,
@@ -91,11 +105,15 @@ type LeadScoreBreakdown = {
   trust_gap: ScoreDimension
   walk_in_viability: ScoreDimension
   demo_potential: ScoreDimension
+  operational_opportunity: ScoreDimension
   urgency: ScoreDimension
   confidence: ScoreDimension
+  confidence_components: ReturnType<typeof calculateSignalConfidence>
   final: {
     score: number
     opportunity_composite: number
+    opportunity_score: number
+    ranking_score: number
     confidence_adjustment: number
     chain_adjustment: number
     method: string
@@ -109,6 +127,9 @@ type ChainAssessment = {
   hasHardChainEvidence: boolean
   independentLikely: boolean
   independentConfidence: number
+  classification: SignalChainClassification
+  reasons: string[]
+  locationCountEstimate: number | null
 }
 
 type WebsiteReview = {
@@ -336,28 +357,6 @@ function publicUrl(value: string | null | undefined) {
   }
 }
 
-const KNOWN_CHAIN_TERMS = [
-  "mcdonalds", "mcdonald's", "starbucks", "walmart", "great clips", "supercuts", "sport clips",
-  "dunkin", "subway", "chipotle", "chick fil a", "chick-fil-a", "dominos", "domino's",
-  "jiffy lube", "valvoline", "midas", "take 5 oil", "planet fitness", "anytime fitness",
-  "crumbl", "jersey mike", "jersey mike's", "massage envy", "hand and stone",
-]
-
-const CHAIN_CUES: Array<{ expression: RegExp; signal: string; weight: number; hard?: boolean }> = [
-  { expression: /franchise (opportunit|owner|information|with us)/i, signal: "Public franchise language", weight: 75, hard: true },
-  { expression: /find (a |your )?location|locations near you|location finder/i, signal: "Location-finder language", weight: 42, hard: true },
-  { expression: /our locations|hundreds of locations|nationwide|across the (u\.?s\.?|country|states)/i, signal: "Multi-market corporate language", weight: 55, hard: true },
-  { expression: /corporate office|investor relations|franchising/i, signal: "Corporate/franchise page language", weight: 62, hard: true },
-  { expression: /join the (franchise|team) at [a-z]/i, signal: "Franchise recruitment language", weight: 50, hard: true },
-]
-
-const INDEPENDENT_CUES: Array<{ expression: RegExp; signal: string; weight: number }> = [
-  { expression: /locally owned|locally operated/i, signal: "Locally owned public wording", weight: 28 },
-  { expression: /family owned|family-run/i, signal: "Family-owned public wording", weight: 28 },
-  { expression: /owner operated|owner-operated/i, signal: "Owner-operated public wording", weight: 30 },
-  { expression: /proudly serving (keller|dfw|dallas|fort worth|our community|the local community)/i, signal: "Local-service public wording", weight: 12 },
-]
-
 function assessChainLikelihood(input: {
   businessName: string
   url?: string | null
@@ -366,64 +365,26 @@ function assessChainLikelihood(input: {
   scan?: SignalWebsiteScan | null
   firecrawlExcerpt?: string | null
 }) : ChainAssessment {
-  const text = sourceText(input)
-  const evidence: Array<{ signal: string; weight: number }> = []
-  let chainSignals = 0
-  let hardChainSignals = 0
-  let independentConfidence = 0
-
-  for (const term of KNOWN_CHAIN_TERMS) {
-    if (text.includes(term)) {
-      evidence.push({ signal: `Known national-chain term: ${term}`, weight: 95 })
-      chainSignals = Math.max(chainSignals, 95)
-      hardChainSignals = Math.max(hardChainSignals, 95)
-      break
-    }
-  }
-
-  for (const cue of CHAIN_CUES) {
-    if (cue.expression.test(text)) {
-      evidence.push({ signal: cue.signal, weight: cue.weight })
-      chainSignals += cue.weight
-      if (cue.hard) hardChainSignals += cue.weight
-    }
-  }
-
-  for (const cue of INDEPENDENT_CUES) {
-    if (cue.expression.test(text)) {
-      evidence.push({ signal: cue.signal, weight: -cue.weight })
-      independentConfidence += cue.weight
-    }
-  }
-
-  const hostname = normalizeSignalHostname(input.url)
-  if (hostname.includes("franchise") || hostname.includes("corporate")) {
-    evidence.push({ signal: "Domain contains corporate/franchise wording", weight: 40 })
-    chainSignals += 40
-    hardChainSignals += 40
-  }
-
-  // Direct franchise/corporate/location-network evidence is never cancelled
-  // out by generic “local” wording. A genuinely strong independent signal can
-  // leave a medium-risk multi-location business visible for manual review, but
-  // Signal never labels that business as independent likely.
-  const hasHardChainEvidence = hardChainSignals > 0
-  const hardEvidenceFloor = hardChainSignals >= 75 ? 95 : hasHardChainEvidence ? 60 : 0
-  const likelihood = clamp(
-    Math.max(hardEvidenceFloor, chainSignals >= 75 ? chainSignals : chainSignals - independentConfidence),
-  )
-  const independentLikely = !hasHardChainEvidence && likelihood < 45 && independentConfidence >= 12
-  const reason = evidence.length
-    ? evidence.map((item) => item.signal).slice(0, 3).join("; ")
-    : null
+  const assessment = assessSignalChain({
+    businessName: input.businessName,
+    url: input.url,
+    publicText: sourceText(input),
+  })
+  const evidence = assessment.reasons.map((signal) => ({
+    signal,
+    weight: assessment.deterministicBlock ? 100 : assessment.probability,
+  }))
 
   return {
-    likelihood,
-    reason,
+    likelihood: assessment.probability,
+    reason: assessment.reasons.slice(0, 3).join("; ") || null,
     evidence,
-    hasHardChainEvidence,
-    independentLikely,
-    independentConfidence: clamp(independentConfidence),
+    hasHardChainEvidence: assessment.deterministicBlock,
+    independentLikely: assessment.classification === "independent" || assessment.classification === "likely_independent" || assessment.classification === "local_multi_location",
+    independentConfidence: assessment.independenceConfidence,
+    classification: assessment.classification,
+    reasons: assessment.reasons,
+    locationCountEstimate: assessment.locationCountEstimate,
   }
 }
 
@@ -467,9 +428,22 @@ function discoveryTerms(focus: IndustryFocus, custom: string | null, leadLimit: 
 
 function buildDiscoveryQueries(run: SignalRun) {
   const focus = run.industry_focus as IndustryFocus
-  return discoveryTerms(focus, run.custom_industry, run.lead_limit).map(
-    (term) => `independent ${term} near ${run.location} within ${run.radius_miles} miles official website local business`,
-  )
+  const terms = discoveryTerms(focus, run.custom_industry, Math.max(run.lead_limit, 15))
+  const patterns = [
+    (term: string) => `independent ${term} in ${run.location}`,
+    (term: string) => `local ${term} ${run.location} official website contact`,
+    (term: string) => `owner-operated ${term} ${run.location}`,
+    (term: string) => `family-owned ${term} near ${run.location}`,
+    (term: string) => `${term} ${run.location} Facebook`,
+    (term: string) => `${term} ${run.location} Instagram`,
+    (term: string) => `best-rated local ${term} ${run.location} -directory`,
+  ]
+  const desiredQueries = Math.min(14, Math.max(9, Math.ceil(Math.min(75, Math.max(30, run.lead_limit * 8)) / 7)))
+  const queries: string[] = []
+  for (let patternIndex = 0; patternIndex < patterns.length; patternIndex += 1) {
+    for (const term of terms) queries.push(patterns[patternIndex](term))
+  }
+  return unique(queries, desiredQueries)
 }
 
 function requestedMarketTerms(run: SignalRun) {
@@ -721,6 +695,11 @@ function buildScoreBreakdown(input: {
   scan: SignalWebsiteScan | null
   hasAddress: boolean
   publicFacts: string[]
+  entityConfidence?: number
+  geographicConfidence?: number
+  sourceCount?: number
+  contactAgreement?: number
+  providerFailure?: boolean
 }) : LeadScoreBreakdown {
   const focus = input.run.industry_focus as IndustryFocus
   const scan = input.scan
@@ -823,6 +802,21 @@ function buildScoreBreakdown(input: {
     unknowns: ["Use placeholders for services, pricing, reviews, and logos that are not verified"],
   })
 
+  const operationalEvidence = [
+    /quote|estimate|request service|service request/i.test(publicText) ? "Public quote or service-request language was detected" : null,
+    !input.website.objectiveSignals.has_booking && /appointment|booking|schedule|quote|estimate/i.test(publicText) ? "Customer action language appears without a verified first-party workflow" : null,
+    input.website.status === "social_only" ? "Customer flow appears to depend on a social platform" : null,
+  ].filter(Boolean) as string[]
+  const operationalOpportunity = scoreDimension({
+    score: operationalEvidence.length ? clamp(35 + operationalEvidence.length * 20) : 15,
+    confidence: operationalEvidence.length ? 62 : 28,
+    rationale: operationalEvidence.length
+      ? "A small customer-flow or request-routing improvement is supported by public wording."
+      : "No specific operational-system opportunity is verified; keep the first offer focused on the visible customer path.",
+    evidence: operationalEvidence,
+    unknowns: ["Signal does not submit forms, place bookings, or inspect private operations"],
+  })
+
   const urgencySignals = [
     /new location|now open|opening soon|now booking|limited time|hiring/i.test(publicText) ? "Public time-sensitive language was detected" : null,
     /request (a )?quote|book now|call now/i.test(publicText) && !input.website.objectiveSignals.has_booking ? "Conversion language appears without a verified booking/request path" : null,
@@ -840,13 +834,23 @@ function buildScoreBreakdown(input: {
     ...input.website.evidence,
     input.chain.reason,
   ], 20)
-  const confidenceScore = clamp(
-    factualEvidence.length * 6 +
-    (scan && !scan.broken_response ? 28 : 0) +
-    (input.hasAddress ? 8 : 0) +
-    (hasPhone ? 8 : 0) +
-    (input.chain.evidence.length > 0 ? 6 : 0),
-  )
+  const confidenceComponents = calculateSignalConfidence({
+    identity: input.entityConfidence ?? 45,
+    officialSite: scan && !scan.broken_response ? 88 : input.lead.website_url ? 28 : hasSocial ? 42 : 18,
+    geography: input.geographicConfidence ?? (isLocalEvidence ? 45 : 15),
+    contactAgreement: input.contactAgreement ?? (hasPhone || hasEmail ? 55 : 15),
+    sourceDiversity: clamp((input.sourceCount || sourceUrls(input.lead.source_urls).length) * 22, 15, 88),
+    websiteCompleteness: input.website.objectiveSignals.scan_coverage === "usable" ? 90 : input.website.objectiveSignals.scan_coverage === "limited" ? 62 : 22,
+    chainCertainty: input.chain.classification === "independent" || input.chain.classification === "likely_independent"
+      ? input.chain.independentConfidence
+      : input.chain.classification === "chain" || input.chain.classification === "likely_franchise"
+        ? input.chain.likelihood
+        : 35,
+    freshness: 92,
+    contradictionPenalty: 0,
+    providerFailurePenalty: input.providerFailure ? 12 : 0,
+  })
+  const confidenceScore = confidenceComponents.final
   const confidence = scoreDimension({
     score: confidenceScore,
     confidence: 100,
@@ -859,22 +863,29 @@ function buildScoreBreakdown(input: {
     ].filter(Boolean) as string[],
   })
 
-  const weightedDimensions: Array<[ScoreDimension, number]> = [
-    [fit, 0.2],
-    [websiteOpportunity, 0.2],
-    [contactFriction, 0.14],
-    [trustGap, 0.08],
-    [walkIn, 0.11],
-    [demoPotential, 0.16],
-    [urgency, 0.11],
-  ]
-  const knownWeight = weightedDimensions.reduce((total, [dimension, weight]) => total + (dimension.score == null ? 0 : weight), 0)
-  const opportunityComposite = knownWeight
-    ? weightedDimensions.reduce((total, [dimension, weight]) => total + (dimension.score == null ? 0 : (dimension.score * weight) / knownWeight), 0)
-    : 0
-  const confidenceAdjustment = 0.45 + confidenceScore / 200
-  const chainAdjustment = 1 - Math.min(input.chain.likelihood, 70) / 180
-  const finalScore = clamp(opportunityComposite * confidenceAdjustment * chainAdjustment)
+  const opportunity = calculateSignalOpportunity({
+    dimensions: {
+      mountlineFit: Math.round((fit.score || 0) * 0.2),
+      websiteOpportunity: Math.round((websiteOpportunity.score || 0) * 0.2),
+      contactConversionFriction: Math.round((contactFriction.score || 0) * 0.15),
+      trustGap: Math.round((trustGap.score || 0) * 0.15),
+      demoPotential: Math.round((demoPotential.score || 0) * 0.1),
+      contactViability: Math.round((walkIn.score ?? (hasPhone || hasEmail ? 55 : 0)) * 0.1),
+      operationalOpportunity: Math.round((operationalOpportunity.score || 0) * 0.05),
+      timingUrgency: Math.round((urgency.score || 0) * 0.05),
+    },
+    confidence: confidenceScore,
+    penalties: {
+      uncertain_identity: (input.entityConfidence ?? 0) < 65 ? 35 : 0,
+      uncertain_geography: (input.geographicConfidence ?? 0) < 60 ? 25 : 0,
+      probable_chain: input.chain.classification === "chain" || input.chain.classification === "likely_franchise" ? 100 : input.chain.classification === "uncertain" ? 24 : 0,
+      excellent_website: input.website.status === "strong_site" ? 18 : 0,
+      no_contact: !hasPhone && !hasEmail && !input.hasAddress && !input.website.objectiveSignals.has_contact && !input.website.objectiveSignals.has_booking ? 20 : 0,
+      insufficient_evidence: confidenceScore < 55 ? 30 : 0,
+    },
+  })
+  const confidenceAdjustment = Number((confidenceScore / 100).toFixed(2))
+  const chainAdjustment = opportunity.penalties.probable_chain ? 0 : 1
 
   return {
     fit,
@@ -883,14 +894,18 @@ function buildScoreBreakdown(input: {
     trust_gap: trustGap,
     walk_in_viability: walkIn,
     demo_potential: demoPotential,
+    operational_opportunity: operationalOpportunity,
     urgency,
     confidence,
+    confidence_components: confidenceComponents,
     final: {
-      score: finalScore,
-      opportunity_composite: Math.round(opportunityComposite),
-      confidence_adjustment: Number(confidenceAdjustment.toFixed(2)),
-      chain_adjustment: Number(chainAdjustment.toFixed(2)),
-      method: "Weighted public-evidence opportunity score, reduced by evidence confidence and chain risk.",
+      score: opportunity.rankingScore,
+      opportunity_composite: opportunity.positiveScore,
+      opportunity_score: opportunity.opportunityScore,
+      ranking_score: opportunity.rankingScore,
+      confidence_adjustment: confidenceAdjustment,
+      chain_adjustment: chainAdjustment,
+      method: "Eight-dimension opportunity score with explicit penalties, multiplied by calibrated evidence confidence.",
     },
   }
 }
@@ -964,10 +979,10 @@ function salesPlan(input: {
       ? "The public business may be stronger than its current customer path shows."
       : "The site has a foundation; the pitch is cleaner customer flow rather than a needless redesign."
   const pricingAngle = input.website.status === "no_site" || input.website.status === "social_only"
-    ? "Offer a concept preview first, then a simple $200–$500 starter website if the confirmed scope stays light; optional care can be separate."
+    ? "Offer a concept preview first, then position a focused starter site around $900–$1,800 if the confirmed scope stays lean; optional care stays separate."
     : input.website.status === "weak_site"
-      ? "Position this as a scoped website refresh and confirm the real pages, assets, and customer flow before quoting."
-      : "Lead with a focused customer-flow review; price only after the business confirms what is actually getting in the way."
+      ? "Position a scoped website refresh around $1,800–$3,500 after confirming pages, assets, and the one customer flow that matters."
+      : "Lead with a focused $450–$950 customer-flow improvement; quote a broader rebuild only if the business confirms a larger need."
   return {
     recommended_offer: offer,
     pitch_angle: pitch,
@@ -991,36 +1006,102 @@ function fallbackSalesPack(input: {
 }) {
   const name = input.lead.business_name
   const location = [input.lead.city, input.lead.state].filter(Boolean).join(", ") || "the local area"
+  const raw = asObject(input.lead.raw_research)
+  const storedScan = asObject(raw.scan)
+  const branding = asObject(raw.firecrawl_branding)
+  const brandingColorValue = asObject(branding.colors).primary
+  const brandingColors = unique(
+    typeof brandingColorValue === "string"
+      ? [brandingColorValue]
+      : safeArray(brandingColorValue).filter((item): item is string => typeof item === "string"),
+    4,
+  )
+  const services = unique(safeArray(storedScan.service_language).filter((item): item is string => typeof item === "string"), 4)
   const facts = unique([
     ...input.reasons,
     ...input.website.evidence,
+    ...services,
   ], 6)
-  const verifiedServices = input.website.objectiveSignals.has_services
-    ? "Use the services visible on the public site only."
-    : "Use a placeholder for services that are not verified."
+  const specificFact = services[0]
+    || input.reasons.find((reason) => !/^independent|^official-site identity/i.test(reason))
+    || input.website.evidence[0]
+    || "a public local-business identity and contact route were verified"
+  const verifiedServices = services.length
+    ? `Verified service wording: ${services.join(" | ")}`
+    : "Services are not verified; use clearly labeled placeholders until confirmed."
   const painPoints: Array<{ statement: string; basis: "evidence" | "hypothesis" }> = input.website.gaps
     .slice(0, 3)
     .map((statement) => ({ statement, basis: "evidence" }))
   if (painPoints.length === 0) {
     painPoints.push({ statement: "Ask whether the current customer path answers the questions callers ask most often.", basis: "hypothesis" })
   }
+  const strongestAngle = input.website.status === "no_site" || input.website.status === "social_only"
+    ? `Give ${name} one clear home for its verified services and contact route without replacing the social presence that already works.`
+    : input.website.status === "weak_site"
+      ? `Make the next customer step clearer around ${input.website.gaps[0]?.toLowerCase() || "services and contact"}, while respecting the business's existing reputation.`
+      : `Keep the existing site foundation and improve only ${input.website.gaps[0]?.toLowerCase() || "the clearest customer-flow friction"}.`
+  const channel = input.plan.best_first_action === "walk_in" ? "walk-in" : input.plan.best_first_action === "call" ? "call" : "text or email"
+  const questions = unique([
+    input.website.objectiveSignals.has_booking
+      ? "Is the current booking path working smoothly, or do customers still call before they can choose the right service?"
+      : "When someone is ready to start, would you rather have them call directly or send the details first?",
+    services.length
+      ? `Which of the publicly listed services—${services.slice(0, 2).join(" or ")}—usually needs the most explanation before a customer commits?`
+      : "Which service or request usually creates the most back-and-forth before a customer is ready?",
+    "Are you trying to create more demand right now, or mainly make the process easier for people already reaching out?",
+    input.lead.phone ? "Do most new customers come through referrals, Google, social, or the public phone number?" : "Where do most serious new inquiries start today?",
+  ], 4)
+  const designDirection = /barber|salon/i.test(input.lead.industry || "")
+    ? "Use an editorial, confident barber/salon layout with service clarity, strong work imagery placeholders, and an appointment-first mobile CTA."
+    : /groom|pet/i.test(input.lead.industry || "")
+      ? "Use a warm, trustworthy pet-service layout with friendly image treatment, service cards, safety/trust placeholders, and a call-or-book mobile path."
+      : /detail|auto/i.test(input.lead.industry || "")
+        ? "Use a high-contrast automotive layout with large work imagery placeholders, package clarity, vehicle/service fit, and a quote-first mobile CTA."
+        : /contract|roof|plumb|hvac|home service/i.test(input.lead.industry || "")
+          ? "Use a practical home-service layout with service-area clarity, proof placeholders, emergency/estimate routing, and a prominent mobile call CTA."
+          : /church|nonprofit|ministry/i.test(input.lead.industry || "")
+            ? "Use a calm, welcoming community layout with visit information, programs, location/hours, and a low-friction plan-a-visit CTA."
+            : /spa|wellness/i.test(input.lead.industry || "")
+              ? "Use a refined, restrained wellness layout with service education, trust placeholders, and an appointment-led customer path."
+              : /restaurant|food|cafe/i.test(input.lead.industry || "")
+                ? "Use an appetite-led local-food layout with hours/location, menu placeholders, strong public-image treatment, and call/order/reservation CTAs only when verified."
+                : "Use a restrained local-service layout centered on service clarity, trust, and one obvious customer next step."
+  const opener = `Hey, Luke with Mountline. ${name} stood out because ${specificFact.toLowerCase()}. We noticed ${input.website.gaps[0]?.toLowerCase() || "one part of the customer path that may be worth simplifying"}, so we mocked up a small concept because it is easier to show than explain.`
   return {
-    why_this_fits: `${name} is worth a closer look because ${facts[0]?.toLowerCase() || "public local-business evidence is available"}. Signal is not assuming a problem beyond the public evidence.`,
+    lead_briefing: `${name} is a verified ${input.lead.industry || "local business"} in ${location}. Public evidence shows ${specificFact.toLowerCase()}. Signal's strongest honest angle is: ${strongestAngle} Verify ${input.scores.fit.unknowns[0]?.toLowerCase() || "the preferred contact flow"} before outreach. Best first channel: ${channel}.`,
+    strongest_honest_angle: strongestAngle,
+    fifteen_second_opener: opener,
+    why_this_fits: `${name} is worth a closer look because ${specificFact.toLowerCase()}. Signal is not assuming a problem beyond stored public evidence.`,
     what_stood_out: facts,
     likely_pain_points: painPoints,
     recommended_offer: input.plan.recommended_offer,
     pricing_angle: input.plan.pricing_angle,
     pitch_angle: input.plan.pitch_angle,
     best_first_action: input.plan.best_first_action,
-    walk_in_script: `Hi — Mountline Studio is a local founder-led studio that helps service businesses make the next step clearer online. ${name} stood out because ${facts[0]?.toLowerCase() || "the public customer path looked worth reviewing"}. This is not a hard sell; Mountline can put together a simple concept showing a clearer services, call, or request flow if that would be useful.`,
-    call_script: `Hi, this is Mountline Studio. A quick public review of ${name} in ${location} showed ${facts[0]?.toLowerCase() || "a possible customer-flow opportunity"}. Mountline builds practical websites and simple customer flows for local businesses. Would a two-minute explanation of a concept-preview idea be useful, or is there a better time?`,
-    follow_up_message: `Hi — Mountline Studio following up on the public-site idea for ${name}. The goal is not to replace anything that already works; it is to give customers one clearer path to understand services and take the next step. A clearly labeled concept preview can be shared if useful.`,
+    walk_in_script: [
+      `Greeting: “${opener}”`,
+      "Permission: “Is now a bad time, or can we show the idea in thirty seconds?”",
+      `After the concept: “The part we would keep focused is ${strongestAngle.toLowerCase()}”`,
+      `Discovery: “${questions[0]}” “${questions[1]}” “${questions[2]}”`,
+      `Offer: “The smallest useful version is ${input.plan.recommended_offer.toLowerCase()} ${input.plan.pricing_angle}”`,
+      "Soft close: “If that direction makes sense, what is the best number or email for sending the concept and a one-page scope?”",
+      "Busy exit: “No problem—we can leave the link and get out of the way. If it is not useful, no follow-up pressure.”",
+    ].join("\n\n"),
+    call_script: `“Hey, Luke with Mountline—did we catch you with thirty seconds? ${name} came up because ${specificFact.toLowerCase()}. We noticed ${input.website.gaps[0]?.toLowerCase() || "a possible customer-flow simplification"} and mocked up one focused idea. This is not a pitch for a giant rebuild. Would a quick explanation be useful, or should we send the concept instead?”`,
+    discovery_questions: questions,
+    follow_up_message: `Mountline concept for ${name}: ${strongestAngle} This is a clearly labeled preview, not finished or official work.`,
+    follow_up_text: `Thanks for the quick conversation about ${name}. Here is the Mountline concept centered on ${strongestAngle.toLowerCase()} It is a preview, not a finished site. If the direction is useful, we can turn it into a small, clear scope.`,
+    follow_up_email: `Subject: The ${name} concept we discussed\n\nThanks for taking a look. The concept is built around one thing: ${strongestAngle}\n\nIt uses only the public facts we could verify and keeps unknown details as placeholders. If the direction feels right, Mountline can send a short scope for the smallest useful version. No generic rebuild pitch attached.`,
     objection_handling: [
-      { objection: "Who are you with?", response: "Mountline Studio. It is a local founder-led studio focused on practical websites and customer flows for local businesses." },
-      { objection: "How did you find us?", response: "Mountline was reviewing public local-business signals and looked for businesses with a strong local presence that might benefit from a clearer online customer path. Your business stood out." },
+      { objection: "Who are you with?", response: "Mountline. We build focused websites and customer flows for local businesses, and this idea was prepared specifically for your public setup." },
+      { objection: "How did you find us?", response: `Through public local-business research. ${name} stood out because ${specificFact.toLowerCase()}.` },
       { objection: "We already have Facebook.", response: "Facebook can keep doing what it does. A website would not replace it; it gives customers one simple place to see services, call, and understand what to do next." },
+      { objection: "We already get enough business.", response: "Then more traffic is not the pitch. The useful question is whether the current process can save time for the customers and team already reaching out." },
+      { objection: "Technical setup is not our thing.", response: "That is exactly why the first version stays simple. Mountline handles the setup and keeps the business focused on one clear customer action." },
       { objection: "We already have a website.", response: "That may be enough. The idea is only to review the next step a customer sees and see whether calls, quotes, or booking could be clearer—not to push a rebuild that is not needed." },
+      { objection: "Can you send it?", response: "Absolutely. What is the best number or email? The message will include the one specific idea and the labeled concept link—nothing automated." },
       { objection: "We are busy.", response: "Understood. A one-page concept can be left behind or sent later, and it can be reviewed whenever there is time." },
+      { objection: "What does it cost?", response: input.plan.pricing_angle },
     ],
     what_to_avoid: [
       "Do not claim the current site is ugly or broken.",
@@ -1033,14 +1114,26 @@ function fallbackSalesPack(input: {
       ...input.scores.walk_in_viability.unknowns,
       ...input.website.gaps.slice(0, 2),
     ], 6),
+    next_action_checklist: [
+      input.lead.address ? "Verify the address, public hours, and a respectful walk-in time." : "Verify the preferred public contact route before outreach.",
+      "Open every evidence link and confirm the exact fact used in the opener.",
+      "Build only the one-angle concept; keep all unknown facts as visible placeholders.",
+      `Start with a ${channel}; do not sequence automated follow-ups.`,
+      "Bring the concept on a phone or laptop and a simple QR/contact card.",
+    ],
     lovable_prompt: [
       `Create a clearly labeled concept preview for ${name}, a ${input.lead.industry || "local service business"} in ${location}.`,
       "This is not the official website. Add a discreet preview disclaimer in the concept and do not use the business's logo unless it is explicitly supplied.",
       `Use only these verified public signals: ${facts.join(" | ") || "No additional facts verified."}`,
       verifiedServices,
       "Do not invent testimonials, review counts, pricing, staff names, ownership facts, services, awards, logos, photos, or contact details. Use tasteful placeholders for anything unverified.",
-      "Build mobile-first with a black/white restrained palette that can be adapted to the business later. Make the opening section explain the service category, show a simple primary CTA, and include: services or service placeholders, trust/proof placeholder area, how-it-works or FAQ, contact/request section, and clear call/text/request CTAs only where public contact data is verified.",
-      `Design direction: make the customer path clearer around ${input.plan.pitch_angle.toLowerCase()}. Avoid generic agency language and avoid fake social proof.`,
+      `Verified contact method: ${input.lead.phone ? `phone ${input.lead.phone}` : input.lead.public_email ? `email ${input.lead.public_email}` : "unknown—use a non-functional CTA placeholder"}.`,
+      `Strongest customer-flow opportunity: ${strongestAngle}`,
+      "Build mobile-first. Include: focused hero, verified services or explicit placeholders, proof placeholder area, process/FAQ, and one contact/request section. Use call/text/request CTAs only where the contact data is verified.",
+      `Category-specific design direction: ${designDirection}`,
+      brandingColors.length ? `Verified public-site color cues: ${brandingColors.join(", ")}. Use them as a starting point, not as an invented brand standard.` : "No reliable color palette was extracted; use a tasteful neutral concept palette and label it as an assumption.",
+      "Use existing logo colors and public visual cues only if supplied in the evidence. Otherwise use a tasteful neutral palette and label the color direction as an assumption. Do not invent a logo.",
+      `Avoid generic agency language and fake social proof. Intended primary CTA: ${input.lead.phone ? "Call the verified public phone" : input.website.objectiveSignals.has_booking ? "Use the verified booking path" : "Request details through a placeholder flow"}.`,
     ].join("\n"),
     generated_by: "deterministic_fallback",
     generated_at: currentIso(),
@@ -1049,13 +1142,18 @@ function fallbackSalesPack(input: {
 }
 
 function leadPublicFacts(lead: MutableLead, scan: SignalWebsiteScan | null, website: WebsiteReview) {
+  const storedScan = asObject(asObject(lead.raw_research).scan)
+  const storedServices = safeArray(storedScan.service_language).filter((item): item is string => typeof item === "string")
   return unique([
+    `Canonical business name: ${lead.canonical_name || lead.business_name}`,
     lead.industry ? `Industry: ${lead.industry}` : null,
-    lead.city ? `City: ${lead.city}` : null,
-    lead.phone ? "Public phone found" : null,
-    lead.public_email ? "Public email found" : null,
+    lead.verified_city || lead.city ? `Verified city: ${lead.verified_city || lead.city}` : null,
+    lead.verified_address ? `Verified public address: ${lead.verified_address}` : null,
+    lead.phone ? `Public phone: ${lead.phone}` : null,
+    lead.public_email ? `Public email: ${lead.public_email}` : null,
     ...website.evidence,
     ...(scan?.service_language || []).slice(0, 3),
+    ...storedServices.slice(0, 4),
   ], 12)
 }
 
@@ -1289,8 +1387,9 @@ async function advanceDiscovery(run: MutableRun) {
       progress: 8 + Math.round((index / Math.max(1, preparedQueries.length)) * 20),
     })
 
-    const response = await searchSignalTavilyPublicWeb({ query, maxResults: Math.min(10, Math.max(6, Math.ceil(run.lead_limit / 2) + 3)) })
-    const nextResults = [...storedResults, ...response.results].slice(0, Math.min(run.lead_limit * 4, 60))
+    const rawCandidateTarget = Math.min(75, Math.max(30, run.lead_limit * 8))
+    const response = await searchSignalTavilyPublicWeb({ query, maxResults: 10 })
+    const nextResults = [...storedResults, ...response.results].slice(0, rawCandidateTarget)
     const warnings = response.setup_messages
     const nextRun = await updateRun(run.id, snapshotRunStatus(run, "finding_local_businesses", 10 + Math.round(((index + 1) / preparedQueries.length) * 20), {
       status: "discovering",
@@ -1341,26 +1440,39 @@ async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResul
   let excludedChains = 0
   let excludedDuplicates = 0
   let excludedNonBusinessSources = 0
+  let excludedGenericEntities = 0
   let mergedDuplicateSources = 0
   let viableScanCandidates = 0
   const records: Array<Record<string, unknown>> = []
   const recordsByIdentity = new Map<string, Record<string, unknown>>()
-  // Keep the evidence pass bounded. The scanner can rank a small shortlist
-  // well; blindly reading dozens of sites makes a five-lead run slow and
-  // burns provider credits without improving the returned top leads.
-  const poolLimit = Math.min(Math.max(run.lead_limit + 3, run.lead_limit * 2), 30)
+  const recordsByName = new Map<string, Record<string, unknown>>()
+  const recordsByHost = new Map<string, Record<string, unknown>>()
+  // Research a true funnel, not exactly the requested result count. Cheap
+  // deterministic gates run first; website/Firecrawl work happens later.
+  const poolLimit = Math.min(75, Math.max(30, run.lead_limit * 6))
 
   for (const result of rawResults) {
-    const businessName = extractBusinessName(result)
     const sourceType = classifySignalResearchUrl(result.url)
     if (sourceType !== "likely_official_site" && sourceType !== "social") {
-      excludedDuplicates += 1
+      excludedNonBusinessSources += 1
       continue
     }
     if (sourceType === "likely_official_site" && isLikelyDirectoryOrListicleResult(result)) {
       excludedNonBusinessSources += 1
       continue
     }
+    const identity = resolveSignalDiscoveryEntity({
+      title: result.title,
+      url: result.url,
+      city: run.location,
+      industry: run.custom_industry || run.industry_focus,
+      sourceType,
+    })
+    if (!identity.canonicalName || !["verified", "likely"].includes(identity.status)) {
+      excludedGenericEntities += 1
+      continue
+    }
+    const businessName = identity.canonicalName
     const hostname = sourceType === "likely_official_site" ? normalizeSignalHostname(result.url) : ""
     // A social result and an official-domain result for the same local name
     // should resolve to one candidate. Domain/phone stay as aliases, while the
@@ -1377,7 +1489,10 @@ async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResul
     const social = sourceType === "social" ? [result.url] : []
     const websiteUrl = sourceType === "likely_official_site" ? publicUrl(result.url) : null
     const chain = assessChainLikelihood({ businessName, url: websiteUrl || result.url, title: result.title, snippet: result.snippet })
+    const normalizedName = normalizeSignalBusinessName(businessName)
     const existingRecord = recordsByIdentity.get(identityKey)
+      || recordsByName.get(normalizedName)
+      || (hostname ? recordsByHost.get(hostname) : undefined)
 
     if (existingRecord) {
       // A title-matched Facebook result and official-domain result often refer
@@ -1405,6 +1520,10 @@ async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResul
         existingRecord.chain_likelihood = chain.likelihood
         existingRecord.chain_reason = chain.reason
         existingRecord.chain_evidence = chain.evidence
+        existingRecord.chain_classification = chain.classification
+        existingRecord.chain_probability = chain.likelihood
+        existingRecord.chain_reasons = chain.reasons
+        existingRecord.location_count_estimate = chain.locationCountEstimate
         existingRecord.is_independent_likely = chain.independentLikely
         existingRecord.independent_confidence = chain.independentConfidence
         if (isHighChain && wasEligible) {
@@ -1441,6 +1560,12 @@ async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResul
       rank: null,
       status: isHighChain ? "excluded" : "candidate",
       business_name: businessName,
+      canonical_name: businessName,
+      canonical_name_confidence: identity.confidence,
+      entity_status: identity.status,
+      entity_rejection_reason: identity.rejectionReason,
+      identity_evidence_count: identity.evidence.length,
+      identity_evidence_summary: identity.evidence,
       industry,
       city: null,
       state: null,
@@ -1454,10 +1579,28 @@ async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResul
       chain_likelihood: chain.likelihood,
       chain_reason: chain.reason,
       chain_evidence: chain.evidence,
+      chain_classification: chain.classification,
+      chain_probability: chain.likelihood,
+      chain_reasons: chain.reasons,
+      location_count_estimate: chain.locationCountEstimate,
       is_independent_likely: chain.independentLikely,
       independent_confidence: chain.independentConfidence,
       final_score: null,
       confidence_score: null,
+      opportunity_score: null,
+      ranking_score: null,
+      confidence_components: {},
+      geographic_status: "unclear",
+      verified_city: null,
+      verified_address: null,
+      distance_estimate_miles: null,
+      geographic_confidence: 0,
+      geographic_evidence: [],
+      qualification_status: isHighChain ? "rejected" : null,
+      rejection_reason: isHighChain ? `Known or probable chain: ${chain.reason || "deterministic chain evidence"}` : null,
+      script_generation_type: null,
+      prompt_version: null,
+      evaluation_metadata: { discovery_entity_version: "signal-quality-v2" },
       score_breakdown: {},
       key_reasons: isHighChain ? [`Excluded because of chain likelihood: ${chain.reason || "public chain signal"}`] : [],
       website_analysis: {},
@@ -1470,6 +1613,8 @@ async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResul
     }
     records.push(record)
     recordsByIdentity.set(identityKey, record)
+    recordsByName.set(normalizedName, record)
+    if (hostname) recordsByHost.set(hostname, record)
   }
 
   if (records.length) {
@@ -1503,6 +1648,7 @@ async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResul
       excluded_chains: excludedChains,
       excluded_duplicates: excludedDuplicates,
       excluded_nonbusiness_sources: excludedNonBusinessSources,
+      excluded_generic_entities: excludedGenericEntities,
       merged_duplicate_sources: mergedDuplicateSources,
     },
   }
@@ -1587,6 +1733,10 @@ async function saveEvidence(run: MutableRun, lead: MutableLead, rows: Array<{
   source_title?: string | null
   excerpt?: string | null
   confidence?: SignalConfidence
+  source_tier?: 1 | 2 | 3
+  reliability_score?: number
+  extracted_fact?: string | null
+  retrieved_at?: string
   metadata?: JsonObject
 }>) {
   if (!rows.length) return
@@ -1600,6 +1750,10 @@ async function saveEvidence(run: MutableRun, lead: MutableLead, rows: Array<{
       source_title: row.source_title || null,
       excerpt: row.excerpt?.slice(0, 1200) || null,
       confidence: row.confidence || "medium",
+      source_tier: row.source_tier || 3,
+      reliability_score: clamp(row.reliability_score ?? (row.source_tier === 1 ? 90 : row.source_tier === 2 ? 72 : 38)),
+      extracted_fact: row.extracted_fact?.slice(0, 500) || row.excerpt?.slice(0, 500) || null,
+      retrieved_at: row.retrieved_at || currentIso(),
       metadata: row.metadata || null,
     })),
   )
@@ -1636,16 +1790,65 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
 
   let scan: SignalWebsiteScan | null = null
   let firecrawlExcerpt: string | null = null
+  let firecrawlBranding: JsonObject | null = null
   let firecrawlCreditsUsed = 0
   const cursor = runCursor(run)
-  const firecrawlBudget = Math.min(getSignalMarketRuntimeConfig().maxFirecrawlCreditsPerMarket, run.lead_limit)
+  const firecrawlBudget = Math.min(getSignalMarketRuntimeConfig().maxFirecrawlCreditsPerMarket, run.lead_limit * 2)
   const priorFirecrawlCredits = asNumber(cursor.firecrawl_credits_used)
   if (lead.website_url) {
     scan = await scanSignalWebsite(lead.website_url, { maxSecondaryPages: 0 })
-    if (!scan.broken_response && getSignalLeadRunProviderSetup().firecrawl && priorFirecrawlCredits < firecrawlBudget) {
+  }
+
+  const identityNames = unique([
+    ...(scan?.json_ld_names || []),
+    scan?.open_graph_site_name,
+    ...(scan?.logo_alt_text || []).map((value) => value.replace(/\blogo\b/gi, " ").trim()),
+    scan?.page_title?.split(/\s[-–—|:]\s/)[0],
+    lead.canonical_name,
+    lead.business_name,
+  ], 12)
+  const entityAssessments = identityNames.map((name) => assessSignalEntityName({
+    name,
+    city: run.location,
+    industry: lead.industry || run.custom_industry,
+    url: lead.website_url || source.url,
+    sourceType: asString(raw.source_type),
+    corroboratingNames: identityNames.filter((candidate) => candidate !== name),
+  }))
+  const entity = entityAssessments.sort((left, right) => right.confidence - left.confidence)[0]
+    || assessSignalEntityName({ name: lead.business_name, city: run.location, url: lead.website_url || source.url })
+  const canonicalName = entity.canonicalName || lead.business_name
+  const preChain = assessChainLikelihood({
+    businessName: canonicalName,
+    url: lead.website_url || source.url,
+    title: source.title,
+    snippet: source.snippet,
+    scan,
+  })
+  let chainSearchResults: DiscoveryResult[] = []
+  if (!preChain.hasHardChainEvidence && preChain.likelihood >= 25 && preChain.likelihood < 75) {
+    const response = await searchSignalTavilyPublicWeb({
+      query: `"${canonicalName}" locations franchise corporate parent company`,
+      maxResults: 5,
+    })
+    chainSearchResults = response.results.map(parseDiscoveryResult).filter(Boolean) as DiscoveryResult[]
+    if (response.setup_messages.length) await writeProviderWarning(run, response.setup_messages[0])
+  }
+  const chainSearchText = chainSearchResults.map((result) => `${result.title} ${result.snippet} ${result.url}`).join(" ")
+
+  // Firecrawl is intentionally downstream of cheap identity and known-chain
+  // gates. It is never spent on a generic result or deterministic chain.
+  if (lead.website_url
+    && scan
+    && !scan.broken_response
+    && ["verified", "likely"].includes(entity.status)
+    && !preChain.hasHardChainEvidence
+    && getSignalLeadRunProviderSetup().firecrawl
+    && priorFirecrawlCredits < firecrawlBudget) {
       try {
         const extracted = await scrapeFirecrawlPage(lead.website_url)
         firecrawlExcerpt = extracted.markdown_excerpt
+        firecrawlBranding = extracted.branding
         firecrawlCreditsUsed = Math.max(0, extracted.credits_used)
         if (firecrawlCreditsUsed > 0) {
           await updateRun(run.id, {
@@ -1663,22 +1866,16 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
           `Firecrawl extraction failed for ${lead.business_name}; Signal kept the safe public-site scan instead. ${error instanceof Error ? error.message : ""}`.trim(),
         )
       }
-    }
   }
 
   const socialLinks = unique([
     ...sourceUrls(lead.social_links),
     ...(scan?.social_links || []),
   ], 10)
-  const officialIdentity = assessOfficialSiteIdentity({
-    businessName: lead.business_name,
-    websiteUrl: lead.website_url,
-    scan,
-  })
   const pageText = sourceText({
-    businessName: lead.business_name,
+    businessName: canonicalName,
     title: source.title,
-    snippet: source.snippet,
+    snippet: `${source.snippet} ${chainSearchText}`,
     url: lead.website_url || source.url,
     scan,
     firecrawlExcerpt,
@@ -1687,15 +1884,66 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
   const publicEmail = unique([lead.public_email, ...extractEmails(`${source.snippet} ${scan?.visible_emails.join(" ") || ""}`)])[0] || null
   const address = lead.address || extractStreetAddress(`${source.snippet} ${(scan?.hours_location_language || []).join(" ")}`)
   const website = websiteReview({ websiteUrl: lead.website_url, scan, socialLinks, firecrawlExcerpt })
-  const chain = assessChainLikelihood({
-    businessName: lead.business_name,
+  let chain = assessChainLikelihood({
+    businessName: canonicalName,
     url: lead.website_url || source.url,
     title: source.title,
     snippet: source.snippet,
     scan,
     firecrawlExcerpt,
   })
-  const marketEvidence = hasVerifiedMarketEvidence(run, pageText)
+  const chainAi = !chain.hasHardChainEvidence && chain.likelihood >= 25 && chain.likelihood < 75 && getSignalLeadRunProviderSetup().ai
+    ? await runSignalChainClassificationAi({
+      businessName: canonicalName,
+      websiteUrl: lead.website_url,
+      evidence: unique([...chain.reasons, ...chainSearchResults.map((result) => `${result.title}: ${result.snippet}`), firecrawlExcerpt], 12),
+    })
+    : null
+  if (chainAi?.output.classification === "chain" || chainAi?.output.classification === "likely_franchise") {
+    chain = {
+      ...chain,
+      classification: chainAi.output.classification,
+      likelihood: Math.max(chain.likelihood, chainAi.output.probability),
+      hasHardChainEvidence: chainAi.output.probability >= 85,
+      independentLikely: false,
+      reasons: unique([...chain.reasons, ...chainAi.output.evidence, chainAi.output.reason], 8),
+      locationCountEstimate: chainAi.output.location_count_estimate || chain.locationCountEstimate,
+    }
+  } else if (chainAi && ["independent", "likely_independent", "local_multi_location"].includes(chainAi.output.classification)) {
+    chain = {
+      ...chain,
+      classification: chainAi.output.classification,
+      independentConfidence: Math.max(chain.independentConfidence, Math.min(78, chainAi.output.probability)),
+      reasons: unique([...chain.reasons, ...chainAi.output.evidence, chainAi.output.reason], 8),
+      locationCountEstimate: chainAi.output.location_count_estimate || chain.locationCountEstimate,
+    }
+  }
+  const sourceIsOfficialSocial = asString(raw.source_type) === "social"
+  const geography = assessSignalGeography({
+    location: run.location,
+    marketType: run.market_type,
+    address,
+    officialTexts: [
+      ...(scan ? [scan.page_title || "", scan.meta_description || "", ...scan.hours_location_language] : []),
+      firecrawlExcerpt || "",
+      ...(sourceIsOfficialSocial ? [source.title, source.snippet] : []),
+    ],
+    corroboratingTexts: [],
+    discoveryTexts: sourceIsOfficialSocial ? [] : [source.title, source.snippet],
+  })
+  const independenceBoost = !chain.hasHardChainEvidence && chain.likelihood < 40
+    ? (entity.confidence >= 65 ? 10 : 0) + (geography.confidence >= 60 ? 12 : 0) + (lead.website_url || socialLinks.length ? 10 : 0)
+    : 0
+  if (independenceBoost > 0) {
+    const independenceConfidence = clamp(chain.independentConfidence + independenceBoost)
+    chain = {
+      ...chain,
+      independentConfidence: independenceConfidence,
+      independentLikely: independenceConfidence >= 70,
+      classification: independenceConfidence >= 80 ? "independent" : independenceConfidence >= 70 ? "likely_independent" : chain.classification,
+      reasons: unique([...chain.reasons, independenceConfidence >= 70 ? "Distinct identity, local first-party evidence, and no chain signals support likely independence." : null], 8),
+    }
+  }
   const noteExclusion = noteExclusionReason({
     run,
     website,
@@ -1703,15 +1951,18 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     hasAddress: Boolean(address),
   })
   const publicFacts = unique([
-    source.snippet,
+    `Canonical business name: ${canonicalName}`,
+    ...geography.evidence,
     ...website.evidence,
     scan?.page_title,
     scan?.meta_description,
     ...(scan?.service_language || []),
-    ...officialIdentity.evidence,
+    ...entity.evidence,
   ], 12)
   const scoredLead = {
     ...lead,
+    business_name: canonicalName,
+    canonical_name: canonicalName,
     phone,
     public_email: publicEmail,
     address,
@@ -1722,6 +1973,15 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     is_independent_likely: chain.independentLikely,
     independent_confidence: chain.independentConfidence,
   } as MutableLead
+  const scanPhones = scan?.visible_phones.map(normalizeSignalPhone).filter(Boolean) || []
+  const contactAgreement = phone && scanPhones.includes(normalizeSignalPhone(phone))
+    ? 90
+    : phone || publicEmail
+      ? 58
+      : website.objectiveSignals.has_contact || website.objectiveSignals.has_booking
+        ? 45
+        : 10
+  const sourceCount = unique(sourceUrls(lead.source_urls).map(normalizeSignalHostname), 12).length
   const scores = buildScoreBreakdown({
     run,
     lead: scoredLead,
@@ -1730,14 +1990,14 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     scan,
     hasAddress: Boolean(address),
     publicFacts,
+    entityConfidence: entity.confidence,
+    geographicConfidence: geography.confidence,
+    sourceCount,
+    contactAgreement,
+    providerFailure: Boolean(scan?.broken_response || (getSignalLeadRunProviderSetup().firecrawl && !firecrawlExcerpt)),
   })
   const profile = communicationProfile({ lead: scoredLead, website, scan })
   const plan = salesPlan({ lead: scoredLead, website, scores, profile: profile as unknown as JsonObject })
-  const chainExcluded = chain.likelihood >= 75
-    || (chain.hasHardChainEvidence && chain.independentConfidence < 50)
-    || (chain.likelihood >= 45 && chain.independentConfidence < 24)
-  const locationExcluded = !marketEvidence.verified
-  const identityExcluded = !officialIdentity.verified
   const hasClearContactPath = Boolean(
     address
     || phone
@@ -1745,32 +2005,53 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     || website.objectiveSignals.has_contact
     || website.objectiveSignals.has_booking,
   )
-  const contactExcluded = !hasClearContactPath
-  const exclusionReason = chainExcluded
-    ? `Excluded because of chain likelihood: ${chain.reason || "public franchise/multi-location signal"}`
-    : locationExcluded
-      ? `Excluded because public evidence did not verify the requested ${run.market_type === "metro" ? "metro" : "city"} market (${marketEvidence.terms.join(", ") || run.location}).`
-      : identityExcluded
-        ? `Excluded because the claimed official site could not be tied to ${lead.business_name} from public page identity signals.`
-        : contactExcluded
-          ? "Excluded because public evidence did not show a clear phone, email, address, booking, or contact route."
-          : noteExclusion
-  const status: SignalRunLeadStatus = exclusionReason ? "excluded" : "ready"
+  const qualification = qualifySignalLead({
+    entityStatus: entity.status,
+    entityConfidence: entity.confidence,
+    chainClassification: chain.classification,
+    independenceConfidence: chain.independentConfidence,
+    geographicStatus: geography.status,
+    geographicConfidence: geography.confidence,
+    evidenceConfidence: scores.confidence.score || 0,
+    opportunityScore: scores.final.opportunity_score,
+    hasContactRoute: hasClearContactPath,
+    hasEvidenceLinks: sourceUrls(lead.source_urls).length > 0,
+    incompleteResearch: Boolean(scan?.broken_response && lead.website_url && !sourceIsOfficialSocial),
+  })
+  const exclusionReasons = unique([
+    ...qualification.reasons,
+    noteExclusion,
+  ], 10)
+  const exclusionReason = exclusionReasons[0] || null
+  const status: SignalRunLeadStatus = qualification.qualified && !noteExclusion ? "ready" : "excluded"
   const risks = unique([
     ...website.gaps,
     ...scores.fit.unknowns,
     ...scores.walk_in_viability.unknowns,
     chain.likelihood >= 45 ? `Chain likelihood: ${chain.reason || "public franchise/multi-location signal"}` : null,
-    locationExcluded ? `Requested-market evidence is missing for ${run.location}; radius cannot be treated as verified distance.` : null,
-    identityExcluded ? officialIdentity.reason : null,
-    contactExcluded ? "No clear public contact route was verified" : null,
+    geography.confidence < 60 ? `Requested-market evidence is insufficient for ${run.location}; radius cannot be treated as verified distance.` : null,
+    entity.rejectionReason,
+    !hasClearContactPath ? "No clear public contact route was verified" : null,
     noteExclusion,
   ], 8)
 
   const { error } = await supabase.from("signal_run_leads").update({
     status,
+    business_name: canonicalName,
+    canonical_name: canonicalName,
+    canonical_name_confidence: entity.confidence,
+    entity_status: entity.status,
+    entity_rejection_reason: entity.rejectionReason,
+    identity_evidence_count: entity.evidence.length,
+    identity_evidence_summary: entity.evidence,
     industry: industryLabel(run.industry_focus as IndustryFocus, run.custom_industry, pageText),
-    city: lead.city || (marketEvidence.verified && run.market_type === "city" ? run.location : null),
+    city: geography.verifiedCity,
+    verified_city: geography.verifiedCity,
+    verified_address: geography.verifiedAddress,
+    geographic_status: geography.status,
+    geographic_confidence: geography.confidence,
+    geographic_evidence: geography.evidence,
+    distance_estimate_miles: geography.distanceEstimateMiles,
     address,
     phone,
     public_email: publicEmail,
@@ -1780,13 +2061,22 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     chain_likelihood: chain.likelihood,
     chain_reason: chain.reason,
     chain_evidence: chain.evidence,
+    chain_classification: chain.classification,
+    chain_probability: chain.likelihood,
+    chain_reasons: chain.reasons,
+    location_count_estimate: chain.locationCountEstimate,
     is_independent_likely: chain.independentLikely,
     independent_confidence: chain.independentConfidence,
     final_score: scores.final.score,
+    opportunity_score: scores.final.opportunity_score,
+    ranking_score: scores.final.ranking_score,
     confidence_score: scores.confidence.score,
+    confidence_components: scores.confidence_components,
+    qualification_status: qualification.qualified && !noteExclusion ? "qualified" : qualification.status,
+    rejection_reason: exclusionReasons.join(" ") || null,
     score_breakdown: scores,
     key_reasons: exclusionReason ? [exclusionReason] : unique([
-      ...officialIdentity.evidence,
+      ...entity.evidence,
       ...topReasons(scores, website, chain),
     ], 5),
     website_analysis: website,
@@ -1807,9 +2097,15 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
         booking_links: scan.booking_links,
       } : null,
       firecrawl_excerpt: firecrawlExcerpt,
+      firecrawl_branding: firecrawlBranding,
       firecrawl_credits_used: firecrawlCreditsUsed,
       firecrawl_credit_budget: firecrawlBudget,
-      official_site_identity: officialIdentity,
+      canonical_identity: entity,
+      geography,
+      qualification,
+      chain_search_results: chainSearchResults,
+      chain_ai_classification: chainAi ? { ...chainAi.output, provider: `${chainAi.provider}:${chainAi.model}` } : null,
+      prompt_version: "signal-quality-v2",
     },
     research_error: scan?.broken_response ? scan.error : null,
   }).eq("id", lead.id)
@@ -1821,13 +2117,18 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     source_title?: string | null
     excerpt?: string | null
     confidence?: SignalConfidence
+    source_tier?: 1 | 2 | 3
+    reliability_score?: number
+    extracted_fact?: string | null
     metadata?: JsonObject
   }> = [
-    { evidence_type: "discovery_result", source_url: source.url, source_title: source.title, excerpt: source.snippet, confidence: "medium" as SignalConfidence, metadata: { source_label: source.source_label } },
-    ...officialIdentity.evidence.map((excerpt) => ({ evidence_type: "official_site_identity", source_url: lead.website_url, source_title: "Official-site identity", excerpt, confidence: "high" as SignalConfidence, metadata: {} })),
-    ...chain.evidence.map((item) => ({ evidence_type: "chain_assessment", source_url: lead.website_url || source.url, source_title: "Chain likelihood", excerpt: item.signal, confidence: "medium" as SignalConfidence, metadata: { weight: item.weight } })),
-    ...(scan?.evidence || []).map((item) => ({ evidence_type: item.signal, source_url: item.url, source_title: "Official-site scan", excerpt: item.snippet, confidence: item.confidence, metadata: {} })),
-    ...(firecrawlExcerpt ? [{ evidence_type: "firecrawl_public_page", source_url: lead.website_url, source_title: "Firecrawl public-page extract", excerpt: firecrawlExcerpt, confidence: "medium" as SignalConfidence, metadata: {} }] : []),
+    { evidence_type: "discovery_result", source_url: source.url, source_title: source.title, excerpt: source.snippet, extracted_fact: "Discovery evidence only; not canonical identity proof.", confidence: "low" as SignalConfidence, source_tier: 3, reliability_score: 35, metadata: { source_label: source.source_label } },
+    ...entity.evidence.map((excerpt) => ({ evidence_type: "official_site_identity", source_url: lead.website_url || source.url, source_title: "Canonical identity", excerpt, extracted_fact: canonicalName, confidence: "high" as SignalConfidence, source_tier: 1 as const, reliability_score: 90, metadata: {} })),
+    ...geography.evidence.map((excerpt) => ({ evidence_type: "geographic_validation", source_url: lead.website_url || source.url, source_title: "Geographic validation", excerpt, extracted_fact: geography.verifiedCity, confidence: geography.confidence >= 75 ? "high" as SignalConfidence : "medium" as SignalConfidence, source_tier: sourceIsOfficialSocial || lead.website_url ? 1 as const : 3 as const, reliability_score: geography.confidence, metadata: { status: geography.status } })),
+    ...chain.evidence.map((item) => ({ evidence_type: "chain_assessment", source_url: lead.website_url || source.url, source_title: "Chain classification", excerpt: item.signal, extracted_fact: chain.classification, confidence: chain.hasHardChainEvidence ? "high" as SignalConfidence : "medium" as SignalConfidence, source_tier: lead.website_url ? 1 as const : 3 as const, reliability_score: chain.hasHardChainEvidence ? 96 : 65, metadata: { weight: item.weight } })),
+    ...chainSearchResults.map((result) => ({ evidence_type: "chain_search_evidence", source_url: result.url, source_title: result.title, excerpt: result.snippet, extracted_fact: "Selective chain/franchise corroboration search", confidence: "medium" as SignalConfidence, source_tier: 3 as const, reliability_score: 45, metadata: {} })),
+    ...(scan?.evidence || []).map((item) => ({ evidence_type: item.signal, source_url: item.url, source_title: "Official-site scan", excerpt: item.snippet, extracted_fact: item.snippet, confidence: item.confidence, source_tier: 1 as const, reliability_score: item.confidence === "high" ? 92 : item.confidence === "medium" ? 75 : 55, metadata: {} })),
+    ...(firecrawlExcerpt ? [{ evidence_type: "firecrawl_public_page", source_url: lead.website_url, source_title: "Firecrawl official-page extract", excerpt: firecrawlExcerpt, extracted_fact: "Official-page content used for identity, geography, website, and chain analysis.", confidence: "high" as SignalConfidence, source_tier: 1 as const, reliability_score: 88, metadata: {} }] : []),
   ]
   await saveEvidence(run, lead, evidenceRows)
   await addRunEvent({
@@ -1887,12 +2188,35 @@ async function rankLeads(run: MutableRun) {
     .select("*")
     .eq("run_id", run.id)
     .eq("status", "ready")
-    .order("final_score", { ascending: false, nullsFirst: false })
+    .eq("qualification_status", "qualified")
+    .order("ranking_score", { ascending: false, nullsFirst: false })
+    .order("opportunity_score", { ascending: false, nullsFirst: false })
     .order("confidence_score", { ascending: false, nullsFirst: false })
     .order("id", { ascending: true })
     .limit(60)
   if (error) throw new Error(error.message)
-  const ranked = (data || []) as MutableLead[]
+  const candidates = (data || []) as MutableLead[]
+  const ranked: MutableLead[] = []
+  const seenAliases = new Set<string>()
+  for (const lead of candidates) {
+    const aliases = unique([
+      signalDuplicateKey({ canonicalName: lead.canonical_name || lead.business_name, city: lead.verified_city || lead.city, websiteUrl: lead.website_url, phone: lead.phone }),
+      lead.normalized_hostname ? `domain:${lead.normalized_hostname}` : null,
+      lead.normalized_phone ? `phone:${lead.normalized_phone}` : null,
+      `name:${normalizeSignalBusinessName(lead.canonical_name || lead.business_name)}:${normalizeSignalCity(lead.verified_city || lead.city || run.location)}`,
+    ], 8)
+    if (aliases.some((alias) => seenAliases.has(alias))) {
+      await supabase.from("signal_run_leads").update({
+        status: "excluded",
+        qualification_status: "rejected",
+        rejection_reason: "Duplicate resolved identity, domain, or phone within this run.",
+        key_reasons: ["Excluded as a duplicate of a higher-ranked candidate."],
+      }).eq("id", lead.id)
+      continue
+    }
+    aliases.forEach((alias) => seenAliases.add(alias))
+    ranked.push(lead)
+  }
   for (const [index, lead] of ranked.entries()) {
     await supabase.from("signal_run_leads").update({ rank: index + 1 }).eq("id", lead.id)
   }
@@ -1938,8 +2262,29 @@ async function buildSalesPack(run: MutableRun, lead: MutableLead, kind: "scripts
   })
   const plan = salesPlan({ lead, website, scores, profile: asObject(lead.communication_profile) })
   const facts = leadPublicFacts(lead, null, website)
-  const evidence = facts.map((excerpt) => ({ label: "Public Signal evidence", excerpt, url: lead.website_url }))
   const fallback = fallbackSalesPack({ lead, website, scores, reasons: safeArray(lead.key_reasons).filter((item): item is string => typeof item === "string"), plan })
+  const supabase = createAdminClient()
+  const { data: storedEvidence, error: evidenceError } = await supabase
+    .from("signal_run_lead_evidence")
+    .select("source_title, source_url, excerpt, extracted_fact, source_tier, reliability_score")
+    .eq("run_id", run.id)
+    .eq("lead_id", lead.id)
+    .order("source_tier", { ascending: true, nullsFirst: false })
+    .order("reliability_score", { ascending: false, nullsFirst: false })
+    .limit(16)
+  if (evidenceError) throw new Error(evidenceError.message)
+  const evidence = (storedEvidence || []).map((item) => ({
+    label: item.source_title || `Tier ${item.source_tier || 3} public evidence`,
+    excerpt: item.extracted_fact || item.excerpt || "Public evidence link",
+    url: item.source_url,
+  }))
+  const communication = asObject(lead.communication_profile)
+  const profileTags = safeArray(communication.tags).flatMap((item) => {
+    const tag = asObject(item)
+    const label = asString(tag.label) || asString(tag.tag)
+    return label ? [label] : []
+  })
+  const risks = safeArray(lead.risks).filter((item): item is string => typeof item === "string")
   const aiPack = kind === "lovable" ? null : await runSignalLeadSalesPackAi({
     businessName: lead.business_name,
     city: lead.city,
@@ -1947,36 +2292,47 @@ async function buildSalesPack(run: MutableRun, lead: MutableLead, kind: "scripts
     websiteStatus: lead.website_status,
     publicFacts: facts,
     evidence,
-    scoreSummary: `Final score ${lead.final_score ?? "unknown"}; confidence ${lead.confidence_score ?? "unknown"}; website opportunity ${scores.website_opportunity.score ?? "unknown"}.`,
+    scoreSummary: `Opportunity ${lead.opportunity_score ?? scores.final.opportunity_score}; confidence ${lead.confidence_score ?? "unknown"}; ranking ${lead.ranking_score ?? scores.final.ranking_score}; website opportunity ${scores.website_opportunity.score ?? "unknown"}.`,
+    verifiedContact: unique([lead.phone ? `Public phone: ${lead.phone}` : null, lead.public_email ? `Public email: ${lead.public_email}` : null, lead.verified_address ? `Public address: ${lead.verified_address}` : null], 6),
+    websiteFindings: unique([website.summary, ...website.evidence, ...website.gaps], 10),
+    communicationProfile: profileTags,
+    strongestOpportunity: fallback.strongest_honest_angle,
+    uncertainties: risks,
+    forbiddenClaims: fallback.what_to_avoid,
+    recommendedChannel: plan.best_first_action,
   })
   if (kind !== "lovable" && !aiPack && getSignalLeadRunProviderSetup().ai) {
     await writeProviderWarning(run, "AI sales-pack generation was unavailable for one lead; Signal used the deterministic public-evidence fallback.")
   }
   const previous = asObject(lead.sales_pack)
-  // Keep every fact-bearing section deterministic and tied to stored public
-  // evidence. AI may improve only the conversational phrasing; it never gets
-  // to replace fit reasons, pain points, offer terms, risks, or the concept
-  // prompt with uncited claims.
-  const output = aiPack
+  const aiOutput = aiPack
     ? {
       ...fallback,
-      walk_in_script: aiPack.output.walk_in_script,
-      call_script: aiPack.output.call_script,
-      follow_up_message: aiPack.output.follow_up_message,
-      objection_handling: aiPack.output.objection_handling,
+      ...aiPack.output,
+      what_stood_out: fallback.what_stood_out,
+      likely_pain_points: fallback.likely_pain_points,
+      risks_to_verify: fallback.risks_to_verify,
+      lovable_prompt: fallback.lovable_prompt,
       ai_phrase_provider: `${aiPack.provider}:${aiPack.model}`,
     }
-    : fallback
-  const nextPack = kind === "lovable"
-    ? { ...previous, lovable_prompt: fallback.lovable_prompt, generated_at: currentIso(), generated_by: "deterministic_public_evidence" }
-    : { ...previous, ...output, generated_at: currentIso(), generated_by: aiPack ? `${aiPack.provider}:${aiPack.model}` : "deterministic_fallback" }
-  const supabase = createAdminClient()
+    : null
+  const selectedPack = selectSignalSalesPack({ fallback, aiPack: aiOutput, businessName: lead.business_name, verifiedFacts: facts })
+  if (aiOutput && selectedPack.generatedBy === "deterministic_fallback") {
+    await writeProviderWarning(run, `AI sales-pack grounding failed for ${lead.business_name}; Signal used the verified fallback.`)
+  }
+  const acceptedAi = selectedPack.generatedBy === "ai"
+  const output = selectedPack.pack
+  const nextPack: JsonObject = kind === "lovable"
+    ? { ...previous, lovable_prompt: fallback.lovable_prompt, generated_at: currentIso(), generated_by: "deterministic_fallback", prompt_version: "signal-sales-pack-v2" }
+    : { ...previous, ...output, generated_at: currentIso(), generated_by: acceptedAi ? "ai" : "deterministic_fallback", prompt_version: "signal-sales-pack-v2" }
   const { data, error } = await supabase
     .from("signal_run_leads")
     .update({
       sales_pack: nextPack,
-      lovable_prompt: typeof nextPack.lovable_prompt === "string" ? nextPack.lovable_prompt : fallback.lovable_prompt,
+      lovable_prompt: asString(nextPack.lovable_prompt) || fallback.lovable_prompt,
       next_steps: plan.next_step_checklist,
+      script_generation_type: kind === "lovable" ? lead.script_generation_type : acceptedAi ? "ai" : "deterministic_fallback",
+      prompt_version: "signal-sales-pack-v2",
     })
     .eq("id", lead.id)
     .select("*")
@@ -2014,6 +2370,10 @@ async function advanceWritingPacks(run: MutableRun) {
 async function finishRun(run: MutableRun) {
   const ranked = await rankLeads(run)
   const returned = ranked.slice(0, run.lead_limit)
+  const [checked, rejected] = await Promise.all([
+    countRunLeads(run.id, ["ready", "saved", "excluded", "failed"]),
+    countRunLeads(run.id, ["excluded", "failed"]),
+  ])
   const status: SignalRunStatus = returned.length < run.lead_limit ? "partial" : "completed"
   await updateRun(run.id, snapshotRunStatus(run, "completed", 100, {
     status,
@@ -2022,6 +2382,8 @@ async function finishRun(run: MutableRun) {
       ...runSummary(run),
       qualified_leads: ranked.length,
       returned_leads: returned.length,
+      candidates_checked: checked,
+      candidates_rejected: rejected,
       top_lead_names: returned.map((lead) => lead.business_name),
     },
     error_message: status === "partial" ? `Signal found ${returned.length} lead${returned.length === 1 ? "" : "s"} with enough independent public evidence.` : null,
@@ -2029,7 +2391,9 @@ async function finishRun(run: MutableRun) {
   await addRunEvent({
     runId: run.id,
     stage: "completed",
-    message: status === "completed" ? `Signal ranked ${returned.length} leads worth opening.` : `Signal returned ${returned.length} partial-result lead${returned.length === 1 ? "" : "s"}.`,
+    message: status === "completed"
+      ? `Signal checked ${checked} candidates, rejected ${rejected}, and ranked ${returned.length} leads worth opening.`
+      : `Signal found only ${returned.length} lead${returned.length === 1 ? "" : "s"} that met the quality bar after rejecting ${rejected}.`,
     progress: 100,
   })
 }

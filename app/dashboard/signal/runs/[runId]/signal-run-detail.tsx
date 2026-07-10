@@ -470,6 +470,11 @@ export function SignalRunDetail({
   const completed = run.status === "completed" || run.status === "partial"
   const active = isActive(run)
   const providerErrors = stringsFrom(run.provider_errors)
+  const runSummary = asRecord(run.summary)
+  const candidatesChecked = typeof runSummary?.candidates_checked === "number" ? runSummary.candidates_checked : leads.length
+  const candidatesRejected = typeof runSummary?.candidates_rejected === "number"
+    ? runSummary.candidates_rejected
+    : leads.filter((lead) => lead.status === "excluded" || lead.status === "failed").length
 
   return (
     <div className="space-y-7 pb-10">
@@ -495,7 +500,9 @@ export function SignalRunDetail({
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
               {completed
-                ? `Signal ranked the best independent opportunities from this ${run.market_type === "metro" ? "area" : "city"} search.`
+                ? visibleLeads.length < run.lead_limit
+                  ? `Signal found only ${visibleLeads.length} business${visibleLeads.length === 1 ? "" : "es"} that met the quality bar. It rejected weaker or uncertain candidates instead of filling the list.`
+                  : `Signal ranked the best independent opportunities from this ${run.market_type === "metro" ? "area" : "city"} search.`
                 : "Signal is working through public business data, checking websites, and writing the sales angle for each viable lead."}
             </p>
           </div>
@@ -578,7 +585,11 @@ export function SignalRunDetail({
               </p>
             </div>
             <div className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-              <span className="font-mono text-foreground">{visibleLeads.length}</span> ready to review
+              <span className="font-mono text-foreground">{candidatesChecked}</span> checked
+              <span className="mx-2 text-border">/</span>
+              <span className="font-mono text-foreground">{candidatesRejected}</span> rejected
+              <span className="mx-2 text-border">/</span>
+              <span className="font-mono text-foreground">{visibleLeads.length}</span> qualified
             </div>
           </div>
 
@@ -794,11 +805,17 @@ function LeadDrawer({
   const pitch = textFrom(salesPack, ["best_pitch_angle", "pitch_angle", "recommended_pitch"])
   const pricing = textFrom(salesPack, ["pricing_angle", "recommended_pricing_angle"])
   const firstAction = textFrom(salesPack, ["best_first_action", "recommended_first_action", "next_action"])
+  const generatedBy = textFrom(salesPack, ["generated_by"])
   const avoid = listFrom(salesPack, ["what_to_avoid", "what_to_avoid_saying", "avoid", "risks"]).slice(0, 6)
   const scripts = [
+    ["Lead briefing", textFrom(salesPack, ["lead_briefing"])],
+    ["Strongest honest angle", textFrom(salesPack, ["strongest_honest_angle"])],
+    ["15-second opener", textFrom(salesPack, ["fifteen_second_opener"])],
     ["Walk-in script", textFrom(salesPack, ["walk_in_script", "walkin_script"])],
     ["Call script", textFrom(salesPack, ["call_script", "call_opener", "phone_script"])],
-    ["Follow-up", textFrom(salesPack, ["follow_up", "follow_up_message", "text_email_follow_up"])],
+    ["Discovery questions", listFrom(salesPack, ["discovery_questions"]).join("\n") || null],
+    ["Follow-up text", textFrom(salesPack, ["follow_up_text", "follow_up_message"])],
+    ["Follow-up email", textFrom(salesPack, ["follow_up_email"])],
     ["Objection handling", objectionHandlingText(salesPack?.objection_handling || salesPack?.objections)],
   ].filter((item): item is [string, string] => Boolean(item[1]))
   const risks = listFrom(lead.risks).slice(0, 8)
@@ -826,8 +843,9 @@ function LeadDrawer({
 
       <div className="space-y-6 px-5 py-6 sm:px-7">
         <div className="grid gap-3 sm:grid-cols-3">
-          <DrawerMetric label="Final score" value={lead.final_score === null ? "—" : String(lead.final_score)} />
+          <DrawerMetric label="Opportunity" value={lead.opportunity_score === null ? "—" : String(lead.opportunity_score)} />
           <DrawerMetric label="Confidence" value={lead.confidence_score === null ? "—" : `${lead.confidence_score}%`} />
+          <DrawerMetric label="Ranking score" value={lead.ranking_score === null ? (lead.final_score === null ? "—" : String(lead.final_score)) : String(lead.ranking_score)} />
           <DrawerMetric label="Chain likelihood" value={`${lead.chain_likelihood}%`} />
         </div>
 
@@ -921,6 +939,7 @@ function LeadDrawer({
             <button type="button" disabled={Boolean(working)} onClick={() => onGenerate("scripts")} className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">
               {working === "scripts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Generate scripts
             </button>
+            {generatedBy && <span className="inline-flex h-9 items-center rounded-md border border-border px-3 text-xs text-muted-foreground">{generatedBy === "ai" ? "AI pack" : "Verified fallback"}</span>}
           </div>
           {scripts.length > 0 ? (
             <div className="space-y-3">

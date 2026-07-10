@@ -5,8 +5,10 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "evaluate:signal": "node --experimental-strip-types scripts/evaluate-signal.ts",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "test:signal": "node --experimental-strip-types --test lib/signal/__tests__/quality.test.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.3.5",

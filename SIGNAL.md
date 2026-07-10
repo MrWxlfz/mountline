@@ -819,6 +819,21 @@ V2.2 regression cases:
 - New independent barber not contacted: warm local mode may be appropriate, with friendly local or modern casual communication profile and permission-based first contact.
 - Medical/dental: professional studio mode, clinical professional profile, compliance warning, and no patient-data/PHI/EHR/intake AI recommendations.
 
+## Lead-run quality evaluation
+
+The rebuilt `/api/signal/runs` funnel treats search results as discovery evidence, checks a 30–75 candidate pool, rejects generic entities and known chains before expensive enrichment, and applies explicit entity, independence, geography, evidence-confidence, opportunity, and contact gates. A run may return fewer leads than requested.
+
+Run the offline regression suite and Southlake summary with:
+
+```bash
+npm run test:signal
+npm run evaluate:signal
+```
+
+The fixtures cover known chains, query-like/non-entity titles, distinct independents, social-only identity, geography evidence, duplicate domains/phones, confidence calibration, score spread, hard qualification gates, script grounding, and the original Southlake failures. The offline evaluation does not call Tavily, Firecrawl, AI providers, or Supabase and never reads API keys.
+
+Apply `supabase/migrations/20260710043832_signal_intelligence_v2.sql` before deploying the lead-run changes. It is additive and preserves existing run history.
+
 ## Future Roadmap
 
 Document-only possibilities:

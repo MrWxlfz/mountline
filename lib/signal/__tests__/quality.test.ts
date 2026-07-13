@@ -12,8 +12,12 @@ import {
   signalDuplicateKey,
 } from "../quality.ts"
 import { buildSignalPlaceSearchPlan, buildSignalPlaceTiles, mergeSignalPlaces, signalDistanceMiles, type SignalPlace } from "../places-core.ts"
-import { selectSignalSalesPack, validateSignalSalesPackGrounding } from "../sales-grounding.ts"
-import { genericEntities, independentEntities, knownChains, mapFirstOpportunities } from "../fixtures/signal-evaluation-fixtures.ts"
+import { selectSignalSalesPack, validateSignalConceptPrompt, validateSignalSalesPackGrounding } from "../sales-grounding.ts"
+import { cleanSignalBusinessName, resolveSignalCanonicalName } from "../business-name.ts"
+import { assessSignalOfficialWebsite, assessSignalSocialProfile, detectSignalParkedWebsite } from "../presence.ts"
+import { formatConfidence, formatOnlinePresence, formatRunStatus, formatSignalLabel } from "../presentation.ts"
+import { genericEntities, independentEntities, knownChains, leadQualityFixtures, mapFirstOpportunities } from "../fixtures/signal-evaluation-fixtures.ts"
+import { normalizeSignalWorkbookCell } from "../workbook-values.ts"
 
 test("known chains have zero leakage", () => {
   for (const fixture of knownChains) {
@@ -48,6 +52,84 @@ test("distinct independent identities survive canonical-name checks", () => {
   }
 })
 
+test("business-name resolver removes discovery noise and honors source priority", () => {
+  const noisy = cleanSignalBusinessName("✨ Oak & Ember Grooming — Best Pet Services in Southlake, TX @oakandember", {
+    city: "Southlake",
+    state: "TX",
+    category: "pet grooming",
+  })
+  assert.equal(noisy.name, "Oak & Ember Grooming")
+  assert.ok(noisy.warnings.length > 0)
+
+  const resolved = resolveSignalCanonicalName([
+    { value: "@oakandembergrooming", source: "social_handle" },
+    { value: "Oak & Ember Grooming | Official Website", source: "official_website_title", verified: true },
+    { value: "Oak & Ember Grooming", source: "places_listing", verified: true },
+  ], { city: "Southlake", state: "TX", category: "pet grooming" })
+  assert.equal(resolved.canonicalName, "Oak & Ember Grooming")
+  assert.equal(resolved.canonicalNameSource, "places_listing")
+  assert.ok(resolved.canonicalNameConfidence >= 90)
+})
+
+test("business-name resolver preserves meaningful punctuation and acronyms", () => {
+  assert.equal(cleanSignalBusinessName("DFW Auto & Detail Co.", { city: "Keller", category: "auto detailing" }).name, "DFW Auto & Detail Co")
+  assert.equal(cleanSignalBusinessName("O'Neil's Barber Co.", { city: "Keller", category: "barber" }).name, "O'Neil's Barber Co")
+  assert.equal(cleanSignalBusinessName("Top 10 Pet Grooming Services Near Me", { category: "pet grooming" }).name, null)
+})
+
+test("official website validation requires identity evidence and detects parked domains", () => {
+  const official = assessSignalOfficialWebsite({
+    businessName: "Oak & Ember Grooming",
+    websiteUrl: "https://oakandember.example",
+    listingWebsite: true,
+    reachable: true,
+    openGraphSiteName: "Oak & Ember Grooming",
+    visiblePhones: ["817-555-0142"],
+    expectedPhone: "(817) 555-0142",
+    city: "Southlake",
+    pageText: "Fear-free grooming in Southlake",
+  })
+  assert.equal(official.status, "verified_official_website")
+  assert.equal(official.accepted, true)
+
+  const unrelated = assessSignalOfficialWebsite({
+    businessName: "Oak & Ember Grooming",
+    websiteUrl: "https://unrelated-directory.example",
+    reachable: true,
+    pageTitle: "A national directory",
+  })
+  assert.equal(unrelated.accepted, false)
+  assert.equal(detectSignalParkedWebsite({ pageTitle: "Buy this domain", url: "https://oakandember.example" }), true)
+})
+
+test("official social validation needs a name match plus corroboration", () => {
+  const official = assessSignalSocialProfile({
+    businessName: "Cedar Chair Barber Co.",
+    profileUrl: "https://instagram.com/cedarchairbarber",
+    title: "Cedar Chair Barber Co. | Instagram",
+    snippet: "Appointments in Southlake, TX · Call 817-555-0188",
+    expectedPhone: "817-555-0188",
+    expectedCity: "Southlake",
+  })
+  assert.equal(official.official, true)
+  const weak = assessSignalSocialProfile({
+    businessName: "Cedar Chair Barber Co.",
+    profileUrl: "https://instagram.com/barbers",
+    title: "Barber inspiration",
+    snippet: "Popular haircuts",
+    expectedCity: "Southlake",
+  })
+  assert.equal(weak.official, false)
+})
+
+test("presentation helpers never expose raw enums or fake perfect confidence", () => {
+  assert.equal(formatRunStatus("completed_with_limits"), "Completed with limited evidence")
+  assert.equal(formatOnlinePresence("website_parked"), "Website appears parked")
+  assert.equal(formatSignalLabel("research_needed"), "Needs research")
+  assert.equal(formatConfidence(100), "High · 99%")
+  assert.equal(formatSignalLabel("owner_operated_likely").includes("_"), false)
+})
+
 test("geography requires first-party or corroborating evidence", () => {
   const weak = assessSignalGeography({ location: "Southlake, TX", marketType: "city", discoveryTexts: ["Southlake pet grooming"] })
   assert.equal(weak.status, "unclear")
@@ -69,8 +151,10 @@ test("provider failure lowers confidence and 100 is unavailable", () => {
     geography: 90,
     independence: 86,
     contact: 90,
-    onlinePresence: 88,
+    websiteStatus: 88,
+    socialStatus: 78,
     opportunityAnalysis: 84,
+    evidenceSourceDiversity: 82,
     contradictionPenalty: 0,
   }
   const complete = calculateSignalConfidence({ ...base, providerFailurePenalty: 0 })
@@ -82,12 +166,12 @@ test("provider failure lowers confidence and 100 is unavailable", () => {
 test("weighted scores have meaningful spread and confidence affects rank", () => {
   const strong = calculateSignalOpportunity({
     confidence: 88,
-    dimensions: { reputationViability: 19, digitalGap: 24, customerFlowOpportunity: 18, trustGap: 14, demoPotential: 9, outreachViability: 9 },
+    dimensions: { leadViability: 15, digitalOpportunity: 20, customerFlowFriction: 18, trustReputationGap: 13, salesAccessibility: 9, conceptPotential: 9, commercialFit: 9 },
   })
   const weak = calculateSignalOpportunity({
     confidence: 58,
-    dimensions: { reputationViability: 10, digitalGap: 7, customerFlowOpportunity: 4, trustGap: 2, demoPotential: 3, outreachViability: 4 },
-    penalties: { insufficient_evidence: 12 },
+    dimensions: { leadViability: 8, digitalOpportunity: 5, customerFlowFriction: 3, trustReputationGap: 2, salesAccessibility: 3, conceptPotential: 2, commercialFit: 3 },
+    penalties: { insufficient_evidence: 8 },
   })
   assert.ok(strong.opportunityScore - weak.opportunityScore >= 35)
   assert.ok(strong.rankingScore > strong.opportunityScore * 0.8)
@@ -121,24 +205,57 @@ test("sales-pack grounding catches generic or swappable scripts", () => {
   assert.equal(missing.valid, false)
 
   const groundedPack = {
-    lead_briefing: "Oak & Ember Grooming lists fear-free dog grooming appointments in Southlake.",
-    strongest_honest_angle: "Make the fear-free appointment path easier to understand.",
-    fifteen_second_opener: "Luke with Mountline—Oak & Ember Grooming stood out for its fear-free grooming language.",
-    walk_in_script: "Oak & Ember Grooming and its fear-free appointment path are the focus.",
-    call_script: "Oak & Ember Grooming came up because the public site explains fear-free grooming.",
-    discovery_questions: ["Do customers call before choosing a grooming appointment?"],
-    recommended_offer: "Focused booking-path concept",
-    objection_handling: [{ objection: "Busy", response: "We can send the concept." }],
-    follow_up_text: "Oak & Ember Grooming concept: clearer fear-free booking.",
-    follow_up_email: "Oak & Ember Grooming concept focused on fear-free grooming.",
-    what_to_avoid: ["Do not promise more revenue."],
-    next_action_checklist: ["Verify booking path"],
-    lovable_prompt: "Concept preview for Oak & Ember Grooming using verified fear-free grooming wording.",
+    one_minute_briefing: "Oak & Ember Grooming lists fear-free dog grooming appointments in Southlake. The focused opportunity is to make that appointment path easier to understand without replacing the business's current public channels.",
+    best_angle: "Make the verified fear-free appointment path easier for Southlake pet owners to understand.",
+    walk_in_opener: "Luke with Mountline—Oak & Ember Grooming stood out for its fear-free grooming language in Southlake. We prepared one small appointment-path concept because it is easier to show than explain.",
+    busy_response: "No problem. Mountline can send the labeled concept for a quieter moment, with no automated follow-up attached.",
+    concept_transition: "The concept keeps fear-free appointments central. Would this simpler path be useful for Oak & Ember Grooming?",
+    discovery_questions: [
+      "Do customers call before they understand which fear-free appointment fits?",
+      "Would a phone-first request path fit the way the team currently works?",
+      "Is the goal more demand, or less back-and-forth for current inquiries?",
+    ],
+    price_transition: "Mountline would confirm the smallest useful scope, then put the exact pages and price in writing before work starts.",
+    call_script: "Luke with Mountline here—did we catch Oak & Ember Grooming with thirty seconds? The verified fear-free grooming language in Southlake stood out, and we prepared one focused appointment-path concept. Would a quick explanation be useful, or should Mountline send the preview?",
+    follow_up_text: "Thanks for reviewing the Oak & Ember Grooming concept. It keeps the verified fear-free appointment path central. Mountline can outline the smallest useful version if the direction fits.",
+    objections: [
+      { objection: "We already use social media.", response: "That can stay exactly where it is. The concept gives fear-free appointment details one reliable home while social continues handling updates and daily visibility for Oak & Ember Grooming." },
+      { objection: "We are too busy.", response: "No problem. Mountline can send one labeled concept link for a quieter moment. There is no automated follow-up sequence, and the team can decide whether the direction is useful." },
+      { objection: "We get enough business.", response: "More traffic does not need to be the goal. The practical question is whether clearer fear-free appointment information reduces repetitive calls and makes existing inquiries easier for the team." },
+      { objection: "What would it cost?", response: "Mountline would start with the smallest useful version, confirm the exact appointment flow and pages, and put the scope and price in writing before any work begins." },
+    ],
+    do_not_say: ["Do not promise revenue.", "Do not criticize the current social presence.", "Do not present the concept as an official site."],
+    next_steps: ["Verify the appointment path.", "Confirm public hours.", "Prepare one labeled concept."],
+    lovable_prompt: "Create a labeled concept preview for Oak & Ember Grooming using only verified fear-free grooming and Southlake details. Use placeholders for every unknown fact.",
   }
   assert.equal(validateSignalSalesPackGrounding({ pack: groundedPack, businessName: "Oak & Ember Grooming", verifiedFacts: ["Fear-free dog grooming appointments"] }).valid, true)
-  const fallbackSelection = selectSignalSalesPack({ fallback: groundedPack, aiPack: { fifteen_second_opener: "Generic growth pitch" }, businessName: "Oak & Ember Grooming", verifiedFacts: ["Fear-free dog grooming appointments"] })
+  const fallbackSelection = selectSignalSalesPack({ fallback: groundedPack, aiPack: { walk_in_opener: "Generic growth pitch" }, businessName: "Oak & Ember Grooming", verifiedFacts: ["Fear-free dog grooming appointments"] })
   assert.equal(fallbackSelection.generatedBy, "deterministic_fallback")
   assert.equal(fallbackSelection.pack.generated_by, "deterministic_fallback")
+})
+
+test("concept prompts are specific, substantial, safe, and category-aware", () => {
+  const fixtures = [
+    { name: "Pine & Paws Grooming", fact: "fear-free grooming appointments", direction: "Use warm pet-service imagery, preparation guidance, and a call-or-appointment path." },
+    { name: "Cedar Chair Barber Co.", fact: "appointment and walk-in barber services", direction: "Use an editorial barber layout, work-gallery placeholders, and a clear appointment-or-walk-in choice." },
+    { name: "Blacktop & Brass Detailing", fact: "mobile interior detailing packages", direction: "Use a high-contrast automotive layout, package comparison, vehicle fit, and a quote-first path." },
+    { name: "North Gate Home Services", fact: "residential repair estimates", direction: "Use a practical service-area layout, project-proof placeholders, and estimate-request routing." },
+    { name: "Clearline Home Cleaning", fact: "recurring home-cleaning visits", direction: "Use a calm, trustworthy cleaning layout, recurring-service explanation, and a request-first path." },
+  ]
+  const prompts = fixtures.map((fixture) => [
+    `Create a clearly labeled concept preview for ${fixture.name}. This is not the official website.`,
+    `Use only the verified fact: ${fixture.fact}. ${fixture.direction}`,
+    "Build mobile-first with one obvious primary CTA, a compact sticky mobile call or request action when appropriate, verified service content, proof placeholders, process guidance, a practical FAQ, and a secondary contact option.",
+    "Choose typography, spacing, imagery, warmth, and layout character for this exact category instead of applying a generic agency template. Keep unknown details visibly labeled as placeholders.",
+    "Do not invent testimonials, review counts, pricing, policies, awards, team members, owner quotes, years in business, payment options, availability, or booking functionality. Do not invent a logo. Preserve the concept disclaimer in the rendered page.",
+  ].join(" "))
+  assert.equal(new Set(prompts).size, fixtures.length)
+  prompts.forEach((prompt, index) => {
+    const fixture = fixtures[index]
+    const result = validateSignalConceptPrompt({ prompt, businessName: fixture.name, verifiedFacts: [fixture.fact] })
+    assert.equal(result.valid, true, `${fixture.name}: ${result.issues.join(" ")}`)
+  })
+  assert.equal(validateSignalConceptPrompt({ prompt: "Make a nice website.", businessName: "Pine & Paws Grooming", verifiedFacts: ["fear-free grooming appointments"] }).valid, false)
 })
 
 test("map-first no-site groomer is a strong opportunity, not missing evidence", () => {
@@ -189,6 +306,23 @@ test("social-first barber and weak-site cleaner remain eligible", () => {
     hasContactForm: false,
   })
   assert.ok(cleaner.some((signal) => signal.signal === "website_weak"))
+
+  const detailer = buildSignalOpportunityEvidence({
+    onlinePresence: mapFirstOpportunities.independentDetailer.onlinePresence,
+    rating: mapFirstOpportunities.independentDetailer.rating,
+    reviewCount: mapFirstOpportunities.independentDetailer.reviewCount,
+    hasPhone: true,
+    hasContactForm: false,
+  })
+  const contractor = buildSignalOpportunityEvidence({
+    onlinePresence: mapFirstOpportunities.independentContractor.onlinePresence,
+    rating: mapFirstOpportunities.independentContractor.rating,
+    reviewCount: mapFirstOpportunities.independentContractor.reviewCount,
+    hasPhone: true,
+    hasContactForm: false,
+  })
+  assert.ok(detailer.some((signal) => signal.signal === "reputation_to_digital_gap"))
+  assert.ok(contractor.some((signal) => signal.signal === "directory_only"))
 })
 
 test("payment claims require first-party evidence and reviews stay verify-only", () => {
@@ -209,6 +343,35 @@ test("payment claims require first-party evidence and reviews stay verify-only",
   const unconfirmed = reviewOnly.find((signal) => signal.signal === "possible_payment_friction")
   assert.equal(unconfirmed?.verificationStatus, "verify_before_mention")
   assert.equal(unconfirmed?.safeToMentionInFirstPitch, false)
+
+  const observed = buildSignalOpportunityEvidence({
+    onlinePresence: "social_only",
+    hasPhone: true,
+    userObservations: [leadQualityFixtures.cashOnlyObservation.observation],
+  }).find((signal) => signal.signal === "verified_payment_friction")
+  assert.equal(observed?.evidenceSource, "user_observation")
+  assert.equal(observed?.safeToMentionInFirstPitch, false)
+})
+
+test("weak but real businesses do not survive the quality model", () => {
+  const strongSite = calculateSignalOpportunity({
+    confidence: 90,
+    dimensions: { leadViability: 14, digitalOpportunity: 2, customerFlowFriction: 3, trustReputationGap: 1, salesAccessibility: 7, conceptPotential: 3, commercialFit: 7 },
+    penalties: { excellent_website: 8 },
+  })
+  assert.ok(strongSite.opportunityScore < 48)
+
+  const inactive = qualifySignalLead({ entityStatus: "verified", entityConfidence: 94, chainClassification: "independent", independenceConfidence: 86, geographicStatus: "confirmed_in_market", geographicConfidence: 92, onlinePresenceConfidence: 80, opportunityConfidence: 80, opportunityScore: 82, hasContactRoute: true, hasEvidenceLinks: true, permanentlyClosed: true })
+  assert.equal(inactive.status, "rejected")
+
+  const ambiguous = assessSignalEntityName({ name: leadQualityFixtures.ambiguousIdentity.name, city: leadQualityFixtures.ambiguousIdentity.city, industry: "local services" })
+  assert.ok(["ambiguous", "generic_result", "rejected"].includes(ambiguous.status))
+
+  const lowReviewSignals = buildSignalOpportunityEvidence({ onlinePresence: leadQualityFixtures.lowReviewBusiness.onlinePresence, rating: leadQualityFixtures.lowReviewBusiness.rating, reviewCount: leadQualityFixtures.lowReviewBusiness.reviewCount, hasPhone: true })
+  assert.equal(lowReviewSignals.some((signal) => signal.signal === "reputation_to_digital_gap"), false)
+
+  const appointmentSignals = buildSignalOpportunityEvidence({ onlinePresence: leadQualityFixtures.appointmentSalon.onlinePresence, hasPhone: true, hasBooking: leadQualityFixtures.appointmentSalon.hasBooking })
+  assert.equal(appointmentSignals.some((signal) => signal.signal === "phone_first_customer_flow"), false)
 })
 
 test("places tiling expands larger markets and deduplicates provider identities", () => {
@@ -264,4 +427,13 @@ test("hard rejects stay hard while sparse markets preserve watchlist research", 
   ]
   assert.equal(outcomes.filter((outcome) => outcome.status === "qualified").length, 2)
   assert.equal(outcomes.filter((outcome) => outcome.status === "watchlist").length, 1)
+})
+
+test("workbook values stay readable after safe XLSX parsing", () => {
+  assert.equal(
+    normalizeSignalWorkbookCell("  Pine &amp; Paws\u0000  Grooming  "),
+    "Pine & Paws Grooming",
+  )
+  assert.equal(normalizeSignalWorkbookCell("Cedar &#38; Chair"), "Cedar & Chair")
+  assert.equal(normalizeSignalWorkbookCell("Blacktop &#x26; Brass"), "Blacktop & Brass")
 })

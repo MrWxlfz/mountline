@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "@/lib/signal/playbooks"
+import { formatScoreReason, formatSignalLabel } from "@/lib/signal/presentation"
 import type {
   SignalAlert,
   SignalAnalysis,
@@ -227,6 +228,18 @@ function stringList(value: unknown) {
   }).filter(Boolean)
 }
 
+function readableFacts(value: unknown, prefix = ""): string[] {
+  if (!value || typeof value !== "object") return []
+  if (Array.isArray(value)) return value.flatMap((item) => readableFacts(item, prefix)).slice(0, 8)
+  return Object.entries(value as Record<string, unknown>).flatMap(([key, item]) => {
+    const label = prefix ? `${prefix} · ${formatSignalLabel(key)}` : formatSignalLabel(key)
+    if (typeof item === "string" || typeof item === "number" || typeof item === "boolean") {
+      return [`${label}: ${formatScoreReason(String(item))}`]
+    }
+    return item && typeof item === "object" ? readableFacts(item, label) : []
+  }).slice(0, 8)
+}
+
 function visualAnalysisFromEvidence(evidence: SignalVisualEvidence[]) {
   const latest = evidence.find((item) => item.analysis && typeof item.analysis === "object")
   return latest?.analysis && typeof latest.analysis === "object"
@@ -266,7 +279,7 @@ function buildStrategyBoxes({
     scan?.page_title && `Official homepage title: ${String(scan.page_title)}`,
     ...stringsFromRecordArray(scan?.evidence, ["signal", "snippet"]).slice(0, 4),
     ...verifiedObservations.slice(0, 4).map((item) =>
-      `${item.category.replace(/_/g, " ")}: ${item.note}${item.url ? ` (${item.url})` : ""}`,
+      `${formatSignalLabel(item.category)}: ${item.note}${item.url ? ` (${item.url})` : ""}`,
     ),
     visualEvidence.some((item) => item.screenshot_type === "desktop") && "Desktop public-site screenshot is stored.",
     visualEvidence.some((item) => item.screenshot_type === "mobile") && "Mobile public-site screenshot is stored.",
@@ -320,13 +333,13 @@ function buildTimeline({
       date: prospect.created_at,
       category: "research",
       title: "Prospect created",
-      detail: prospect.source.replace(/_/g, " "),
+      detail: formatSignalLabel(prospect.source),
     },
     ...analyses.map((analysis) => ({
       date: analysis.created_at,
       category: analysis.analysis_type === "deep_dive" ? "analysis" : "research",
-      title: analysis.analysis_type.replace(/_/g, " "),
-      detail: analysis.recommended_primary_offer || analysis.executive_summary || analysis.model_provider || "Analysis saved",
+      title: formatSignalLabel(analysis.analysis_type),
+      detail: analysis.recommended_primary_offer || analysis.executive_summary || "Analysis saved",
     })),
     ...drafts.map((draft) => ({
       date: draft.created_at,
@@ -344,7 +357,7 @@ function buildTimeline({
             : event.follow_up_date
               ? "follow_up"
               : "outreach",
-      title: event.event_type.replace(/_/g, " "),
+      title: formatSignalLabel(event.event_type),
       detail: [event.channel, event.summary].filter(Boolean).join(": "),
     })),
     ...visualEvidence.map((item) => ({
@@ -356,13 +369,13 @@ function buildTimeline({
     ...verifiedObservations.map((item) => ({
       date: item.created_at,
       category: "note",
-      title: item.category.replace(/_/g, " "),
+      title: formatSignalLabel(item.category),
       detail: item.note,
     })),
     ...feedback.map((item) => ({
       date: item.created_at,
       category: "correction",
-      title: item.feedback_type.replace(/_/g, " "),
+      title: formatSignalLabel(item.feedback_type),
       detail: item.corrected_value || item.note || item.original_value || "Correction saved",
     })),
     ...alerts.map((alert) => ({
@@ -1286,7 +1299,7 @@ export function SignalProspectDetail({
             <Meta label="Industry" value={prospect.industry} />
             <Meta label="Playbook" value={playbook.name} />
             <Meta label="Category confidence" value={prospect.classification_confidence || latestAnalysis?.confidence || "-"} />
-            <Meta label="Classification source" value={prospect.classification_source ? prospect.classification_source.replace(/_/g, " ") : "-"} />
+            <Meta label="Classification source" value={prospect.classification_source ? formatSignalLabel(prospect.classification_source) : "-"} />
             <Meta label="Location" value={[prospect.city, prospect.state].filter(Boolean).join(", ") || "-"} />
             <Meta label="Locality" value={localityLabels[prospect.locality_scope || "unknown"] || prospect.locality_scope || "-"} />
             <Meta label="Relationship" value={relationshipLabels[prospect.relationship_type || "none"] || prospect.relationship_type || "-"} />
@@ -1423,12 +1436,12 @@ export function SignalProspectDetail({
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <select value={recordChannel} onChange={(event) => setRecordChannel(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
                 {["email", "call", "voicemail", "instagram", "contact_form", "text", "in_person", "other"].map((value) => (
-                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
                 ))}
               </select>
               <select value={recordEventType} onChange={(event) => setRecordEventType(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
                 {["attempted", "delivered", "voicemail_left", "replied", "permission_to_send_demo", "demo_sent", "follow_up_sent", "interested", "declined"].map((value) => (
-                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
                 ))}
               </select>
               <input type="date" value={recordDate} onChange={(event) => setRecordDate(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm" />
@@ -1566,7 +1579,6 @@ export function SignalProspectDetail({
               <Meta label="Platform" value={String(scan?.detected_website_platform || prospect.existing_website_platform || "-")} />
               <Meta label="Booking" value={String(scan?.detected_booking_platform || prospect.existing_booking_platform || "-")} />
               <Meta label="Scanned" value={formatDateTime(String(scan?.scanned_at || latestScanAnalysis?.created_at || ""))} />
-              <Meta label="Research provider" value={latestAnalysis?.research_provider || "-"} />
               <Meta label="Official source" value={latestAnalysis?.confirmed_official_url || prospect.website_url || "-"} />
               <Meta label="Scan coverage" value={latestAnalysis?.scan_coverage_confidence || "-"} />
               <Meta label="Coverage note" value={latestAnalysis?.scan_coverage_note || "-"} />
@@ -1579,9 +1591,9 @@ export function SignalProspectDetail({
             {weighting && (
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <EvidenceGroup title="Official Website Evidence" items={stringList(weighting.official_website_evidence)} />
-                <EvidenceGroup title="Visual Screenshot Evidence" items={stringList((weighting.visual_screenshot_evidence as Record<string, unknown> | undefined)?.analysis ? [JSON.stringify((weighting.visual_screenshot_evidence as Record<string, unknown>).analysis)] : [])} />
+                <EvidenceGroup title="Visual Screenshot Evidence" items={readableFacts((weighting.visual_screenshot_evidence as Record<string, unknown> | undefined)?.analysis)} />
                 <EvidenceGroup title="Human-Entered Observations" items={stringList(weighting.user_research_observations)} />
-                <EvidenceGroup title="System-Derived Classification" items={[JSON.stringify(weighting.system_derived_classification || {})]} />
+                <EvidenceGroup title="System-Derived Classification" items={readableFacts(weighting.system_derived_classification)} />
                 <EvidenceGroup title="AI Interpretation" items={stringList([weighting.ai_interpretation])} />
               </div>
             )}
@@ -1607,12 +1619,12 @@ export function SignalProspectDetail({
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <select value={observationCategory} onChange={(event) => setObservationCategory(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
                 {["site_design", "services", "booking", "gallery", "public_contact", "reputation", "platform", "business_context"].map((value) => (
-                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
                 ))}
               </select>
               <select value={observationSource} onChange={(event) => setObservationSource(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
                 {["manual_public_site_review", "official_public_site", "existing_conversation", "personal_relationship"].map((value) => (
-                  <option key={value} value={value}>{value.replace(/_/g, " ")}</option>
+                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
                 ))}
               </select>
             </div>
@@ -1625,8 +1637,8 @@ export function SignalProspectDetail({
               <div className="mt-4 space-y-2">
                 {verifiedObservations.slice(0, 6).map((item) => (
                   <div key={item.id} className="rounded-md border border-border bg-background/50 p-2 text-xs text-muted-foreground">
-                    <span className="text-foreground">{item.category.replace(/_/g, " ")}</span>
-                    {" "}· {item.source.replace(/_/g, " ")} · {formatDateTime(item.created_at)}
+                    <span className="text-foreground">{formatSignalLabel(item.category)}</span>
+                    {" "}· {formatSignalLabel(item.source)} · {formatDateTime(item.created_at)}
                     <p className="mt-1 text-sm text-foreground">{item.note}</p>
                     {item.url && <p className="mt-1 break-all">{item.url}</p>}
                   </div>
@@ -1852,7 +1864,7 @@ export function SignalProspectDetail({
               "unknown_needs_review",
             ].map((value) => (
               <option key={value} value={value}>
-                {value.replace(/_/g, " ")}
+                {formatSignalLabel(value)}
               </option>
             ))}
           </select>

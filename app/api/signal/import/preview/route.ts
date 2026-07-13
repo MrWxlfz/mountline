@@ -11,7 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import type { SignalProspect } from "@/lib/supabase/types"
 
 const MAX_IMPORT_BYTES = 5 * 1024 * 1024
-const ALLOWED_EXTENSIONS = [".csv", ".xlsx", ".xls"]
+const ALLOWED_EXTENSIONS = [".csv", ".xlsx"]
 
 function extensionOf(filename: string) {
   const lower = filename.toLowerCase()
@@ -40,7 +40,10 @@ export async function POST(request: Request) {
   const extension = extensionOf(file.name)
   if (!extension) {
     return NextResponse.json(
-      { error: "Signal import accepts .csv, .xlsx, or .xls files only." },
+      {
+        error:
+          "Signal import accepts .csv or .xlsx files. Save legacy .xls workbooks as .xlsx or CSV first.",
+      },
       { status: 400 },
     )
   }

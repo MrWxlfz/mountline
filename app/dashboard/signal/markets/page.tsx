@@ -10,6 +10,7 @@ import {
 } from "@/components/dashboard/dashboard-ui"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { getSignalPlaybook } from "@/lib/signal/playbooks"
+import { formatSignalLabel } from "@/lib/signal/presentation"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { SignalMarket, SignalMarketCandidate } from "@/lib/supabase/types"
 
@@ -115,7 +116,7 @@ export default async function SignalMarketsPage() {
                         {market.industries.map((key) => getSignalPlaybook(key).name).join(", ")}
                       </p>
                     </div>
-                    <StatusBadge tone={statusTone(market.status)}>{market.status.replace(/_/g, " ")}</StatusBadge>
+                    <StatusBadge tone={statusTone(market.status)}>{formatSignalLabel(market.status)}</StatusBadge>
                   </div>
                   <div className="mt-4 h-1.5 rounded-full bg-muted">
                     <div className="h-full rounded-full bg-blue-400" style={{ width: `${Math.min(progress, 100)}%` }} />

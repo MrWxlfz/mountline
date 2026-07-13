@@ -30,6 +30,9 @@ export async function POST(
     body && typeof body === "object" && !Array.isArray(body)
       ? (body as Record<string, unknown>).kind
       : null
+  const notes = body && typeof body === "object" && !Array.isArray(body) && typeof (body as Record<string, unknown>).notes === "string"
+    ? String((body as Record<string, unknown>).notes).trim().slice(0, 600)
+    : ""
 
   if (kind !== "scripts" && kind !== "lovable") {
     return json({ error: "Generation kind must be scripts or lovable." }, 400)
@@ -41,6 +44,8 @@ export async function POST(
       runId,
       leadId,
       kind,
+      notes,
+      createdBy: authCheck.access.userId,
     })
 
     return json({ lead: result.lead })

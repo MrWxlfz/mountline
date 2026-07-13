@@ -1,9 +1,11 @@
 import "server-only"
 
+import readExcelFile from "read-excel-file/node"
 import type { SignalProspect } from "@/lib/supabase/types"
 import { inferSignalPlaybook } from "./playbooks"
 import { findLikelySignalDuplicates } from "./research"
 import { signalOutreachStatusSchema } from "./validation"
+import { normalizeSignalWorkbookCell } from "./workbook-values"
 
 export type SignalImportField =
   | "business_name"
@@ -40,7 +42,7 @@ export type SignalImportPreviewRow = {
 }
 
 type WorkbookRows = {
-  file_type: "csv" | "xlsx" | "xls"
+  file_type: "csv" | "xlsx"
   sheet_names: string[]
   selected_sheet_name: string | null
   rows: string[][]
@@ -123,28 +125,6 @@ function parseCsv(text: string) {
   return rows
 }
 
-async function loadXlsx() {
-  try {
-    const dynamicImport = new Function("specifier", "return import(specifier)") as (
-      specifier: string,
-    ) => Promise<{
-      read: (buffer: Buffer, options: Record<string, unknown>) => {
-        SheetNames: string[]
-        Sheets: Record<string, unknown>
-      }
-      utils: {
-        sheet_to_json: (
-          sheet: unknown,
-          options: Record<string, unknown>,
-        ) => unknown[][]
-      }
-    }>
-    return await dynamicImport("xlsx")
-  } catch {
-    return null
-  }
-}
-
 export async function readSignalWorkbookRows({
   buffer,
   filename,
@@ -165,35 +145,30 @@ export async function readSignalWorkbookRows({
     }
   }
 
-  const fileType = lower.endsWith(".xls") ? "xls" : "xlsx"
-  const xlsx = await loadXlsx()
-  if (!xlsx) {
+  if (!lower.endsWith(".xlsx")) {
     throw new Error(
-      "Workbook parsing dependency is not installed. Install the xlsx package before importing Excel files.",
+      "Signal accepts CSV and modern .xlsx workbooks. Save legacy .xls files as .xlsx or CSV before importing.",
     )
   }
 
-  const workbook = xlsx.read(buffer, {
-    type: "buffer",
-    cellDates: true,
-    cellNF: false,
-    cellHTML: false,
-  })
-  const selected = sheetName && workbook.SheetNames.includes(sheetName)
+  const workbook = await readExcelFile(buffer)
+  const sheetNames = workbook.map((sheet) => sheet.sheet)
+  const selected = sheetName && sheetNames.includes(sheetName)
     ? sheetName
-    : workbook.SheetNames[0]
+    : sheetNames[0]
 
   if (!selected) throw new Error("Workbook did not contain any worksheets.")
 
-  const sheet = workbook.Sheets[selected]
-  const rows = xlsx.utils
-    .sheet_to_json(sheet, { header: 1, defval: "", raw: false })
-    .map((row) => row.map((value) => clean(value, 1200)))
+  const sheet = workbook.find((candidate) => candidate.sheet === selected)
+  if (!sheet) throw new Error("Signal could not read the selected worksheet.")
+
+  const rows = sheet.data
+    .map((row) => row.map((value) => normalizeSignalWorkbookCell(value)))
     .filter((row) => row.some(Boolean))
 
   return {
-    file_type: fileType,
-    sheet_names: workbook.SheetNames,
+    file_type: "xlsx",
+    sheet_names: sheetNames,
     selected_sheet_name: selected,
     rows,
   }

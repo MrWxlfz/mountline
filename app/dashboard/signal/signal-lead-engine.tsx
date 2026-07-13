@@ -25,6 +25,14 @@ import {
   Sparkles,
   Target,
 } from "lucide-react"
+import {
+  formatBusinessCategory,
+  formatConfidence,
+  formatOnlinePresence,
+  formatRunStage,
+  formatRunStatus,
+  formatScoreReason,
+} from "@/lib/signal/presentation"
 import type { SignalRun, SignalRunEvent, SignalRunLead } from "@/lib/supabase/types"
 
 type JsonRecord = Record<string, unknown>
@@ -61,35 +69,10 @@ type RunPayload = {
   providerSetup?: SignalProviderSetup
 }
 
-const activeStatuses = new Set(["queued", "discovering", "checking", "scoring", "writing_packs", "ranking"])
-
-const stageLabels: Record<string, string> = {
-  setting_up: "Setting up market",
-  setting_up_market: "Setting up market",
-  queued: "Setting up market",
-  discovering: "Finding local businesses",
-  finding_local_businesses: "Finding local businesses",
-  resolving_market: "Resolving market",
-  searching_local_map_listings: "Searching local map listings",
-  expanding_category_coverage: "Expanding category coverage",
-  removing_chains_and_duplicates: "Removing chains and duplicates",
-  verifying_business_identities: "Verifying business identities",
-  checking_websites_and_social: "Checking websites and social profiles",
-  finding_customer_flow_gaps: "Finding customer-flow gaps",
-  filtering_chains_and_duplicates: "Filtering chains and duplicates",
-  checking: "Checking websites and contact friction",
-  checking_websites: "Checking websites and contact friction",
-  scoring: "Scoring opportunities",
-  scoring_opportunities: "Scoring opportunities",
-  writing_packs: "Writing sales packs",
-  writing_sales_packs: "Writing sales packs",
-  ranking: "Ranking the strongest opportunities",
-  ranking_final_leads: "Ranking the strongest opportunities",
-  retrying_research: "Retrying research",
-  completed: "Results ready",
-  partial: "Partial results ready",
-  failed: "Research needs attention",
-}
+const activeStatuses = new Set([
+  "queued", "discovering", "enriching", "analyzing", "selecting", "generating",
+  "checking", "scoring", "writing_packs", "ranking",
+])
 
 const industryOptions = [
   ["best_opportunities", "Best opportunities"],
@@ -103,23 +86,6 @@ const industryOptions = [
   ["commercial_cleaning", "Commercial cleaning"],
   ["custom", "Custom"],
 ] as const
-
-const websiteLabels: Record<string, string> = {
-  no_site: "No site found",
-  weak_site: "Weak site",
-  decent_site: "Decent site",
-  strong_site: "Strong site",
-  social_only: "Social-only",
-  unknown: "Checking site",
-  no_website_found: "No verified site",
-  directory_only: "Directory-only",
-  website_unreachable: "Site unreachable",
-  website_broken: "Broken site",
-  website_weak: "Weak site",
-  website_adequate: "Adequate site",
-  website_strong: "Strong site",
-  website_unknown: "Site status unknown",
-}
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -196,8 +162,7 @@ function parsePayload(value: unknown): RunPayload {
 }
 
 function stageLabel(value: string | null | undefined) {
-  if (!value) return "Researching"
-  return stageLabels[value] || value.replace(/_/g, " ")
+  return formatRunStage(value)
 }
 
 function activeRun(run: SignalRun | null | undefined) {
@@ -261,6 +226,10 @@ function providerMissing(providerSetup: SignalProviderSetup | null | undefined) 
 
 function onlinePresence(lead: SignalRunLead) {
   return lead.online_presence_classification || lead.website_status
+}
+
+function leadName(lead: SignalRunLead) {
+  return lead.display_name || lead.canonical_name || lead.business_name
 }
 
 export function SignalLeadEngine({
@@ -441,14 +410,14 @@ export function SignalLeadEngine({
           <div className="flex flex-wrap gap-2 xl:justify-end">
             <button type="button" onClick={() => scrollTo("recent-runs")} className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background/70 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Clock3 className="h-4 w-4" />View recent runs</button>
             <button type="button" onClick={() => scrollTo("saved-leads")} className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background/70 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Bookmark className="h-4 w-4" />Open saved leads</button>
-            <button type="button" onClick={() => scrollTo("run-results")} className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background/70 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Sparkles className="h-4 w-4" />Demo prompts</button>
+            <button type="button" onClick={() => scrollTo("run-results")} className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background/70 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Sparkles className="h-4 w-4" />Concepts</button>
           </div>
         </div>
       </section>
 
       {missingProviders.length > 0 && (
         <div role="alert" className="flex flex-col gap-3 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-50 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex gap-3"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-medium">Signal needs a small setup check.</p><p className="mt-1 leading-5 text-amber-100/80">Add {missingProviders.join(" and ")} to start live research. Everything else in Signal remains safe to review.</p></div></div>
+          <div className="flex gap-3"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-medium">Signal needs a research connection.</p><p className="mt-1 leading-5 text-amber-100/80">Configure at least one local discovery connection to start live research. Existing runs remain safe to review.</p></div></div>
         </div>
       )}
 
@@ -466,8 +435,8 @@ export function SignalLeadEngine({
         <div role="status" className="flex gap-3 rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
-            <p className="font-medium text-foreground">Signal is running in a reduced-evidence setup.</p>
-            <p className="mt-1 leading-5">{providerWarnings.join(" ")}</p>
+            <p className="font-medium text-foreground">Website analysis is limited right now.</p>
+            <p className="mt-1 leading-5">Signal is relying more heavily on verified listing and public-profile data. {providerWarnings.map((warning) => formatScoreReason(warning)).join(" ")}</p>
           </div>
         </div>
       )}
@@ -505,10 +474,10 @@ export function SignalLeadEngine({
 
           <div className="mt-5 grid gap-5 border-t border-border pt-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div className="space-y-2"><span className="text-sm font-medium text-foreground">How many leads?</span><div className="flex flex-wrap gap-2">{[5, 10, 15, 25].map((count) => <button key={count} type="button" onClick={() => setLeadLimit(count)} className={`inline-flex h-9 min-w-11 items-center justify-center rounded-md border px-3 text-sm font-medium transition-colors ${leadLimit === count ? "border-foreground bg-foreground text-background" : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}>{count}</button>)}</div></div>
-            <Field label="Optional notes"><textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={2} placeholder="Find businesses that would be easy for me to walk into" className="min-h-18 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40" /></Field>
+            <Field label="Optional notes"><textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={2} placeholder="Prioritize businesses that welcome walk-in conversations" className="min-h-18 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40" /></Field>
           </div>
           {industry === "custom" && <Field label="Custom industry"><input value={customIndustry} onChange={(event) => setCustomIndustry(event.target.value)} placeholder="Example: independent landscapers" className="mt-2 h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40" /></Field>}
-          <p className="mt-4 text-xs leading-5 text-muted-foreground">Signal uses structured local listings when configured, filters chains by default, and labels uncertain findings instead of inventing facts. Radius controls map coverage; Tavily verifies broader web presence and Firecrawl analyzes verified official sites.</p>
+          <p className="mt-4 text-xs leading-5 text-muted-foreground">Signal starts with structured local listings, filters chains by default, verifies official public pages, and labels uncertainty instead of inventing facts. Radius controls local discovery coverage.</p>
         </form>
       </section>
 
@@ -526,9 +495,9 @@ export function SignalLeadEngine({
         </section>
       )}
 
-      {currentRun && !currentIsActive && (currentRun.status === "completed" || currentRun.status === "partial") && (
+      {currentRun && !currentIsActive && (["completed", "partial", "completed_with_limits"] as string[]).includes(currentRun.status) && (
         <section id="run-results" className="scroll-mt-20 rounded-xl border border-border bg-card p-5 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Latest result</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{userName}, Signal found some strong leads.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Each lead is ranked with evidence, confidence, a practical first move, and a ready-to-use sales direction.</p></div><Link href={`/dashboard/signal/runs/${currentRun.id}`} className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">Open full run <ArrowRight className="h-4 w-4" /></Link></div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Latest result</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{userName}, Signal found the opportunities worth reviewing.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Each finalist includes verified evidence, calibrated confidence, a practical first move, and a grounded sales direction.</p></div><Link href={`/dashboard/signal/runs/${currentRun.id}`} className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">Open full run <ArrowRight className="h-4 w-4" /></Link></div>
           {currentResults.length > 0 ? <div className="mt-6 grid gap-4 xl:grid-cols-2">{currentResults.slice(0, 5).map((lead, index) => <ResultLeadCard key={lead.id} lead={lead} rank={lead.rank || index + 1} />)}</div> : <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/20 p-7 text-center"><Target className="mx-auto h-6 w-6 text-muted-foreground" /><p className="mt-3 font-medium text-foreground">No leads are ready to rank yet.</p><p className="mt-2 text-sm text-muted-foreground">Open the run to review the partial evidence and retry any failed provider step.</p></div>}
         </section>
       )}
@@ -565,29 +534,42 @@ function Field({ children, label }: { children: React.ReactNode; label: string }
 }
 
 function RunEventFeed({ events }: { events: SignalRunEvent[] }) {
-  return <section className="rounded-xl border border-border bg-card p-5"><div className="flex items-center justify-between gap-3"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Progress</p><h2 className="mt-2 text-lg font-semibold text-foreground">What Signal is doing</h2></div><RadioTower className="h-4 w-4 text-muted-foreground" /></div><div className="mt-5 max-h-[268px] space-y-4 overflow-y-auto pr-1">{events.length > 0 ? events.map((event) => <div key={event.id} className="grid grid-cols-[54px_minmax(0,1fr)] gap-3"><span className="pt-0.5 font-mono text-[11px] text-muted-foreground">{timeLabel(event.created_at)}</span><div className="border-l border-border pl-3"><p className="text-xs font-medium text-foreground">{stageLabel(event.stage)}</p><p className="mt-1 text-sm leading-5 text-muted-foreground">{event.message}</p></div></div>) : <p className="text-sm leading-6 text-muted-foreground">Signal will add persisted progress events as soon as research starts.</p>}</div></section>
+  return <section className="rounded-xl border border-border bg-card p-5"><div className="flex items-center justify-between gap-3"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Progress</p><h2 className="mt-2 text-lg font-semibold text-foreground">What Signal is doing</h2></div><RadioTower className="h-4 w-4 text-muted-foreground" /></div><div className="mt-5 max-h-[268px] space-y-4 overflow-y-auto pr-1">{events.length > 0 ? events.map((event) => <div key={event.id} className="grid grid-cols-[54px_minmax(0,1fr)] gap-3"><span className="pt-0.5 font-mono text-[11px] text-muted-foreground">{timeLabel(event.created_at)}</span><div className="border-l border-border pl-3"><p className="text-xs font-medium text-foreground">{stageLabel(event.stage)}</p><p className="mt-1 text-sm leading-5 text-muted-foreground">{formatScoreReason(event.message)}</p></div></div>) : <p className="text-sm leading-6 text-muted-foreground">Signal will add persisted progress events as soon as research starts.</p>}</div></section>
 }
 
 function RecentRunCard({ run }: { run: SignalRun }) {
   const active = activeRun(run)
-  const statusClass = run.status === "completed" ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200" : run.status === "failed" ? "border-red-400/30 bg-red-400/10 text-red-200" : "border-border bg-muted/50 text-muted-foreground"
-  return <Link href={`/dashboard/signal/runs/${run.id}`} className="group rounded-lg border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-medium text-foreground">{run.location}</p><p className="mt-1 text-sm text-muted-foreground">{run.market_type === "metro" ? "Metro / area" : "City"} · {run.lead_limit} leads · {dateLabel(run.created_at)}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusClass}`}>{run.status.replace(/_/g, " ")}</span></div>{active && <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-foreground" style={{ width: `${Math.max(0, Math.min(100, run.progress_percent))}%` }} /></div>}<div className="mt-4 flex items-center justify-between text-xs text-muted-foreground"><span>{active ? stageLabel(run.current_stage) : "Open results"}</span><span className="inline-flex items-center gap-1 group-hover:text-foreground">Open <ChevronRight className="h-3.5 w-3.5" /></span></div></Link>
+  const statusClass = run.status === "completed"
+    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+    : run.status === "failed"
+      ? "border-red-400/30 bg-red-400/10 text-red-200"
+      : "border-border bg-muted/50 text-muted-foreground"
+  return (
+    <Link href={`/dashboard/signal/runs/${run.id}`} className="group rounded-lg border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0"><p className="truncate font-medium text-foreground">{run.location}</p><p className="mt-1 text-sm text-muted-foreground">{run.market_type === "metro" ? "Metro / area" : "City"} · {run.lead_limit} leads · {dateLabel(run.created_at)}</p></div>
+        <span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusClass}`}>{formatRunStatus(run.status)}</span>
+      </div>
+      {active && <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-foreground" style={{ width: `${Math.max(0, Math.min(100, run.progress_percent))}%` }} /></div>}
+      <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground"><span>{active ? stageLabel(run.current_stage) : "Open results"}</span><span className="inline-flex items-center gap-1 group-hover:text-foreground">Open <ChevronRight className="h-3.5 w-3.5" /></span></div>
+    </Link>
+  )
 }
 
 function ResultLeadCard({ lead, rank }: { lead: SignalRunLead; rank: number }) {
-  const reasons = stringsFrom(lead.key_reasons).slice(0, 3)
+  const reasons = stringsFrom(lead.key_reasons).map((reason) => formatScoreReason(reason)).slice(0, 3)
   const salesPack = asRecord(lead.sales_pack)
-  const pitch = textFrom(salesPack, ["best_pitch_angle", "pitch_angle", "recommended_offer", "offer_angle"])
+  const pitch = textFrom(salesPack, ["best_angle", "strongest_honest_angle", "best_pitch_angle", "pitch_angle"])
   const action = textFrom(salesPack, ["best_first_action", "recommended_first_action", "next_action"])
   const location = [lead.city, lead.state].filter(Boolean).join(", ") || lead.address || "Location to verify"
   const presence = onlinePresence(lead)
   const statusTone = ["no_site", "weak_site", "social_only", "no_website_found", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(presence) ? "border-amber-400/30 bg-amber-400/10 text-amber-100" : ["strong_site", "website_strong"].includes(presence) ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200" : "border-border bg-muted/50 text-muted-foreground"
   const href = `/dashboard/signal/runs/${lead.run_id}?lead=${lead.id}`
 
-  return <article className="rounded-xl border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 sm:p-5"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone}`}>{websiteLabels[presence] || "Checking site"}</span></div><h3 className="mt-3 truncate text-lg font-semibold text-foreground">{lead.business_name}</h3><p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"><span>{lead.industry || "Local business"}</span><span className="text-border">/</span><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span></p></div><div className="shrink-0 text-right"><p className="font-mono text-2xl font-semibold text-foreground">{lead.final_score ?? "—"}</p><p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">Score</p><p className="mt-2 text-xs text-muted-foreground">{lead.confidence_score ?? "—"}% confidence</p></div></div><div className="mt-5 rounded-lg border border-border bg-card/50 p-3"><p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Recommended pitch</p><p className="mt-2 text-sm leading-5 text-foreground">{pitch || "Open this lead for the evidence-backed pitch angle and sales pack."}</p>{action && <p className="mt-2 text-xs leading-5 text-muted-foreground"><span className="text-foreground">Start with:</span> {action}</p>}</div>{reasons.length > 0 && <ul className="mt-4 space-y-2">{reasons.map((reason, index) => <li key={`${reason}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />{reason}</li>)}</ul>}<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4"><div className="flex flex-wrap gap-3 text-xs text-muted-foreground">{lead.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{lead.phone}</span>}{lead.is_independent_likely && <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5" />Independent likely</span>}</div><div className="flex gap-2"><Link href={`${href}&tab=sales-pack`} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><FileText className="h-3.5 w-3.5" />Sales pack</Link><Link href={`${href}&tab=lovable`} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-xs font-medium text-background transition-colors hover:bg-foreground/90"><Sparkles className="h-3.5 w-3.5" />Lovable prompt</Link></div></div></article>
+  return <article className="rounded-xl border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 sm:p-5"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone}`}>{formatOnlinePresence(presence)}</span></div><h3 className="mt-3 truncate text-lg font-semibold text-foreground">{leadName(lead)}</h3><p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"><span>{formatBusinessCategory(lead.primary_category || lead.industry)}</span><span className="text-border">/</span><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span></p></div><div className="shrink-0 text-right"><p className="font-mono text-2xl font-semibold text-foreground">{lead.final_score ?? "—"}</p><p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">Score</p><p className="mt-2 text-xs text-muted-foreground">{formatConfidence(lead.confidence_score)}</p></div></div><div className="mt-5 rounded-lg border border-border bg-card/50 p-3"><p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Why it stands out</p><p className="mt-2 text-sm leading-5 text-foreground">{pitch || reasons[0] || "Open this lead for the evidence-backed opportunity and sales plan."}</p>{action && <p className="mt-2 text-xs leading-5 text-muted-foreground"><span className="text-foreground">Best move:</span> {action}</p>}</div>{reasons.length > 0 && <ul className="mt-4 space-y-2">{reasons.map((reason, index) => <li key={`${reason}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />{reason}</li>)}</ul>}<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4"><div className="flex flex-wrap gap-3 text-xs text-muted-foreground">{lead.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{lead.phone}</span>}{lead.is_independent_likely && <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5" />Likely independent</span>}</div><div className="flex gap-2"><Link href={`${href}&tab=sales-pack`} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><FileText className="h-3.5 w-3.5" />Sales pack</Link><Link href={`${href}&tab=lovable`} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-xs font-medium text-background transition-colors hover:bg-foreground/90"><Sparkles className="h-3.5 w-3.5" />Concept</Link></div></div></article>
 }
 
 function SavedLeadCard({ lead }: { lead: SignalRunLead }) {
   const href = `/dashboard/signal/runs/${lead.run_id}?lead=${lead.id}`
-  return <Link href={href} className="group rounded-lg border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="flex items-center gap-2"><Bookmark className="h-4 w-4 text-emerald-300" /><p className="truncate font-medium text-foreground">{lead.business_name}</p></div><p className="mt-2 text-sm text-muted-foreground">{[lead.industry, lead.city, lead.state].filter(Boolean).join(" · ") || "Saved Signal lead"}</p></div><span className="font-mono text-lg font-semibold text-foreground">{lead.final_score ?? "—"}</span></div><div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground"><span>{lead.phone || lead.website_url || "Open sales pack"}</span><span className="inline-flex items-center gap-1 group-hover:text-foreground">Open <ArrowUpRight className="h-3.5 w-3.5" /></span></div></Link>
+  return <Link href={href} className="group rounded-lg border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="flex items-center gap-2"><Bookmark className="h-4 w-4 text-emerald-300" /><p className="truncate font-medium text-foreground">{leadName(lead)}</p></div><p className="mt-2 text-sm text-muted-foreground">{[formatBusinessCategory(lead.primary_category || lead.industry), lead.city, lead.state].filter(Boolean).join(" · ")}</p></div><span className="font-mono text-lg font-semibold text-foreground">{lead.final_score ?? "—"}</span></div><div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground"><span>{lead.phone || lead.website_url || "Open sales pack"}</span><span className="inline-flex items-center gap-1 group-hover:text-foreground">Open <ArrowUpRight className="h-3.5 w-3.5" /></span></div></Link>
 }

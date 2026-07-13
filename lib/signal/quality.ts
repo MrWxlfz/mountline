@@ -1,3 +1,5 @@
+import { cleanSignalBusinessName, resolveSignalCanonicalName } from "./business-name.ts"
+
 export type SignalEntityStatus =
   | "verified"
   | "likely"
@@ -72,20 +74,23 @@ export type SignalConfidenceComponents = {
   geography: number
   independence: number
   contact: number
-  onlinePresence: number
+  websiteStatus: number
+  socialStatus: number
   opportunityAnalysis: number
+  evidenceSourceDiversity: number
   contradictionPenalty: number
   providerFailurePenalty: number
   final: number
 }
 
 export type SignalOpportunityDimensions = {
-  reputationViability: number
-  digitalGap: number
-  customerFlowOpportunity: number
-  trustGap: number
-  demoPotential: number
-  outreachViability: number
+  leadViability: number
+  digitalOpportunity: number
+  customerFlowFriction: number
+  trustReputationGap: number
+  salesAccessibility: number
+  conceptPotential: number
+  commercialFit: number
 }
 
 export type SignalOpportunityResult = {
@@ -98,6 +103,7 @@ export type SignalOpportunityResult = {
 
 export type SignalQualificationResult = {
   status: SignalQualificationStatus
+  leadQualityStatus: "exceptional" | "strong" | "promising" | "watchlist" | "weak" | "reject"
   qualified: boolean
   reasons: string[]
 }
@@ -107,6 +113,7 @@ export type SignalOnlinePresenceClassification =
   | "social_only"
   | "directory_only"
   | "website_unreachable"
+  | "website_parked"
   | "website_broken"
   | "website_weak"
   | "website_adequate"
@@ -280,7 +287,12 @@ export function assessSignalEntityName(input: {
   sourceType?: string | null
   corroboratingNames?: string[]
 }) : SignalEntityAssessment {
-  const raw = (input.name || "").replace(/\s+/g, " ").trim()
+  const rawInput = (input.name || "").replace(/\s+/g, " ").trim()
+  const cleaned = cleanSignalBusinessName(input.name, {
+    city: input.city,
+    category: input.industry,
+  })
+  const raw = cleaned.name || ""
   const normalized = normalizeQualityName(raw)
   const hostname = normalizeQualityHostname(input.url)
   const sourceType = input.sourceType || "unknown"
@@ -296,7 +308,7 @@ export function assessSignalEntityName(input: {
   const city = (input.city || "").split(",")[0]?.trim() || ""
   const cityExpression = city ? new RegExp(`\\b${escapeRegExp(city)}\\b`, "i") : null
   const genericPatterns: RegExp[] = [
-    /\bservices?\s+(?:in|near)\b/i,
+    /\b(?:services?|barbers?|groomers?|salons?|detailers?|cleaners?|contractors?)\s+(?:in|near)\b/i,
     /\b(?:businesses?|locations?|results?|directory)\s+(?:in|near)\b/i,
     /^(?:best|top(?:\s+\d+)?|find\s+a|local)\b/i,
     /\bnear\s+me\b/i,
@@ -304,7 +316,7 @@ export function assessSignalEntityName(input: {
     /\b(?:read reviews|compare|list of)\b/i,
     /\b(?:locations?|services?)\s+near\s+(?:you|me)\b/i,
   ]
-  const looksGeneric = genericPatterns.some((pattern) => pattern.test(raw))
+  const looksGeneric = genericPatterns.some((pattern) => pattern.test(rawInput))
   const tokens = meaningfulTokens(raw, city, input.industry)
   const compactName = normalized.replace(/\s+/g, "")
   const compactGenericParts = unique([
@@ -344,7 +356,7 @@ export function assessSignalEntityName(input: {
     confidence,
     status: confidence >= 80 ? "verified" : confidence >= 65 ? "likely" : "ambiguous",
     rejectionReason: confidence < 55 ? "The business identity is not supported by enough distinctive public signals." : null,
-    evidence,
+    evidence: unique([...evidence, ...cleaned.warnings], 8),
   }
 }
 
@@ -355,11 +367,18 @@ export function resolveSignalDiscoveryEntity(input: {
   industry?: string | null
   sourceType?: string | null
 }) : SignalEntityAssessment {
-  const firstTitleSegment = input.title
-    .replace(/\b(?:official\s+(?:site|website)|home\s*page|website)\b/gi, " ")
-    .split(/\s[-–—|:]\s/)[0]
-    .replace(/\s+/g, " ")
-    .trim()
+  const rawTitleAssessment = assessSignalEntityName({ ...input, name: input.title })
+  if (
+    ["generic_result", "rejected"].includes(rawTitleAssessment.status)
+    && /(?:^(?:best|top(?:\s+\d+)?|find\s+a|local)\b|\bnear\s+me\b|\b(?:services?|businesses?|locations?)\s+(?:in|near)\b)/i.test(input.title)
+  ) {
+    return rawTitleAssessment
+  }
+  const resolution = resolveSignalCanonicalName([
+    { value: input.title, source: "search_result_title" },
+    { value: hostnameName(input.url), source: "social_handle" },
+  ], { city: input.city, category: input.industry })
+  const firstTitleSegment = resolution.canonicalName || input.title
   const titleAssessment = assessSignalEntityName({ ...input, name: firstTitleSegment })
   if (titleAssessment.status !== "generic_result" && titleAssessment.status !== "rejected" && titleAssessment.status !== "directory") {
     return titleAssessment
@@ -511,28 +530,34 @@ export function assessSignalGeography(input: {
 
 export function calculateSignalConfidence(input: Omit<SignalConfidenceComponents, "final">) : SignalConfidenceComponents {
   const weighted =
-    clamp(input.identity) * 0.24
-    + clamp(input.geography) * 0.2
-    + clamp(input.independence) * 0.16
-    + clamp(input.contact) * 0.14
-    + clamp(input.onlinePresence) * 0.12
-    + clamp(input.opportunityAnalysis) * 0.14
-  const final = clamp(Math.min(97, weighted - clamp(input.contradictionPenalty, 0, 60) - clamp(input.providerFailurePenalty, 0, 40)))
+    clamp(input.identity) * 0.17
+    + clamp(input.geography) * 0.14
+    + clamp(input.independence) * 0.12
+    + clamp(input.contact) * 0.12
+    + clamp(input.websiteStatus) * 0.12
+    + clamp(input.socialStatus) * 0.07
+    + clamp(input.opportunityAnalysis) * 0.15
+    + clamp(input.evidenceSourceDiversity) * 0.11
+  const final = clamp(Math.min(96, weighted - clamp(input.contradictionPenalty, 0, 60) - clamp(input.providerFailurePenalty, 0, 30)))
   return { ...input, final }
 }
 
 export function calculateSignalOpportunity(input: {
   dimensions: SignalOpportunityDimensions
   confidence: number
+  evidenceCompleteness?: number
+  actionability?: number
+  categorySaturationPenalty?: number
   penalties?: Partial<Record<"uncertain_identity" | "uncertain_geography" | "probable_chain" | "excellent_website" | "no_contact" | "contradictory_evidence" | "insufficient_evidence" | "duplicate", number>>
 }) : SignalOpportunityResult {
   const dimensions: SignalOpportunityDimensions = {
-    reputationViability: clamp(input.dimensions.reputationViability, 0, 20),
-    digitalGap: clamp(input.dimensions.digitalGap, 0, 25),
-    customerFlowOpportunity: clamp(input.dimensions.customerFlowOpportunity, 0, 20),
-    trustGap: clamp(input.dimensions.trustGap, 0, 15),
-    demoPotential: clamp(input.dimensions.demoPotential, 0, 10),
-    outreachViability: clamp(input.dimensions.outreachViability, 0, 10),
+    leadViability: clamp(input.dimensions.leadViability, 0, 15),
+    digitalOpportunity: clamp(input.dimensions.digitalOpportunity, 0, 20),
+    customerFlowFriction: clamp(input.dimensions.customerFlowFriction, 0, 20),
+    trustReputationGap: clamp(input.dimensions.trustReputationGap, 0, 15),
+    salesAccessibility: clamp(input.dimensions.salesAccessibility, 0, 10),
+    conceptPotential: clamp(input.dimensions.conceptPotential, 0, 10),
+    commercialFit: clamp(input.dimensions.commercialFit, 0, 10),
   }
   const positiveScore = Object.values(dimensions).reduce((sum, value) => sum + value, 0)
   const penalties = Object.fromEntries(
@@ -543,8 +568,11 @@ export function calculateSignalOpportunity(input: {
   // Confidence affects ordering without erasing a real digital gap. This is
   // especially important for credible map listings whose web footprint is the
   // opportunity rather than a missing prerequisite.
-  const confidenceFactor = 0.65 + clamp(input.confidence) / 100 * 0.35
-  const rankingScore = clamp(opportunityScore * confidenceFactor)
+  const confidenceFactor = 0.58 + clamp(input.confidence) / 100 * 0.3
+  const evidenceFactor = clamp(input.evidenceCompleteness ?? input.confidence) / 100 * 0.07
+  const actionabilityFactor = clamp(input.actionability ?? input.confidence) / 100 * 0.05
+  const saturationPenalty = clamp(input.categorySaturationPenalty || 0, 0, 20)
+  const rankingScore = clamp(opportunityScore * (confidenceFactor + evidenceFactor + actionabilityFactor) - saturationPenalty)
   return { dimensions, penalties, positiveScore, opportunityScore, rankingScore }
 }
 
@@ -575,15 +603,15 @@ export function qualifySignalLead(input: {
   if ((["generic_result", "directory", "rejected"] as SignalEntityStatus[]).includes(input.entityStatus) || input.entityConfidence < 55) hardReasons.push("A meaningful business identity could not be established.")
   if (input.geographicStatus === "outside_market") hardReasons.push("The business is outside the requested market boundary.")
   if (!input.hasContactRoute && !input.hasListingRoute) hardReasons.push("No usable public contact or listing route was verified.")
-  if (hardReasons.length > 0) return { status: "rejected", qualified: false, reasons: hardReasons }
+  if (hardReasons.length > 0) return { status: "rejected", leadQualityStatus: "reject", qualified: false, reasons: hardReasons }
 
   const reasons: string[] = []
   const opportunityConfidence = input.opportunityConfidence ?? input.evidenceConfidence ?? 0
   const presenceConfidence = input.onlinePresenceConfidence ?? input.evidenceConfidence ?? 0
-  const identityReady = (["verified", "likely"] as SignalEntityStatus[]).includes(input.entityStatus) && input.entityConfidence >= 68
-  const geographyReady = input.geographicStatus !== "unclear" && input.geographicConfidence >= 68
-  const independenceReady = input.chainClassification !== "uncertain" && input.independenceConfidence >= 60
-  const opportunityReady = input.opportunityScore >= 52 && opportunityConfidence >= 45
+  const identityReady = (["verified", "likely"] as SignalEntityStatus[]).includes(input.entityStatus) && input.entityConfidence >= 72
+  const geographyReady = input.geographicStatus !== "unclear" && input.geographicConfidence >= 70
+  const independenceReady = input.chainClassification !== "uncertain" && input.independenceConfidence >= 62
+  const opportunityReady = input.opportunityScore >= 60 && opportunityConfidence >= 50
   if (!identityReady) reasons.push("Business identity needs one more corroborating source.")
   if (!geographyReady) reasons.push("Market presence needs one more geographic check.")
   if (!independenceReady) reasons.push("Independent status needs one more chain/franchise check.")
@@ -592,18 +620,24 @@ export function qualifySignalLead(input: {
   if (!input.hasEvidenceLinks) reasons.push("A traceable public listing or evidence link is still needed.")
 
   if (identityReady && geographyReady && independenceReady && opportunityReady && input.hasContactRoute && input.hasEvidenceLinks && !input.incompleteResearch) {
-    return { status: "qualified", qualified: true, reasons: [] }
+    const leadQualityStatus = input.opportunityScore >= 85
+      ? "exceptional"
+      : input.opportunityScore >= 72
+        ? "strong"
+        : "promising"
+    return { status: "qualified", leadQualityStatus, qualified: true, reasons: [] }
   }
   const promisingMapLead = input.entityConfidence >= 65
     && input.geographicConfidence >= 60
-    && input.opportunityScore >= 45
+    && input.opportunityScore >= 48
     && input.hasContactRoute
     && input.hasEvidenceLinks
   if (promisingMapLead && (presenceConfidence >= 45 || input.incompleteResearch)) {
-    return { status: "watchlist", qualified: false, reasons }
+    return { status: "watchlist", leadQualityStatus: "watchlist", qualified: false, reasons }
   }
   return {
     status: "research_needed",
+    leadQualityStatus: input.opportunityScore >= 40 ? "weak" : "reject",
     qualified: false,
     reasons: reasons.length ? reasons : ["A specific missing fact must be checked before outreach."],
   }
@@ -628,6 +662,7 @@ export function buildSignalOpportunityEvidence(input: {
     social_only: "The business appears to rely primarily on a verified social profile.",
     directory_only: "Only structured listing or directory routes were verified.",
     website_unreachable: "The listing website could not be reached during analysis.",
+    website_parked: "The verified business domain appears parked or for sale.",
     website_broken: "The verified website returned a broken or unusable response.",
     website_weak: "The verified website has evidence-backed content or customer-flow gaps.",
     website_adequate: null,
@@ -659,7 +694,7 @@ export function buildSignalOpportunityEvidence(input: {
   }
   const rating = input.rating || 0
   const reviews = input.reviewCount || 0
-  if (rating >= 4.4 && reviews >= 20 && ["no_website_found", "social_only", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(input.onlinePresence)) {
+  if (rating >= 4.4 && reviews >= 20 && ["no_website_found", "social_only", "directory_only", "website_unreachable", "website_parked", "website_broken", "website_weak"].includes(input.onlinePresence)) {
     add({
       signal: "reputation_to_digital_gap",
       supportingEvidence: `The structured listing shows a ${rating.toFixed(1)} rating across ${reviews} reviews while the verified digital presence remains limited.`,

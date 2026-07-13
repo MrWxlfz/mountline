@@ -914,6 +914,12 @@ export type SignalFocusItem = {
 export type SignalRunStatus =
   | "queued"
   | "discovering"
+  | "enriching"
+  | "analyzing"
+  | "selecting"
+  | "generating"
+  | "completed_with_limits"
+  | "cancelled"
   | "checking"
   | "scoring"
   | "writing_packs"
@@ -944,6 +950,7 @@ export type SignalOnlinePresenceClassification =
   | "social_only"
   | "directory_only"
   | "website_unreachable"
+  | "website_parked"
   | "website_broken"
   | "website_weak"
   | "website_adequate"
@@ -1079,6 +1086,46 @@ export type SignalRunLead = {
   opportunity_signals: SignalJson
   research_needed_reasons: SignalJson
   provider_usage_metadata: SignalJson
+  raw_names: SignalJson
+  canonical_name_source: "manual_correction" | "official_website_structured_data" | "places_listing" | "official_website_site_name" | "verified_official_social" | "reputable_business_listing" | "official_website_title" | "search_result_title" | "social_handle" | null
+  canonical_name_warnings: SignalJson
+  display_name: string | null
+  official_website_status: "verified_official_website" | "likely_official_website" | "no_official_website_found" | "website_unreachable" | "website_parked" | "website_broken" | "website_unknown" | null
+  lead_quality_status: "exceptional" | "strong" | "promising" | "watchlist" | "weak" | "reject" | null
+  sales_strategy: SignalJson | null
+  script_quality_score: number | null
+  generation_attempt: number
+  generation_failure_reason: string | null
+  fallback_usage: boolean
+}
+
+export type SignalRunLeadCorrection = {
+  id: string
+  run_id: string
+  lead_id: string
+  created_at: string
+  created_by: string | null
+  stable_identity_key: string | null
+  provider_place_id: string | null
+  normalized_hostname: string | null
+  normalized_phone: string | null
+  correction_type: "canonical_name" | "official_website" | "official_facebook" | "official_instagram" | "chain" | "duplicate" | "not_a_business" | "category" | "city" | "no_website_verified" | "reject"
+  previous_value: SignalJson | null
+  corrected_value: SignalJson | null
+  note: string | null
+  active: boolean
+}
+
+export type SignalRunLeadObservation = {
+  id: string
+  run_id: string
+  lead_id: string
+  created_at: string
+  created_by: string | null
+  stable_identity_key: string | null
+  category: "payment" | "owner_availability" | "storefront" | "interest" | "follow_up" | "availability" | "contact_preference" | "existing_provider" | "operations" | "other"
+  note: string
+  source: "user_observation"
 }
 
 export type SignalRunLeadEvidence = {

@@ -63,7 +63,7 @@ The page never exposes provider/depth/budget controls. It shows provider setup w
 
 For map-first runs, the radius is a geographic boundary around the resolved market center. Signal filters physical listings by coordinate distance and retains provider-marked service-area businesses found within the bounded search. Distance is straight-line discovery distance, never a drive-time claim. Tavily fallback runs still label radius as a discovery preference because they do not have equivalent map coverage.
 
-The additive lead-run schema is defined by the existing lead-run migrations plus `20260710070000_signal_map_first_discovery.sql`. Apply migrations in timestamp order before opening a live run.
+The additive lead-run schema is defined by the existing lead-run migrations plus `20260710070000_signal_map_first_discovery.sql` and `202607130001_signal_production_readiness.sql`. Apply migrations in timestamp order before opening a live run.
 
 Lead runs use the official Google Places API when configured. They do not scrape or automate the consumer Google Maps website, copy provider photos, or store review text. Tavily verifies broader public-web presence and identifies matching public social/profile URLs without scraping those platforms. Firecrawl receives only a verified official website URL after the existing SSRF-safe scan.
 
@@ -72,6 +72,31 @@ A structured listing can proceed without a website. Signal classifies presence a
 High-likelihood chains and franchises are excluded before costly website or AI work. Medium chain likelihood remains visible only when public evidence leaves a strong independent-local reason to continue. Ignoring a lead adds its normalized public business identity to the existing suppression flow so it is not silently resurfaced in later runs.
 
 Each ranked lead includes the public evidence used, separate identity/geographic/independence/contact/presence/opportunity confidence, chain rationale, an evidence-based communication-profile tag list, a draft sales pack, and a clearly labeled concept-preview/Lovable prompt. Qualified leads, watchlist leads, research-needed leads, and hard rejects remain distinct. Sales packs are generated only for qualified leads and remain draft-only; no contact action is sent or submitted automatically.
+
+### Production-quality selection and generation
+
+Lead runs use a layered funnel rather than enriching every result equally. Cheap listing, closure, radius, duplicate, generic-name, and chain checks happen first. Signal then keeps an 8–15 candidate deep-analysis group, compares qualified finalists, applies category-diversity pressure, and returns only exceptional, strong, and selected promising leads. It is valid for a run to finish with fewer leads than requested.
+
+Opportunity scoring is a 100-point model with seven independently bounded dimensions: lead viability (15), digital opportunity (20), customer-flow friction (20), trust/reputation gap (15), sales accessibility (10), concept potential (10), and commercial fit (10). Ranking then considers opportunity, confidence, evidence completeness, contact actionability, category saturation, and penalties. Confidence is calculated separately from identity, geography, independence, contact, website status, social status, opportunity analysis, source diversity, contradictions, and relevant provider failures.
+
+Canonical names are resolved from source-ranked public name candidates. Signal persists the raw candidates, selected source, confidence, cleaning warnings, canonical name, and display name. Emoji, handles, URLs, phone numbers, generic search phrases, city/query suffixes, duplicated fragments, and provider suffixes are rejected or removed before a lead can qualify.
+
+Official websites require matching business identity evidence such as name, phone, city/address, structured organization data, or matching public profiles. Public social pages require a name match plus an additional corroborating signal. Parked, broken, unreachable, directory, and unverified domains stay separate. A seven-day server-only identity-resolution cache avoids repeating public domain and social verification; the cache stores no private content.
+
+Sales packs use two validated passes: strategy, then scripts. Persisted packs must pass grounding, swap-resistance, length, voice, section-count, objection, claim-safety, and quality-score gates. Generation retries up to three times before the polished deterministic fallback is used. The selected pack records its quality score, attempt count, prompt version, failure reason, and fallback usage. Concept prompts use verified business facts, category-specific design and section direction, explicit CTA behavior, placeholders for unknowns, and a visible concept disclaimer.
+
+Run-lead corrections support canonical name, official website, official Facebook/Instagram, category, city, no-site verification, chain, duplicate, not-a-business, and rejection updates. Corrections persist by stable place ID, domain, phone, or normalized identity and influence later runs without applying broadly to unrelated businesses. Private observations are stored separately from public evidence and are labeled as Mountline team observations when used in regenerated packs.
+
+### Local quality evaluation
+
+Run the deterministic production-readiness gate with:
+
+```bash
+npm run test:signal
+npm run evaluate:signal
+```
+
+The test command covers presentation formatting, noisy-name resolution, domain/social validation, chain and generic-result rejection, geography, duplicates, score/confidence spread, lead-quality gates, payment-observation handling, sales-pack grounding, concept-prompt safety, and map-first fixtures. The evaluation command prints rubric scores for five category-specific golden packs and four clearly labeled offline run simulations: Keller best opportunities (15), Southlake best opportunities (10), grooming, and auto detailing. Live provider validation remains a deployment step and must not be confused with the offline simulations.
 
 ## Quick Research
 
@@ -124,7 +149,7 @@ Campaign records are stored in `signal_campaigns`; candidates are stored in `sig
 
 Prospects can be created from `/dashboard/signal/new` with public business details, human notes, visible website observations, contact routes, playbook, relevant demo, outreach mode, and conversation style.
 
-Workbook import on `/dashboard/signal/import` accepts `.csv`, `.xlsx`, and `.xls` files up to 5 MB. Files are parsed server-side. Raw workbook files are not sent to AI. Signal converts rows and headers into sanitized structured data, maps obvious columns deterministically, can ask the fast AI model to map ambiguous headers only, shows duplicates, and imports only after team confirmation.
+Workbook import on `/dashboard/signal/import` accepts `.csv` and modern `.xlsx` files up to 5 MB. Legacy `.xls` files must first be saved as `.xlsx` or CSV. Files are parsed server-side. Raw workbook files are not sent to AI. Signal converts rows and headers into sanitized structured data, maps obvious columns deterministically, can ask the fast AI model to map ambiguous headers only, shows duplicates, and imports only after team confirmation.
 
 Supported headers include:
 

@@ -70,6 +70,26 @@ export const mapFirstOpportunities = {
     hasContactForm: false,
     serviceAreaVerified: true,
   },
+  independentDetailer: {
+    name: "Blacktop & Brass Detailing",
+    city: "Southlake, TX",
+    phone: "(817) 555-0164",
+    rating: 4.9,
+    reviewCount: 58,
+    onlinePresence: "website_weak" as const,
+    verifiedService: "Mobile interior detailing packages",
+    hasContactForm: false,
+  },
+  independentContractor: {
+    name: "North Gate Home Services",
+    city: "Keller, TX",
+    phone: "(817) 555-0176",
+    rating: 4.7,
+    reviewCount: 47,
+    onlinePresence: "directory_only" as const,
+    verifiedService: "Residential repair estimates",
+    serviceAreaVerified: true,
+  },
 }
 
 export const mapFirstNegativeFixtures = {
@@ -77,4 +97,14 @@ export const mapFirstNegativeFixtures = {
   outsideRadius: { name: "Far Away Barber", distanceMiles: 31, requestedRadiusMiles: 10 },
   duplicatePlaceId: "google-place-fixture-123",
   noIdentity: { name: "Pet Grooming Services Near Me" },
+}
+
+export const leadQualityFixtures = {
+  strongSiteNoOpportunity: { name: "Polished Fixture Studio", onlinePresence: "website_strong" as const, opportunityScore: 34 },
+  inactiveBusiness: { name: "Inactive Fixture Shop", businessStatus: "CLOSED_PERMANENTLY" },
+  ambiguousIdentity: { name: "Local Services", city: "Keller, TX" },
+  lowReviewBusiness: { name: "New Leaf Grooming", rating: 5, reviewCount: 2, onlinePresence: "social_only" as const },
+  appointmentSalon: { name: "Juniper Salon", hasBooking: true, onlinePresence: "website_weak" as const },
+  cashOnlyObservation: { name: "Fixture Barber", observation: "A cash or check only sign was visible at the counter." },
+  facebookFirst: { name: "Pine & Paws Grooming", onlinePresence: "social_only" as const, officialSocialVerified: true },
 }

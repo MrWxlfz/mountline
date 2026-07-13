@@ -38,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getSignalPlaybook, SIGNAL_PLAYBOOKS } from "@/lib/signal/playbooks"
+import { formatSignalLabel } from "@/lib/signal/presentation"
 import type { SignalCampaignRow, SignalMarketRow, SignalProspectRow } from "./page"
 import type { SignalOutreachEvent } from "@/lib/supabase/types"
 
@@ -523,7 +524,7 @@ export function SignalDashboard({
                     </StatusBadge>
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {(row.latest_analysis?.recommended_lane || "review").replace(/_/g, " ")}
+                    {formatSignalLabel(row.latest_analysis?.recommended_lane || "review")}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {row.latest_analysis?.confidence || "unknown"} confidence
@@ -569,7 +570,7 @@ export function SignalDashboard({
                         {[market.city, market.state].filter(Boolean).join(", ")}
                       </p>
                     </div>
-                    <StatusBadge>{market.status.replace(/_/g, " ")}</StatusBadge>
+                    <StatusBadge>{formatSignalLabel(market.status)}</StatusBadge>
                   </div>
                   <div className="mt-4 h-1.5 rounded-full bg-muted">
                     <div className="h-full rounded-full bg-blue-400" style={{ width: `${Math.min(progress, 100)}%` }} />
@@ -958,10 +959,10 @@ function SignalRow({
         <StatusBadge tone={priorityTone(analysis?.priority)}>{analysis?.priority || "-"}</StatusBadge>
       </td>
       <td className="px-4 py-4 text-muted-foreground">
-        {analysis?.recommended_lane ? analysis.recommended_lane.replace(/_/g, " ") : "-"}
+        {analysis?.recommended_lane ? formatSignalLabel(analysis.recommended_lane) : "-"}
       </td>
       <td className="px-4 py-4 text-muted-foreground">
-        {row.contact_readiness.replace(/_/g, " ")}
+        {formatSignalLabel(row.contact_readiness)}
       </td>
       <td className="px-4 py-4">
         <StatusBadge>{statusLabels[row.outreach_status] || row.outreach_status}</StatusBadge>

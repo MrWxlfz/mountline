@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ArrowLeft, BookOpen, ShieldAlert } from "lucide-react"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { SIGNAL_PLAYBOOKS } from "@/lib/signal/playbooks"
+import { formatSignalLabel } from "@/lib/signal/presentation"
 
 export default async function SignalPlaybooksPage() {
   await requireNorthlineTeamMember()
@@ -37,7 +38,7 @@ export default async function SignalPlaybooksPage() {
                 </p>
               </div>
               <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
-                {playbook.recommendedOutreachMode.replace(/_/g, " ")}
+                {formatSignalLabel(playbook.recommendedOutreachMode)}
               </span>
             </div>
 

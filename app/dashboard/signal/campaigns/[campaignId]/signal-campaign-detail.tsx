@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getSignalPlaybook } from "@/lib/signal/playbooks"
+import { formatBusinessCategory, formatSignalLabel } from "@/lib/signal/presentation"
 import type {
   SignalCampaign,
   SignalCampaignCandidate,
@@ -357,7 +358,7 @@ export function SignalCampaignDetail({
                       <StatusBadge>{candidate.classification_confidence || "unknown"} category</StatusBadge>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {[candidate.city, candidate.state].filter(Boolean).join(", ") || "Location unknown"} · {(candidate.classified_playbook || candidate.industry_hint || "Industry unknown").replace(/_/g, " ")}
+                      {[candidate.city, candidate.state].filter(Boolean).join(", ") || "Location unknown"} · {formatBusinessCategory(candidate.classified_playbook || candidate.industry_hint, "Industry unknown")}
                     </p>
                     {candidate.source_url && (
                       <a
@@ -383,7 +384,7 @@ export function SignalCampaignDetail({
                       <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground sm:grid-cols-4">
                         <MiniStat label="Priority" value={String(quickScoreDetails.priority || "-")} />
                         <MiniStat label="Score" value={String(quickScoreDetails.overall_opportunity_score || "-")} />
-                        <MiniStat label="Lane" value={String(quickScoreDetails.recommended_lane || "-").replace(/_/g, " ")} />
+                        <MiniStat label="Lane" value={formatSignalLabel(String(quickScoreDetails.recommended_lane || "-"), "-")} />
                         <MiniStat label="Coverage" value={String(quickScoreDetails.scan_coverage_confidence || "-")} />
                       </div>
                     )}
@@ -539,7 +540,7 @@ export function SignalCampaignDetail({
                         "unknown_needs_review",
                       ].map((value) => (
                         <option key={value} value={value}>
-                          {value.replace(/_/g, " ")}
+                          {formatSignalLabel(value)}
                         </option>
                       ))}
                     </select>

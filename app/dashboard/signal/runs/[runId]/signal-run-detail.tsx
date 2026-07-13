@@ -34,9 +34,29 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import type { SignalRun, SignalRunEvent, SignalRunLead } from "@/lib/supabase/types"
+import {
+  formatBusinessCategory,
+  formatConfidence,
+  formatOnlinePresence,
+  formatQualificationStatus,
+  formatRunStage,
+  formatRunStatus,
+  formatScoreReason,
+  formatSignalLabel,
+} from "@/lib/signal/presentation"
+import type {
+  SignalRun,
+  SignalRunEvent,
+  SignalRunLead,
+  SignalRunLeadCorrection,
+  SignalRunLeadObservation,
+} from "@/lib/supabase/types"
 
 type JsonRecord = Record<string, unknown>
+
+type LeadFeedbackInput =
+  | { action: "correction"; correction_type: SignalRunLeadCorrection["correction_type"]; value?: string; note?: string }
+  | { action: "observation"; category: SignalRunLeadObservation["category"]; note: string }
 
 type SerializedLeadEvidence = {
   id?: string
@@ -53,6 +73,8 @@ type RunApiPayload = {
   events?: SignalRunEvent[]
   lead?: SignalRunLead
   evidence?: SerializedLeadEvidence[]
+  observations?: SignalRunLeadObservation[]
+  corrections?: SignalRunLeadCorrection[]
 }
 
 export type SignalRunDetailProps = {
@@ -61,52 +83,10 @@ export type SignalRunDetailProps = {
   initialEvents: SignalRunEvent[]
 }
 
-const activeStatuses = new Set(["queued", "discovering", "checking", "scoring", "writing_packs", "ranking"])
-
-const stageLabels: Record<string, string> = {
-  setting_up: "Setting up market",
-  setting_up_market: "Setting up market",
-  queued: "Setting up market",
-  discovering: "Finding local businesses",
-  finding_local_businesses: "Finding local businesses",
-  resolving_market: "Resolving market",
-  searching_local_map_listings: "Searching local map listings",
-  expanding_category_coverage: "Expanding category coverage",
-  removing_chains_and_duplicates: "Removing chains and duplicates",
-  verifying_business_identities: "Verifying business identities",
-  checking_websites_and_social: "Checking websites and social profiles",
-  finding_customer_flow_gaps: "Finding customer-flow gaps",
-  filtering_chains_and_duplicates: "Filtering chains and duplicates",
-  checking: "Checking websites and contact friction",
-  checking_websites: "Checking websites and contact friction",
-  scoring: "Scoring opportunities",
-  scoring_opportunities: "Scoring opportunities",
-  writing_packs: "Writing sales packs",
-  writing_sales_packs: "Writing sales packs",
-  ranking: "Ranking the strongest opportunities",
-  ranking_final_leads: "Ranking the strongest opportunities",
-  retrying_research: "Retrying research",
-  completed: "Results ready",
-  partial: "Partial results ready",
-  failed: "Research needs attention",
-}
-
-const websiteLabels: Record<string, string> = {
-  no_site: "No site found",
-  weak_site: "Weak site",
-  decent_site: "Decent site",
-  strong_site: "Strong site",
-  social_only: "Social-only",
-  unknown: "Checking site",
-  no_website_found: "No verified site",
-  directory_only: "Directory-only",
-  website_unreachable: "Site unreachable",
-  website_broken: "Broken site",
-  website_weak: "Weak site",
-  website_adequate: "Adequate site",
-  website_strong: "Strong site",
-  website_unknown: "Site status unknown",
-}
+const activeStatuses = new Set([
+  "queued", "discovering", "enriching", "analyzing", "selecting", "generating",
+  "checking", "scoring", "writing_packs", "ranking",
+])
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -146,6 +126,22 @@ function asEvidence(value: unknown): SerializedLeadEvidence[] | undefined {
   return value.filter((item) => Boolean(asRecord(item))) as SerializedLeadEvidence[]
 }
 
+function asObservations(value: unknown): SignalRunLeadObservation[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  return value.filter((item) => {
+    const record = asRecord(item)
+    return Boolean(record && typeof record.id === "string" && typeof record.note === "string")
+  }) as SignalRunLeadObservation[]
+}
+
+function asCorrections(value: unknown): SignalRunLeadCorrection[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  return value.filter((item) => {
+    const record = asRecord(item)
+    return Boolean(record && typeof record.id === "string" && typeof record.correction_type === "string")
+  }) as SignalRunLeadCorrection[]
+}
+
 function parsePayload(value: unknown): RunApiPayload {
   const record = asRecord(value)
   if (!record) return {}
@@ -159,17 +155,18 @@ function parsePayload(value: unknown): RunApiPayload {
     events: asRunEvents(record.events),
     lead: asLead(record.lead) || directLead || undefined,
     evidence: asEvidence(record.evidence),
+    observations: asObservations(record.observations),
+    corrections: asCorrections(record.corrections),
   }
 }
 
 function displayStage(stage: string | null | undefined) {
-  if (!stage) return "Researching"
-  return stageLabels[stage] || stage.replace(/_/g, " ")
+  return formatRunStage(stage)
 }
 
 function statusTone(status: SignalRun["status"]) {
   if (status === "completed") return "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
-  if (status === "partial") return "border-amber-400/30 bg-amber-400/10 text-amber-100"
+  if (status === "partial" || status === "completed_with_limits") return "border-amber-400/30 bg-amber-400/10 text-amber-100"
   if (status === "failed") return "border-red-400/30 bg-red-400/10 text-red-200"
   return "border-border bg-muted/50 text-muted-foreground"
 }
@@ -244,12 +241,22 @@ function numberEntries(value: unknown): Array<{ label: string; value: number }> 
 function scoreEntries(value: unknown): Array<{
   label: string
   value: number
+  max: number
   rationale: string | null
   evidence: string[]
   unknowns: string[]
 }> {
   const record = asRecord(value)
   if (!record) return []
+  const maximums: Record<string, number> = {
+    leadViability: 15,
+    digitalOpportunity: 20,
+    customerFlowFriction: 20,
+    trustReputationGap: 15,
+    salesAccessibility: 10,
+    conceptPotential: 10,
+    commercialFit: 10,
+  }
 
   return Object.entries(record)
     .flatMap(([key, item]) => {
@@ -258,10 +265,11 @@ function scoreEntries(value: unknown): Array<{
       return typeof score === "number" && Number.isFinite(score)
         ? [{
           label: key === "final" ? "Final score" : labelize(key),
-          value: Math.max(0, Math.min(100, score)),
+          value: Math.max(0, Math.min(maximums[key] || 100, score)),
+          max: maximums[key] || 100,
           rationale: typeof dimension?.rationale === "string" ? dimension.rationale : null,
-          evidence: stringsFrom(dimension?.evidence).slice(0, 3),
-          unknowns: stringsFrom(dimension?.unknowns).slice(0, 2),
+          evidence: stringsFrom(dimension?.evidence).map((item) => formatScoreReason(item)).slice(0, 3),
+          unknowns: stringsFrom(dimension?.unknowns).map((item) => formatScoreReason(item)).slice(0, 2),
         }]
         : []
     })
@@ -295,7 +303,11 @@ function objectionHandlingText(value: unknown) {
 }
 
 function labelize(value: string) {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
+  return formatSignalLabel(value)
+}
+
+function leadName(lead: SignalRunLead) {
+  return lead.display_name || lead.canonical_name || lead.business_name
 }
 
 function isActive(run: SignalRun) {
@@ -329,9 +341,12 @@ export function SignalRunDetail({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedLead, setSelectedLead] = useState<SignalRunLead | null>(null)
   const [selectedEvidence, setSelectedEvidence] = useState<SerializedLeadEvidence[]>([])
+  const [selectedObservations, setSelectedObservations] = useState<SignalRunLeadObservation[]>([])
+  const [selectedCorrections, setSelectedCorrections] = useState<SignalRunLeadCorrection[]>([])
   const [loadingLead, setLoadingLead] = useState(false)
   const [leadError, setLeadError] = useState<string | null>(null)
   const [leadWorking, setLeadWorking] = useState<"saved" | "ignored" | "scripts" | "lovable" | null>(null)
+  const [feedbackWorking, setFeedbackWorking] = useState<"correction" | "observation" | null>(null)
   const openedFromQuery = useRef<string | null>(null)
 
   const applyPayload = useCallback((payload: RunApiPayload) => {
@@ -404,6 +419,8 @@ export function SignalRunDetail({
     setDrawerOpen(true)
     setSelectedLead(lead)
     setSelectedEvidence([])
+    setSelectedObservations([])
+    setSelectedCorrections([])
     setLeadError(null)
     setLoadingLead(true)
 
@@ -417,6 +434,8 @@ export function SignalRunDetail({
         setLeads((current) => current.map((item) => item.id === payload.lead?.id ? payload.lead : item))
       }
       setSelectedEvidence(payload.evidence || [])
+      setSelectedObservations(payload.observations || [])
+      setSelectedCorrections(payload.corrections || [])
     } catch (cause) {
       setLeadError(cause instanceof Error ? cause.message : "Lead details could not be loaded.")
     } finally {
@@ -448,7 +467,7 @@ export function SignalRunDetail({
       const nextLead = payload.lead || { ...lead, status }
       setSelectedLead(nextLead)
       setLeads((current) => current.map((item) => item.id === lead.id ? nextLead : item))
-      setMessage(status === "saved" ? `${lead.business_name} saved.` : `${lead.business_name} removed from this run.`)
+      setMessage(status === "saved" ? `${leadName(lead)} saved.` : `${leadName(lead)} removed from this run.`)
     } catch (cause) {
       setLeadError(cause instanceof Error ? cause.message : "Lead status could not be saved.")
     } finally {
@@ -456,14 +475,14 @@ export function SignalRunDetail({
     }
   }
 
-  const generateLeadAsset = async (lead: SignalRunLead, kind: "scripts" | "lovable") => {
+  const generateLeadAsset = async (lead: SignalRunLead, kind: "scripts" | "lovable", notes?: string) => {
     setLeadWorking(kind)
     setLeadError(null)
     try {
       const response = await fetch(`/api/signal/runs/${run.id}/leads/${lead.id}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind }),
+        body: JSON.stringify({ kind, notes: notes?.trim() || undefined }),
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Signal could not generate that asset.")
@@ -472,11 +491,47 @@ export function SignalRunDetail({
         setSelectedLead(payload.lead)
         setLeads((current) => current.map((item) => item.id === lead.id ? payload.lead! : item))
       }
-      setMessage(kind === "lovable" ? "Lovable prompt ready." : "Sales scripts ready.")
+      setMessage(kind === "lovable" ? "Concept prompt ready." : "Sales scripts ready.")
     } catch (cause) {
       setLeadError(cause instanceof Error ? cause.message : "Signal could not generate that asset.")
     } finally {
       setLeadWorking(null)
+    }
+  }
+
+  const saveLeadFeedback = async (
+    lead: SignalRunLead,
+    input: LeadFeedbackInput,
+  ) => {
+    setFeedbackWorking(input.action)
+    setLeadError(null)
+    try {
+      const response = await fetch(`/api/signal/runs/${run.id}/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Signal could not save that update.")
+      const payload = parsePayload(data)
+      if (payload.lead) {
+        setSelectedLead(payload.lead)
+        setLeads((current) => current.map((item) => item.id === lead.id ? payload.lead! : item))
+      }
+      const detailResponse = await fetch(`/api/signal/runs/${run.id}/leads/${lead.id}`, { cache: "no-store" })
+      const detailData = await detailResponse.json().catch(() => ({}))
+      if (detailResponse.ok) {
+        const detailPayload = parsePayload(detailData)
+        setSelectedObservations(detailPayload.observations || [])
+        setSelectedCorrections(detailPayload.corrections || [])
+      }
+      setMessage(typeof data?.message === "string" ? data.message : "Signal saved the update.")
+      return true
+    } catch (cause) {
+      setLeadError(cause instanceof Error ? cause.message : "Signal could not save that update.")
+      return false
+    } finally {
+      setFeedbackWorking(null)
     }
   }
 
@@ -493,7 +548,7 @@ export function SignalRunDetail({
     [events],
   )
   const progress = Math.max(0, Math.min(100, run.progress_percent || 0))
-  const completed = run.status === "completed" || run.status === "partial"
+  const completed = run.status === "completed" || run.status === "partial" || run.status === "completed_with_limits"
   const active = isActive(run)
   const providerErrors = stringsFrom(run.provider_errors)
   const runSummary = asRecord(run.summary)
@@ -501,6 +556,13 @@ export function SignalRunDetail({
   const candidatesRejected = typeof runSummary?.candidates_rejected === "number"
     ? runSummary.candidates_rejected
     : leads.filter((lead) => lead.status === "excluded" || lead.status === "failed").length
+  const runFacts = [
+    ["Businesses found", runSummary?.candidates_discovered],
+    ["Duplicates removed", runSummary?.excluded_duplicates || runSummary?.merged_duplicate_sources],
+    ["Chains rejected", runSummary?.excluded_chains],
+    ["Finalists analyzed", runSummary?.finalists_analyzed],
+    ["Packs prepared", runSummary?.returned_leads],
+  ].filter((item): item is [string, number] => typeof item[1] === "number" && item[1] > 0)
 
   return (
     <div className="space-y-7 pb-10">
@@ -517,12 +579,12 @@ export function SignalRunDetail({
             </Link>
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone(run.status)}`}>
-                {run.status.replace(/_/g, " ")}
+                {formatRunStatus(run.status)}
               </span>
               <span className="font-mono text-xs text-muted-foreground">RUN {run.id.slice(0, 8)}</span>
             </div>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              {completed ? "Luke, Signal found some strong leads." : `Running ${run.location}.`}
+              {completed ? "Signal found the opportunities worth reviewing." : `Running ${run.location}.`}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
               {completed
@@ -568,8 +630,8 @@ export function SignalRunDetail({
 
       {providerErrors.length > 0 && (
         <div className="rounded-lg border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-          <p className="font-medium">Signal kept going with reduced evidence.</p>
-          <p className="mt-1 leading-5 text-amber-100/80">{providerErrors.slice(0, 2).join(" ")}</p>
+          <p className="font-medium">Some website details could not be verified.</p>
+          <p className="mt-1 leading-5 text-amber-100/80">Signal kept identity and location checks intact and relied more heavily on verified listings and public profiles. {providerErrors.slice(0, 2).map((item) => formatScoreReason(item)).join(" ")}</p>
         </div>
       )}
 
@@ -619,6 +681,12 @@ export function SignalRunDetail({
               {watchlistLeads.length > 0 && <><span className="mx-2 text-border">/</span><span className="font-mono text-foreground">{watchlistLeads.length}</span> watchlist</>}
             </div>
           </div>
+
+          {runFacts.length > 0 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {runFacts.map(([label, value]) => <span key={label} className="rounded-md border border-border bg-muted/20 px-2.5 py-1.5 text-xs text-muted-foreground"><span className="mr-1 font-mono text-foreground">{value}</span>{label.toLowerCase()}</span>)}
+            </div>
+          )}
 
           {visibleLeads.length > 0 ? (
             <div className="mt-6 grid gap-4 xl:grid-cols-2">
@@ -677,11 +745,15 @@ export function SignalRunDetail({
           {selectedLead && (
             <LeadDrawer
               evidence={selectedEvidence}
+              observations={selectedObservations}
+              corrections={selectedCorrections}
               lead={selectedLead}
               loading={loadingLead}
               error={leadError}
               working={leadWorking}
-              onGenerate={(kind) => void generateLeadAsset(selectedLead, kind)}
+              feedbackWorking={feedbackWorking}
+              onGenerate={(kind, notes) => void generateLeadAsset(selectedLead, kind, notes)}
+              onFeedback={(input) => saveLeadFeedback(selectedLead, input)}
               onStatus={(status) => void updateLeadStatus(selectedLead, status)}
             />
           )}
@@ -707,7 +779,7 @@ function EventFeed({ events, compact = false }: { events: SignalRunEvent[]; comp
             <span className="pt-0.5 font-mono text-[11px] text-muted-foreground">{formatTime(event.created_at)}</span>
             <div className="min-w-0 border-l border-border pl-3">
               <p className="text-xs font-medium text-foreground">{displayStage(event.stage)}</p>
-              <p className="mt-1 text-sm leading-5 text-muted-foreground">{event.message}</p>
+              <p className="mt-1 text-sm leading-5 text-muted-foreground">{formatScoreReason(event.message)}</p>
               {typeof event.progress_percent === "number" && (
                 <p className="mt-1 font-mono text-[11px] text-muted-foreground">{event.progress_percent}%</p>
               )}
@@ -732,13 +804,13 @@ function RunLeadCard({
   lead: SignalRunLead
   rank: number
   onOpen: () => void
-  onGenerate: (kind: "scripts" | "lovable") => void
+  onGenerate: (kind: "scripts" | "lovable", notes?: string) => void
   onStatus: (status: "saved" | "ignored") => void
   working: "saved" | "ignored" | "scripts" | "lovable" | null
 }) {
-  const reasons = listFrom(lead.key_reasons).slice(0, 3)
+  const reasons = listFrom(lead.key_reasons).map((item) => formatScoreReason(item)).slice(0, 3)
   const salesPack = asRecord(lead.sales_pack)
-  const pitch = textFrom(salesPack, ["best_pitch_angle", "pitch_angle", "recommended_offer", "offer_angle"])
+  const pitch = textFrom(salesPack, ["best_angle", "strongest_honest_angle", "best_pitch_angle", "pitch_angle"])
   const action = textFrom(salesPack, ["best_first_action", "recommended_first_action", "next_action"])
   const location = [lead.city, lead.state].filter(Boolean).join(", ") || lead.address || "Location to verify"
   const presence = onlinePresence(lead)
@@ -750,12 +822,13 @@ function RunLeadCard({
           <div className="flex flex-wrap items-center gap-2">
             <span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span>
             <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>
-              {websiteLabels[presence] || "Checking site"}
+              {formatOnlinePresence(presence)}
             </span>
+            {lead.lead_quality_status && <span className="rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground">{formatQualificationStatus(lead.lead_quality_status)}</span>}
           </div>
-          <h3 className="mt-3 truncate text-lg font-semibold text-foreground">{lead.business_name}</h3>
+          <h3 className="mt-3 truncate text-lg font-semibold text-foreground">{leadName(lead)}</h3>
           <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-            <span>{lead.industry || "Local business"}</span>
+            <span>{formatBusinessCategory(lead.primary_category || lead.industry)}</span>
             <span className="text-border">/</span>
             <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span>
           </p>
@@ -763,18 +836,18 @@ function RunLeadCard({
         <div className="shrink-0 text-right">
           <p className="font-mono text-2xl font-semibold text-foreground">{lead.final_score ?? "—"}</p>
           <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">Score</p>
-          <p className="mt-2 text-xs text-muted-foreground">{lead.confidence_score ?? "—"}% confidence</p>
+          <p className="mt-2 text-xs text-muted-foreground">{formatConfidence(lead.confidence_score)}</p>
         </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
         <div className="rounded-lg border border-border bg-card/50 p-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Pitch angle</p>
-          <p className="mt-2 text-sm leading-5 text-foreground">{pitch || "Open the lead to review the evidence-backed pitch angle."}</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Why it stands out</p>
+          <p className="mt-2 text-sm leading-5 text-foreground">{pitch || reasons[0] || "Open the lead to review the evidence-backed opportunity."}</p>
         </div>
         {action && (
           <div className="rounded-lg border border-border bg-card/50 p-3 sm:max-w-40">
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Start with</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Best move</p>
             <p className="mt-2 text-sm leading-5 text-foreground">{action}</p>
           </div>
         )}
@@ -798,16 +871,16 @@ function RunLeadCard({
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" disabled={Boolean(working)} onClick={() => onGenerate("scripts")} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
-            {working === "scripts" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} Script
+            {working === "scripts" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} Sales pack
           </button>
           <button type="button" disabled={Boolean(working)} onClick={() => onGenerate("lovable")} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
-            {working === "lovable" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />} Lovable
+            {working === "lovable" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />} Concept
           </button>
           <button type="button" disabled={Boolean(working) || lead.status === "saved"} onClick={() => onStatus("saved")} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
             <Bookmark className="h-3.5 w-3.5" /> {lead.status === "saved" ? "Saved" : "Save"}
           </button>
           <button type="button" disabled={Boolean(working)} onClick={() => onStatus("ignored")} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
-            <X className="h-3.5 w-3.5" /> Ignore
+            <X className="h-3.5 w-3.5" /> Reject
           </button>
           <button type="button" onClick={onOpen} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-2.5 text-xs font-medium text-background transition-colors hover:bg-foreground/90">
             Open <ChevronRight className="h-3.5 w-3.5" />
@@ -819,7 +892,7 @@ function RunLeadCard({
 }
 
 function WatchlistLeadCard({ lead, onOpen }: { lead: SignalRunLead; onOpen: () => void }) {
-  const reasons = listFrom(lead.key_reasons).slice(0, 2)
+  const reasons = listFrom(lead.key_reasons).map((item) => formatScoreReason(item)).slice(0, 2)
   const presence = onlinePresence(lead)
   const tier = lead.qualification_status === "research_needed" ? "Research needed" : "Watchlist"
   return (
@@ -828,10 +901,10 @@ function WatchlistLeadCard({ lead, onOpen }: { lead: SignalRunLead; onOpen: () =
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-xs font-medium text-amber-100">{tier}</span>
-            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>{websiteLabels[presence] || "Presence unknown"}</span>
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>{formatOnlinePresence(presence)}</span>
           </div>
-          <h3 className="mt-3 truncate font-medium text-foreground">{lead.business_name}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{[lead.industry, lead.city, lead.state].filter(Boolean).join(" · ") || "Local business"}</p>
+          <h3 className="mt-3 truncate font-medium text-foreground">{leadName(lead)}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{[formatBusinessCategory(lead.primary_category || lead.industry), lead.city, lead.state].filter(Boolean).join(" · ")}</p>
         </div>
         <span className="font-mono text-lg font-semibold text-foreground">{lead.opportunity_score ?? "—"}</span>
       </div>
@@ -845,19 +918,27 @@ function WatchlistLeadCard({ lead, onOpen }: { lead: SignalRunLead; onOpen: () =
 }
 
 function LeadDrawer({
+  corrections,
   evidence,
   error,
+  feedbackWorking,
   lead,
   loading,
+  observations,
+  onFeedback,
   onGenerate,
   onStatus,
   working,
 }: {
+  corrections: SignalRunLeadCorrection[]
   evidence: SerializedLeadEvidence[]
   error: string | null
+  feedbackWorking: "correction" | "observation" | null
   lead: SignalRunLead
   loading: boolean
-  onGenerate: (kind: "scripts" | "lovable") => void
+  observations: SignalRunLeadObservation[]
+  onFeedback: (input: LeadFeedbackInput) => Promise<boolean>
+  onGenerate: (kind: "scripts" | "lovable", notes?: string) => void
   onStatus: (status: "saved" | "ignored") => void
   working: "saved" | "ignored" | "scripts" | "lovable" | null
 }) {
@@ -866,58 +947,69 @@ function LeadDrawer({
   const scores = scoreEntries(lead.score_breakdown)
   const profile = profileLabels(lead.communication_profile)
   const salesPack = asRecord(lead.sales_pack)
+  const strategy = asRecord(lead.sales_strategy)
   const websiteAnalysis = asRecord(lead.website_analysis)
   const websiteSummary = textFrom(websiteAnalysis, ["summary"])
   const websiteEvidence = listFrom(websiteAnalysis, ["evidence"]).slice(0, 5)
   const websiteGaps = listFrom(websiteAnalysis, ["gaps"]).slice(0, 5)
-  const summary = textFrom(salesPack, ["summary", "why_this_fits", "why_this_business_is_a_fit", "why_fit", "why_this_lead_matters"])
-  const offer = textFrom(salesPack, ["recommended_offer", "best_offer_angle", "offer_angle", "recommended_primary_offer"])
-  const pitch = textFrom(salesPack, ["best_pitch_angle", "pitch_angle", "recommended_pitch"])
+  const summary = textFrom(salesPack, ["one_minute_briefing", "lead_briefing", "summary", "why_this_fits"])
+  const offer = textFrom(strategy, ["recommended_offer"]) || textFrom(salesPack, ["recommended_offer", "best_offer_angle", "offer_angle"])
+  const pitch = textFrom(salesPack, ["best_angle", "strongest_honest_angle", "best_pitch_angle", "pitch_angle"]) || textFrom(strategy, ["strongest_angle"])
   const pricing = textFrom(salesPack, ["pricing_angle", "recommended_pricing_angle"])
   const firstAction = textFrom(salesPack, ["best_first_action", "recommended_first_action", "next_action"])
   const generatedBy = textFrom(salesPack, ["generated_by"])
-  const avoid = listFrom(salesPack, ["what_to_avoid", "what_to_avoid_saying", "avoid", "risks"]).slice(0, 6)
+  const avoid = listFrom(salesPack, ["do_not_say", "what_to_avoid", "what_to_avoid_saying", "avoid"]).slice(0, 6)
   const scripts = [
-    ["Lead briefing", textFrom(salesPack, ["lead_briefing"])],
-    ["Strongest honest angle", textFrom(salesPack, ["strongest_honest_angle"])],
-    ["15-second opener", textFrom(salesPack, ["fifteen_second_opener"])],
-    ["Walk-in script", textFrom(salesPack, ["walk_in_script", "walkin_script"])],
+    ["One-minute briefing", textFrom(salesPack, ["one_minute_briefing", "lead_briefing"])],
+    ["Best angle", textFrom(salesPack, ["best_angle", "strongest_honest_angle"])],
+    ["Walk-in opener", textFrom(salesPack, ["walk_in_opener", "walk_in_script", "walkin_script"])],
+    ["If they are busy", textFrom(salesPack, ["busy_response"])],
+    ["Concept transition", textFrom(salesPack, ["concept_transition"])],
     ["Call script", textFrom(salesPack, ["call_script", "call_opener", "phone_script"])],
     ["Discovery questions", listFrom(salesPack, ["discovery_questions"]).join("\n") || null],
+    ["Price transition", textFrom(salesPack, ["price_transition", "pricing_angle"])],
     ["Follow-up text", textFrom(salesPack, ["follow_up_text", "follow_up_message"])],
-    ["Follow-up email", textFrom(salesPack, ["follow_up_email"])],
-    ["Objection handling", objectionHandlingText(salesPack?.objection_handling || salesPack?.objections)],
+    ["Objection handling", objectionHandlingText(salesPack?.objections || salesPack?.objection_handling)],
   ].filter((item): item is [string, string] => Boolean(item[1]))
   const risks = listFrom(lead.risks).slice(0, 8)
   const checklist = listFrom(lead.next_steps).slice(0, 8)
+  const selectionReasons = listFrom(lead.key_reasons).map((item) => formatScoreReason(item)).slice(0, 5)
+  const opportunitySignals = Array.isArray(lead.opportunity_signals)
+    ? lead.opportunity_signals.flatMap((item) => {
+      const record = asRecord(item)
+      const evidenceText = typeof record?.supportingEvidence === "string" ? record.supportingEvidence : typeof record?.supporting_evidence === "string" ? record.supporting_evidence : null
+      return evidenceText ? [formatScoreReason(evidenceText)] : []
+    }).slice(0, 5)
+    : []
   const sourceUrls = Array.from(new Set([
     ...evidence.map((item) => item.source_url).filter((item): item is string => Boolean(item)),
     ...stringsFrom(lead.source_urls).filter((item) => /^https?:\/\//i.test(item)),
   ]))
   const socialLinks = stringsFrom(lead.social_links).filter((item) => /^https?:\/\//i.test(item))
+  const [conceptNotes, setConceptNotes] = useState("")
 
   return (
     <div className="min-h-full bg-background">
       <SheetHeader className="border-b border-border px-5 py-5 sm:px-7">
         <div className="flex flex-wrap items-center gap-2 pr-8">
           <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>
-            {websiteLabels[presence] || "Checking site"}
+            {formatOnlinePresence(presence)}
           </span>
-          {lead.qualification_status && <span className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground">{labelize(lead.qualification_status)}</span>}
+          {(lead.lead_quality_status || lead.qualification_status) && <span className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground">{formatQualificationStatus(lead.lead_quality_status || lead.qualification_status)}</span>}
           {lead.is_independent_likely && <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-200">Independent likely</span>}
         </div>
-        <SheetTitle className="mt-3 text-2xl tracking-tight">{lead.business_name}</SheetTitle>
+        <SheetTitle className="mt-3 text-2xl tracking-tight">{leadName(lead)}</SheetTitle>
         <SheetDescription className="mt-1">
-          {[lead.industry, lead.city, lead.state].filter(Boolean).join(" · ") || "Local opportunity"}
+          {[formatBusinessCategory(lead.primary_category || lead.industry), lead.city, lead.state].filter(Boolean).join(" · ")}
         </SheetDescription>
       </SheetHeader>
 
       <div className="space-y-6 px-5 py-6 sm:px-7">
         <div className="grid gap-3 sm:grid-cols-3">
           <DrawerMetric label="Opportunity" value={lead.opportunity_score === null ? "—" : String(lead.opportunity_score)} />
-          <DrawerMetric label="Confidence" value={lead.confidence_score === null ? "—" : `${lead.confidence_score}%`} />
+          <DrawerMetric label="Confidence" value={formatConfidence(lead.confidence_score)} />
           <DrawerMetric label="Ranking score" value={lead.ranking_score === null ? (lead.final_score === null ? "—" : String(lead.final_score)) : String(lead.ranking_score)} />
-          <DrawerMetric label="Chain likelihood" value={`${lead.chain_likelihood}%`} />
+          <DrawerMetric label="Chain check" value={formatSignalLabel(lead.chain_classification, "Needs verification")} />
           {lead.rating != null && <DrawerMetric label="Listing reputation" value={`${lead.rating.toFixed(1)}${lead.review_count != null ? ` · ${lead.review_count} reviews` : ""}`} />}
         </div>
 
@@ -937,6 +1029,10 @@ function LeadDrawer({
             {summary || "Signal has kept this lead because its public presence suggests a practical, evidence-backed opportunity. Confirm the details before pitching."}
           </p>
         </section>
+
+        <DrawerSection title="Why Signal selected it" icon={CheckCircle2}>
+          <BulletList items={selectionReasons.length ? selectionReasons : ["The available public evidence supports a practical local-business opportunity."]} />
+        </DrawerSection>
 
         <section className="grid gap-4 lg:grid-cols-2">
           <DrawerSection title="Contact and public presence" icon={Building2}>
@@ -962,19 +1058,29 @@ function LeadDrawer({
           </DrawerSection>
         </section>
 
+        <LeadKnowledgeEditor
+          corrections={corrections}
+          observations={observations}
+          working={feedbackWorking}
+          onSubmit={onFeedback}
+        />
+
         <DrawerSection title="Evidence links" icon={ShieldCheck}>
           {sourceUrls.length > 0 ? (
-            <div className="space-y-3">
-              {sourceUrls.slice(0, 8).map((url) => {
-                const source = evidence.find((item) => item.source_url === url)
-                return (
-                  <a key={url} href={normalizeUrl(url)} target="_blank" rel="noreferrer" className="block rounded-lg border border-border bg-muted/20 p-3 transition-colors hover:bg-muted/40">
-                    <span className="flex items-center gap-2 text-sm font-medium text-foreground"><ExternalLink className="h-3.5 w-3.5" />{source?.source_title || domain(url)}</span>
-                    {source?.excerpt && <span className="mt-2 block text-sm leading-5 text-muted-foreground">{source.excerpt}</span>}
-                  </a>
-                )
-              })}
-            </div>
+            <details>
+              <summary className="cursor-pointer text-sm font-medium text-foreground">Show {sourceUrls.length} public source{sourceUrls.length === 1 ? "" : "s"}</summary>
+              <div className="mt-3 space-y-3">
+                {sourceUrls.slice(0, 8).map((url) => {
+                  const source = evidence.find((item) => item.source_url === url)
+                  return (
+                    <a key={url} href={normalizeUrl(url)} target="_blank" rel="noreferrer" className="block rounded-lg border border-border bg-muted/20 p-3 transition-colors hover:bg-muted/40">
+                      <span className="flex items-center gap-2 text-sm font-medium text-foreground"><ExternalLink className="h-3.5 w-3.5" />{source?.source_title || domain(url)}</span>
+                      {source?.excerpt && <span className="mt-2 block text-sm leading-5 text-muted-foreground">{formatScoreReason(source.excerpt)}</span>}
+                    </a>
+                  )
+                })}
+              </div>
+            </details>
           ) : (
             <p className="text-sm leading-6 text-muted-foreground">No source links were returned. Treat the lead as low-confidence until public evidence is checked.</p>
           )}
@@ -987,10 +1093,16 @@ function LeadDrawer({
           {!websiteSummary && websiteEvidence.length === 0 && websiteGaps.length === 0 && <p className="text-sm leading-6 text-muted-foreground">Website analysis is not ready yet. Signal will keep unknown items labeled rather than infer them.</p>}
         </DrawerSection>
 
+        <DrawerSection title="Opportunity" icon={Target}>
+          <MiniText label="Primary opportunity" value={pitch} />
+          {opportunitySignals.length > 0 && <div className="mt-3"><BulletList title="Evidence-backed signals" items={opportunitySignals} /></div>}
+          <div className="mt-3"><MiniText label="Best first move" value={firstAction} /></div>
+        </DrawerSection>
+
         <DrawerSection title="Score breakdown" icon={Target}>
           {scores.length > 0 ? (
             <div className="space-y-4">
-              {scores.map((score) => <ScoreBar key={score.label} label={score.label} value={score.value} />)}
+              {scores.map((score) => <ScoreBar key={score.label} label={score.label} value={score.value} max={score.max} rationale={score.rationale} evidence={score.evidence} unknowns={score.unknowns} />)}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">The score breakdown will appear after the evidence pass completes.</p>
@@ -1012,7 +1124,8 @@ function LeadDrawer({
             <button type="button" disabled={Boolean(working) || !canGenerate} onClick={() => onGenerate("scripts")} className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">
               {working === "scripts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Generate scripts
             </button>
-            {generatedBy && <span className="inline-flex h-9 items-center rounded-md border border-border px-3 text-xs text-muted-foreground">{generatedBy === "ai" ? "AI pack" : "Verified fallback"}</span>}
+            {generatedBy && <span className="inline-flex h-9 items-center rounded-md border border-border px-3 text-xs text-muted-foreground">{formatSignalLabel(generatedBy)}</span>}
+            {lead.script_quality_score != null && <span className="inline-flex h-9 items-center rounded-md border border-border px-3 text-xs text-muted-foreground">Quality {lead.script_quality_score}/100</span>}
           </div>
           {scripts.length > 0 ? (
             <div className="space-y-3">
@@ -1024,9 +1137,10 @@ function LeadDrawer({
         </DrawerSection>
 
         <DrawerSection title="Lovable concept prompt" icon={Sparkles}>
-          <div className="mb-4 flex flex-wrap gap-2">
-            <button type="button" disabled={Boolean(working) || !canGenerate} onClick={() => onGenerate("lovable")} className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
-              {working === "lovable" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Generate Lovable prompt
+          <div className="mb-4 space-y-3">
+            <textarea value={conceptNotes} onChange={(event) => setConceptNotes(event.target.value)} rows={2} placeholder="Optional concept direction for this regeneration" aria-label="Concept regeneration notes" className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-sm text-foreground placeholder:text-muted-foreground" />
+            <button type="button" disabled={Boolean(working) || !canGenerate} onClick={() => onGenerate("lovable", conceptNotes)} className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
+              {working === "lovable" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Generate concept prompt
             </button>
           </div>
           {lead.lovable_prompt ? <CopyBlock title="Concept preview prompt" value={lead.lovable_prompt} /> : <p className="text-sm leading-6 text-muted-foreground">Signal will write a custom concept prompt that uses verified details and labels unknown facts as placeholders.</p>}
@@ -1054,6 +1168,111 @@ function LeadDrawer({
         </div>
       </div>
     </div>
+  )
+}
+
+const correctionOptions: Array<{ value: SignalRunLeadCorrection["correction_type"]; label: string }> = [
+  { value: "canonical_name", label: "Correct business name" },
+  { value: "official_website", label: "Set official website" },
+  { value: "official_facebook", label: "Set official Facebook" },
+  { value: "official_instagram", label: "Set official Instagram" },
+  { value: "category", label: "Correct category" },
+  { value: "city", label: "Correct city" },
+  { value: "no_website_verified", label: "Confirm no official website" },
+  { value: "chain", label: "Mark as chain" },
+  { value: "duplicate", label: "Mark as duplicate" },
+  { value: "not_a_business", label: "Mark as not a business" },
+  { value: "reject", label: "Reject this lead" },
+]
+
+const observationOptions: Array<{ value: SignalRunLeadObservation["category"]; label: string }> = [
+  { value: "storefront", label: "Storefront" },
+  { value: "owner_availability", label: "Owner availability" },
+  { value: "interest", label: "Interest" },
+  { value: "follow_up", label: "Follow-up" },
+  { value: "availability", label: "Availability" },
+  { value: "contact_preference", label: "Contact preference" },
+  { value: "existing_provider", label: "Existing provider" },
+  { value: "operations", label: "Operations" },
+  { value: "payment", label: "Payment" },
+  { value: "other", label: "Other" },
+]
+
+function LeadKnowledgeEditor({
+  corrections,
+  observations,
+  onSubmit,
+  working,
+}: {
+  corrections: SignalRunLeadCorrection[]
+  observations: SignalRunLeadObservation[]
+  onSubmit: (input: LeadFeedbackInput) => Promise<boolean>
+  working: "correction" | "observation" | null
+}) {
+  const [correctionType, setCorrectionType] = useState<SignalRunLeadCorrection["correction_type"]>("canonical_name")
+  const [correctionValue, setCorrectionValue] = useState("")
+  const [correctionNote, setCorrectionNote] = useState("")
+  const [observationCategory, setObservationCategory] = useState<SignalRunLeadObservation["category"]>("storefront")
+  const [observationNote, setObservationNote] = useState("")
+  const correctionNeedsValue = ["canonical_name", "official_website", "official_facebook", "official_instagram", "category", "city"].includes(correctionType)
+
+  const submitCorrection = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (correctionNeedsValue && !correctionValue.trim()) return
+    const saved = await onSubmit({
+      action: "correction",
+      correction_type: correctionType,
+      value: correctionValue.trim() || undefined,
+      note: correctionNote.trim() || undefined,
+    })
+    if (saved) {
+      setCorrectionValue("")
+      setCorrectionNote("")
+    }
+  }
+
+  const submitObservation = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (observationNote.trim().length < 2) return
+    const saved = await onSubmit({ action: "observation", category: observationCategory, note: observationNote.trim() })
+    if (saved) setObservationNote("")
+  }
+
+  return (
+    <DrawerSection title="Corrections and field notes" icon={FileText}>
+      <p className="text-sm leading-6 text-muted-foreground">Corrections persist by business identity. Field notes stay private to the Mountline team and are labeled as observations when used in a regenerated sales pack.</p>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <form onSubmit={submitCorrection} className="space-y-3 rounded-lg border border-border bg-muted/15 p-3">
+          <label className="block text-xs font-medium text-muted-foreground" htmlFor="signal-correction-type">Correct research</label>
+          <select id="signal-correction-type" value={correctionType} onChange={(event) => setCorrectionType(event.target.value as SignalRunLeadCorrection["correction_type"])} className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm text-foreground">
+            {correctionOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+          {correctionNeedsValue && <input aria-label="Correct value" value={correctionValue} onChange={(event) => setCorrectionValue(event.target.value)} placeholder="Correct value" className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm text-foreground placeholder:text-muted-foreground" />}
+          <input aria-label="Correction note" value={correctionNote} onChange={(event) => setCorrectionNote(event.target.value)} placeholder="Optional reason or source" className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm text-foreground placeholder:text-muted-foreground" />
+          <button type="submit" disabled={Boolean(working) || (correctionNeedsValue && !correctionValue.trim())} className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50">
+            {working === "correction" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save correction
+          </button>
+        </form>
+
+        <form onSubmit={submitObservation} className="space-y-3 rounded-lg border border-border bg-muted/15 p-3">
+          <label className="block text-xs font-medium text-muted-foreground" htmlFor="signal-observation-type">Add private observation</label>
+          <select id="signal-observation-type" value={observationCategory} onChange={(event) => setObservationCategory(event.target.value as SignalRunLeadObservation["category"])} className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm text-foreground">
+            {observationOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+          <textarea aria-label="Observation" value={observationNote} onChange={(event) => setObservationNote(event.target.value)} placeholder="What was observed directly?" rows={3} className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-sm text-foreground placeholder:text-muted-foreground" />
+          <button type="submit" disabled={Boolean(working) || observationNote.trim().length < 2} className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50">
+            {working === "observation" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save observation
+          </button>
+        </form>
+      </div>
+
+      {(corrections.length > 0 || observations.length > 0) && (
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {corrections.length > 0 && <div><p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Active corrections</p><ul className="space-y-2">{corrections.slice(0, 5).map((item) => <li key={item.id} className="rounded-md border border-border bg-background/40 p-2 text-sm text-muted-foreground"><span className="font-medium text-foreground">{formatSignalLabel(item.correction_type)}</span>{typeof item.corrected_value === "string" && item.corrected_value ? ` · ${item.corrected_value}` : ""}{item.note ? ` — ${item.note}` : ""}</li>)}</ul></div>}
+          {observations.length > 0 && <div><p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Private observations</p><ul className="space-y-2">{observations.slice(0, 5).map((item) => <li key={item.id} className="rounded-md border border-border bg-background/40 p-2 text-sm text-muted-foreground"><span className="font-medium text-foreground">{formatSignalLabel(item.category)}</span> · {item.note}</li>)}</ul></div>}
+        </div>
+      )}
+    </DrawerSection>
   )
 }
 
@@ -1086,20 +1305,22 @@ function DetailLine({ external, href, icon: Icon, label, value }: { external?: b
 function ScoreBar({
   evidence = [],
   label,
+  max = 100,
   rationale,
   unknowns = [],
   value,
 }: {
   evidence?: string[]
   label: string
+  max?: number
   rationale?: string | null
   unknowns?: string[]
   value: number
 }) {
   return (
     <div className="rounded-lg border border-border bg-muted/15 p-3">
-      <div className="mb-1.5 flex items-center justify-between gap-3 text-sm"><span className="text-muted-foreground">{label}</span><span className="font-mono text-foreground">{value}</span></div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-foreground" style={{ width: `${value}%` }} /></div>
+      <div className="mb-1.5 flex items-center justify-between gap-3 text-sm"><span className="text-muted-foreground">{label}</span><span className="font-mono text-foreground">{value}/{max}</span></div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-foreground" style={{ width: `${Math.max(0, Math.min(100, (value / Math.max(1, max)) * 100))}%` }} /></div>
       {rationale && <p className="mt-2 text-xs leading-5 text-muted-foreground">{rationale}</p>}
       {evidence.length > 0 && <p className="mt-2 text-xs leading-5 text-foreground/85"><span className="mr-1 font-medium text-muted-foreground">Evidence:</span>{evidence.join(" · ")}</p>}
       {unknowns.length > 0 && <p className="mt-1 text-xs leading-5 text-amber-100/80"><span className="mr-1 font-medium text-amber-200">Verify:</span>{unknowns.join(" · ")}</p>}

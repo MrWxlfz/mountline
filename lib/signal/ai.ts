@@ -91,6 +91,35 @@ const signalLeadSalesPackSchema = z.object({
   lovable_prompt: z.string().trim().min(1).max(7000),
 })
 
+const signalLeadSalesStrategySchema = z.object({
+  strongest_angle: z.string().trim().min(20).max(420),
+  lead_value: z.string().trim().min(20).max(420),
+  best_approach: z.enum(["walk_in", "call", "text_email", "research_more"]),
+  recommended_offer: z.string().trim().min(20).max(420),
+  likely_objections: z.array(z.string().trim().min(3).max(180)).min(4).max(4),
+  tone: z.string().trim().min(10).max(220),
+  facts_to_mention: z.array(z.string().trim().min(3).max(260)).min(2).max(5),
+  facts_not_to_mention: z.array(z.string().trim().min(3).max(260)).min(2).max(6),
+})
+
+const signalLeadScriptsSchema = z.object({
+  one_minute_briefing: z.string().trim().min(40).max(1200),
+  best_angle: z.string().trim().min(15).max(420),
+  walk_in_opener: z.string().trim().min(20).max(650),
+  busy_response: z.string().trim().min(5).max(240),
+  concept_transition: z.string().trim().min(5).max(300),
+  discovery_questions: z.array(z.string().trim().min(8).max(260)).length(3),
+  price_transition: z.string().trim().min(10).max(360),
+  call_script: z.string().trim().min(20).max(950),
+  follow_up_text: z.string().trim().min(10).max(500),
+  objections: z.array(z.object({
+    objection: z.string().trim().min(3).max(160),
+    response: z.string().trim().min(12).max(520),
+  })).length(4),
+  do_not_say: z.array(z.string().trim().min(3).max(220)).min(3).max(6),
+  next_steps: z.array(z.string().trim().min(3).max(220)).min(3).max(5),
+})
+
 const signalChainClassificationSchema = z.object({
   classification: z.enum(["independent", "likely_independent", "local_multi_location", "likely_franchise", "chain", "uncertain"]),
   probability: z.number().int().min(0).max(100),
@@ -407,6 +436,111 @@ export async function runDeepAiAnalysis(
 }
 
 export type SignalLeadSalesPackOutput = z.infer<typeof signalLeadSalesPackSchema>
+export type SignalLeadSalesStrategyOutput = z.infer<typeof signalLeadSalesStrategySchema>
+export type SignalLeadScriptsOutput = z.infer<typeof signalLeadScriptsSchema>
+
+export type SignalLeadSalesContext = {
+  businessName: string
+  city: string | null
+  industry: string | null
+  websiteStatus: string
+  publicFacts: string[]
+  evidence: Array<{ label: string; excerpt: string; url?: string | null }>
+  scoreSummary: string
+  verifiedContact: string[]
+  websiteFindings: string[]
+  communicationProfile: string[]
+  strongestOpportunity: string
+  uncertainties: string[]
+  forbiddenClaims: string[]
+  recommendedChannel: string
+}
+
+function salesContext(input: SignalLeadSalesContext) {
+  return [
+    `Business: ${input.businessName}`,
+    `Location: ${input.city || "unknown"}`,
+    `Industry: ${input.industry || "unknown"}`,
+    `Website status: ${input.websiteStatus}`,
+    `Verified public facts: ${input.publicFacts.join(" | ") || "No additional public facts confirmed."}`,
+    `Score summary: ${input.scoreSummary}`,
+    `Verified contact: ${input.verifiedContact.join(" | ") || "No direct contact fact verified."}`,
+    `Website findings: ${input.websiteFindings.join(" | ") || "Website findings incomplete."}`,
+    `Communication profile: ${input.communicationProfile.join(" | ") || "Keep the approach direct and respectful."}`,
+    `Strongest opportunity: ${input.strongestOpportunity}`,
+    `Recommended first channel: ${input.recommendedChannel}`,
+    `Facts to verify: ${input.uncertainties.join(" | ") || "None listed."}`,
+    `Forbidden claims: ${input.forbiddenClaims.join(" | ") || "Do not add unsupported facts."}`,
+    "Evidence:",
+    ...input.evidence.slice(0, 12).map((item) => `- ${item.label}: ${item.excerpt}${item.url ? ` (${item.url})` : ""}`),
+  ].join("\n")
+}
+
+function verifiedFactGrounded(values: string[], facts: string[]) {
+  const factTokens = facts
+    .flatMap((fact) => fact.toLowerCase().split(/[^a-z0-9]+/))
+    .filter((token) => token.length >= 5 && !["public", "verified", "business", "website", "contact"].includes(token))
+  const output = values.join(" ").toLowerCase()
+  return new Set(factTokens.filter((token) => output.includes(token))).size >= Math.min(2, new Set(factTokens).size)
+}
+
+export async function runSignalLeadSalesStrategyAi(input: SignalLeadSalesContext) {
+  let critique = ""
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const prompt = [
+      "Create the strategy pass for one Mountline Signal sales plan.",
+      safetyInstructions(),
+      "Choose exactly one primary angle and the smallest credible offer. Use at least two supplied business-specific facts.",
+      "Keep the voice local, observant, friendly, credible, and direct. Do not pretend Mountline is a large agency.",
+      "Do not use first-person singular. Use 'Luke with Mountline', 'Mountline', 'we', or 'our'. Never mention school or age.",
+      "Treat every uncertainty as something to verify, never as a fact. Do not promise revenue, traffic, or conversion results.",
+      "Return strict JSON only with: strongest_angle, lead_value, best_approach, recommended_offer, likely_objections, tone, facts_to_mention, facts_not_to_mention.",
+      critique,
+      salesContext(input),
+    ].filter(Boolean).join("\n\n")
+    const result = await callProvider(prompt, true)
+    if (!result) continue
+    const parsed = signalLeadSalesStrategySchema.safeParse(result.json)
+    if (parsed.success && verifiedFactGrounded(parsed.data.facts_to_mention, input.publicFacts)) {
+      return { output: parsed.data, provider: result.provider, model: result.model, attempt }
+    }
+    critique = "Previous attempt failed: strategy must match the schema and facts_to_mention must contain at least two distinctive verified facts from the supplied evidence. Rewrite it without adding facts."
+  }
+  return null
+}
+
+export async function runSignalLeadScriptsAi(input: SignalLeadSalesContext & { strategy: SignalLeadSalesStrategyOutput }) {
+  let critique = ""
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const prompt = [
+      "Write the script pass for one Mountline Signal sales plan using the approved strategy below.",
+      safetyInstructions(),
+      "The result must sound natural when read aloud and must fail the swap test: changing only the business name cannot make it fit another lead.",
+      "Use at least two verified business-specific references across the briefing, opener, call script, and follow-up.",
+      "Do not use first-person singular. Use 'Luke with Mountline', 'Mountline', 'we', or 'our'. Never mention school or age.",
+      "Word limits: briefing 150; walk-in opener 70; busy response 30; concept transition 35; call script 120; follow-up text 60; each objection response 20–60.",
+      "Return exactly three conversational discovery questions, exactly four relevant objections, three to six do-not-say items, and three to five next steps.",
+      "Do not add a Lovable prompt; concept generation is deterministic from verified evidence.",
+      "Return strict JSON only with: one_minute_briefing, best_angle, walk_in_opener, busy_response, concept_transition, discovery_questions, price_transition, call_script, follow_up_text, objections, do_not_say, next_steps.",
+      `Approved strategy: ${JSON.stringify(input.strategy)}`,
+      critique,
+      salesContext(input),
+    ].filter(Boolean).join("\n\n")
+    const result = await callProvider(prompt, true)
+    if (!result) continue
+    const parsed = signalLeadScriptsSchema.safeParse(result.json)
+    if (parsed.success && verifiedFactGrounded([
+      parsed.data.one_minute_briefing,
+      parsed.data.walk_in_opener,
+      parsed.data.call_script,
+      parsed.data.follow_up_text,
+    ], input.publicFacts)) {
+      return { output: parsed.data, provider: result.provider, model: result.model, attempt }
+    }
+    critique = "Previous attempt failed quality checks: obey every word limit, include exactly the required item counts, and ground at least two distinctive references in supplied verified facts. Remove unsupported claims and generic agency language."
+  }
+  return null
+}
 
 export async function runSignalChainClassificationAi(input: {
   businessName: string

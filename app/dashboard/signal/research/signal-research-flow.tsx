@@ -11,6 +11,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react"
+import { formatSignalLabel } from "@/lib/signal/presentation"
 
 type Candidate = {
   title: string
@@ -268,7 +269,7 @@ export function SignalResearchFlow() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{candidate.title}</p>
                         <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                          {candidate.source_type.replace(/_/g, " ")}
+                          {formatSignalLabel(candidate.source_type)}
                         </span>
                         <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
                           {candidate.confidence}

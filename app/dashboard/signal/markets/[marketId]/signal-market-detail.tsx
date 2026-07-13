@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getSignalPlaybook } from "@/lib/signal/playbooks"
+import { formatRunStage, formatSignalLabel } from "@/lib/signal/presentation"
 import type { SignalMarketUsageEstimate } from "@/lib/signal/providers"
 import type {
   SignalJson,
@@ -103,7 +104,7 @@ function progressSnapshot(market: SignalMarket, candidates: SignalMarketCandidat
   return {
     current: done,
     percent: candidates.length ? Math.round((done / candidates.length) * 100) : 0,
-    stage: market.status.replace(/_/g, " "),
+    stage: formatSignalLabel(market.status),
     total: candidates.length,
   }
 }
@@ -512,7 +513,7 @@ export function SignalMarketDetail({
             ? "Signal is finding businesses, verifying official websites, and scoring public opportunities."
             : `${[market.city, market.state].filter(Boolean).join(", ")} · ${market.industries.map((key) => getSignalPlaybook(key).name).join(", ")}`
         }
-        meta={<StatusBadge tone={statusTone(market.status)}>{market.status.replace(/_/g, " ")}</StatusBadge>}
+        meta={<StatusBadge tone={statusTone(market.status)}>{formatSignalLabel(market.status)}</StatusBadge>}
         actions={
           <>
             <SecondaryAction href="/dashboard/signal/markets" icon={ArrowLeft}>Markets</SecondaryAction>
@@ -558,7 +559,7 @@ export function SignalMarketDetail({
                   <Timer className="h-3.5 w-3.5" />
                   {formatElapsed(market.last_run_at)}
                 </span>
-                <span>{usage.stopped_reason ? String(usage.stopped_reason) : "Safe official-site research only"}</span>
+                <span>{usage.stopped_reason ? formatSignalLabel(String(usage.stopped_reason)) : "Safe official-site research only"}</span>
               </div>
             </div>
 
@@ -573,10 +574,10 @@ export function SignalMarketDetail({
             />
 
             <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 xl:grid-cols-3">
-              <UsagePill label="Provider" value={market.provider_mode || estimate.provider_mode} />
-              <UsagePill label="Firecrawl pages" value={String(usage.firecrawl_pages ?? 0)} />
-              <UsagePill label="Firecrawl credits" value={String(usage.firecrawl_credits ?? 0)} />
-              <UsagePill label="Tavily searches" value={String(usage.tavily_searches ?? 0)} />
+              <UsagePill label="Research mode" value={formatSignalLabel(market.provider_mode || estimate.provider_mode)} />
+              <UsagePill label="Official pages checked" value={String(usage.firecrawl_pages ?? 0)} />
+              <UsagePill label="Site-analysis usage" value={String(usage.firecrawl_credits ?? 0)} />
+              <UsagePill label="Search checks" value={String(usage.tavily_searches ?? 0)} />
               <UsagePill label="Fast analyses" value={String(usage.ai_fast_analyses ?? 0)} />
               <UsagePill label="Depth" value={market.research_depth} />
             </div>
@@ -604,7 +605,7 @@ export function SignalMarketDetail({
                 <div key={event.id} className="grid grid-cols-[72px_1fr] gap-3 text-sm">
                   <span className="pt-0.5 font-mono text-xs text-muted-foreground">{formatTime(event.created_at)}</span>
                   <div className="min-w-0 border-l border-border pl-3">
-                    <StatusBadge tone={eventTone(event.stage)}>{event.stage.replace(/_/g, " ")}</StatusBadge>
+                    <StatusBadge tone={eventTone(event.stage)}>{formatRunStage(event.stage)}</StatusBadge>
                     <p className="mt-1 leading-5 text-foreground">{event.message}</p>
                     {event.progress_total ? (
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -627,7 +628,7 @@ export function SignalMarketDetail({
         <section className="space-y-3">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-              I found {topProspects.length} prospect{topProspects.length === 1 ? "" : "s"} worth reviewing.
+              Signal found {topProspects.length} prospect{topProspects.length === 1 ? "" : "s"} worth reviewing.
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Signal reviewed {counts.scored} public business website{counts.scored === 1 ? "" : "s"}, removed {counts.removed} duplicate or suppressed result{counts.removed === 1 ? "" : "s"}, and shortlisted the strongest opportunities.
@@ -864,7 +865,7 @@ function ProspectCard({
         <p className="text-xs font-medium uppercase text-muted-foreground">Visual anchor</p>
         <p className="mt-2 text-sm text-foreground">
           {candidate.visual_state
-            ? candidate.visual_state.replace(/_/g, " ")
+            ? formatSignalLabel(candidate.visual_state)
             : "No screenshot preview yet. Visual capture happens after prospect approval."}
         </p>
       </div>
@@ -876,7 +877,7 @@ function ProspectCard({
 
       <div className="mt-4 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
         <span>Confidence: {candidate.resolution_confidence || candidate.confidence || "unknown"}</span>
-        <span>Lane: {candidate.recommended_lane?.replace(/_/g, " ") || "review"}</span>
+        <span>Lane: {formatSignalLabel(candidate.recommended_lane || "review")}</span>
         <span>Demo: {candidate.relevant_demo || "none"}</span>
         <span>Next: {firstDiscoveryQuestion(candidate) || "Review evidence, then call manually."}</span>
       </div>
@@ -1018,7 +1019,7 @@ function CompactCandidateRow({
         </p>
       </div>
       <StatusBadge tone={priorityTone(candidate.preliminary_priority)}>{candidate.preliminary_priority || "-"}</StatusBadge>
-      <span className="text-xs text-muted-foreground">{candidate.recommended_lane?.replace(/_/g, " ") || "review"}</span>
+      <span className="text-xs text-muted-foreground">{formatSignalLabel(candidate.recommended_lane || "review")}</span>
       <span className="font-mono text-xs text-muted-foreground">{candidate.website_opportunity_score ?? "-"}</span>
       <div className="flex gap-2">
         <button type="button" onClick={onOpenEvidence} className="text-xs text-muted-foreground hover:text-foreground">Evidence</button>
@@ -1144,9 +1145,9 @@ function RawCandidateTable({
                 <td className="px-3 py-3">
                   <StatusBadge tone={priorityTone(candidate.preliminary_priority)}>{candidate.preliminary_priority || "-"}</StatusBadge>
                 </td>
-                <td className="px-3 py-3 text-muted-foreground">{candidate.recommended_lane?.replace(/_/g, " ") || "-"}</td>
+                <td className="px-3 py-3 text-muted-foreground">{candidate.recommended_lane ? formatSignalLabel(candidate.recommended_lane) : "-"}</td>
                 <td className="px-3 py-3">
-                  <StatusBadge>{candidate.research_state.replace(/_/g, " ")}</StatusBadge>
+                  <StatusBadge>{formatSignalLabel(candidate.research_state)}</StatusBadge>
                 </td>
                 <td className="px-3 py-3">
                   <DropdownMenu>

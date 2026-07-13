@@ -85,8 +85,8 @@ export function SignalMarketNewForm() {
           max_candidates: Number(maxCandidates) || 10,
           research_depth: depth,
           notes: [
-            providerMode !== "hybrid" ? `Preferred provider mode: ${providerMode}.` : null,
-            firecrawlBudget !== "default" ? `Firecrawl page budget: ${firecrawlBudget}.` : null,
+            providerMode !== "hybrid" ? `Preferred research mode: ${providerMode}.` : null,
+            firecrawlBudget !== "default" ? `Official-site analysis budget: ${firecrawlBudget}.` : null,
             screenshotLimit !== "default" ? `Screenshot limit: ${screenshotLimit}.` : null,
             excludeExisting ? "Exclude existing prospects." : "Allow existing prospect matches.",
             excludeSuppressed ? "Exclude suppressed results." : "Allow suppressed result review.",
@@ -175,12 +175,12 @@ export function SignalMarketNewForm() {
 
           {advancedOpen && (
             <div className="mt-4 grid gap-4 rounded-lg border border-border bg-muted/20 p-4 md:grid-cols-2">
-              <SelectField label="Provider mode" value={providerMode} onChange={setProviderMode}>
-                <option value="hybrid">Hybrid</option>
-                <option value="tavily">Tavily only</option>
-                <option value="firecrawl">Firecrawl only</option>
+              <SelectField label="Research mode" value={providerMode} onChange={setProviderMode}>
+                <option value="hybrid">Balanced discovery and site analysis</option>
+                <option value="tavily">Search verification only</option>
+                <option value="firecrawl">Official-site analysis only</option>
               </SelectField>
-              <SelectField label="Firecrawl page budget" value={firecrawlBudget} onChange={setFirecrawlBudget}>
+              <SelectField label="Official-site page budget" value={firecrawlBudget} onChange={setFirecrawlBudget}>
                 <option value="default">Use environment default</option>
                 <option value="low">Low</option>
                 <option value="standard">Standard</option>

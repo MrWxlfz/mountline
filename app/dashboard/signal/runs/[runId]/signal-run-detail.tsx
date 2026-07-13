@@ -69,6 +69,13 @@ const stageLabels: Record<string, string> = {
   queued: "Setting up market",
   discovering: "Finding local businesses",
   finding_local_businesses: "Finding local businesses",
+  resolving_market: "Resolving market",
+  searching_local_map_listings: "Searching local map listings",
+  expanding_category_coverage: "Expanding category coverage",
+  removing_chains_and_duplicates: "Removing chains and duplicates",
+  verifying_business_identities: "Verifying business identities",
+  checking_websites_and_social: "Checking websites and social profiles",
+  finding_customer_flow_gaps: "Finding customer-flow gaps",
   filtering_chains_and_duplicates: "Filtering chains and duplicates",
   checking: "Checking websites and contact friction",
   checking_websites: "Checking websites and contact friction",
@@ -91,6 +98,14 @@ const websiteLabels: Record<string, string> = {
   strong_site: "Strong site",
   social_only: "Social-only",
   unknown: "Checking site",
+  no_website_found: "No verified site",
+  directory_only: "Directory-only",
+  website_unreachable: "Site unreachable",
+  website_broken: "Broken site",
+  website_weak: "Weak site",
+  website_adequate: "Adequate site",
+  website_strong: "Strong site",
+  website_unknown: "Site status unknown",
 }
 
 function asRecord(value: unknown): JsonRecord | null {
@@ -159,12 +174,16 @@ function statusTone(status: SignalRun["status"]) {
   return "border-border bg-muted/50 text-muted-foreground"
 }
 
-function websiteTone(status: SignalRunLead["website_status"]) {
-  if (status === "no_site" || status === "weak_site" || status === "social_only") {
+function websiteTone(status: string) {
+  if (["no_site", "weak_site", "social_only", "no_website_found", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(status)) {
     return "border-amber-400/30 bg-amber-400/10 text-amber-100"
   }
-  if (status === "strong_site") return "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+  if (status === "strong_site" || status === "website_strong") return "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
   return "border-border bg-muted/50 text-muted-foreground"
+}
+
+function onlinePresence(lead: SignalRunLead) {
+  return lead.online_presence_classification || lead.website_status
 }
 
 function formatDate(value: string | null | undefined) {
@@ -285,7 +304,7 @@ function isActive(run: SignalRun) {
 
 function rankedLeads(leads: SignalRunLead[]) {
   return [...leads]
-    .filter((lead) => !["ignored", "excluded", "failed"].includes(lead.status))
+    .filter((lead) => !["ignored", "excluded", "failed"].includes(lead.status) && (lead.qualification_status === "qualified" || (lead.qualification_status == null && lead.rank != null)))
     .sort((left, right) => {
       const rank = (left.rank ?? Number.MAX_SAFE_INTEGER) - (right.rank ?? Number.MAX_SAFE_INTEGER)
       if (rank !== 0) return rank
@@ -462,6 +481,13 @@ export function SignalRunDetail({
   }
 
   const visibleLeads = useMemo(() => rankedLeads(leads).slice(0, run.lead_limit), [leads, run.lead_limit])
+  const watchlistLeads = useMemo(
+    () => [...leads]
+      .filter((lead) => !["ignored", "excluded", "failed"].includes(lead.status) && ["watchlist", "research_needed"].includes(lead.qualification_status || ""))
+      .sort((left, right) => (right.ranking_score ?? -1) - (left.ranking_score ?? -1))
+      .slice(0, run.lead_limit),
+    [leads, run.lead_limit],
+  )
   const latestEvents = useMemo(
     () => [...events].sort((left, right) => right.created_at.localeCompare(left.created_at)).slice(0, 12),
     [events],
@@ -501,9 +527,9 @@ export function SignalRunDetail({
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
               {completed
                 ? visibleLeads.length < run.lead_limit
-                  ? `Signal found only ${visibleLeads.length} business${visibleLeads.length === 1 ? "" : "es"} that met the quality bar. It rejected weaker or uncertain candidates instead of filling the list.`
+                  ? `Signal found ${visibleLeads.length} qualified business${visibleLeads.length === 1 ? "" : "es"}${watchlistLeads.length ? ` and preserved ${watchlistLeads.length} promising watchlist/research candidate${watchlistLeads.length === 1 ? "" : "s"}` : ""}. It did not fabricate a full list.`
                   : `Signal ranked the best independent opportunities from this ${run.market_type === "metro" ? "area" : "city"} search.`
-                : "Signal is working through public business data, checking websites, and writing the sales angle for each viable lead."}
+                : "Signal is working through structured local listings, verifying web and social presence, and writing the sales angle for each viable lead."}
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
@@ -590,6 +616,7 @@ export function SignalRunDetail({
               <span className="font-mono text-foreground">{candidatesRejected}</span> rejected
               <span className="mx-2 text-border">/</span>
               <span className="font-mono text-foreground">{visibleLeads.length}</span> qualified
+              {watchlistLeads.length > 0 && <><span className="mx-2 text-border">/</span><span className="font-mono text-foreground">{watchlistLeads.length}</span> watchlist</>}
             </div>
           </div>
 
@@ -612,6 +639,20 @@ export function SignalRunDetail({
               <Target className="mx-auto h-6 w-6 text-muted-foreground" />
               <p className="mt-3 font-medium text-foreground">No qualified leads are ready yet.</p>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Open the event feed to see what Signal found and whether a partial provider result needs a retry.</p>
+            </div>
+          )}
+
+          {watchlistLeads.length > 0 && (
+            <div className="mt-7 border-t border-border pt-6">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Watchlist and research needed</p>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">These are real local businesses with a promising map or reputation signal, but one or two facts still need verification before outreach.</p>
+              </div>
+              <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                {watchlistLeads.map((lead) => (
+                  <WatchlistLeadCard key={lead.id} lead={lead} onOpen={() => void openLead(lead)} />
+                ))}
+              </div>
             </div>
           )}
         </section>
@@ -700,6 +741,7 @@ function RunLeadCard({
   const pitch = textFrom(salesPack, ["best_pitch_angle", "pitch_angle", "recommended_offer", "offer_angle"])
   const action = textFrom(salesPack, ["best_first_action", "recommended_first_action", "next_action"])
   const location = [lead.city, lead.state].filter(Boolean).join(", ") || lead.address || "Location to verify"
+  const presence = onlinePresence(lead)
 
   return (
     <article className="group rounded-xl border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20 sm:p-5">
@@ -707,8 +749,8 @@ function RunLeadCard({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span>
-            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(lead.website_status)}`}>
-              {websiteLabels[lead.website_status] || "Checking site"}
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>
+              {websiteLabels[presence] || "Checking site"}
             </span>
           </div>
           <h3 className="mt-3 truncate text-lg font-semibold text-foreground">{lead.business_name}</h3>
@@ -776,6 +818,32 @@ function RunLeadCard({
   )
 }
 
+function WatchlistLeadCard({ lead, onOpen }: { lead: SignalRunLead; onOpen: () => void }) {
+  const reasons = listFrom(lead.key_reasons).slice(0, 2)
+  const presence = onlinePresence(lead)
+  const tier = lead.qualification_status === "research_needed" ? "Research needed" : "Watchlist"
+  return (
+    <article className="rounded-lg border border-border bg-background/40 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-xs font-medium text-amber-100">{tier}</span>
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>{websiteLabels[presence] || "Presence unknown"}</span>
+          </div>
+          <h3 className="mt-3 truncate font-medium text-foreground">{lead.business_name}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{[lead.industry, lead.city, lead.state].filter(Boolean).join(" · ") || "Local business"}</p>
+        </div>
+        <span className="font-mono text-lg font-semibold text-foreground">{lead.opportunity_score ?? "—"}</span>
+      </div>
+      {reasons.length > 0 && <p className="mt-3 text-sm leading-5 text-muted-foreground">{reasons.join(" ")}</p>}
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
+        <span className="text-xs text-muted-foreground">{lead.phone || lead.provider_listing_url || "Specific fact to verify"}</span>
+        <button type="button" onClick={onOpen} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">Review evidence <ChevronRight className="h-3.5 w-3.5" /></button>
+      </div>
+    </article>
+  )
+}
+
 function LeadDrawer({
   evidence,
   error,
@@ -793,6 +861,8 @@ function LeadDrawer({
   onStatus: (status: "saved" | "ignored") => void
   working: "saved" | "ignored" | "scripts" | "lovable" | null
 }) {
+  const presence = onlinePresence(lead)
+  const canGenerate = lead.qualification_status === "qualified" || (lead.qualification_status == null && lead.rank != null)
   const scores = scoreEntries(lead.score_breakdown)
   const profile = profileLabels(lead.communication_profile)
   const salesPack = asRecord(lead.sales_pack)
@@ -830,9 +900,10 @@ function LeadDrawer({
     <div className="min-h-full bg-background">
       <SheetHeader className="border-b border-border px-5 py-5 sm:px-7">
         <div className="flex flex-wrap items-center gap-2 pr-8">
-          <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(lead.website_status)}`}>
-            {websiteLabels[lead.website_status] || "Checking site"}
+          <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>
+            {websiteLabels[presence] || "Checking site"}
           </span>
+          {lead.qualification_status && <span className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground">{labelize(lead.qualification_status)}</span>}
           {lead.is_independent_likely && <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-200">Independent likely</span>}
         </div>
         <SheetTitle className="mt-3 text-2xl tracking-tight">{lead.business_name}</SheetTitle>
@@ -847,6 +918,7 @@ function LeadDrawer({
           <DrawerMetric label="Confidence" value={lead.confidence_score === null ? "—" : `${lead.confidence_score}%`} />
           <DrawerMetric label="Ranking score" value={lead.ranking_score === null ? (lead.final_score === null ? "—" : String(lead.final_score)) : String(lead.ranking_score)} />
           <DrawerMetric label="Chain likelihood" value={`${lead.chain_likelihood}%`} />
+          {lead.rating != null && <DrawerMetric label="Listing reputation" value={`${lead.rating.toFixed(1)}${lead.review_count != null ? ` · ${lead.review_count} reviews` : ""}`} />}
         </div>
 
         {error && (
@@ -873,6 +945,7 @@ function LeadDrawer({
               {lead.phone && <DetailLine icon={Phone} label="Phone" value={lead.phone} href={`tel:${lead.phone}`} />}
               {lead.public_email && <DetailLine icon={Mail} label="Email" value={lead.public_email} href={`mailto:${lead.public_email}`} />}
               {lead.website_url && <DetailLine icon={Globe2} label="Website" value={lead.website_url} href={normalizeUrl(lead.website_url)} external />}
+              {lead.provider_listing_url && <DetailLine icon={MapPin} label="Map listing" value={lead.listing_attribution || "Structured listing"} href={normalizeUrl(lead.provider_listing_url)} external />}
               {socialLinks.slice(0, 2).map((url) => <DetailLine key={url} icon={Globe2} label="Social" value={domain(url)} href={normalizeUrl(url)} external />)}
               {!lead.address && !lead.phone && !lead.public_email && !lead.website_url && <p className="text-sm text-muted-foreground">Contact details still need verification.</p>}
             </div>
@@ -936,7 +1009,7 @@ function LeadDrawer({
 
         <DrawerSection title="Script pack" icon={FileText}>
           <div className="mb-4 flex flex-wrap gap-2">
-            <button type="button" disabled={Boolean(working)} onClick={() => onGenerate("scripts")} className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">
+            <button type="button" disabled={Boolean(working) || !canGenerate} onClick={() => onGenerate("scripts")} className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">
               {working === "scripts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Generate scripts
             </button>
             {generatedBy && <span className="inline-flex h-9 items-center rounded-md border border-border px-3 text-xs text-muted-foreground">{generatedBy === "ai" ? "AI pack" : "Verified fallback"}</span>}
@@ -946,13 +1019,13 @@ function LeadDrawer({
               {scripts.map(([title, value]) => <CopyBlock key={title} title={title} value={value} />)}
             </div>
           ) : (
-            <p className="text-sm leading-6 text-muted-foreground">Generate the pack to get a walk-in opener, call script, follow-up, and honest objection handling.</p>
+            <p className="text-sm leading-6 text-muted-foreground">{canGenerate ? "Generate the pack to get a walk-in opener, call script, follow-up, and honest objection handling." : "Verify the missing watchlist/research facts before generating outreach."}</p>
           )}
         </DrawerSection>
 
         <DrawerSection title="Lovable concept prompt" icon={Sparkles}>
           <div className="mb-4 flex flex-wrap gap-2">
-            <button type="button" disabled={Boolean(working)} onClick={() => onGenerate("lovable")} className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
+            <button type="button" disabled={Boolean(working) || !canGenerate} onClick={() => onGenerate("lovable")} className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
               {working === "lovable" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Generate Lovable prompt
             </button>
           </div>

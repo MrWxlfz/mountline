@@ -21,7 +21,12 @@ export type SignalGeographicStatus =
   | "unclear"
   | "outside_market"
 
-export type SignalQualificationStatus = "qualified" | "rejected" | "incomplete"
+export type SignalQualificationStatus =
+  | "qualified"
+  | "watchlist"
+  | "research_needed"
+  | "rejected"
+  | "incomplete"
 
 export type SignalEvidenceTier = 1 | 2 | 3
 
@@ -64,27 +69,23 @@ export type SignalGeographicAssessment = {
 
 export type SignalConfidenceComponents = {
   identity: number
-  officialSite: number
   geography: number
-  contactAgreement: number
-  sourceDiversity: number
-  websiteCompleteness: number
-  chainCertainty: number
-  freshness: number
+  independence: number
+  contact: number
+  onlinePresence: number
+  opportunityAnalysis: number
   contradictionPenalty: number
   providerFailurePenalty: number
   final: number
 }
 
 export type SignalOpportunityDimensions = {
-  mountlineFit: number
-  websiteOpportunity: number
-  contactConversionFriction: number
+  reputationViability: number
+  digitalGap: number
+  customerFlowOpportunity: number
   trustGap: number
   demoPotential: number
-  contactViability: number
-  operationalOpportunity: number
-  timingUrgency: number
+  outreachViability: number
 }
 
 export type SignalOpportunityResult = {
@@ -99,6 +100,27 @@ export type SignalQualificationResult = {
   status: SignalQualificationStatus
   qualified: boolean
   reasons: string[]
+}
+
+export type SignalOnlinePresenceClassification =
+  | "no_website_found"
+  | "social_only"
+  | "directory_only"
+  | "website_unreachable"
+  | "website_broken"
+  | "website_weak"
+  | "website_adequate"
+  | "website_strong"
+  | "website_unknown"
+
+export type SignalOpportunityEvidence = {
+  signal: string
+  supportingEvidence: string
+  evidenceSource: "places" | "official_website" | "official_social" | "directory" | "public_review" | "user_observation"
+  confidence: number
+  suggestedMountlineSolution: string
+  safeToMentionInFirstPitch: boolean
+  verificationStatus: "confirmed" | "verify_before_mention"
 }
 
 type ChainDefinition = {
@@ -489,14 +511,12 @@ export function assessSignalGeography(input: {
 
 export function calculateSignalConfidence(input: Omit<SignalConfidenceComponents, "final">) : SignalConfidenceComponents {
   const weighted =
-    clamp(input.identity) * 0.22
-    + clamp(input.officialSite) * 0.15
-    + clamp(input.geography) * 0.14
-    + clamp(input.contactAgreement) * 0.1
-    + clamp(input.sourceDiversity) * 0.12
-    + clamp(input.websiteCompleteness) * 0.1
-    + clamp(input.chainCertainty) * 0.12
-    + clamp(input.freshness) * 0.05
+    clamp(input.identity) * 0.24
+    + clamp(input.geography) * 0.2
+    + clamp(input.independence) * 0.16
+    + clamp(input.contact) * 0.14
+    + clamp(input.onlinePresence) * 0.12
+    + clamp(input.opportunityAnalysis) * 0.14
   const final = clamp(Math.min(97, weighted - clamp(input.contradictionPenalty, 0, 60) - clamp(input.providerFailurePenalty, 0, 40)))
   return { ...input, final }
 }
@@ -507,14 +527,12 @@ export function calculateSignalOpportunity(input: {
   penalties?: Partial<Record<"uncertain_identity" | "uncertain_geography" | "probable_chain" | "excellent_website" | "no_contact" | "contradictory_evidence" | "insufficient_evidence" | "duplicate", number>>
 }) : SignalOpportunityResult {
   const dimensions: SignalOpportunityDimensions = {
-    mountlineFit: clamp(input.dimensions.mountlineFit, 0, 20),
-    websiteOpportunity: clamp(input.dimensions.websiteOpportunity, 0, 20),
-    contactConversionFriction: clamp(input.dimensions.contactConversionFriction, 0, 15),
+    reputationViability: clamp(input.dimensions.reputationViability, 0, 20),
+    digitalGap: clamp(input.dimensions.digitalGap, 0, 25),
+    customerFlowOpportunity: clamp(input.dimensions.customerFlowOpportunity, 0, 20),
     trustGap: clamp(input.dimensions.trustGap, 0, 15),
     demoPotential: clamp(input.dimensions.demoPotential, 0, 10),
-    contactViability: clamp(input.dimensions.contactViability, 0, 10),
-    operationalOpportunity: clamp(input.dimensions.operationalOpportunity, 0, 5),
-    timingUrgency: clamp(input.dimensions.timingUrgency, 0, 5),
+    outreachViability: clamp(input.dimensions.outreachViability, 0, 10),
   }
   const positiveScore = Object.values(dimensions).reduce((sum, value) => sum + value, 0)
   const penalties = Object.fromEntries(
@@ -522,7 +540,11 @@ export function calculateSignalOpportunity(input: {
   )
   const penaltyTotal = Object.values(penalties).reduce((sum, value) => sum + value, 0)
   const opportunityScore = clamp(positiveScore - penaltyTotal)
-  const rankingScore = clamp(opportunityScore * clamp(input.confidence) / 100)
+  // Confidence affects ordering without erasing a real digital gap. This is
+  // especially important for credible map listings whose web footprint is the
+  // opportunity rather than a missing prerequisite.
+  const confidenceFactor = 0.65 + clamp(input.confidence) / 100 * 0.35
+  const rankingScore = clamp(opportunityScore * confidenceFactor)
   return { dimensions, penalties, positiveScore, opportunityScore, rankingScore }
 }
 
@@ -533,29 +555,153 @@ export function qualifySignalLead(input: {
   independenceConfidence: number
   geographicStatus: SignalGeographicStatus
   geographicConfidence: number
-  evidenceConfidence: number
+  evidenceConfidence?: number
+  onlinePresenceConfidence?: number
+  opportunityConfidence?: number
   opportunityScore: number
   hasContactRoute: boolean
+  hasListingRoute?: boolean
   hasEvidenceLinks: boolean
   duplicate?: boolean
   incompleteResearch?: boolean
+  permanentlyClosed?: boolean
+  irrelevantCategory?: boolean
 }) : SignalQualificationResult {
+  const hardReasons: string[] = []
+  if (input.permanentlyClosed) hardReasons.push("The structured listing says the business is permanently closed.")
+  if (input.irrelevantCategory) hardReasons.push("The structured listing is outside the requested business categories.")
+  if (input.duplicate) hardReasons.push("Candidate duplicates another resolved business identity.")
+  if ((["chain", "likely_franchise"] as SignalChainClassification[]).includes(input.chainClassification)) hardReasons.push("Known chain or likely franchise evidence exceeds the configured threshold.")
+  if ((["generic_result", "directory", "rejected"] as SignalEntityStatus[]).includes(input.entityStatus) || input.entityConfidence < 55) hardReasons.push("A meaningful business identity could not be established.")
+  if (input.geographicStatus === "outside_market") hardReasons.push("The business is outside the requested market boundary.")
+  if (!input.hasContactRoute && !input.hasListingRoute) hardReasons.push("No usable public contact or listing route was verified.")
+  if (hardReasons.length > 0) return { status: "rejected", qualified: false, reasons: hardReasons }
+
   const reasons: string[] = []
-  if (!input.hasEvidenceLinks) reasons.push("No traceable public evidence link is available.")
-  if (!input.hasContactRoute) reasons.push("No viable public contact route was verified.")
-  if (!(["verified", "likely"] as SignalEntityStatus[]).includes(input.entityStatus) || input.entityConfidence < 65) reasons.push("Canonical business identity did not meet the 65-point quality gate.")
-  if ((["chain", "likely_franchise", "uncertain"] as SignalChainClassification[]).includes(input.chainClassification) || input.independenceConfidence < 70) reasons.push("Independent-business evidence did not meet the 70-point quality gate.")
-  if ((["unclear", "outside_market"] as SignalGeographicStatus[]).includes(input.geographicStatus) || input.geographicConfidence < 60) reasons.push("Geographic evidence did not meet the 60-point quality gate.")
-  if (input.evidenceConfidence < 55) reasons.push("Overall evidence confidence did not meet the 55-point quality gate.")
-  if (input.opportunityScore < 55) reasons.push("Opportunity score did not meet the 55-point quality gate.")
-  if (input.duplicate) reasons.push("Candidate duplicates another resolved business identity.")
-  if (input.incompleteResearch) reasons.push("Critical provider research is incomplete.")
-  const incomplete = input.incompleteResearch || !input.hasEvidenceLinks
-  return {
-    status: reasons.length === 0 ? "qualified" : incomplete ? "incomplete" : "rejected",
-    qualified: reasons.length === 0,
-    reasons,
+  const opportunityConfidence = input.opportunityConfidence ?? input.evidenceConfidence ?? 0
+  const presenceConfidence = input.onlinePresenceConfidence ?? input.evidenceConfidence ?? 0
+  const identityReady = (["verified", "likely"] as SignalEntityStatus[]).includes(input.entityStatus) && input.entityConfidence >= 68
+  const geographyReady = input.geographicStatus !== "unclear" && input.geographicConfidence >= 68
+  const independenceReady = input.chainClassification !== "uncertain" && input.independenceConfidence >= 60
+  const opportunityReady = input.opportunityScore >= 52 && opportunityConfidence >= 45
+  if (!identityReady) reasons.push("Business identity needs one more corroborating source.")
+  if (!geographyReady) reasons.push("Market presence needs one more geographic check.")
+  if (!independenceReady) reasons.push("Independent status needs one more chain/franchise check.")
+  if (!opportunityReady) reasons.push("The customer-flow opportunity needs stronger supporting evidence.")
+  if (!input.hasContactRoute) reasons.push("A direct phone, email, social, booking, or walk-in contact path still needs verification.")
+  if (!input.hasEvidenceLinks) reasons.push("A traceable public listing or evidence link is still needed.")
+
+  if (identityReady && geographyReady && independenceReady && opportunityReady && input.hasContactRoute && input.hasEvidenceLinks && !input.incompleteResearch) {
+    return { status: "qualified", qualified: true, reasons: [] }
   }
+  const promisingMapLead = input.entityConfidence >= 65
+    && input.geographicConfidence >= 60
+    && input.opportunityScore >= 45
+    && input.hasContactRoute
+    && input.hasEvidenceLinks
+  if (promisingMapLead && (presenceConfidence >= 45 || input.incompleteResearch)) {
+    return { status: "watchlist", qualified: false, reasons }
+  }
+  return {
+    status: "research_needed",
+    qualified: false,
+    reasons: reasons.length ? reasons : ["A specific missing fact must be checked before outreach."],
+  }
+}
+
+export function buildSignalOpportunityEvidence(input: {
+  onlinePresence: SignalOnlinePresenceClassification
+  rating?: number | null
+  reviewCount?: number | null
+  hasPhone: boolean
+  hasContactForm?: boolean
+  hasBooking?: boolean
+  officialTexts?: string[]
+  officialSocialTexts?: string[]
+  reviewTexts?: string[]
+  userObservations?: string[]
+}) {
+  const signals: SignalOpportunityEvidence[] = []
+  const add = (signal: SignalOpportunityEvidence) => signals.push(signal)
+  const presenceEvidence: Record<SignalOnlinePresenceClassification, string | null> = {
+    no_website_found: "No official website was found across the sources checked.",
+    social_only: "The business appears to rely primarily on a verified social profile.",
+    directory_only: "Only structured listing or directory routes were verified.",
+    website_unreachable: "The listing website could not be reached during analysis.",
+    website_broken: "The verified website returned a broken or unusable response.",
+    website_weak: "The verified website has evidence-backed content or customer-flow gaps.",
+    website_adequate: null,
+    website_strong: null,
+    website_unknown: null,
+  }
+  const presence = presenceEvidence[input.onlinePresence]
+  if (presence) {
+    add({
+      signal: input.onlinePresence,
+      supportingEvidence: presence,
+      evidenceSource: input.onlinePresence === "social_only" ? "official_social" : input.onlinePresence === "directory_only" ? "directory" : "places",
+      confidence: input.onlinePresence === "no_website_found" ? 78 : 82,
+      suggestedMountlineSolution: "A phone-first one-page website with services, trust context, and one clear next step.",
+      safeToMentionInFirstPitch: true,
+      verificationStatus: "confirmed",
+    })
+  }
+  if (input.hasPhone && !input.hasContactForm && !input.hasBooking) {
+    add({
+      signal: "phone_first_customer_flow",
+      supportingEvidence: "A public phone is available, but no verified contact form or booking/request path was found.",
+      evidenceSource: "places",
+      confidence: 72,
+      suggestedMountlineSolution: "Keep calling available while adding a simple request or appointment path.",
+      safeToMentionInFirstPitch: true,
+      verificationStatus: "confirmed",
+    })
+  }
+  const rating = input.rating || 0
+  const reviews = input.reviewCount || 0
+  if (rating >= 4.4 && reviews >= 20 && ["no_website_found", "social_only", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(input.onlinePresence)) {
+    add({
+      signal: "reputation_to_digital_gap",
+      supportingEvidence: `The structured listing shows a ${rating.toFixed(1)} rating across ${reviews} reviews while the verified digital presence remains limited.`,
+      evidenceSource: "places",
+      confidence: reviews >= 50 ? 88 : 76,
+      suggestedMountlineSolution: "Translate the existing local reputation into a clear, credible digital home without replacing social channels.",
+      safeToMentionInFirstPitch: true,
+      verificationStatus: "confirmed",
+    })
+  }
+
+  const officialSources = [
+    ...(input.officialTexts || []).map((text) => ({ text, source: "official_website" as const })),
+    ...(input.officialSocialTexts || []).map((text) => ({ text, source: "official_social" as const })),
+    ...(input.userObservations || []).map((text) => ({ text, source: "user_observation" as const })),
+  ]
+  const officialPayment = officialSources.find(({ text }) => /\b(?:cash|check|cheque)(?:\s*(?:or|and|\/ )\s*(?:cash|check|cheque))?\s+only\b|\bno (?:credit |debit )?cards?\b/i.test(text))
+  if (officialPayment) {
+    add({
+      signal: "verified_payment_friction",
+      supportingEvidence: officialPayment.text.slice(0, 260),
+      evidenceSource: officialPayment.source,
+      confidence: officialPayment.source === "user_observation" ? 75 : 92,
+      suggestedMountlineSolution: "Verify current payment preferences first; only then discuss a simple optional card or payment-link path as a secondary improvement.",
+      safeToMentionInFirstPitch: false,
+      verificationStatus: "confirmed",
+    })
+  } else {
+    const reviewPayment = (input.reviewTexts || []).find((text) => /\b(?:cash|check|cheque)(?:\s*(?:or|and|\/)\s*(?:cash|check|cheque))?\s+only\b|\bno (?:credit |debit )?cards?\b/i.test(text))
+    if (reviewPayment) {
+      add({
+        signal: "possible_payment_friction",
+        supportingEvidence: reviewPayment.slice(0, 260),
+        evidenceSource: "public_review",
+        confidence: 45,
+        suggestedMountlineSolution: "Ask whether the review still reflects current policy before mentioning payment options.",
+        safeToMentionInFirstPitch: false,
+        verificationStatus: "verify_before_mention",
+      })
+    }
+  }
+  return signals
 }
 
 export function signalDuplicateKey(input: {

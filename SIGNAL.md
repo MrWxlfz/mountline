@@ -48,25 +48,30 @@ All pages and APIs use the existing Mountline team-member guard. Signal is not p
 
 `/dashboard/signal` is the internal lead-engine entry point. A team member enters a city or metro area, an optional radius, a lead count, an industry preference, and optional plain-language notes. Signal then creates a persisted run and advances it in short, resumable stages:
 
-- setting up the market
-- finding public-web candidates
-- filtering chains, duplicates, and suppressed businesses
-- checking likely official public websites
+- resolving the requested market into coordinates and a radius boundary
+- searching structured local map listings across adaptive geographic tiles
+- expanding category coverage when the center search is not enough
+- removing chains, permanently closed listings, duplicates, and out-of-radius results
+- verifying business identities, official sites, social profiles, and chain context through Tavily
+- analyzing verified official websites through the safe scanner and Firecrawl when available
+- finding evidence-backed customer-flow gaps
 - scoring evidence-backed opportunities
 - writing draft-only sales packs
 - ranking the strongest independent local leads
 
 The page never exposes provider/depth/budget controls. It shows provider setup warnings only when a required server-side key is absent. A run is safe to refresh because its status, event feed, candidates, evidence, scoring, and generated drafts are persisted.
 
-The radius is passed into discovery as a public-search preference, not represented as a verified drive-time claim. Signal requires public city/area evidence before ranking a lead and labels any unverified distance as a manual check rather than inventing precision.
+For map-first runs, the radius is a geographic boundary around the resolved market center. Signal filters physical listings by coordinate distance and retains provider-marked service-area businesses found within the bounded search. Distance is straight-line discovery distance, never a drive-time claim. Tavily fallback runs still label radius as a discovery preference because they do not have equivalent map coverage.
 
-The additive lead-run schema is defined by `202607090001_mountline_signal_lead_runs.sql`, `202607090002_mountline_signal_lead_run_hardening.sql`, and `202607090003_mountline_signal_run_evidence_integrity.sql`. Apply all three in order before opening a live run.
+The additive lead-run schema is defined by the existing lead-run migrations plus `20260710070000_signal_map_first_discovery.sql`. Apply migrations in timestamp order before opening a live run.
 
-Lead runs search permitted public web results and scan only likely official public sites that pass the existing SSRF-safe website validation. They do not scrape Google Maps, Google reviews, directory pages, login-gated pages, or social platforms. A public social link may be kept as source context when it appears in a search result or on an official site, but Signal does not fetch the social page.
+Lead runs use the official Google Places API when configured. They do not scrape or automate the consumer Google Maps website, copy provider photos, or store review text. Tavily verifies broader public-web presence and identifies matching public social/profile URLs without scraping those platforms. Firecrawl receives only a verified official website URL after the existing SSRF-safe scan.
+
+A structured listing can proceed without a website. Signal classifies presence as `no_website_found`, `social_only`, `directory_only`, `website_unreachable`, `website_broken`, `website_weak`, `website_adequate`, `website_strong`, or `website_unknown`. “No official website was found” is used only after a reasonable verification search; missing Tavily produces `website_unknown` rather than an absolute no-site claim.
 
 High-likelihood chains and franchises are excluded before costly website or AI work. Medium chain likelihood remains visible only when public evidence leaves a strong independent-local reason to continue. Ignoring a lead adds its normalized public business identity to the existing suppression flow so it is not silently resurfaced in later runs.
 
-Each ranked lead includes the public evidence used, confidence, chain rationale, an evidence-based communication-profile tag list, a draft sales pack, and a clearly labeled concept-preview/Lovable prompt. Sales packs are draft-only; no contact action is sent or submitted automatically.
+Each ranked lead includes the public evidence used, separate identity/geographic/independence/contact/presence/opportunity confidence, chain rationale, an evidence-based communication-profile tag list, a draft sales pack, and a clearly labeled concept-preview/Lovable prompt. Qualified leads, watchlist leads, research-needed leads, and hard rejects remain distinct. Sales packs are generated only for qualified leads and remain draft-only; no contact action is sent or submitted automatically.
 
 ## Quick Research
 
@@ -182,6 +187,22 @@ TAVILY_API_KEY=
 FIRECRAWL_API_KEY=
 ```
 
+Map-first discovery environment variables:
+
+```text
+SIGNAL_PLACES_PROVIDER=google|disabled
+GOOGLE_PLACES_API_KEY=
+SIGNAL_PLACES_MAX_DISCOVERY_RESULTS=120
+SIGNAL_PLACES_MAX_DETAIL_CALLS=36
+SIGNAL_PLACES_MAX_TILES=5
+SIGNAL_PLACES_MAX_CATEGORY_QUERIES=12
+SIGNAL_PLACES_MAX_SEARCH_CALLS=24
+SIGNAL_PLACES_MAX_PAGES_PER_QUERY=1
+SIGNAL_PLACES_CACHE_TTL_HOURS=24
+```
+
+The Google Cloud project for `GOOGLE_PLACES_API_KEY` must have billing, Places API (New), and Geocoding API enabled. Restrict the key to those APIs and to the production server deployment where supported. Keep it server-only; never prefix it with `NEXT_PUBLIC_`.
+
 Optional screenshot capture environment variables:
 
 ```text
@@ -216,6 +237,8 @@ SIGNAL_DEEP_MODEL=gemini-3.5-flash
 SIGNAL_VISUAL_MODEL=gemini-3.5-flash
 SIGNAL_RESEARCH_PROVIDER=tavily
 TAVILY_API_KEY=<Tavily API key>
+SIGNAL_PLACES_PROVIDER=google
+GOOGLE_PLACES_API_KEY=<server-side Google Maps Platform key>
 SIGNAL_SCREENSHOT_PROVIDER=manual
 SIGNAL_ALERT_EMAIL=<Mountline team alert email, optional>
 ```
@@ -224,13 +247,24 @@ API keys authenticate provider access. Model values are exact model IDs, not API
 
 `SIGNAL_AI_PROVIDER=disabled` is supported. If no key exists or the provider fails, Signal stores the website scan and uses deterministic scoring with the UI note: `AI analysis unavailable; rule-based score shown.`
 
-`SIGNAL_RESEARCH_PROVIDER=disabled` is supported. Manual entry and import continue to work without Tavily.
+`SIGNAL_RESEARCH_PROVIDER=disabled` is supported. Map-first discovery can still run with Places, but website/social verification remains lower-confidence; manual entry and import also continue to work.
 
-When no explicit provider mode is set, Lead Runs use configured server-side keys automatically: Tavily for discovery, Firecrawl for official-site extraction, and Gemini or OpenAI for sales-pack drafting. An explicit `disabled` setting always wins. Missing Firecrawl or AI keys degrade gracefully to scanner evidence or deterministic draft generation; missing Tavily prevents new automated discovery while leaving the Signal UI and legacy/manual workflows available.
+When no explicit Places mode is set, Lead Runs use Google map-first discovery automatically when `GOOGLE_PLACES_API_KEY` exists. Tavily becomes verification/enrichment and reduced-coverage fallback discovery; Firecrawl remains official-site extraction; Gemini or OpenAI remains optional sales-pack drafting. Missing Places configuration is shown honestly and falls back to Tavily when available. Missing Tavily lowers online-presence confidence but does not reject otherwise credible map candidates. Missing Firecrawl or AI degrades to safe scanner evidence or deterministic draft generation.
 
 `SIGNAL_SCREENSHOT_PROVIDER=manual` is the default and keeps screenshot collection as upload-only. `browserless` enables server-side homepage capture after the official URL passes the same website scanner safety checks. `disabled` hides automated capture guidance while manual upload can remain available.
 
 `SIGNAL_RESEARCH_PROVIDER=hybrid` uses Tavily for lightweight public discovery and Firecrawl for complementary discovery plus official-site extraction where configured. Firecrawl is never used to crawl whole sites by default; market depth limits control how many official-site pages are read per candidate.
+
+## Map-first deployment
+
+1. In Google Cloud, attach billing and enable Places API (New) and Geocoding API.
+2. Create a server API key, restrict it to those APIs, and add it to the deployment as `GOOGLE_PLACES_API_KEY`.
+3. Set `SIGNAL_PLACES_PROVIDER=google`; keep the conservative default quotas above unless a deliberate budget review supports increasing them.
+4. Keep `SIGNAL_RESEARCH_PROVIDER=tavily` or `hybrid` with `TAVILY_API_KEY` so Signal can verify official sites, public social profiles, and chain context.
+5. Keep `FIRECRAWL_API_KEY` configured if verified official-site extraction is desired.
+6. Apply `supabase/migrations/20260710070000_signal_map_first_discovery.sql` after the earlier Signal migrations. The migration is additive and creates an RLS-protected, short-TTL normalized Places detail cache with no photos or review text.
+7. Deploy, open `/dashboard/signal`, and confirm the provider status does not show reduced map coverage.
+8. Run a five-lead Keller or Southlake groomer search and confirm the activity feed shows market resolution, map listing counts, chain/duplicate removal, web/social verification, opportunity scoring, qualified leads, and any separate watchlist.
 
 ## Initial Analysis Vs Deep Dive
 

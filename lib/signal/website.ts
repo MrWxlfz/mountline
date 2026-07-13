@@ -35,6 +35,7 @@ export type SignalPageScan = {
   links: string[]
   bookingLinks: string[]
   socialLinks: string[]
+  hasContactForm: boolean
   detectedWebsitePlatform: string | null
   detectedBookingPlatform: string | null
   imageCount: number
@@ -574,6 +575,7 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
   const phones = extractPhones(html, text)
   const bookingLinks = getBookingLinks(links)
   const socialLinks = getSocialLinks(links)
+  const hasContactForm = /<form\b[\s\S]{0,12000}?(?:type=["'](?:email|tel)["']|name=["'][^"']*(?:contact|message|quote|estimate|appointment|phone|email)[^"']*["'])/i.test(html)
   const imageCount = (html.match(/<img\b/gi) || []).length
   const title = extractFirst(html, /<title[^>]*>([\s\S]*?)<\/title>/i)
   const metaDescription = extractMetaDescription(html)
@@ -643,6 +645,7 @@ function scanHtmlPage(url: string, status: number, html: string): SignalPageScan
     links,
     bookingLinks,
     socialLinks,
+    hasContactForm,
     detectedWebsitePlatform,
     detectedBookingPlatform,
     imageCount,

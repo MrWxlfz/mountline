@@ -81,7 +81,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[signal] Lead run creation failed:", error)
     const message = errorMessage(error, "Signal could not create this lead run.")
-    const setupIssue = /TAVILY_API_KEY|public research enabled/i.test(message)
+    const setupIssue = /GOOGLE_PLACES_API_KEY|TAVILY_API_KEY|public research enabled/i.test(message)
     return json({ error: message }, setupIssue ? 503 : 500)
   }
 }

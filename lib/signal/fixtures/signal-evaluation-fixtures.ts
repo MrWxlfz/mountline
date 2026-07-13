@@ -39,3 +39,42 @@ export const southlakeRegression = {
   ],
 }
 
+export const mapFirstOpportunities = {
+  independentGroomer: {
+    name: "Pine & Paws Grooming",
+    city: "Keller, TX",
+    phone: "(817) 555-0142",
+    rating: 4.8,
+    reviewCount: 86,
+    onlinePresence: "social_only" as const,
+    social: "https://facebook.com/pineandpawsgrooming",
+    appointmentBased: true,
+  },
+  independentBarber: {
+    name: "Cedar Chair Barber Co.",
+    city: "Southlake, TX",
+    phone: "(817) 555-0188",
+    rating: 4.7,
+    reviewCount: 41,
+    onlinePresence: "social_only" as const,
+    social: "https://instagram.com/cedarchairbarber",
+    appointmentBased: true,
+  },
+  independentCleaner: {
+    name: "Clearline Home Cleaning",
+    city: "Santa Barbara, CA",
+    phone: "(805) 555-0131",
+    rating: 4.6,
+    reviewCount: 33,
+    onlinePresence: "website_weak" as const,
+    hasContactForm: false,
+    serviceAreaVerified: true,
+  },
+}
+
+export const mapFirstNegativeFixtures = {
+  permanentlyClosed: { name: "Closed Grooming Fixture", businessStatus: "CLOSED_PERMANENTLY" },
+  outsideRadius: { name: "Far Away Barber", distanceMiles: 31, requestedRadiusMiles: 10 },
+  duplicatePlaceId: "google-place-fixture-123",
+  noIdentity: { name: "Pet Grooming Services Near Me" },
+}

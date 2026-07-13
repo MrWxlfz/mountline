@@ -939,6 +939,17 @@ export type SignalRunWebsiteStatus =
   | "social_only"
   | "unknown"
 
+export type SignalOnlinePresenceClassification =
+  | "no_website_found"
+  | "social_only"
+  | "directory_only"
+  | "website_unreachable"
+  | "website_broken"
+  | "website_weak"
+  | "website_adequate"
+  | "website_strong"
+  | "website_unknown"
+
 export type SignalRun = {
   id: string
   created_at: string
@@ -965,6 +976,10 @@ export type SignalRun = {
   started_at: string | null
   heartbeat_at: string | null
   attempt_count: number
+  discovery_provider: "google" | "tavily" | null
+  market_center: SignalJson | null
+  market_boundary: SignalJson | null
+  provider_usage: SignalJson
 }
 
 export type SignalRunEvent = {
@@ -1035,11 +1050,35 @@ export type SignalRunLead = {
   opportunity_score: number | null
   ranking_score: number | null
   confidence_components: SignalJson
-  qualification_status: "qualified" | "rejected" | "incomplete" | null
+  qualification_status: "qualified" | "watchlist" | "research_needed" | "rejected" | "incomplete" | null
   rejection_reason: string | null
   script_generation_type: "ai" | "deterministic_fallback" | null
   prompt_version: string | null
   evaluation_metadata: SignalJson
+  discovery_provider: "google" | "tavily" | null
+  provider_place_id: string | null
+  provider_listing_url: string | null
+  listing_latitude: number | null
+  listing_longitude: number | null
+  listing_retrieved_at: string | null
+  listing_attribution: string | null
+  business_status: string | null
+  primary_category: string | null
+  place_categories: SignalJson
+  rating: number | null
+  review_count: number | null
+  opening_hours: SignalJson
+  price_level: string | null
+  online_presence_classification: SignalOnlinePresenceClassification | null
+  primary_online_channel: "website" | "facebook" | "instagram" | "booking_marketplace" | "directory" | "phone" | "unknown" | null
+  social_profiles: SignalJson
+  social_verification_confidence: number | null
+  contact_confidence: number | null
+  online_presence_confidence: number | null
+  opportunity_analysis_confidence: number | null
+  opportunity_signals: SignalJson
+  research_needed_reasons: SignalJson
+  provider_usage_metadata: SignalJson
 }
 
 export type SignalRunLeadEvidence = {

@@ -26,6 +26,7 @@ import {
   assessSignalChain,
   assessSignalEntityName,
   assessSignalGeography,
+  buildSignalOpportunityEvidence,
   calculateSignalConfidence,
   calculateSignalOpportunity,
   qualifySignalLead,
@@ -34,7 +35,24 @@ import {
   type SignalChainClassification,
   type SignalEntityStatus,
   type SignalGeographicStatus,
+  type SignalOnlinePresenceClassification,
 } from "./quality"
+import {
+  addSignalPlacesUsage,
+  buildSignalPlacesPlan,
+  emptySignalPlacesUsage,
+  getSignalPlacesConfig,
+  getSignalPlacesProvider,
+  getSignalPlacesSetup,
+  runSignalPlacesPlanItem,
+  type SignalPlacesUsage,
+} from "./places"
+import {
+  mergeSignalPlaces,
+  signalDistanceMiles,
+  type SignalPlace,
+  type SignalResolvedMarket,
+} from "./places-core"
 import { scanSignalWebsite, type SignalWebsiteScan } from "./website"
 import { selectSignalSalesPack } from "./sales-grounding"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -134,12 +152,16 @@ type ChainAssessment = {
 
 type WebsiteReview = {
   status: SignalRunWebsiteStatus
+  classification?: SignalOnlinePresenceClassification
+  classificationConfidence?: number
+  primaryOnlineChannel?: "website" | "facebook" | "instagram" | "booking_marketplace" | "directory" | "phone" | "unknown"
   summary: string
   evidence: string[]
   gaps: string[]
   objectiveSignals: {
     has_cta: boolean
     has_contact: boolean
+    has_contact_form?: boolean
     has_services: boolean
     has_booking: boolean
     has_trust_language: boolean
@@ -167,12 +189,15 @@ function isWebsiteReview(value: unknown): value is WebsiteReview {
 }
 
 export type SignalLeadRunProviderSetup = {
+  places: boolean
   tavily: boolean
   firecrawl: boolean
   ai: boolean
   missing: string[]
   warnings: string[]
   researchProvider: string
+  placesProvider: "google" | "disabled"
+  mapFirst: boolean
   aiProvider: "gemini" | "openai" | "disabled"
 }
 
@@ -297,6 +322,59 @@ function parseDiscoveryResult(value: unknown): DiscoveryResult | null {
     url,
     snippet: asString(item.snippet),
     source_label: asString(item.source_label) || "Tavily public web result",
+  }
+}
+
+function parseSignalPlace(value: unknown): SignalPlace | null {
+  const item = asObject(value)
+  const coordinates = asObject(item.coordinates)
+  const latitude = typeof coordinates.latitude === "number" ? coordinates.latitude : null
+  const longitude = typeof coordinates.longitude === "number" ? coordinates.longitude : null
+  const providerPlaceId = asString(item.provider_place_id)
+  const canonicalName = asString(item.canonical_name)
+  if (item.provider !== "google" || !providerPlaceId || !canonicalName || latitude == null || longitude == null) return null
+  return {
+    provider: "google",
+    provider_place_id: providerPlaceId,
+    canonical_name: canonicalName,
+    formatted_address: asString(item.formatted_address) || null,
+    city: asString(item.city) || null,
+    state: asString(item.state) || null,
+    coordinates: { latitude, longitude },
+    phone: asString(item.phone) || null,
+    website_url: publicUrl(asString(item.website_url)),
+    listing_url: publicUrl(asString(item.listing_url)),
+    business_status: asString(item.business_status) || null,
+    categories: safeArray(item.categories).filter((entry): entry is string => typeof entry === "string"),
+    rating: typeof item.rating === "number" ? item.rating : null,
+    review_count: typeof item.review_count === "number" ? item.review_count : null,
+    opening_hours: safeArray(item.opening_hours).filter((entry): entry is string => typeof entry === "string"),
+    price_level: asString(item.price_level) || null,
+    primary_category: asString(item.primary_category) || null,
+    service_area_business: item.service_area_business === true,
+    retrieved_at: asString(item.retrieved_at) || currentIso(),
+  }
+}
+
+function parseResolvedMarket(value: unknown): SignalResolvedMarket | null {
+  const item = asObject(value)
+  const center = asObject(item.center)
+  const boundary = asObject(item.boundary)
+  const low = asObject(boundary.low)
+  const high = asObject(boundary.high)
+  const numbers = [center.latitude, center.longitude, low.latitude, low.longitude, high.latitude, high.longitude]
+  if (item.provider !== "google" || numbers.some((number) => typeof number !== "number" || !Number.isFinite(number))) return null
+  return item as unknown as SignalResolvedMarket
+}
+
+function parsePlacesUsage(value: unknown): SignalPlacesUsage {
+  const item = asObject(value)
+  return {
+    market_resolution_calls: asNumber(item.market_resolution_calls),
+    search_calls: asNumber(item.search_calls),
+    detail_calls: asNumber(item.detail_calls),
+    cache_hits: asNumber(item.cache_hits),
+    returned_places: asNumber(item.returned_places),
   }
 }
 
@@ -563,6 +641,8 @@ function websiteReview(input: {
   scan: SignalWebsiteScan | null
   socialLinks: string[]
   firecrawlExcerpt: string | null
+  verificationAttempted?: boolean
+  directoryOnly?: boolean
 }) : WebsiteReview {
   const scan = input.scan
   const hasSite = Boolean(input.websiteUrl)
@@ -573,24 +653,58 @@ function websiteReview(input: {
     if (input.socialLinks.length > 0) {
       return {
         status: "social_only",
-        summary: "No official website was found; public social context is the only visible web presence.",
-        evidence: ["No likely official website in discovery results", "Public social link found"],
+        classification: "social_only",
+        classificationConfidence: input.verificationAttempted ? 86 : 62,
+        primaryOnlineChannel: input.socialLinks.some((url) => /instagram\.com/i.test(url)) ? "instagram" : "facebook",
+        summary: "No official website was found across the sources checked; the business appears to rely primarily on a verified social profile.",
+        evidence: ["No official website was verified", "A matching public social profile was found"],
         gaps: ["No verified official site", "Customer path needs manual confirmation"],
+        objectiveSignals: { has_cta: false, has_contact: false, has_services: false, has_booking: false, has_trust_language: false, scan_coverage: "none" },
+      }
+    }
+    if (input.directoryOnly) {
+      return {
+        status: "no_site",
+        classification: "directory_only",
+        classificationConfidence: input.verificationAttempted ? 78 : 58,
+        primaryOnlineChannel: "directory",
+        summary: "A structured map listing and contact route were found, but no official site or social profile was verified.",
+        evidence: ["Structured listing found", "No official website or social profile was verified"],
+        gaps: ["Directory-only presence", "Customer information depends on third-party listing context"],
+        objectiveSignals: { has_cta: false, has_contact: false, has_services: false, has_booking: false, has_trust_language: false, scan_coverage: "none" },
+      }
+    }
+    if (!input.verificationAttempted) {
+      return {
+        status: "unknown",
+        classification: "website_unknown",
+        classificationConfidence: 28,
+        primaryOnlineChannel: "phone",
+        summary: "The structured listing has no website field, but broader web verification was unavailable.",
+        evidence: ["No website field was present in the structured listing"],
+        gaps: ["Official website status still needs verification"],
         objectiveSignals: { has_cta: false, has_contact: false, has_services: false, has_booking: false, has_trust_language: false, scan_coverage: "none" },
       }
     }
     return {
       status: "no_site",
-      summary: "No likely official website was found in the public discovery evidence.",
-      evidence: ["No likely official website in discovery results"],
-      gaps: ["Website presence is unverified", "Contact route needs manual confirmation"],
+      classification: "no_website_found",
+      classificationConfidence: 82,
+      primaryOnlineChannel: "phone",
+      summary: "No official website was found across the sources checked.",
+      evidence: ["Structured listing checked", "Exact-name web verification did not produce a verified official site"],
+      gaps: ["No verified official website", "Customer information and next steps may depend on calls or listings"],
       objectiveSignals: { has_cta: false, has_contact: false, has_services: false, has_booking: false, has_trust_language: false, scan_coverage: "none" },
     }
   }
 
   if (!scan || scan.broken_response) {
+    const unreachable = /fetch|timeout|network|dns|connect|unreachable/i.test(scan?.error || "")
     return {
       status: "unknown",
+      classification: unreachable ? "website_unreachable" : "website_broken",
+      classificationConfidence: 78,
+      primaryOnlineChannel: "website",
       summary: "A likely official website was found, but Signal could not safely read enough public content to assess it.",
       evidence: scan?.error ? [`Website scan issue: ${scan.error}`] : ["Website scan did not return usable content"],
       gaps: ["Website quality is not verified", "Review the public site manually before making a visual claim"],
@@ -602,6 +716,9 @@ function websiteReview(input: {
   if (/\b(sign in|log in|password|member portal|members only)\b/i.test(loginWallText)) {
     return {
       status: "unknown",
+      classification: "website_unknown",
+      classificationConfidence: 70,
+      primaryOnlineChannel: "website",
       summary: "The public page appears to be a login-gated or member-only surface, so Signal did not inspect private content.",
       evidence: ["Public page indicates a login-gated or member-only surface"],
       gaps: ["Website quality and customer flow remain unverified"],
@@ -611,9 +728,11 @@ function websiteReview(input: {
 
   const hasCta = scan.cta_words.length > 0
   const hasContact = scan.visible_phones.length > 0 || scan.visible_emails.length > 0 || scan.pages.some((page) => page.links.some((link) => /contact/i.test(link)))
+  const hasContactForm = scan.pages.some((page) => page.hasContactForm)
   const hasServices = scan.service_language.length > 0 || scan.headings.some((heading) => /service|what we do|our work/i.test(heading))
   const hasBooking = scan.booking_links.length > 0
   const text = sourceText({ scan, firecrawlExcerpt: input.firecrawlExcerpt })
+  const visiblePageText = scan.pages.map((page) => page.textExcerpt).join(" ")
   const hasTrust = /testimonial|trusted|award|serving since|years of experience|review/i.test(text)
   const coverage = scan.scanned_urls.length > 1 ? "usable" : "limited"
 
@@ -627,8 +746,13 @@ function websiteReview(input: {
   else gaps.push("No clear public CTA was detected")
   if (hasContact) evidence.push("A public contact route was detected")
   else gaps.push("No public phone, email, or contact-path signal was detected")
+  if (hasContactForm) evidence.push("A public contact or request form was detected")
+  else if (/quote|estimate|appointment|schedule|request|contact/i.test(`${visiblePageText} ${text}`)) gaps.push("Customer-action language appears without a detected contact or request form")
   if (hasBooking) evidence.push("A public booking/request path was detected")
   if (hasTrust) evidence.push("Public trust language was detected")
+  if (!/\bfaq|frequently asked/i.test(`${scan.headings.join(" ")} ${visiblePageText}`)) gaps.push("No public FAQ signal was detected")
+  const staleCopyright = visiblePageText.match(/(?:©|copyright)\s*(20\d{2})/i)?.[1]
+  if (staleCopyright && Number(staleCopyright) <= new Date().getFullYear() - 4) gaps.push(`Public copyright wording appears dated ${staleCopyright}; verify whether the site is still maintained`)
 
   const gapsCount = gaps.length
   const signalsCount = [scan.page_title, scan.meta_description, hasServices, hasCta, hasContact, hasBooking].filter(Boolean).length
@@ -640,6 +764,9 @@ function websiteReview(input: {
 
   return {
     status,
+    classification: status === "weak_site" ? "website_weak" : status === "strong_site" ? "website_strong" : "website_adequate",
+    classificationConfidence: coverage === "usable" ? 88 : 74,
+    primaryOnlineChannel: "website",
     summary: status === "weak_site"
       ? "The public site has multiple objective clarity or contact-flow gaps. This is not a visual-design judgment."
       : status === "strong_site"
@@ -647,7 +774,7 @@ function websiteReview(input: {
         : "The public site has some useful customer-flow signals, with specific gaps worth verifying.",
     evidence,
     gaps,
-    objectiveSignals: { has_cta: hasCta, has_contact: hasContact, has_services: hasServices, has_booking: hasBooking, has_trust_language: hasTrust, scan_coverage: coverage },
+    objectiveSignals: { has_cta: hasCta, has_contact: hasContact, has_contact_form: hasContactForm, has_services: hasServices, has_booking: hasBooking, has_trust_language: hasTrust, scan_coverage: coverage },
   }
 }
 
@@ -764,14 +891,21 @@ function buildScoreBreakdown(input: {
     unknowns: ["Signal does not submit forms or test booking/payment flows"],
   })
 
-  const trustProof = input.website.objectiveSignals.has_trust_language
+  const rating = input.lead.rating || 0
+  const reviewCount = input.lead.review_count || 0
+  const structuredReputation = rating >= 4.2 && reviewCount >= 10
+  const trustProof = input.website.objectiveSignals.has_trust_language || structuredReputation
   const trustGap = scoreDimension({
     score: trustProof && websiteOpportunity.score != null ? clamp((websiteOpportunity.score || 0) * 0.72 + 15) : null,
-    confidence: trustProof ? 48 : 0,
-    rationale: trustProof
-      ? "Public trust language is present while the online customer-flow review still shows gaps."
+    confidence: structuredReputation ? (reviewCount >= 50 ? 88 : 74) : trustProof ? 48 : 0,
+    rationale: structuredReputation
+      ? "The structured listing's reputation signal is stronger than the verified digital customer path."
+      : trustProof
+        ? "Public trust language is present while the online customer-flow review still shows gaps."
       : "No public evidence supports a reputation-versus-presentation comparison.",
-    evidence: trustProof ? ["Public trust/testimonial language detected", ...input.website.gaps.slice(0, 2)] : [],
+    evidence: structuredReputation
+      ? [`Structured listing rating: ${rating.toFixed(1)} across ${reviewCount} reviews`, ...input.website.gaps.slice(0, 2)]
+      : trustProof ? ["Public trust/testimonial language detected", ...input.website.gaps.slice(0, 2)] : [],
     unknowns: trustProof ? ["Third-party review reputation was not collected"] : ["No public trust signal was found", "Third-party review reputation was not collected"],
   })
 
@@ -836,17 +970,22 @@ function buildScoreBreakdown(input: {
   ], 20)
   const confidenceComponents = calculateSignalConfidence({
     identity: input.entityConfidence ?? 45,
-    officialSite: scan && !scan.broken_response ? 88 : input.lead.website_url ? 28 : hasSocial ? 42 : 18,
     geography: input.geographicConfidence ?? (isLocalEvidence ? 45 : 15),
-    contactAgreement: input.contactAgreement ?? (hasPhone || hasEmail ? 55 : 15),
-    sourceDiversity: clamp((input.sourceCount || sourceUrls(input.lead.source_urls).length) * 22, 15, 88),
-    websiteCompleteness: input.website.objectiveSignals.scan_coverage === "usable" ? 90 : input.website.objectiveSignals.scan_coverage === "limited" ? 62 : 22,
-    chainCertainty: input.chain.classification === "independent" || input.chain.classification === "likely_independent"
+    independence: input.chain.classification === "independent" || input.chain.classification === "likely_independent"
       ? input.chain.independentConfidence
       : input.chain.classification === "chain" || input.chain.classification === "likely_franchise"
         ? input.chain.likelihood
         : 35,
-    freshness: 92,
+    contact: input.contactAgreement ?? (hasPhone || hasEmail ? 72 : input.hasAddress ? 55 : 25),
+    onlinePresence: input.website.classificationConfidence
+      ?? (input.website.objectiveSignals.scan_coverage === "usable" ? 88 : input.website.status === "no_site" || input.website.status === "social_only" ? 76 : 38),
+    opportunityAnalysis: clamp(
+      30
+      + (websiteOpportunity.evidence.length ? 16 : 0)
+      + (contactFriction.evidence.length ? 14 : 0)
+      + (trustGap.evidence.length ? 18 : 0)
+      + (operationalOpportunity.evidence.length ? 14 : 0),
+    ),
     contradictionPenalty: 0,
     providerFailurePenalty: input.providerFailure ? 12 : 0,
   })
@@ -865,23 +1004,26 @@ function buildScoreBreakdown(input: {
 
   const opportunity = calculateSignalOpportunity({
     dimensions: {
-      mountlineFit: Math.round((fit.score || 0) * 0.2),
-      websiteOpportunity: Math.round((websiteOpportunity.score || 0) * 0.2),
-      contactConversionFriction: Math.round((contactFriction.score || 0) * 0.15),
+      reputationViability: clamp(Math.round(
+        (rating >= 4 ? 7 : 2)
+        + (reviewCount >= 50 ? 6 : reviewCount >= 10 ? 4 : reviewCount > 0 ? 2 : 0)
+        + (hasPhone || hasEmail ? 4 : 0)
+        + (input.hasAddress || input.lead.provider_listing_url ? 3 : 0),
+      ), 0, 20),
+      digitalGap: Math.round((websiteOpportunity.score || 0) * 0.25),
+      customerFlowOpportunity: Math.round(Math.max(contactFriction.score || 0, operationalOpportunity.score || 0) * 0.2),
       trustGap: Math.round((trustGap.score || 0) * 0.15),
       demoPotential: Math.round((demoPotential.score || 0) * 0.1),
-      contactViability: Math.round((walkIn.score ?? (hasPhone || hasEmail ? 55 : 0)) * 0.1),
-      operationalOpportunity: Math.round((operationalOpportunity.score || 0) * 0.05),
-      timingUrgency: Math.round((urgency.score || 0) * 0.05),
+      outreachViability: Math.round((walkIn.score ?? (hasPhone || hasEmail || input.lead.provider_listing_url ? 55 : 0)) * 0.1),
     },
     confidence: confidenceScore,
     penalties: {
-      uncertain_identity: (input.entityConfidence ?? 0) < 65 ? 35 : 0,
-      uncertain_geography: (input.geographicConfidence ?? 0) < 60 ? 25 : 0,
+      uncertain_identity: (input.entityConfidence ?? 0) < 60 ? 25 : 0,
+      uncertain_geography: (input.geographicConfidence ?? 0) < 60 ? 20 : 0,
       probable_chain: input.chain.classification === "chain" || input.chain.classification === "likely_franchise" ? 100 : input.chain.classification === "uncertain" ? 24 : 0,
       excellent_website: input.website.status === "strong_site" ? 18 : 0,
       no_contact: !hasPhone && !hasEmail && !input.hasAddress && !input.website.objectiveSignals.has_contact && !input.website.objectiveSignals.has_booking ? 20 : 0,
-      insufficient_evidence: confidenceScore < 55 ? 30 : 0,
+      insufficient_evidence: confidenceComponents.opportunityAnalysis < 40 ? 12 : 0,
     },
   })
   const confidenceAdjustment = Number((confidenceScore / 100).toFixed(2))
@@ -905,7 +1047,7 @@ function buildScoreBreakdown(input: {
       ranking_score: opportunity.rankingScore,
       confidence_adjustment: confidenceAdjustment,
       chain_adjustment: chainAdjustment,
-      method: "Eight-dimension opportunity score with explicit penalties, multiplied by calibrated evidence confidence.",
+      method: "Six-dimension map-first opportunity score with separate calibrated evidence confidence.",
     },
   }
 }
@@ -949,6 +1091,7 @@ function communicationProfile(input: {
 
 function topReasons(scores: LeadScoreBreakdown, website: WebsiteReview, chain: ChainAssessment) {
   const candidates = [
+    ...scores.trust_gap.evidence,
     ...scores.fit.evidence,
     ...scores.website_opportunity.evidence,
     ...scores.contact_friction.evidence,
@@ -1007,6 +1150,12 @@ function fallbackSalesPack(input: {
   const name = input.lead.business_name
   const location = [input.lead.city, input.lead.state].filter(Boolean).join(", ") || "the local area"
   const raw = asObject(input.lead.raw_research)
+  const storedOpportunitySignals = safeArray(raw.opportunity_signals).map(asObject)
+  const paymentVerification = storedOpportunitySignals
+    .filter((signal) => /payment/i.test(asString(signal.signal)) || signal.safeToMentionInFirstPitch === false)
+    .map((signal) => asString(signal.verificationStatus) === "verify_before_mention"
+      ? "A third-party payment claim must be verified directly before it is mentioned."
+      : "Confirm the business's current payment preference before proposing or mentioning payment options.")
   const storedScan = asObject(raw.scan)
   const branding = asObject(raw.firecrawl_branding)
   const brandingColorValue = asObject(branding.colors).primary
@@ -1036,7 +1185,7 @@ function fallbackSalesPack(input: {
     painPoints.push({ statement: "Ask whether the current customer path answers the questions callers ask most often.", basis: "hypothesis" })
   }
   const strongestAngle = input.website.status === "no_site" || input.website.status === "social_only"
-    ? `Give ${name} one clear home for its verified services and contact route without replacing the social presence that already works.`
+    ? `Complement the existing ${input.website.status === "social_only" ? "social presence" : "listing and phone presence"} with one phone-first page where customers can understand ${name}, see services, and take the next step. It would not replace Facebook or Instagram.`
     : input.website.status === "weak_site"
       ? `Make the next customer step clearer around ${input.website.gaps[0]?.toLowerCase() || "services and contact"}, while respecting the business's existing reputation.`
       : `Keep the existing site foundation and improve only ${input.website.gaps[0]?.toLowerCase() || "the clearest customer-flow friction"}.`
@@ -1110,12 +1259,14 @@ function fallbackSalesPack(input: {
       "Do not lead with payments or complex systems unless the business asks about them.",
     ],
     risks_to_verify: unique([
+      ...paymentVerification,
       ...input.scores.fit.unknowns,
       ...input.scores.walk_in_viability.unknowns,
       ...input.website.gaps.slice(0, 2),
     ], 6),
     next_action_checklist: [
       input.lead.address ? "Verify the address, public hours, and a respectful walk-in time." : "Verify the preferred public contact route before outreach.",
+      ...paymentVerification,
       "Open every evidence link and confirm the exact fact used in the opener.",
       "Build only the one-angle concept; keep all unknown facts as visible placeholders.",
       `Start with a ${channel}; do not sequence automated follow-ups.`,
@@ -1151,6 +1302,7 @@ function leadPublicFacts(lead: MutableLead, scan: SignalWebsiteScan | null, webs
     lead.verified_address ? `Verified public address: ${lead.verified_address}` : null,
     lead.phone ? `Public phone: ${lead.phone}` : null,
     lead.public_email ? `Public email: ${lead.public_email}` : null,
+    lead.rating != null && lead.review_count != null ? `Structured listing reputation: ${lead.rating.toFixed(1)} rating across ${lead.review_count} reviews` : null,
     ...website.evidence,
     ...(scan?.service_language || []).slice(0, 3),
     ...storedServices.slice(0, 4),
@@ -1196,7 +1348,8 @@ async function fetchRun(runId: string) {
 }
 
 async function writeProviderWarning(run: MutableRun, warning: string) {
-  const current = safeArray(run.provider_errors).filter((item): item is string => typeof item === "string")
+  const latest = await fetchRun(run.id).catch(() => null)
+  const current = safeArray(latest?.provider_errors || run.provider_errors).filter((item): item is string => typeof item === "string")
   const provider_errors = unique([...current, warning], 10)
   return updateRun(run.id, { provider_errors })
 }
@@ -1212,19 +1365,25 @@ function snapshotRunStatus(run: MutableRun, stage: string, progress: number, upd
 
 export function getSignalLeadRunProviderSetup(): SignalLeadRunProviderSetup {
   const researchProvider = getSignalResearchProviderMode()
+  const placesSetup = getSignalPlacesSetup()
+  const places = placesSetup.enabled
   const tavily = (researchProvider === "tavily" || researchProvider === "hybrid") && Boolean(process.env.TAVILY_API_KEY)
   const firecrawl = (researchProvider === "firecrawl" || researchProvider === "hybrid") && Boolean(process.env.FIRECRAWL_API_KEY)
   const aiSetup = getSignalAiProviderSetup()
   const missing: string[] = []
   const warnings: string[] = []
 
-  if (!tavily) {
+  if (!places && placesSetup.missing_env.length) missing.push(...placesSetup.missing_env)
+  if (!places && placesSetup.warning) warnings.push(placesSetup.warning)
+  if (!tavily && !places) {
     missing.push("TAVILY_API_KEY")
     warnings.push(
       researchProvider === "disabled"
-        ? "Public research is disabled by SIGNAL_RESEARCH_PROVIDER."
-        : "Tavily is required to discover new local lead candidates.",
+        ? "Public-web fallback research is disabled by SIGNAL_RESEARCH_PROVIDER."
+        : "Tavily fallback discovery is unavailable.",
     )
+  } else if (!tavily) {
+    warnings.push("Tavily verification is unavailable; map candidates will keep lower online-presence confidence instead of being rejected.")
   }
   if (!firecrawl) {
     missing.push("FIRECRAWL_API_KEY")
@@ -1236,12 +1395,15 @@ export function getSignalLeadRunProviderSetup(): SignalLeadRunProviderSetup {
   }
 
   return {
+    places,
     tavily,
     firecrawl,
     ai: aiSetup.enabled,
     missing: unique(missing, 6),
     warnings: unique(warnings, 6),
     researchProvider,
+    placesProvider: placesSetup.provider,
+    mapFirst: places,
     aiProvider: aiSetup.provider,
   }
 }
@@ -1254,8 +1416,8 @@ export async function createSignalLeadRun({
   input: SignalLeadRunCreateInput
 }) {
   const providerSetup = getSignalLeadRunProviderSetup()
-  if (!providerSetup.tavily) {
-    throw new Error("Signal needs TAVILY_API_KEY and public research enabled before it can find new leads.")
+  if (!providerSetup.places && !providerSetup.tavily) {
+    throw new Error("Signal needs GOOGLE_PLACES_API_KEY for map-first discovery or TAVILY_API_KEY for reduced-coverage fallback discovery.")
   }
 
   const supabase = createAdminClient()
@@ -1273,6 +1435,9 @@ export async function createSignalLeadRun({
       current_stage: "setting_up_market",
       progress_percent: 0,
       provider_status: {
+        places: providerSetup.places,
+        places_provider: providerSetup.placesProvider,
+        map_first: providerSetup.mapFirst,
         tavily: providerSetup.tavily,
         firecrawl: providerSetup.firecrawl,
         ai: providerSetup.ai,
@@ -1280,6 +1445,8 @@ export async function createSignalLeadRun({
         ai_provider: providerSetup.aiProvider,
       },
       provider_errors: providerSetup.warnings,
+      discovery_provider: providerSetup.places ? "google" : "tavily",
+      provider_usage: emptySignalPlacesUsage(),
       summary: {
         requested_leads: input.lead_limit,
         radius_is_a_discovery_preference: true,
@@ -1371,7 +1538,7 @@ async function releaseRun(runId: string, token: string) {
   }
 }
 
-async function advanceDiscovery(run: MutableRun) {
+async function advanceTavilyDiscovery(run: MutableRun) {
   const cursor = runCursor(run)
   const queries = safeArray(cursor.queries).filter((item): item is string => typeof item === "string")
   const preparedQueries = queries.length ? queries : buildDiscoveryQueries(run)
@@ -1432,6 +1599,322 @@ async function advanceDiscovery(run: MutableRun) {
     progress: 34,
     metadata: materialized.summary,
   })
+}
+
+async function materializePlacesCandidates(run: MutableRun, rawPlaces: SignalPlace[], market: SignalResolvedMarket) {
+  const supabase = createAdminClient()
+  const places = mergeSignalPlaces(rawPlaces)
+  const config = getSignalPlacesConfig()
+  const poolLimit = Math.min(config.maxDiscoveryResults, Math.max(50, run.lead_limit * 15))
+  const records: Array<Record<string, unknown>> = []
+  let eligible = 0
+  let excludedChains = 0
+  let excludedClosed = 0
+  let excludedGenericEntities = 0
+  let outsideRadius = 0
+
+  for (const place of places) {
+    if (records.length >= poolLimit) break
+    if (place.business_status === "CLOSED_PERMANENTLY") {
+      excludedClosed += 1
+      continue
+    }
+    const distance = signalDistanceMiles(market.center, place.coordinates)
+    if (!place.service_area_business && distance > run.radius_miles * 1.08) {
+      outsideRadius += 1
+      continue
+    }
+    const baseEntity = assessSignalEntityName({
+      name: place.canonical_name,
+      city: place.city || run.location,
+      industry: place.primary_category || place.categories.join(" "),
+      url: place.listing_url,
+      sourceType: "places",
+      corroboratingNames: [place.canonical_name],
+    })
+    if (!baseEntity.canonicalName || ["generic_result", "directory", "rejected"].includes(baseEntity.status)) {
+      excludedGenericEntities += 1
+      continue
+    }
+    const entityConfidence = Math.max(88, baseEntity.confidence)
+    const chain = assessChainLikelihood({
+      businessName: place.canonical_name,
+      url: place.website_url || place.listing_url,
+      title: place.canonical_name,
+      snippet: `${place.formatted_address || ""} ${place.primary_category || ""} ${place.categories.join(" ")}`,
+    })
+    const isHighChain = chain.hasHardChainEvidence || chain.likelihood >= 75
+    if (isHighChain) excludedChains += 1
+    else eligible += 1
+    const listingUrl = place.listing_url
+      || `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(place.provider_place_id)}`
+    const publicText = `${place.canonical_name} ${place.formatted_address || ""} ${place.primary_category || ""} ${place.categories.join(" ")}`
+    const industry = industryLabel(run.industry_focus as IndustryFocus, run.custom_industry, publicText)
+    records.push({
+      run_id: run.id,
+      identity_key: `google:${place.provider_place_id}`,
+      normalized_business_name: normalizeSignalBusinessName(place.canonical_name) || null,
+      normalized_hostname: null,
+      normalized_phone: null,
+      rank: null,
+      status: isHighChain ? "excluded" : "candidate",
+      business_name: place.canonical_name,
+      canonical_name: place.canonical_name,
+      canonical_name_confidence: entityConfidence,
+      entity_status: "verified",
+      entity_rejection_reason: null,
+      identity_evidence_count: 3,
+      identity_evidence_summary: [
+        "Structured Places listing supplies a distinct business identity.",
+        "Provider place ID supplies a stable canonical listing identity.",
+        "Listing coordinates and formatted address establish geographic context.",
+      ],
+      discovery_provider: "google",
+      provider_place_id: place.provider_place_id,
+      provider_listing_url: listingUrl,
+      listing_latitude: place.coordinates.latitude,
+      listing_longitude: place.coordinates.longitude,
+      listing_retrieved_at: place.retrieved_at,
+      listing_attribution: "Google Places",
+      business_status: place.business_status,
+      primary_category: place.primary_category,
+      place_categories: place.categories,
+      rating: place.rating,
+      review_count: place.review_count,
+      opening_hours: place.opening_hours,
+      price_level: place.price_level,
+      industry,
+      city: place.city,
+      state: place.state,
+      address: place.formatted_address,
+      website_url: place.website_url,
+      phone: place.phone,
+      public_email: null,
+      social_links: [],
+      social_profiles: [],
+      source_urls: [listingUrl],
+      website_status: "unknown",
+      online_presence_classification: "website_unknown",
+      primary_online_channel: place.phone ? "phone" : "directory",
+      social_verification_confidence: 0,
+      contact_confidence: place.phone ? 92 : 65,
+      online_presence_confidence: 20,
+      opportunity_analysis_confidence: 20,
+      opportunity_signals: [],
+      research_needed_reasons: [],
+      chain_likelihood: chain.likelihood,
+      chain_reason: chain.reason,
+      chain_evidence: chain.evidence,
+      chain_classification: chain.classification,
+      chain_probability: chain.likelihood,
+      chain_reasons: chain.reasons,
+      location_count_estimate: chain.locationCountEstimate,
+      is_independent_likely: chain.independentLikely,
+      independent_confidence: chain.independentConfidence,
+      final_score: null,
+      confidence_score: null,
+      opportunity_score: null,
+      ranking_score: null,
+      confidence_components: {},
+      geographic_status: "confirmed_within_radius",
+      verified_city: place.city || run.location.split(",")[0]?.trim() || run.location,
+      verified_address: place.formatted_address,
+      distance_estimate_miles: Number(distance.toFixed(2)),
+      geographic_confidence: 95,
+      geographic_evidence: [
+        `Structured listing coordinates are ${distance.toFixed(1)} miles from the resolved market center.`,
+        place.formatted_address ? `Structured listing address: ${place.formatted_address}` : "Service-area listing falls within the requested market search.",
+      ],
+      qualification_status: isHighChain ? "rejected" : null,
+      rejection_reason: isHighChain ? `Known or probable chain: ${chain.reason || "deterministic chain evidence"}` : null,
+      script_generation_type: null,
+      prompt_version: null,
+      evaluation_metadata: { discovery_entity_version: "signal-map-first-v1" },
+      score_breakdown: {},
+      key_reasons: isHighChain ? [`Excluded because of chain likelihood: ${chain.reason || "public chain signal"}`] : [],
+      website_analysis: {},
+      communication_profile: {},
+      sales_pack: null,
+      lovable_prompt: null,
+      risks: isHighChain ? ["High chain/franchise likelihood"] : [],
+      next_steps: [],
+      provider_usage_metadata: { discovery_search_fields: "essentials_and_pro_identity", details_fetched: false },
+      raw_research: {
+        discovery: {
+          title: place.canonical_name,
+          url: listingUrl,
+          snippet: `${place.formatted_address || ""} ${place.primary_category || ""}`.trim(),
+          source_label: "Google Places structured listing",
+        },
+        source_type: "places",
+        place_discovery: place,
+      },
+    })
+  }
+
+  if (records.length) {
+    const placeIds = records.map((record) => String(record.provider_place_id || "")).filter(Boolean)
+    const { data: existing, error: existingError } = await supabase
+      .from("signal_run_leads")
+      .select("provider_place_id")
+      .eq("run_id", run.id)
+      .eq("discovery_provider", "google")
+      .in("provider_place_id", placeIds)
+    if (existingError) throw new Error(existingError.message)
+    const existingIds = new Set((existing || []).map((item) => item.provider_place_id).filter(Boolean))
+    const newRecords = records.filter((record) => !existingIds.has(String(record.provider_place_id || "")))
+    if (newRecords.length) {
+      const { error } = await supabase.from("signal_run_leads").insert(newRecords)
+      if (error) throw new Error(error.message)
+    }
+  }
+
+  return {
+    eligible,
+    summary: {
+      map_listings_checked: places.length,
+      candidates_discovered: records.length,
+      viable_scan_candidates: eligible,
+      candidate_scan_budget: poolLimit,
+      excluded_chains: excludedChains,
+      excluded_permanently_closed: excludedClosed,
+      excluded_generic_entities: excludedGenericEntities,
+      excluded_outside_radius: outsideRadius,
+      excluded_duplicates: Math.max(0, rawPlaces.length - places.length),
+      merged_duplicate_sources: Math.max(0, rawPlaces.length - places.length),
+    },
+  }
+}
+
+async function advancePlacesDiscovery(run: MutableRun) {
+  const provider = getSignalPlacesProvider()
+  if (!provider) return advanceTavilyDiscovery(run)
+  const cursor = runCursor(run)
+  let market = parseResolvedMarket(cursor.resolved_market)
+  const usage = parsePlacesUsage(run.provider_usage)
+
+  if (!market) {
+    await addRunEvent({
+      runId: run.id,
+      stage: "resolving_market",
+      message: `Resolving ${run.location} into a map center and ${run.radius_miles}-mile search boundary…`,
+      progress: 6,
+    })
+    try {
+      market = await provider.resolveMarket(run.location, run.radius_miles)
+      const nextUsage = addSignalPlacesUsage(usage, { ...emptySignalPlacesUsage(), market_resolution_calls: 1 })
+      await updateRun(run.id, snapshotRunStatus(run, "searching_local_map_listings", 9, {
+        discovery_provider: "google",
+        market_center: market.center,
+        market_boundary: market.boundary,
+        provider_usage: nextUsage,
+        execution_cursor: { ...cursor, resolved_market: market, place_results: [], place_plan_index: 0, place_page_count: 0 },
+      }))
+      await addRunEvent({ runId: run.id, stage: "searching_local_map_listings", message: `Resolved ${market.label}. Starting structured local-listing discovery.`, progress: 9 })
+      return
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Places market resolution failed."
+      if (getSignalLeadRunProviderSetup().tavily) {
+        await updateRun(run.id, {
+          discovery_provider: "tavily",
+          execution_cursor: { ...cursor, places_failed: true },
+          provider_errors: unique([...safeArray(run.provider_errors).filter((item): item is string => typeof item === "string"), `${message} Signal switched to reduced-coverage Tavily discovery.`], 10),
+        })
+        await addRunEvent({ runId: run.id, stage: "provider_warning", message: `${message} Falling back to public-web discovery with reduced local coverage.`, progress: 8 })
+        return
+      }
+      throw error
+    }
+  }
+
+  const plan = buildSignalPlacesPlan({ market, industryFocus: run.industry_focus, customIndustry: run.custom_industry })
+  const storedPlaces = safeArray(cursor.place_results).map(parseSignalPlace).filter((place): place is SignalPlace => Boolean(place))
+  const config = getSignalPlacesConfig()
+  const target = Math.min(config.maxDiscoveryResults, Math.max(50, run.lead_limit * 15))
+  const index = Math.max(0, Math.floor(asNumber(cursor.place_plan_index)))
+  const pageCount = Math.max(0, Math.floor(asNumber(cursor.place_page_count)))
+  const pageToken = asString(cursor.place_page_token) || null
+  const minimumCoverageCalls = new Set(plan.map((item) => item.tile.id)).size
+
+  if (index < plan.length && (storedPlaces.length < target || index < minimumCoverageCalls)) {
+    const item = plan[index]
+    const stage = index < Math.min(plan.length, config.maxCategoryQueries) ? "searching_local_map_listings" : "expanding_category_coverage"
+    await addRunEvent({
+      runId: run.id,
+      stage,
+      message: `Searching ${item.tile.id} coverage for ${item.query} (${index + 1} of ${plan.length})…`,
+      progress: 10 + Math.round(index / Math.max(1, plan.length) * 22),
+    })
+    try {
+      const response = await runSignalPlacesPlanItem({ provider, item, market, pageToken })
+      const merged = mergeSignalPlaces([...storedPlaces, ...response.places]).slice(0, config.maxDiscoveryResults)
+      const nextUsage = addSignalPlacesUsage(usage, response.usage)
+      const paginate = Boolean(response.next_page_token) && pageCount + 1 < config.maxPagesPerQuery
+      await updateRun(run.id, snapshotRunStatus(run, stage, 11 + Math.round((index + (paginate ? 0.5 : 1)) / Math.max(1, plan.length) * 22), {
+        provider_usage: nextUsage,
+        execution_cursor: {
+          ...cursor,
+          resolved_market: market,
+          place_results: merged,
+          place_plan_index: paginate ? index : index + 1,
+          place_page_count: paginate ? pageCount + 1 : 0,
+          place_page_token: paginate ? response.next_page_token : null,
+        },
+      }))
+      return
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Places search failed."
+      await updateRun(run.id, {
+        execution_cursor: { ...cursor, resolved_market: market, place_results: storedPlaces, place_plan_index: index + 1, place_page_count: 0, place_page_token: null },
+        provider_errors: unique([...safeArray(run.provider_errors).filter((item): item is string => typeof item === "string"), message], 10),
+      })
+      await addRunEvent({ runId: run.id, stage: "provider_warning", message: `${message} Signal kept the map listings already found.`, progress: run.progress_percent })
+      return
+    }
+  }
+
+  if (storedPlaces.length === 0 && getSignalLeadRunProviderSetup().tavily) {
+    await updateRun(run.id, {
+      discovery_provider: "tavily",
+      execution_cursor: { ...cursor, places_failed: true, resolved_market: market, place_results: [] },
+      provider_errors: unique([...safeArray(run.provider_errors).filter((item): item is string => typeof item === "string"), "Places returned no usable listings; Signal switched to reduced-coverage Tavily discovery."], 10),
+    })
+    await addRunEvent({ runId: run.id, stage: "provider_warning", message: "Places returned no usable listings. Falling back to public-web discovery with reduced coverage.", progress: 30 })
+    return
+  }
+
+  const materialized = await materializePlacesCandidates(run, storedPlaces, market)
+  if (materialized.eligible === 0) {
+    await updateRun(run.id, snapshotRunStatus(run, "completed_with_no_matches", 100, {
+      status: "partial",
+      completed_at: currentIso(),
+      summary: { ...runSummary(run), ...materialized.summary, qualified_leads: 0 },
+      error_message: "No structured local listings survived the chain, entity, status, duplicate, and radius filters.",
+    }))
+    await addRunEvent({ runId: run.id, stage: "completed", message: "No structured local listings survived the hard discovery filters.", progress: 100 })
+    return
+  }
+
+  await updateRun(run.id, snapshotRunStatus(run, "removing_chains_and_duplicates", 34, {
+    status: "checking",
+    summary: { ...runSummary(run), ...materialized.summary },
+    execution_cursor: { ...cursor, resolved_market: market, place_results: [], place_plan_index: plan.length },
+  }))
+  await addRunEvent({
+    runId: run.id,
+    stage: "removing_chains_and_duplicates",
+    message: `${materialized.summary.map_listings_checked} map listings checked; ${materialized.summary.excluded_chains} chains removed and ${materialized.summary.excluded_duplicates} duplicates merged.`,
+    progress: 34,
+    metadata: materialized.summary,
+  })
+}
+
+async function advanceDiscovery(run: MutableRun) {
+  const cursor = runCursor(run)
+  if (getSignalLeadRunProviderSetup().places && cursor.places_failed !== true) {
+    return advancePlacesDiscovery(run)
+  }
+  return advanceTavilyDiscovery(run)
 }
 
 async function materializeCandidates(run: MutableRun, rawResults: DiscoveryResult[]) {
@@ -1792,11 +2275,96 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
   let firecrawlExcerpt: string | null = null
   let firecrawlBranding: JsonObject | null = null
   let firecrawlCreditsUsed = 0
+  let place = parseSignalPlace(raw.place_discovery)
+  let placeDetailsUsage = emptySignalPlacesUsage()
+  let detailsFetched = false
   const cursor = runCursor(run)
   const firecrawlBudget = Math.min(getSignalMarketRuntimeConfig().maxFirecrawlCreditsPerMarket, run.lead_limit * 2)
   const priorFirecrawlCredits = asNumber(cursor.firecrawl_credits_used)
-  if (lead.website_url) {
-    scan = await scanSignalWebsite(lead.website_url, { maxSecondaryPages: 0 })
+  const placesUsage = parsePlacesUsage(run.provider_usage)
+  const placesProvider = getSignalPlacesProvider()
+  if (lead.discovery_provider === "google"
+    && lead.provider_place_id
+    && placesProvider
+    && placesUsage.detail_calls < getSignalPlacesConfig().maxDetailCalls) {
+    try {
+      const details = await placesProvider.placeDetails(lead.provider_place_id)
+      placeDetailsUsage = details.usage
+      detailsFetched = Boolean(details.place)
+      if (details.place) place = details.place
+      const nextUsage = addSignalPlacesUsage(placesUsage, details.usage)
+      await updateRun(run.id, { provider_usage: nextUsage })
+    } catch (error) {
+      await writeProviderWarning(run, `${error instanceof Error ? error.message : "Places details failed."} Signal kept the structured discovery listing.`)
+    }
+  }
+
+  if (place) {
+    lead = {
+      ...lead,
+      business_name: place.canonical_name || lead.business_name,
+      canonical_name: place.canonical_name || lead.canonical_name,
+      address: place.formatted_address || lead.address,
+      verified_address: place.formatted_address || lead.verified_address,
+      city: place.city || lead.city,
+      verified_city: place.city || lead.verified_city,
+      state: place.state || lead.state,
+      phone: place.phone || lead.phone,
+      website_url: place.website_url || lead.website_url,
+      provider_listing_url: place.listing_url || lead.provider_listing_url,
+      business_status: place.business_status || lead.business_status,
+      primary_category: place.primary_category || lead.primary_category,
+      place_categories: place.categories as unknown as SignalJson,
+      rating: place.rating ?? lead.rating,
+      review_count: place.review_count ?? lead.review_count,
+      opening_hours: place.opening_hours as unknown as SignalJson,
+      price_level: place.price_level || lead.price_level,
+    }
+  }
+
+  const verificationAttempted = getSignalLeadRunProviderSetup().tavily
+  let verificationResults: DiscoveryResult[] = []
+  if (verificationAttempted && lead.discovery_provider === "google") {
+    const verificationQuery = unique([
+      `"${lead.business_name}"`,
+      lead.city || run.location,
+      lead.phone || null,
+      lead.address || null,
+      "official website Facebook Instagram booking",
+    ], 8).join(" ")
+    const response = await searchSignalTavilyPublicWeb({ query: verificationQuery, maxResults: 8 })
+    verificationResults = response.results.map(parseDiscoveryResult).filter(Boolean) as DiscoveryResult[]
+    if (response.setup_messages.length) await writeProviderWarning(run, response.setup_messages[0])
+  }
+  const verificationMatches = verificationResults.filter((result) => {
+    const text = `${result.title} ${result.snippet}`
+    const nameMatch = businessIdentityMatches(lead.business_name, result.title)
+      || normalizeSignalBusinessName(text).includes(normalizeSignalBusinessName(lead.business_name))
+    const phoneMatch = Boolean(lead.phone && extractPhones(text).some((phone) => normalizeSignalPhone(phone) === normalizeSignalPhone(lead.phone)))
+    const cityMatch = Boolean((lead.city || run.location.split(",")[0] || "").split(",")[0]?.trim()
+      && text.toLowerCase().includes((lead.city || run.location.split(",")[0] || "").split(",")[0]!.trim().toLowerCase()))
+    return phoneMatch || (nameMatch && cityMatch) || (nameMatch && verificationResults.length <= 3)
+  })
+  const officialSearchResult = verificationMatches.find((result) => classifySignalResearchUrl(result.url) === "likely_official_site"
+    && !/(?:booksy|vagaro|squareup|schedulicity|mindbodyonline|glossgenius|styleseat)\./i.test(normalizeSignalHostname(result.url)))
+  const socialSearchResults = verificationMatches.filter((result) => classifySignalResearchUrl(result.url) === "social")
+  const directorySearchResults = verificationMatches.filter((result) => classifySignalResearchUrl(result.url) === "directory")
+  const bookingSearchResult = verificationMatches.find((result) => /(?:booksy|vagaro|squareup|schedulicity|mindbodyonline|glossgenius|styleseat)\./i.test(normalizeSignalHostname(result.url)))
+  const listingWebsite = place?.website_url || lead.website_url
+  let verifiedWebsiteUrl = listingWebsite || publicUrl(officialSearchResult?.url)
+  if (verifiedWebsiteUrl) scan = await scanSignalWebsite(verifiedWebsiteUrl, { maxSecondaryPages: 0 })
+  if (!listingWebsite && verifiedWebsiteUrl) {
+    const officialIdentity = assessOfficialSiteIdentity({ businessName: lead.business_name, websiteUrl: verifiedWebsiteUrl, scan })
+    if (!officialIdentity.verified) {
+      verifiedWebsiteUrl = null
+      scan = null
+    }
+  }
+  lead = {
+    ...lead,
+    website_url: verifiedWebsiteUrl,
+    normalized_hostname: normalizeSignalHostname(verifiedWebsiteUrl) || null,
+    source_urls: unique([...sourceUrls(lead.source_urls), ...verificationMatches.map((result) => result.url)], 20) as unknown as SignalJson,
   }
 
   const identityNames = unique([
@@ -1811,18 +2379,31 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     name,
     city: run.location,
     industry: lead.industry || run.custom_industry,
-    url: lead.website_url || source.url,
+    url: verifiedWebsiteUrl || source.url,
     sourceType: asString(raw.source_type),
     corroboratingNames: identityNames.filter((candidate) => candidate !== name),
   }))
-  const entity = entityAssessments.sort((left, right) => right.confidence - left.confidence)[0]
+  let entity = entityAssessments.sort((left, right) => right.confidence - left.confidence)[0]
     || assessSignalEntityName({ name: lead.business_name, city: run.location, url: lead.website_url || source.url })
+  if (lead.discovery_provider === "google" && !["generic_result", "directory", "rejected"].includes(entity.status)) {
+    entity = {
+      ...entity,
+      canonicalName: place?.canonical_name || entity.canonicalName || lead.business_name,
+      confidence: Math.max(92, entity.confidence),
+      status: "verified",
+      rejectionReason: null,
+      evidence: unique([
+        ...entity.evidence,
+        "Structured Places listing supplies a stable place ID, business name, and geographic identity.",
+      ], 8),
+    }
+  }
   const canonicalName = entity.canonicalName || lead.business_name
   const preChain = assessChainLikelihood({
     businessName: canonicalName,
     url: lead.website_url || source.url,
     title: source.title,
-    snippet: source.snippet,
+    snippet: `${source.snippet} ${verificationMatches.map((result) => `${result.title} ${result.snippet} ${result.url}`).join(" ")}`,
     scan,
   })
   let chainSearchResults: DiscoveryResult[] = []
@@ -1870,6 +2451,7 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
 
   const socialLinks = unique([
     ...sourceUrls(lead.social_links),
+    ...socialSearchResults.map((result) => result.url),
     ...(scan?.social_links || []),
   ], 10)
   const pageText = sourceText({
@@ -1883,7 +2465,14 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
   const phone = unique([lead.phone, ...extractPhones(`${source.snippet} ${scan?.visible_phones.join(" ") || ""}`)])[0] || null
   const publicEmail = unique([lead.public_email, ...extractEmails(`${source.snippet} ${scan?.visible_emails.join(" ") || ""}`)])[0] || null
   const address = lead.address || extractStreetAddress(`${source.snippet} ${(scan?.hours_location_language || []).join(" ")}`)
-  const website = websiteReview({ websiteUrl: lead.website_url, scan, socialLinks, firecrawlExcerpt })
+  const website = websiteReview({
+    websiteUrl: lead.website_url,
+    scan,
+    socialLinks,
+    firecrawlExcerpt,
+    verificationAttempted,
+    directoryOnly: Boolean(lead.provider_listing_url || directorySearchResults.length) && !lead.website_url && socialLinks.length === 0,
+  })
   let chain = assessChainLikelihood({
     businessName: canonicalName,
     url: lead.website_url || source.url,
@@ -1919,20 +2508,35 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     }
   }
   const sourceIsOfficialSocial = asString(raw.source_type) === "social"
-  const geography = assessSignalGeography({
-    location: run.location,
-    marketType: run.market_type,
-    address,
-    officialTexts: [
-      ...(scan ? [scan.page_title || "", scan.meta_description || "", ...scan.hours_location_language] : []),
-      firecrawlExcerpt || "",
-      ...(sourceIsOfficialSocial ? [source.title, source.snippet] : []),
-    ],
-    corroboratingTexts: [],
-    discoveryTexts: sourceIsOfficialSocial ? [] : [source.title, source.snippet],
-  })
+  const mapDistance = place && parseResolvedMarket(runCursor(run).resolved_market)
+    ? signalDistanceMiles(parseResolvedMarket(runCursor(run).resolved_market)!.center, place.coordinates)
+    : lead.distance_estimate_miles
+  const geography = lead.discovery_provider === "google"
+    ? {
+      status: "confirmed_within_radius" as const,
+      confidence: 95,
+      verifiedCity: place?.city || lead.verified_city || lead.city || run.location.split(",")[0]?.trim() || run.location,
+      verifiedAddress: address,
+      distanceEstimateMiles: mapDistance == null ? null : Number(mapDistance.toFixed(2)),
+      evidence: unique([
+        address ? `Structured Places address: ${address}` : "Structured service-area listing is within the requested search boundary.",
+        mapDistance == null ? null : `Structured listing coordinates are ${mapDistance.toFixed(1)} miles from the resolved market center.`,
+      ], 6),
+    }
+    : assessSignalGeography({
+      location: run.location,
+      marketType: run.market_type,
+      address,
+      officialTexts: [
+        ...(scan ? [scan.page_title || "", scan.meta_description || "", ...scan.hours_location_language] : []),
+        firecrawlExcerpt || "",
+        ...(sourceIsOfficialSocial ? [source.title, source.snippet] : []),
+      ],
+      corroboratingTexts: [],
+      discoveryTexts: sourceIsOfficialSocial ? [] : [source.title, source.snippet],
+    })
   const independenceBoost = !chain.hasHardChainEvidence && chain.likelihood < 40
-    ? (entity.confidence >= 65 ? 10 : 0) + (geography.confidence >= 60 ? 12 : 0) + (lead.website_url || socialLinks.length ? 10 : 0)
+    ? (entity.confidence >= 65 ? 10 : 0) + (geography.confidence >= 60 ? 12 : 0) + (lead.discovery_provider === "google" ? 18 : lead.website_url || socialLinks.length ? 10 : 0)
     : 0
   if (independenceBoost > 0) {
     const independenceConfidence = clamp(chain.independentConfidence + independenceBoost)
@@ -1994,7 +2598,7 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     geographicConfidence: geography.confidence,
     sourceCount,
     contactAgreement,
-    providerFailure: Boolean(scan?.broken_response || (getSignalLeadRunProviderSetup().firecrawl && !firecrawlExcerpt)),
+    providerFailure: Boolean(scan?.broken_response || (lead.website_url && getSignalLeadRunProviderSetup().firecrawl && !firecrawlExcerpt)),
   })
   const profile = communicationProfile({ lead: scoredLead, website, scan })
   const plan = salesPlan({ lead: scoredLead, website, scores, profile: profile as unknown as JsonObject })
@@ -2003,8 +2607,28 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     || phone
     || publicEmail
     || website.objectiveSignals.has_contact
-    || website.objectiveSignals.has_booking,
+    || website.objectiveSignals.has_booking
+    || socialLinks.length,
   )
+  const contactConfidence = phone
+    ? lead.discovery_provider === "google" ? 94 : contactAgreement
+    : publicEmail ? 82
+      : address || lead.provider_listing_url ? 68
+        : website.objectiveSignals.has_contact || website.objectiveSignals.has_booking ? 58 : 12
+  const onlinePresenceConfidence = website.classificationConfidence || 30
+  const opportunitySignals = buildSignalOpportunityEvidence({
+    onlinePresence: website.classification || "website_unknown",
+    rating: lead.rating,
+    reviewCount: lead.review_count,
+    hasPhone: Boolean(phone),
+    hasContactForm: Boolean(website.objectiveSignals.has_contact_form),
+    hasBooking: website.objectiveSignals.has_booking || Boolean(bookingSearchResult),
+    officialTexts: unique([firecrawlExcerpt, scan?.meta_description, ...(scan?.pages.map((page) => page.textExcerpt) || []), ...(scan?.service_language || [])], 12),
+    officialSocialTexts: socialSearchResults.map((result) => result.snippet),
+    userObservations: run.notes && /\b(?:observed|confirmed|sign says|business says|owner said|policy says)\b/i.test(run.notes) ? [run.notes] : [],
+  })
+  const opportunityConfidence = scores.confidence_components.opportunityAnalysis
+  const incompleteResearch = website.classification === "website_unknown" && onlinePresenceConfidence < 45
   const qualification = qualifySignalLead({
     entityStatus: entity.status,
     entityConfidence: entity.confidence,
@@ -2013,17 +2637,22 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     geographicStatus: geography.status,
     geographicConfidence: geography.confidence,
     evidenceConfidence: scores.confidence.score || 0,
+    onlinePresenceConfidence,
+    opportunityConfidence,
     opportunityScore: scores.final.opportunity_score,
     hasContactRoute: hasClearContactPath,
+    hasListingRoute: Boolean(lead.provider_listing_url),
     hasEvidenceLinks: sourceUrls(lead.source_urls).length > 0,
-    incompleteResearch: Boolean(scan?.broken_response && lead.website_url && !sourceIsOfficialSocial),
+    incompleteResearch,
+    permanentlyClosed: lead.business_status === "CLOSED_PERMANENTLY",
   })
   const exclusionReasons = unique([
     ...qualification.reasons,
     noteExclusion,
   ], 10)
   const exclusionReason = exclusionReasons[0] || null
-  const status: SignalRunLeadStatus = qualification.qualified && !noteExclusion ? "ready" : "excluded"
+  const qualificationStatus = noteExclusion ? "rejected" : qualification.status
+  const status: SignalRunLeadStatus = qualificationStatus === "rejected" ? "excluded" : "ready"
   const risks = unique([
     ...website.gaps,
     ...scores.fit.unknowns,
@@ -2056,8 +2685,42 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     phone,
     public_email: publicEmail,
     normalized_phone: normalizeSignalPhone(phone) || null,
+    provider_listing_url: place?.listing_url || lead.provider_listing_url,
+    listing_latitude: place?.coordinates.latitude ?? lead.listing_latitude,
+    listing_longitude: place?.coordinates.longitude ?? lead.listing_longitude,
+    listing_retrieved_at: place?.retrieved_at || lead.listing_retrieved_at,
+    business_status: place?.business_status || lead.business_status,
+    primary_category: place?.primary_category || lead.primary_category,
+    place_categories: place?.categories || lead.place_categories,
+    rating: place?.rating ?? lead.rating,
+    review_count: place?.review_count ?? lead.review_count,
+    opening_hours: place?.opening_hours || lead.opening_hours,
+    price_level: place?.price_level || lead.price_level,
+    website_url: lead.website_url,
+    normalized_hostname: normalizeSignalHostname(lead.website_url) || null,
     social_links: socialLinks,
+    source_urls: sourceUrls(lead.source_urls),
+    social_profiles: socialLinks.map((url) => ({
+      url,
+      platform: /instagram\.com/i.test(url) ? "instagram" : /facebook\.com/i.test(url) ? "facebook" : "social",
+      confidence: socialSearchResults.some((result) => result.url === url) ? 82 : 68,
+      evidence: "Business name and market/contact context matched public identity signals.",
+      recent_activity_signal: socialSearchResults.some((result) => result.url === url && /\b(?:2025|2026|today|yesterday|hours? ago|days? ago)\b/i.test(result.snippet))
+        ? "Public search evidence suggests recent activity; verify directly before mentioning it."
+        : "unknown",
+      contact_path_available: true,
+    })),
+    social_verification_confidence: socialLinks.length ? (socialSearchResults.length ? 82 : 68) : 0,
     website_status: website.status,
+    online_presence_classification: website.classification || "website_unknown",
+    online_presence_confidence: onlinePresenceConfidence,
+    primary_online_channel: bookingSearchResult && !lead.website_url && socialLinks.length === 0
+      ? "booking_marketplace"
+      : website.primaryOnlineChannel || (phone ? "phone" : "unknown"),
+    contact_confidence: contactConfidence,
+    opportunity_analysis_confidence: opportunityConfidence,
+    opportunity_signals: opportunitySignals,
+    research_needed_reasons: qualificationStatus === "research_needed" ? exclusionReasons : [],
     chain_likelihood: chain.likelihood,
     chain_reason: chain.reason,
     chain_evidence: chain.evidence,
@@ -2072,12 +2735,12 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     ranking_score: scores.final.ranking_score,
     confidence_score: scores.confidence.score,
     confidence_components: scores.confidence_components,
-    qualification_status: qualification.qualified && !noteExclusion ? "qualified" : qualification.status,
-    rejection_reason: exclusionReasons.join(" ") || null,
+    qualification_status: qualificationStatus,
+    rejection_reason: qualificationStatus === "rejected" ? exclusionReasons.join(" ") || null : null,
     score_breakdown: scores,
     key_reasons: exclusionReason ? [exclusionReason] : unique([
-      ...entity.evidence,
       ...topReasons(scores, website, chain),
+      ...entity.evidence,
     ], 5),
     website_analysis: website,
     communication_profile: profile,
@@ -2095,6 +2758,7 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
         visible_phones: scan.visible_phones,
         visible_emails: scan.visible_emails,
         booking_links: scan.booking_links,
+        has_contact_form: scan.pages.some((page) => page.hasContactForm),
       } : null,
       firecrawl_excerpt: firecrawlExcerpt,
       firecrawl_branding: firecrawlBranding,
@@ -2103,9 +2767,20 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
       canonical_identity: entity,
       geography,
       qualification,
+      place_discovery: place,
+      web_verification_results: verificationResults,
+      web_verification_attempted: verificationAttempted,
+      opportunity_signals: opportunitySignals,
       chain_search_results: chainSearchResults,
       chain_ai_classification: chainAi ? { ...chainAi.output, provider: `${chainAi.provider}:${chainAi.model}` } : null,
-      prompt_version: "signal-quality-v2",
+      prompt_version: "signal-map-first-v1",
+    },
+    provider_usage_metadata: {
+      details_fetched: detailsFetched,
+      places_detail_calls: placeDetailsUsage.detail_calls,
+      places_cache_hits: placeDetailsUsage.cache_hits,
+      tavily_verification_searches: verificationAttempted ? 1 : 0,
+      firecrawl_credits_used: firecrawlCreditsUsed,
     },
     research_error: scan?.broken_response ? scan.error : null,
   }).eq("id", lead.id)
@@ -2122,21 +2797,25 @@ async function analyzeCandidate(run: MutableRun, lead: MutableLead) {
     extracted_fact?: string | null
     metadata?: JsonObject
   }> = [
-    { evidence_type: "discovery_result", source_url: source.url, source_title: source.title, excerpt: source.snippet, extracted_fact: "Discovery evidence only; not canonical identity proof.", confidence: "low" as SignalConfidence, source_tier: 3, reliability_score: 35, metadata: { source_label: source.source_label } },
-    ...entity.evidence.map((excerpt) => ({ evidence_type: "official_site_identity", source_url: lead.website_url || source.url, source_title: "Canonical identity", excerpt, extracted_fact: canonicalName, confidence: "high" as SignalConfidence, source_tier: 1 as const, reliability_score: 90, metadata: {} })),
-    ...geography.evidence.map((excerpt) => ({ evidence_type: "geographic_validation", source_url: lead.website_url || source.url, source_title: "Geographic validation", excerpt, extracted_fact: geography.verifiedCity, confidence: geography.confidence >= 75 ? "high" as SignalConfidence : "medium" as SignalConfidence, source_tier: sourceIsOfficialSocial || lead.website_url ? 1 as const : 3 as const, reliability_score: geography.confidence, metadata: { status: geography.status } })),
+    lead.discovery_provider === "google"
+      ? { evidence_type: "structured_place_listing", source_url: lead.provider_listing_url || source.url, source_title: "Google Places listing", excerpt: `${canonicalName}; ${address || "service-area listing"}; ${phone || "phone not returned"}`, extracted_fact: "Structured listing establishes business identity and geography.", confidence: "high" as SignalConfidence, source_tier: 2 as const, reliability_score: 94, metadata: { provider: "google", provider_place_id: lead.provider_place_id, attribution: "Google Places" } }
+      : { evidence_type: "discovery_result", source_url: source.url, source_title: source.title, excerpt: source.snippet, extracted_fact: "Discovery evidence only; not canonical identity proof.", confidence: "low" as SignalConfidence, source_tier: 3 as const, reliability_score: 35, metadata: { source_label: source.source_label } },
+    ...entity.evidence.map((excerpt) => ({ evidence_type: lead.discovery_provider === "google" ? "place_identity" : "official_site_identity", source_url: lead.provider_listing_url || lead.website_url || source.url, source_title: "Canonical identity", excerpt, extracted_fact: canonicalName, confidence: "high" as SignalConfidence, source_tier: lead.discovery_provider === "google" ? 2 as const : 1 as const, reliability_score: 90, metadata: {} })),
+    ...geography.evidence.map((excerpt) => ({ evidence_type: "geographic_validation", source_url: lead.provider_listing_url || lead.website_url || source.url, source_title: "Geographic validation", excerpt, extracted_fact: geography.verifiedCity, confidence: geography.confidence >= 75 ? "high" as SignalConfidence : "medium" as SignalConfidence, source_tier: lead.discovery_provider === "google" ? 2 as const : sourceIsOfficialSocial || lead.website_url ? 1 as const : 3 as const, reliability_score: geography.confidence, metadata: { status: geography.status } })),
     ...chain.evidence.map((item) => ({ evidence_type: "chain_assessment", source_url: lead.website_url || source.url, source_title: "Chain classification", excerpt: item.signal, extracted_fact: chain.classification, confidence: chain.hasHardChainEvidence ? "high" as SignalConfidence : "medium" as SignalConfidence, source_tier: lead.website_url ? 1 as const : 3 as const, reliability_score: chain.hasHardChainEvidence ? 96 : 65, metadata: { weight: item.weight } })),
     ...chainSearchResults.map((result) => ({ evidence_type: "chain_search_evidence", source_url: result.url, source_title: result.title, excerpt: result.snippet, extracted_fact: "Selective chain/franchise corroboration search", confidence: "medium" as SignalConfidence, source_tier: 3 as const, reliability_score: 45, metadata: {} })),
+    ...verificationMatches.map((result) => ({ evidence_type: classifySignalResearchUrl(result.url) === "social" ? "official_social_verification" : "web_presence_verification", source_url: result.url, source_title: result.title, excerpt: result.snippet, extracted_fact: "Name and geographic/contact signals match the structured listing.", confidence: "medium" as SignalConfidence, source_tier: 3 as const, reliability_score: 62, metadata: { source_type: classifySignalResearchUrl(result.url) } })),
+    ...opportunitySignals.map((signal) => ({ evidence_type: signal.signal, source_url: signal.evidenceSource === "places" ? lead.provider_listing_url : lead.website_url || socialLinks[0] || source.url, source_title: "Opportunity signal", excerpt: signal.supportingEvidence, extracted_fact: signal.suggestedMountlineSolution, confidence: toConfidence(signal.confidence), source_tier: signal.evidenceSource === "official_website" || signal.evidenceSource === "official_social" || signal.evidenceSource === "user_observation" ? 1 as const : signal.evidenceSource === "places" ? 2 as const : 3 as const, reliability_score: signal.confidence, metadata: { safe_to_mention_in_first_pitch: signal.safeToMentionInFirstPitch, verification_status: signal.verificationStatus, evidence_source: signal.evidenceSource } })),
     ...(scan?.evidence || []).map((item) => ({ evidence_type: item.signal, source_url: item.url, source_title: "Official-site scan", excerpt: item.snippet, extracted_fact: item.snippet, confidence: item.confidence, source_tier: 1 as const, reliability_score: item.confidence === "high" ? 92 : item.confidence === "medium" ? 75 : 55, metadata: {} })),
     ...(firecrawlExcerpt ? [{ evidence_type: "firecrawl_public_page", source_url: lead.website_url, source_title: "Firecrawl official-page extract", excerpt: firecrawlExcerpt, extracted_fact: "Official-page content used for identity, geography, website, and chain analysis.", confidence: "high" as SignalConfidence, source_tier: 1 as const, reliability_score: 88, metadata: {} }] : []),
   ]
   await saveEvidence(run, lead, evidenceRows)
   await addRunEvent({
     runId: run.id,
-    stage: "checking_websites",
+    stage: "finding_customer_flow_gaps",
     message: status === "excluded"
       ? `Excluded ${lead.business_name}: ${exclusionReason || "public-evidence filter"}`
-      : `Checked public website and contact signals for ${lead.business_name}.`,
+      : `Verified identity and online presence, then checked customer-flow gaps for ${lead.business_name}.`,
     progress: run.progress_percent,
   })
 }
@@ -2148,8 +2827,8 @@ async function advanceChecking(run: MutableRun) {
     if (outstanding > 0) {
       await addRunEvent({
         runId: run.id,
-        stage: "checking_websites",
-        message: "Waiting for an in-progress public-site check to finish before scoring.",
+        stage: "verifying_business_identities",
+        message: "Waiting for an in-progress identity and online-presence check to finish before scoring.",
         progress: run.progress_percent,
       })
       return
@@ -2161,7 +2840,8 @@ async function advanceChecking(run: MutableRun) {
 
   const total = await countRunLeads(run.id, ["candidate", "researching", "ready", "excluded", "failed"])
   const done = await countRunLeads(run.id, ["ready", "excluded", "failed"])
-  await updateRun(run.id, snapshotRunStatus(run, "checking_websites", nextCheckingProgress(run, done, total), { status: "checking" }))
+  await updateRun(run.id, snapshotRunStatus(run, "checking_websites_and_social", nextCheckingProgress(run, done, total), { status: "checking" }))
+  await addRunEvent({ runId: run.id, stage: "verifying_business_identities", message: `Verifying ${candidate.business_name} against its structured listing and public identity signals…`, progress: run.progress_percent })
   try {
     await analyzeCandidate(run, candidate)
   } catch (error) {
@@ -2169,7 +2849,7 @@ async function advanceChecking(run: MutableRun) {
     const supabase = createAdminClient()
     await supabase.from("signal_run_leads").update({ status: "failed", research_error: message, risks: ["Research step failed; manual review needed"] }).eq("id", candidate.id)
     await writeProviderWarning(run, message)
-    await addRunEvent({ runId: run.id, stage: "checking_websites", message: `Could not finish ${candidate.business_name}; keeping partial research.`, progress: run.progress_percent })
+    await addRunEvent({ runId: run.id, stage: "checking_websites_and_social", message: `Could not finish ${candidate.business_name}; keeping partial research.`, progress: run.progress_percent })
   }
 }
 
@@ -2198,11 +2878,23 @@ async function rankLeads(run: MutableRun) {
   const candidates = (data || []) as MutableLead[]
   const ranked: MutableLead[] = []
   const seenAliases = new Set<string>()
-  for (const lead of candidates) {
+  const remaining = [...candidates]
+  const categoryCounts = new Map<string, number>()
+  while (remaining.length > 0) {
+    remaining.sort((left, right) => {
+      const leftCategory = normalizeSignalBusinessName(left.primary_category || left.industry || "other") || "other"
+      const rightCategory = normalizeSignalBusinessName(right.primary_category || right.industry || "other") || "other"
+      const leftAdjusted = (left.ranking_score || 0) - (categoryCounts.get(leftCategory) || 0) * 5
+      const rightAdjusted = (right.ranking_score || 0) - (categoryCounts.get(rightCategory) || 0) * 5
+      return rightAdjusted - leftAdjusted || (right.opportunity_score || 0) - (left.opportunity_score || 0)
+    })
+    const lead = remaining.shift()!
     const aliases = unique([
+      lead.provider_place_id ? `place:${lead.discovery_provider}:${lead.provider_place_id}` : null,
       signalDuplicateKey({ canonicalName: lead.canonical_name || lead.business_name, city: lead.verified_city || lead.city, websiteUrl: lead.website_url, phone: lead.phone }),
       lead.normalized_hostname ? `domain:${lead.normalized_hostname}` : null,
       lead.normalized_phone ? `phone:${lead.normalized_phone}` : null,
+      lead.verified_address ? `name-address:${normalizeSignalBusinessName(lead.canonical_name || lead.business_name)}:${normalizeSignalBusinessName(lead.verified_address)}` : null,
       `name:${normalizeSignalBusinessName(lead.canonical_name || lead.business_name)}:${normalizeSignalCity(lead.verified_city || lead.city || run.location)}`,
     ], 8)
     if (aliases.some((alias) => seenAliases.has(alias))) {
@@ -2216,6 +2908,8 @@ async function rankLeads(run: MutableRun) {
     }
     aliases.forEach((alias) => seenAliases.add(alias))
     ranked.push(lead)
+    const category = normalizeSignalBusinessName(lead.primary_category || lead.industry || "other") || "other"
+    categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1)
   }
   for (const [index, lead] of ranked.entries()) {
     await supabase.from("signal_run_leads").update({ rank: index + 1 }).eq("id", lead.id)
@@ -2226,13 +2920,21 @@ async function rankLeads(run: MutableRun) {
 async function advanceScoring(run: MutableRun) {
   const ranked = await rankLeads(run)
   if (ranked.length === 0) {
+    const supabase = createAdminClient()
+    const { count: watchlistCount } = await supabase
+      .from("signal_run_leads")
+      .select("*", { count: "exact", head: true })
+      .eq("run_id", run.id)
+      .in("qualification_status", ["watchlist", "research_needed"])
     await updateRun(run.id, snapshotRunStatus(run, "completed_with_partial_research", 100, {
       status: "partial",
       completed_at: currentIso(),
-      summary: { ...runSummary(run), qualified_leads: 0 },
-      error_message: "No candidates had enough independent public evidence to rank.",
+      summary: { ...runSummary(run), qualified_leads: 0, watchlist_leads: watchlistCount || 0 },
+      error_message: watchlistCount
+        ? `No leads met the ready-for-outreach bar yet; ${watchlistCount} map-first candidate${watchlistCount === 1 ? " is" : "s are"} preserved for watchlist or targeted research.`
+        : "No candidates had enough independent public evidence to rank.",
     }))
-    await addRunEvent({ runId: run.id, stage: "completed", message: "Signal kept the partial research but could not rank an independent lead.", progress: 100 })
+    await addRunEvent({ runId: run.id, stage: "completed", message: watchlistCount ? `Signal preserved ${watchlistCount} promising map candidate${watchlistCount === 1 ? "" : "s"} instead of returning zero research.` : "Signal kept the partial research but could not rank an independent lead.", progress: 100 })
     return
   }
   await updateRun(run.id, snapshotRunStatus(run, "writing_sales_packs", 78, {
@@ -2370,9 +3072,13 @@ async function advanceWritingPacks(run: MutableRun) {
 async function finishRun(run: MutableRun) {
   const ranked = await rankLeads(run)
   const returned = ranked.slice(0, run.lead_limit)
-  const [checked, rejected] = await Promise.all([
+  const supabase = createAdminClient()
+  const [checked, rejected, watchlist, noWebsite, socialFirst] = await Promise.all([
     countRunLeads(run.id, ["ready", "saved", "excluded", "failed"]),
     countRunLeads(run.id, ["excluded", "failed"]),
+    supabase.from("signal_run_leads").select("*", { count: "exact", head: true }).eq("run_id", run.id).in("qualification_status", ["watchlist", "research_needed"]).then(({ count }) => count || 0),
+    supabase.from("signal_run_leads").select("*", { count: "exact", head: true }).eq("run_id", run.id).in("online_presence_classification", ["no_website_found", "social_only", "directory_only", "website_unreachable", "website_broken"]).then(({ count }) => count || 0),
+    supabase.from("signal_run_leads").select("*", { count: "exact", head: true }).eq("run_id", run.id).eq("online_presence_classification", "social_only").then(({ count }) => count || 0),
   ])
   const status: SignalRunStatus = returned.length < run.lead_limit ? "partial" : "completed"
   await updateRun(run.id, snapshotRunStatus(run, "completed", 100, {
@@ -2384,6 +3090,9 @@ async function finishRun(run: MutableRun) {
       returned_leads: returned.length,
       candidates_checked: checked,
       candidates_rejected: rejected,
+      watchlist_leads: watchlist,
+      no_verified_website: noWebsite,
+      social_first_businesses: socialFirst,
       top_lead_names: returned.map((lead) => lead.business_name),
     },
     error_message: status === "partial" ? `Signal found ${returned.length} lead${returned.length === 1 ? "" : "s"} with enough independent public evidence.` : null,
@@ -2392,8 +3101,8 @@ async function finishRun(run: MutableRun) {
     runId: run.id,
     stage: "completed",
     message: status === "completed"
-      ? `Signal checked ${checked} candidates, rejected ${rejected}, and ranked ${returned.length} leads worth opening.`
-      : `Signal found only ${returned.length} lead${returned.length === 1 ? "" : "s"} that met the quality bar after rejecting ${rejected}.`,
+      ? `Signal checked ${checked} candidates, rejected ${rejected}, found ${noWebsite} without a verified website and ${socialFirst} social-first, then ranked ${returned.length} leads worth opening.`
+      : `Signal found ${returned.length} qualified lead${returned.length === 1 ? "" : "s"} and preserved ${watchlist} watchlist/research candidate${watchlist === 1 ? "" : "s"} after rejecting ${rejected}.`,
     progress: 100,
   })
 }
@@ -2431,8 +3140,16 @@ export async function advanceSignalLeadRun(runId: string) {
 
   try {
     if (claimed.status === "queued") {
-      await updateRun(claimed.id, snapshotRunStatus(claimed, "setting_up_market", 5, { status: "discovering" }))
-      await addRunEvent({ runId: claimed.id, stage: "setting_up_market", message: `Setting up ${claimed.location} before public-web discovery…`, progress: 5 })
+      const mapFirst = getSignalLeadRunProviderSetup().places
+      await updateRun(claimed.id, snapshotRunStatus(claimed, mapFirst ? "resolving_market" : "setting_up_market", 5, { status: "discovering" }))
+      await addRunEvent({
+        runId: claimed.id,
+        stage: mapFirst ? "resolving_market" : "setting_up_market",
+        message: mapFirst
+          ? `Resolving ${claimed.location} before structured local-listing discovery…`
+          : `Setting up ${claimed.location} before reduced-coverage public-web discovery…`,
+        progress: 5,
+      })
     } else if (claimed.status === "discovering") {
       await advanceDiscovery(claimed)
     } else if (claimed.status === "checking") {
@@ -2524,7 +3241,7 @@ export async function generateSignalRunLeadSalesPack({
   if (!snapshot) throw new Error("Lead run not found.")
   const lead = snapshot.leads.find((item) => item.id === leadId) as MutableLead | undefined
   if (!lead) throw new Error("Lead not found.")
-  if (lead.status !== "ready" && lead.status !== "saved") {
+  if ((lead.status !== "ready" && lead.status !== "saved") || lead.qualification_status !== "qualified") {
     throw new Error("Sales packs can only be generated for qualified completed leads.")
   }
   const result = await buildSalesPack(snapshot.run as MutableRun, lead, kind)

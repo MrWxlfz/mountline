@@ -217,14 +217,15 @@ export function ScoutDashboard({
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || "Lead could not be created.")
+        setError(data.error || "Suggestion could not be opened in Signal.")
         return
       }
 
       updateProspect(data.prospect)
-      setMessage("Lead created from Scout prospect.")
+      setMessage("Suggestion saved to the Signal inbox for focused analysis.")
+      if (data.workspace_url) window.location.assign(data.workspace_url)
     } catch {
-      setError("Lead could not be created.")
+      setError("Suggestion could not be opened in Signal.")
     } finally {
       setWorkingId(null)
     }
@@ -533,7 +534,7 @@ function ProspectRow({
           <ActionButton onClick={() => onStatus("not_fit")} disabled={working} label="Not fit">
             <ThumbsDown className="h-3.5 w-3.5" />
           </ActionButton>
-          <ActionButton onClick={onConvert} disabled={working} label="Create lead">
+          <ActionButton onClick={onConvert} disabled={working} label="Analyze in Signal">
             <Plus className="h-3.5 w-3.5" />
           </ActionButton>
         </div>

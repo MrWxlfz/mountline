@@ -261,7 +261,10 @@ export const signalProspectCreateSchema = z.object({
   public_phone: z.string().trim().max(80).optional().nullable(),
   public_contact_form_url: z.string().trim().max(500).optional().nullable(),
   instagram_url: z.string().trim().max(500).optional().nullable(),
-  source: z.enum(["manual", "csv_import", "referral", "public_web_research"]).optional(),
+  facebook_url: z.string().trim().max(500).optional().nullable(),
+  public_address: z.string().trim().max(500).optional().nullable(),
+  chain_status: z.enum(["independent", "likely_independent", "local_multi_location", "likely_franchise", "chain", "uncertain"]).optional(),
+  source: z.enum(["manual", "csv_import", "referral", "public_web_research", "scout_suggestion"]).optional(),
   existing_website_platform: shortNullableText,
   existing_booking_platform: shortNullableText,
   human_notes: nullableText,
@@ -294,6 +297,43 @@ export const signalProspectPatchSchema = signalProspectCreateSchema
     outreach_status: signalOutreachStatusSchema.optional(),
     contacted_at: z.string().datetime().optional().nullable(),
   })
+
+export const signalBusinessAnalysisRequestSchema = z.object({
+  business_input: z
+    .string()
+    .trim()
+    .min(3, "Add a business name, public URL, or phone number.")
+    .max(2000, "Keep the analysis input under 2,000 characters."),
+  observation: z.string().trim().max(3000).optional().nullable(),
+  analyze_now: z.boolean().optional().default(true),
+})
+
+export const signalPipelineUpdateSchema = z.object({
+  pipeline_stage: z.enum([
+    "found",
+    "analyzed",
+    "concept_ready",
+    "contacted",
+    "interested",
+    "proposal",
+    "won",
+    "lost",
+  ]),
+  reason: z.string().trim().max(500).optional().nullable(),
+  next_action: z.string().trim().max(1000).optional().nullable(),
+  next_action_due_at: z.string().datetime().optional().nullable(),
+})
+
+export const signalConceptUpdateSchema = z.object({
+  status: z.enum(["prompt_ready", "in_progress", "ready", "archived"]),
+  concept_url: z.string().trim().url().max(1000).optional().nullable(),
+  screenshot_url: z.string().trim().url().max(1000).optional().nullable(),
+  notes: z.string().trim().max(3000).optional().nullable(),
+})
+
+export const signalConceptCreateSchema = z.object({
+  instructions: z.string().trim().max(1000).optional().nullable(),
+})
 
 export const signalImportSchema = z.object({
   prospects: z.array(signalProspectCreateSchema).min(1).max(100),

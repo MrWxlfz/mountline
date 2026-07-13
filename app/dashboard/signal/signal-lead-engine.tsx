@@ -287,10 +287,10 @@ export function SignalLeadEngine({
     try {
       const response = await fetch("/api/signal/runs", { cache: "no-store" })
       const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Signal could not refresh your runs.")
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Scout could not refresh the discovery runs.")
       applyPayload(parsePayload(data))
     } catch (cause) {
-      if (!silent) setError(cause instanceof Error ? cause.message : "Signal could not refresh your runs.")
+      if (!silent) setError(cause instanceof Error ? cause.message : "Scout could not refresh the discovery runs.")
     } finally {
       if (!silent) setRefreshing(false)
     }
@@ -301,10 +301,10 @@ export function SignalLeadEngine({
     try {
       const response = await fetch(`/api/signal/runs/${currentRun.id}`, { cache: "no-store" })
       const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Signal could not refresh this run.")
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Scout could not refresh this run.")
       applyPayload(parsePayload(data))
     } catch (cause) {
-      if (!silent) setError(cause instanceof Error ? cause.message : "Signal could not refresh this run.")
+      if (!silent) setError(cause instanceof Error ? cause.message : "Scout could not refresh this run.")
     }
   }, [applyPayload, currentRun])
 
@@ -314,10 +314,10 @@ export function SignalLeadEngine({
     try {
       const response = await fetch(`/api/signal/runs/${currentRun.id}/advance`, { method: "POST" })
       const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Signal could not continue this run.")
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Scout could not continue this run.")
       applyPayload(parsePayload(data))
     } catch (cause) {
-      if (!silent) setError(cause instanceof Error ? cause.message : "Signal could not continue this run.")
+      if (!silent) setError(cause instanceof Error ? cause.message : "Scout could not continue this run.")
     } finally {
       advancingRef.current = false
     }
@@ -368,15 +368,15 @@ export function SignalLeadEngine({
         }),
       })
       const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Signal could not start this run.")
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Scout could not start this run.")
       const payload = parsePayload(data)
       const createdRun = payload.run || payload.activeRun
-      if (!createdRun) throw new Error("Signal created the request but did not return a run.")
+      if (!createdRun) throw new Error("Scout created the request but did not return a run.")
 
       applyPayload({ ...payload, activeRun: createdRun })
       setMessage(`Searching ${createdRun.location} for independent local businesses…`)
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Signal could not start this run.")
+      setError(cause instanceof Error ? cause.message : "Scout could not start this run.")
     } finally {
       setSubmitting(false)
     }
@@ -400,11 +400,11 @@ export function SignalLeadEngine({
         <div aria-hidden className="bg-dot-grid absolute inset-0 opacity-35" />
         <div className="relative grid gap-7 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Mountline Signal</p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Mountline Scout</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-[-0.045em] text-foreground sm:text-5xl">Welcome back, {userName}.</h1>
             <p className="mt-2 text-2xl font-medium tracking-tight text-muted-foreground sm:text-3xl">Let’s run up these leads.</p>
             <p className="mt-5 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Find local businesses that need a stronger website, cleaner customer flow, or a sharper way to turn attention into calls.
+              Explore a market for possible businesses to review. Discovery results are suggestions until they are moved into Signal and re-analyzed.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 xl:justify-end">
@@ -417,7 +417,7 @@ export function SignalLeadEngine({
 
       {missingProviders.length > 0 && (
         <div role="alert" className="flex flex-col gap-3 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-50 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex gap-3"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-medium">Signal needs a research connection.</p><p className="mt-1 leading-5 text-amber-100/80">Configure at least one local discovery connection to start live research. Existing runs remain safe to review.</p></div></div>
+          <div className="flex gap-3"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-medium">Scout needs a research connection.</p><p className="mt-1 leading-5 text-amber-100/80">Configure at least one local discovery connection to start live research. Existing runs remain safe to review.</p></div></div>
         </div>
       )}
 
@@ -425,7 +425,7 @@ export function SignalLeadEngine({
         <div role="alert" className="flex gap-3 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-50">
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
-            <p className="font-medium">Signal needs its run storage.</p>
+            <p className="font-medium">Scout needs its run storage.</p>
             <p className="mt-1 leading-5 text-amber-100/80">{storageMessage}</p>
           </div>
         </div>
@@ -436,7 +436,7 @@ export function SignalLeadEngine({
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-medium text-foreground">Website analysis is limited right now.</p>
-            <p className="mt-1 leading-5">Signal is relying more heavily on verified listing and public-profile data. {providerWarnings.map((warning) => formatScoreReason(warning)).join(" ")}</p>
+            <p className="mt-1 leading-5">Scout is relying more heavily on verified listing and public-profile data. {providerWarnings.map((warning) => formatScoreReason(warning)).join(" ")}</p>
           </div>
         </div>
       )}
@@ -448,7 +448,7 @@ export function SignalLeadEngine({
       <section className="rounded-xl border border-border bg-card">
         <div className="border-b border-border px-5 py-5 sm:px-6">
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">New lead run</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Pick a market. Signal handles the rest.</h2>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Pick a market. Scout assembles suggestions.</h2>
         </div>
         <form onSubmit={createRun} className="p-5 sm:p-6">
           <div className="grid gap-5 xl:grid-cols-[1.1fr_1.35fr_0.8fr_1fr_auto] xl:items-end">
@@ -477,7 +477,7 @@ export function SignalLeadEngine({
             <Field label="Optional notes"><textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={2} placeholder="Prioritize businesses that welcome walk-in conversations" className="min-h-18 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40" /></Field>
           </div>
           {industry === "custom" && <Field label="Custom industry"><input value={customIndustry} onChange={(event) => setCustomIndustry(event.target.value)} placeholder="Example: independent landscapers" className="mt-2 h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40" /></Field>}
-          <p className="mt-4 text-xs leading-5 text-muted-foreground">Signal starts with structured local listings, filters chains by default, verifies official public pages, and labels uncertainty instead of inventing facts. Radius controls local discovery coverage.</p>
+          <p className="mt-4 text-xs leading-5 text-muted-foreground">Scout starts with structured local listings, filters chains by default, checks public pages, and labels uncertainty. Results remain suggestions until focused Signal analysis.</p>
         </form>
       </section>
 
@@ -497,7 +497,7 @@ export function SignalLeadEngine({
 
       {currentRun && !currentIsActive && (["completed", "partial", "completed_with_limits"] as string[]).includes(currentRun.status) && (
         <section id="run-results" className="scroll-mt-20 rounded-xl border border-border bg-card p-5 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Latest result</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{userName}, Signal found the opportunities worth reviewing.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Each finalist includes verified evidence, calibrated confidence, a practical first move, and a grounded sales direction.</p></div><Link href={`/dashboard/signal/runs/${currentRun.id}`} className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">Open full run <ArrowRight className="h-4 w-4" /></Link></div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Latest suggestions</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{userName}, Scout found businesses worth reviewing.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Treat every result as a suggestion. Move a business into Signal to resolve identity, evidence, verdict, concept, and outreach.</p></div><Link href={`/dashboard/signal/runs/${currentRun.id}`} className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">Open full run <ArrowRight className="h-4 w-4" /></Link></div>
           {currentResults.length > 0 ? <div className="mt-6 grid gap-4 xl:grid-cols-2">{currentResults.slice(0, 5).map((lead, index) => <ResultLeadCard key={lead.id} lead={lead} rank={lead.rank || index + 1} />)}</div> : <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/20 p-7 text-center"><Target className="mx-auto h-6 w-6 text-muted-foreground" /><p className="mt-3 font-medium text-foreground">No leads are ready to rank yet.</p><p className="mt-2 text-sm text-muted-foreground">Open the run to review the partial evidence and retry any failed provider step.</p></div>}
         </section>
       )}
@@ -506,11 +506,11 @@ export function SignalLeadEngine({
         <section className="flex flex-col gap-4 rounded-xl border border-amber-400/25 bg-amber-400/10 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-amber-100/70">Run paused safely</p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Signal kept the checkpoint. Retry when you’re ready.</h2>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Scout kept the checkpoint. Retry when ready.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{currentRun.error_message || "A public research step did not finish. No completed evidence was discarded."}</p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <button type="button" onClick={() => { setMessage("Retrying the last safe Signal stage…"); void advanceCurrentRun() }} className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"><RefreshCw className="h-4 w-4" />Try again</button>
+            <button type="button" onClick={() => { setMessage("Retrying the last safe Scout stage…"); void advanceCurrentRun() }} className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90"><RefreshCw className="h-4 w-4" />Try again</button>
             <Link href={`/dashboard/signal/runs/${currentRun.id}`} className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">Open run <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </section>
@@ -534,7 +534,7 @@ function Field({ children, label }: { children: React.ReactNode; label: string }
 }
 
 function RunEventFeed({ events }: { events: SignalRunEvent[] }) {
-  return <section className="rounded-xl border border-border bg-card p-5"><div className="flex items-center justify-between gap-3"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Progress</p><h2 className="mt-2 text-lg font-semibold text-foreground">What Signal is doing</h2></div><RadioTower className="h-4 w-4 text-muted-foreground" /></div><div className="mt-5 max-h-[268px] space-y-4 overflow-y-auto pr-1">{events.length > 0 ? events.map((event) => <div key={event.id} className="grid grid-cols-[54px_minmax(0,1fr)] gap-3"><span className="pt-0.5 font-mono text-[11px] text-muted-foreground">{timeLabel(event.created_at)}</span><div className="border-l border-border pl-3"><p className="text-xs font-medium text-foreground">{stageLabel(event.stage)}</p><p className="mt-1 text-sm leading-5 text-muted-foreground">{formatScoreReason(event.message)}</p></div></div>) : <p className="text-sm leading-6 text-muted-foreground">Signal will add persisted progress events as soon as research starts.</p>}</div></section>
+  return <section className="rounded-xl border border-border bg-card p-5"><div className="flex items-center justify-between gap-3"><div><p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">Progress</p><h2 className="mt-2 text-lg font-semibold text-foreground">What Scout is doing</h2></div><RadioTower className="h-4 w-4 text-muted-foreground" /></div><div className="mt-5 max-h-[268px] space-y-4 overflow-y-auto pr-1">{events.length > 0 ? events.map((event) => <div key={event.id} className="grid grid-cols-[54px_minmax(0,1fr)] gap-3"><span className="pt-0.5 font-mono text-[11px] text-muted-foreground">{timeLabel(event.created_at)}</span><div className="border-l border-border pl-3"><p className="text-xs font-medium text-foreground">{stageLabel(event.stage)}</p><p className="mt-1 text-sm leading-5 text-muted-foreground">{formatScoreReason(event.message)}</p></div></div>) : <p className="text-sm leading-6 text-muted-foreground">Scout will add persisted progress events as soon as research starts.</p>}</div></section>
 }
 
 function RecentRunCard({ run }: { run: SignalRun }) {
@@ -566,7 +566,26 @@ function ResultLeadCard({ lead, rank }: { lead: SignalRunLead; rank: number }) {
   const statusTone = ["no_site", "weak_site", "social_only", "no_website_found", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(presence) ? "border-amber-400/30 bg-amber-400/10 text-amber-100" : ["strong_site", "website_strong"].includes(presence) ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200" : "border-border bg-muted/50 text-muted-foreground"
   const href = `/dashboard/signal/runs/${lead.run_id}?lead=${lead.id}`
 
-  return <article className="rounded-xl border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 sm:p-5"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone}`}>{formatOnlinePresence(presence)}</span></div><h3 className="mt-3 truncate text-lg font-semibold text-foreground">{leadName(lead)}</h3><p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"><span>{formatBusinessCategory(lead.primary_category || lead.industry)}</span><span className="text-border">/</span><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span></p></div><div className="shrink-0 text-right"><p className="font-mono text-2xl font-semibold text-foreground">{lead.final_score ?? "—"}</p><p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">Score</p><p className="mt-2 text-xs text-muted-foreground">{formatConfidence(lead.confidence_score)}</p></div></div><div className="mt-5 rounded-lg border border-border bg-card/50 p-3"><p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Why it stands out</p><p className="mt-2 text-sm leading-5 text-foreground">{pitch || reasons[0] || "Open this lead for the evidence-backed opportunity and sales plan."}</p>{action && <p className="mt-2 text-xs leading-5 text-muted-foreground"><span className="text-foreground">Best move:</span> {action}</p>}</div>{reasons.length > 0 && <ul className="mt-4 space-y-2">{reasons.map((reason, index) => <li key={`${reason}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />{reason}</li>)}</ul>}<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4"><div className="flex flex-wrap gap-3 text-xs text-muted-foreground">{lead.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{lead.phone}</span>}{lead.is_independent_likely && <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5" />Likely independent</span>}</div><div className="flex gap-2"><Link href={`${href}&tab=sales-pack`} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><FileText className="h-3.5 w-3.5" />Sales pack</Link><Link href={`${href}&tab=lovable`} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-xs font-medium text-background transition-colors hover:bg-foreground/90"><Sparkles className="h-3.5 w-3.5" />Concept</Link></div></div></article>
+  return <article className="rounded-xl border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 sm:p-5"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone}`}>{formatOnlinePresence(presence)}</span></div><h3 className="mt-3 truncate text-lg font-semibold text-foreground">{leadName(lead)}</h3><p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"><span>{formatBusinessCategory(lead.primary_category || lead.industry)}</span><span className="text-border">/</span><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span></p></div><div className="shrink-0 text-right"><p className="font-mono text-2xl font-semibold text-foreground">{lead.final_score ?? "—"}</p><p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">Scout score</p><p className="mt-2 text-xs text-muted-foreground">{formatConfidence(lead.confidence_score)}</p></div></div><div className="mt-5 rounded-lg border border-border bg-card/50 p-3"><p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Why it may stand out</p><p className="mt-2 text-sm leading-5 text-foreground">{pitch || reasons[0] || "Open this suggestion to review its discovery evidence."}</p>{action && <p className="mt-2 text-xs leading-5 text-muted-foreground"><span className="text-foreground">Suggested move:</span> {action}</p>}</div>{reasons.length > 0 && <ul className="mt-4 space-y-2">{reasons.map((reason, index) => <li key={`${reason}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />{reason}</li>)}</ul>}<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4"><div className="flex flex-wrap gap-3 text-xs text-muted-foreground">{lead.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{lead.phone}</span>}{lead.is_independent_likely && <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5" />Likely independent</span>}</div><div className="flex flex-wrap gap-2"><Link href={href} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><FileText className="h-3.5 w-3.5" />Review discovery</Link><AnalyzeRunLeadButton lead={lead} /></div></div></article>
+}
+
+function AnalyzeRunLeadButton({ lead }: { lead: SignalRunLead }) {
+  const [working, setWorking] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  async function analyze() {
+    setWorking(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/signal/runs/${lead.run_id}/leads/${lead.id}/analyze`, { method: "POST" })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Suggestion could not be opened in Signal.")
+      window.location.assign(data.workspace_url)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Suggestion could not be opened in Signal.")
+      setWorking(false)
+    }
+  }
+  return <div className="flex flex-col items-end gap-1"><button type="button" onClick={analyze} disabled={working} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-xs font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">{working ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}Analyze in Signal</button>{error && <span className="max-w-48 text-right text-[11px] text-red-300">{error}</span>}</div>
 }
 
 function SavedLeadCard({ lead }: { lead: SignalRunLead }) {

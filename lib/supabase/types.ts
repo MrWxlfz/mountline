@@ -137,6 +137,42 @@ export type SignalSource =
   | "csv_import"
   | "referral"
   | "public_web_research"
+  | "scout_suggestion"
+
+export type SignalAnalysisStatus =
+  | "queued"
+  | "resolving"
+  | "researching"
+  | "analyzing"
+  | "ready"
+  | "needs_review"
+  | "failed"
+
+export type SignalIdentityStatus =
+  | "verified"
+  | "likely"
+  | "needs_review"
+  | "ambiguous"
+  | "rejected"
+
+export type SignalVerdict = "pending" | "pursue" | "investigate" | "skip"
+export type SignalLevel = "unknown" | "low" | "medium" | "high"
+export type SignalPipelineStage =
+  | "found"
+  | "analyzed"
+  | "concept_ready"
+  | "contacted"
+  | "interested"
+  | "proposal"
+  | "won"
+  | "lost"
+
+export type SignalConceptStatus =
+  | "not_started"
+  | "prompt_ready"
+  | "in_progress"
+  | "ready"
+  | "archived"
 
 export type SignalRelevantDemo = "auto-detailing" | "barber-shop" | "none"
 
@@ -410,6 +446,33 @@ export type SignalProspect = {
   public_contact_form_url: string | null
   instagram_url: string | null
   source: SignalSource
+  analysis_input?: string | null
+  analysis_status?: SignalAnalysisStatus
+  analysis_error?: string | null
+  analysis_started_at?: string | null
+  analysis_completed_at?: string | null
+  identity_status?: SignalIdentityStatus
+  provider_place_id?: string | null
+  public_address?: string | null
+  business_status?: string | null
+  opening_hours?: SignalJson
+  facebook_url?: string | null
+  chain_status?: "independent" | "likely_independent" | "local_multi_location" | "likely_franchise" | "chain" | "uncertain"
+  verdict?: SignalVerdict
+  opportunity_label?: SignalLevel
+  confidence_label?: SignalLevel
+  approachability_label?: SignalLevel
+  pipeline_stage?: SignalPipelineStage
+  primary_opportunity?: string | null
+  why_it_matters?: string | null
+  smallest_offer?: string | null
+  must_verify?: SignalJson
+  do_not_pitch?: SignalJson
+  next_action?: string | null
+  next_action_due_at?: string | null
+  concept_status?: SignalConceptStatus
+  converted_client_id?: string | null
+  converted_project_id?: string | null
   existing_website_platform: string | null
   existing_booking_platform: string | null
   human_notes: string | null
@@ -445,6 +508,78 @@ export type SignalProspect = {
   follow_up_date: string | null
   assigned_to: string | null
   last_researched_at: string | null
+}
+
+export type SignalEvidenceCategory =
+  | "verified_public_fact"
+  | "likely_inference"
+  | "mountline_observation"
+  | "unverified_claim"
+  | "unknown"
+
+export type SignalEvidenceTier =
+  | "first_party"
+  | "platform_listing"
+  | "social_profile"
+  | "directory"
+  | "search_result"
+  | "mountline_private"
+  | "unknown"
+
+export type SignalEvidenceLedgerItem = {
+  id: string
+  prospect_id: string
+  created_at: string
+  retrieved_at: string | null
+  evidence_category: SignalEvidenceCategory
+  evidence_tier: SignalEvidenceTier
+  claim_type: string
+  claim_text: string
+  source_url: string | null
+  source_title: string | null
+  source_provider: string | null
+  source_excerpt: string | null
+  verification_status: "verified" | "corroborated" | "unverified" | "contradicted" | "unknown"
+  confidence: number | null
+  contradiction_group: string | null
+  metadata: SignalJson
+  created_by: string | null
+}
+
+export type SignalLeadActivity = {
+  id: string
+  prospect_id: string
+  created_at: string
+  occurred_at: string
+  activity_type: string
+  summary: string
+  metadata: SignalJson
+  created_by: string | null
+}
+
+export type SignalLeadStageHistory = {
+  id: string
+  prospect_id: string
+  created_at: string
+  from_stage: SignalPipelineStage | null
+  to_stage: SignalPipelineStage
+  reason: string | null
+  created_by: string | null
+}
+
+export type SignalConcept = {
+  id: string
+  prospect_id: string
+  analysis_id: string | null
+  created_at: string
+  updated_at: string
+  status: Exclude<SignalConceptStatus, "not_started">
+  generation_prompt: string
+  verified_facts: SignalJson
+  concept_url: string | null
+  screenshot_url: string | null
+  notes: string | null
+  created_by: string | null
 }
 
 export type SignalAnalysis = {

@@ -36,6 +36,7 @@ async function getStats() {
     { count: supportOpenCount },
     { count: signalFollowUpsDue },
     { count: signalReadyCount },
+    { count: signalProspectsCount },
     { count: activeCampaignCount },
     { count: highFitAlertCount },
     { data: recentLeads },
@@ -44,7 +45,7 @@ async function getStats() {
   ] = await Promise.all([
     supabase.from("leads").select("*", { count: "exact", head: true }),
     supabase.from("leads").select("*", { count: "exact", head: true }).eq("status", "new"),
-    supabase.from("projects").select("*", { count: "exact", head: true }),
+    supabase.from("projects").select("*", { count: "exact", head: true }).neq("status", "completed"),
     supabase.from("clients").select("*", { count: "exact", head: true }),
     supabase.from("projects").select("*", { count: "exact", head: true }).not("portal_id", "is", null),
     supabase.from("support_threads").select("*", { count: "exact", head: true }).eq("status", "open"),
@@ -58,6 +59,7 @@ async function getStats() {
       .from("signal_prospects")
       .select("*", { count: "exact", head: true })
       .eq("outreach_status", "ready_to_contact"),
+    supabase.from("signal_prospects").select("*", { count: "exact", head: true }),
     supabase
       .from("signal_campaigns")
       .select("*", { count: "exact", head: true })
@@ -67,6 +69,7 @@ async function getStats() {
     supabase
       .from("projects")
       .select("*, clients(business_name)")
+      .neq("status", "completed")
       .order("created_at", { ascending: false })
       .limit(5),
     supabase
@@ -89,6 +92,7 @@ async function getStats() {
     recentProjects: recentProjects || [],
     recentSupport: recentSupport || [],
     signalFollowUpsDue: signalFollowUpsDue || 0,
+    signalProspectsCount: signalProspectsCount || 0,
     signalReadyCount: signalReadyCount || 0,
     supportOpenCount: supportOpenCount || 0,
   }
@@ -134,14 +138,14 @@ export default async function DashboardPage() {
       action: "Open Support",
     },
     stats.signalFollowUpsDue > 0 && {
-      href: "/dashboard/signal/focus",
+      href: "/dashboard/pipeline",
       label: `${stats.signalFollowUpsDue} Signal follow-up${stats.signalFollowUpsDue === 1 ? "" : "s"} due`,
       meta: "Work through due follow-ups before starting new outreach.",
       tone: "green" as const,
       action: "Start Focus",
     },
     stats.highFitAlertCount > 0 && {
-      href: "/dashboard/signal/alerts",
+      href: "/dashboard/signal",
       label: `${stats.highFitAlertCount} high-fit Signal alert${stats.highFitAlertCount === 1 ? "" : "s"}`,
       meta: "Review the evidence and choose the next manual step.",
       tone: "blue" as const,
@@ -159,7 +163,7 @@ export default async function DashboardPage() {
     stats.newLeadsCount > 0
       ? "/dashboard/leads"
       : stats.signalFollowUpsDue > 0 || stats.signalReadyCount > 0
-        ? "/dashboard/signal/focus"
+        ? "/dashboard/pipeline"
         : stats.supportOpenCount > 0
           ? "/dashboard/support"
           : "/dashboard/signal"
@@ -167,8 +171,8 @@ export default async function DashboardPage() {
   const primaryLabel =
     primaryHref === "/dashboard/leads"
       ? "Review Leads"
-      : primaryHref === "/dashboard/signal/focus"
-        ? "Start Focus Mode"
+      : primaryHref === "/dashboard/pipeline"
+        ? "Open Pipeline"
         : primaryHref === "/dashboard/support"
           ? "Open Support"
           : "Open Signal"
@@ -221,10 +225,10 @@ export default async function DashboardPage() {
 
       <MetricStrip
         items={[
-          { href: "/dashboard/leads", label: "Total leads", value: stats.leadsCount },
+          { href: "/dashboard/leads", label: "Signal leads", value: stats.signalProspectsCount },
+          { href: "/dashboard/leads", label: "Incoming inquiries", value: stats.leadsCount, tone: stats.newLeadsCount ? "blue" : "default" },
           { href: "/dashboard/projects", label: "Active projects", value: stats.projectsCount },
           { href: "/dashboard/clients", label: "Clients", value: stats.clientsCount },
-          { href: "/dashboard/portals", label: "Portals", value: stats.portalsCount },
           { href: "/dashboard/support", label: "Open support", value: stats.supportOpenCount, tone: stats.supportOpenCount ? "amber" : "default" },
         ]}
       />

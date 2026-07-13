@@ -21,6 +21,9 @@ import {
   RadioTower,
   PanelLeftClose,
   PanelLeftOpen,
+  BarChart3,
+  GitBranch,
+  Send,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NorthlineLogo } from "@/components/northline-logo"
@@ -28,12 +31,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 const navGroups = [
   {
-    label: "Command",
+    label: "Operate",
     items: [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
       { href: "/dashboard/leads", label: "Leads", icon: Inbox },
-      { href: "/dashboard/scout", label: "Scout", icon: Radar },
-      { href: "/dashboard/signal", label: "Signal", icon: RadioTower },
+      { href: "/dashboard/pipeline", label: "Pipeline", icon: GitBranch },
     ],
   },
   {
@@ -43,6 +45,15 @@ const navGroups = [
       { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
       { href: "/dashboard/portals", label: "Portals", icon: Globe },
       { href: "/dashboard/support", label: "Support", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Growth",
+    items: [
+      { href: "/dashboard/signal", label: "Signal", icon: RadioTower },
+      { href: "/dashboard/scout", label: "Scout", icon: Radar },
+      { href: "/dashboard/outreach", label: "Outreach", icon: Send },
+      { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
     ],
   },
 ]
@@ -128,8 +139,10 @@ export function DashboardShell({
               {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
             <button
+              type="button"
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden p-1.5 hover:bg-muted rounded-md text-muted-foreground"
+              aria-label="Close navigation"
             >
               <X className="w-4 h-4" />
             </button>
@@ -241,12 +254,21 @@ export function DashboardShell({
       <div className={cn("transition-[padding] duration-200", collapsed ? "lg:pl-[76px]" : "lg:pl-64")}>
         <header className="sticky top-0 z-30 flex items-center h-12 px-4 bg-background/80 backdrop-blur-sm border-b border-border lg:px-6">
           <button
+            type="button"
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-1.5 -ml-2 hover:bg-muted rounded-md text-muted-foreground"
+            aria-label="Open navigation"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex-1" />
+          <div className="min-w-0 flex-1 px-3 lg:px-0">
+            <p className="truncate text-xs text-muted-foreground">
+              Mountline OS <span className="px-1 opacity-40">/</span> {pathname === "/dashboard" ? "Overview" : pathname.split("/").filter(Boolean).slice(1).map((part) => part.replace(/-/g, " ")).join(" / ")}
+            </p>
+          </div>
+          <Link href="/dashboard/signal" className="mr-3 hidden h-8 items-center rounded-md bg-foreground px-3 text-xs font-medium text-background hover:bg-foreground/90 sm:inline-flex">
+            Analyze business
+          </Link>
           <Link
             href="/"
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"

@@ -2,6 +2,7 @@ import Link from "next/link"
 import { MessageSquare, ArrowUpRight, Circle } from "lucide-react"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { EmptyState, PageHeader, SectionPanel, StatusBadge } from "@/components/dashboard/dashboard-ui"
 
 function formatDateTime(date: string | null) {
   if (!date) return "No messages yet"
@@ -62,23 +63,15 @@ export default async function SupportInboxPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">
-          Support
-        </p>
-        <h1 className="text-2xl font-bold tracking-tight">Support Inbox</h1>
-        <p className="text-muted-foreground">
-          Open client support threads from active project portals.
-        </p>
-      </div>
+    <div className="space-y-7">
+      <PageHeader eyebrow="Support" title="Support inbox" subtitle="Open client messages from assigned project portals. Reading this inbox never creates a support thread." />
 
       {error ? (
         <div className="rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-400">
           Support threads could not be loaded: {error.message}
         </div>
       ) : threads && threads.length > 0 ? (
-        <div className="grid gap-4">
+        <SectionPanel title="Open threads" description="Unread counts include client messages that have not been opened by the Mountline team."><div className="grid gap-3">
           {threads.map((thread: any) => {
             const project = Array.isArray(thread.projects) ? thread.projects[0] : thread.projects
             const client = Array.isArray(project?.clients) ? project.clients[0] : project?.clients
@@ -102,10 +95,7 @@ export default async function SupportInboxPage() {
                           {client?.business_name || project?.project_name || "Support thread"}
                         </h2>
                         {unreadCount > 0 && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-400">
-                            <Circle className="h-2 w-2 fill-blue-400" />
-                            {unreadCount} unread
-                          </span>
+                          <StatusBadge tone="blue"><Circle className="mr-1 h-2 w-2 fill-current" />{unreadCount} unread</StatusBadge>
                         )}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -128,15 +118,9 @@ export default async function SupportInboxPage() {
               </Link>
             )
           })}
-        </div>
+        </div></SectionPanel>
       ) : (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <MessageSquare className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
-          <h2 className="font-semibold">No open support threads</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Client portal messages will appear here when projects have support activity.
-          </p>
-        </div>
+        <EmptyState title="No open support threads" icon={MessageSquare}>Client portal messages appear here only after an assigned client starts or replies to a project support thread.</EmptyState>
       )}
     </div>
   )

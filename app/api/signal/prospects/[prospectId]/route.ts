@@ -100,6 +100,9 @@ export async function PATCH(
     "public_phone",
     "public_contact_form_url",
     "instagram_url",
+    "facebook_url",
+    "public_address",
+    "chain_status",
     "existing_website_platform",
     "existing_booking_platform",
     "human_notes",
@@ -213,6 +216,14 @@ export async function PATCH(
     },
     "prospect_patch",
   )
+
+  await supabase.from("signal_lead_activities").insert({
+    prospect_id: prospectId,
+    activity_type: "lead_record_updated",
+    summary: "Mountline lead details were updated manually.",
+    metadata: { fields: Object.keys(parsed.data) },
+    created_by: authCheck.access.userId,
+  })
 
   if (
     update.classification_manual_override === true &&

@@ -1,18 +1,19 @@
 import { notFound } from "next/navigation"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
-import { isSignalProspectSuppressed } from "@/lib/signal/alerts"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type {
-  SignalAlert,
   SignalAnalysis,
-  SignalFeedback,
+  SignalConcept,
+  SignalEvidenceLedgerItem,
+  SignalLeadActivity,
+  SignalLeadStageHistory,
   SignalOutreachDraft,
   SignalOutreachEvent,
   SignalProspect,
-  SignalVerifiedObservation,
-  SignalVisualEvidence,
 } from "@/lib/supabase/types"
-import { SignalProspectDetail } from "./signal-prospect-detail"
+import { SignalLeadWorkspace } from "./signal-prospect-detail"
+
+export const dynamic = "force-dynamic"
 
 export default async function SignalProspectPage({
   params,
@@ -22,76 +23,42 @@ export default async function SignalProspectPage({
   await requireNorthlineTeamMember()
   const { prospectId } = await params
   const supabase = createAdminClient()
-
   const { data: prospectData, error } = await supabase
     .from("signal_prospects")
     .select("*")
     .eq("id", prospectId)
     .maybeSingle()
-
-  if (error) {
-    console.error("[signal] Prospect detail fetch failed:", error.message)
-  }
+  if (error) console.error("[signal] Lead workspace fetch failed:", error.message)
   if (!prospectData) notFound()
 
-  const prospect = prospectData as SignalProspect
   const [
     { data: analyses },
     { data: drafts },
-    { data: alerts },
-    { data: events },
-    { data: feedback },
-    { data: visualEvidence },
-    { data: verifiedObservations },
+    { data: outreachEvents },
+    { data: evidence },
+    { data: activities },
+    { data: stageHistory },
+    { data: concepts },
   ] = await Promise.all([
-    supabase
-      .from("signal_analyses")
-      .select("*")
-      .eq("prospect_id", prospect.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("signal_outreach_drafts")
-      .select("*")
-      .eq("prospect_id", prospect.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("signal_alerts")
-      .select("*")
-      .eq("prospect_id", prospect.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("signal_outreach_events")
-      .select("*")
-      .eq("prospect_id", prospect.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("signal_feedback")
-      .select("*")
-      .eq("prospect_id", prospect.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("signal_visual_evidence")
-      .select("*")
-      .eq("prospect_id", prospect.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("signal_verified_observations")
-      .select("*")
-      .eq("prospect_id", prospect.id)
-      .order("created_at", { ascending: false }),
+    supabase.from("signal_analyses").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
+    supabase.from("signal_outreach_drafts").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
+    supabase.from("signal_outreach_events").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
+    supabase.from("signal_evidence_ledger").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
+    supabase.from("signal_lead_activities").select("*").eq("prospect_id", prospectId).order("occurred_at", { ascending: false }),
+    supabase.from("signal_lead_stage_history").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
+    supabase.from("signal_concepts").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
   ])
 
   return (
-    <SignalProspectDetail
-      prospect={prospect}
+    <SignalLeadWorkspace
+      prospect={prospectData as SignalProspect}
       analyses={(analyses || []) as SignalAnalysis[]}
       drafts={(drafts || []) as SignalOutreachDraft[]}
-      alerts={(alerts || []) as SignalAlert[]}
-      outreachEvents={(events || []) as SignalOutreachEvent[]}
-      feedback={(feedback || []) as SignalFeedback[]}
-      visualEvidence={(visualEvidence || []) as SignalVisualEvidence[]}
-      verifiedObservations={(verifiedObservations || []) as SignalVerifiedObservation[]}
-      suppressed={await isSignalProspectSuppressed(prospect)}
+      outreachEvents={(outreachEvents || []) as SignalOutreachEvent[]}
+      evidence={(evidence || []) as SignalEvidenceLedgerItem[]}
+      activities={(activities || []) as SignalLeadActivity[]}
+      stageHistory={(stageHistory || []) as SignalLeadStageHistory[]}
+      concepts={(concepts || []) as SignalConcept[]}
     />
   )
 }

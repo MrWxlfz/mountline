@@ -26,6 +26,17 @@ type LeadRecord = {
   message: string | null
 }
 
+type SignalRecord = {
+  id: string
+  business_name: string
+  contact_name: string | null
+  public_email: string | null
+  public_phone: string | null
+  website_url: string | null
+  primary_opportunity: string | null
+  why_it_matters: string | null
+}
+
 const emptyForm: ClientForm = {
   business_name: "",
   contact_name: "",
@@ -47,20 +58,21 @@ function NewClientForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const leadId = searchParams.get("leadId")
+  const signalId = searchParams.get("signalId")
   const [saving, setSaving] = useState(false)
-  const [loadingLead, setLoadingLead] = useState(Boolean(leadId))
+  const [loadingLead, setLoadingLead] = useState(Boolean(leadId || signalId))
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<ClientForm>(emptyForm)
 
   useEffect(() => {
-    if (!leadId) return
+    if (!leadId && !signalId) return
 
     async function loadLead() {
       setLoadingLead(true)
       setError(null)
 
       try {
-        const res = await fetch(`/api/leads/${leadId}`)
+        const res = await fetch(leadId ? `/api/leads/${leadId}` : `/api/signal/prospects/${signalId}`)
         const data = await res.json()
 
         if (!res.ok) {
@@ -68,7 +80,7 @@ function NewClientForm() {
           return
         }
 
-        setForm(prefillFromLead(data.lead))
+        setForm(leadId ? prefillFromLead(data.lead) : prefillFromSignal(data.prospect))
       } catch {
         setError("Lead details could not be loaded.")
       } finally {
@@ -77,7 +89,7 @@ function NewClientForm() {
     }
 
     loadLead()
-  }, [leadId])
+  }, [leadId, signalId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,7 +100,7 @@ function NewClientForm() {
       const res = await fetch("/api/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, lead_id: leadId }),
+        body: JSON.stringify({ ...form, lead_id: leadId, signal_id: signalId }),
       })
       const data = await res.json()
 
@@ -118,7 +130,11 @@ function NewClientForm() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Add Client</h1>
           <p className="text-muted-foreground">
-            {leadId ? "Create a client record from a lead." : "Create a new client record."}
+            {leadId
+              ? "Create a client record from an inquiry."
+              : signalId
+                ? "Create a client record from the Signal workspace. Verify contact details before saving."
+                : "Create a new client record."}
           </p>
         </div>
       </div>
@@ -251,5 +267,19 @@ function prefillFromLead(lead: LeadRecord): ClientForm {
     phone: lead.phone || "",
     website: lead.current_website || "",
     notes: notes.join("\n"),
+  }
+}
+
+function prefillFromSignal(prospect: SignalRecord): ClientForm {
+  return {
+    business_name: prospect.business_name || "",
+    contact_name: prospect.contact_name || "",
+    email: prospect.public_email || "",
+    phone: prospect.public_phone || "",
+    website: prospect.website_url || "",
+    notes: [
+      prospect.primary_opportunity ? `Signal opportunity: ${prospect.primary_opportunity}` : null,
+      prospect.why_it_matters ? `Signal summary: ${prospect.why_it_matters}` : null,
+    ].filter(Boolean).join("\n\n"),
   }
 }

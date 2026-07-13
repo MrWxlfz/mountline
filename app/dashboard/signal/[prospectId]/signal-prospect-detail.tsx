@@ -1,2087 +1,580 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  AlertTriangle,
+  AlertCircle,
   ArrowLeft,
-  Calendar,
-  CheckCircle2,
+  ArrowRight,
+  Check,
   Clipboard,
   ExternalLink,
-  ImageIcon,
+  FileSearch,
   Loader2,
   Mail,
-  MoreHorizontal,
+  MessageSquare,
   Phone,
-  RadioTower,
+  Plus,
+  RefreshCw,
   ShieldAlert,
   Sparkles,
-  Trash2,
-  Upload,
 } from "lucide-react"
 import {
   PageHeader,
   PrimaryAction,
+  SectionPanel,
   SecondaryAction,
   StatusBadge,
-  priorityTone,
 } from "@/components/dashboard/dashboard-ui"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "@/lib/signal/playbooks"
-import { formatScoreReason, formatSignalLabel } from "@/lib/signal/presentation"
 import type {
-  SignalAlert,
   SignalAnalysis,
-  SignalFeedback,
-  SignalCommunicationProfile,
+  SignalConcept,
+  SignalEvidenceCategory,
+  SignalEvidenceLedgerItem,
+  SignalLeadActivity,
+  SignalLeadStageHistory,
   SignalOutreachDraft,
   SignalOutreachEvent,
+  SignalPipelineStage,
   SignalProspect,
-  SignalVerifiedObservation,
-  SignalVisualEvidence,
 } from "@/lib/supabase/types"
+import { formatSignalLabel } from "@/lib/signal/presentation"
+import { cn } from "@/lib/utils"
 
-type WorkingAction =
-  | "scan"
-  | "quick_score"
-  | "initial"
-  | "deep"
-  | "contacted"
-  | "awaiting"
-  | "demo"
-  | "interested"
-  | "followup"
-  | "suppress"
-  | "convert"
-  | "scripts"
-  | "session"
-  | "visual_upload"
-  | "visual_analyze"
-  | "visual_capture"
-  | "visual_remove"
-  | "observation"
-  | "focus"
-  | "correct_category"
-  | null
-
-const statusLabels: Record<string, string> = {
-  researched: "Researched",
-  needs_review: "Needs review",
-  ready_to_contact: "Ready to contact",
-  contacted: "Contacted",
-  awaiting_reply: "Awaiting reply",
-  permission_to_send_demo: "Permission to send demo",
-  demo_sent: "Demo sent",
-  interested: "Interested",
-  discovery_call: "Discovery call",
-  proposal_sent: "Proposal sent",
-  won: "Won",
-  lost: "Lost",
-  no_response: "No response",
-  do_not_contact: "Do not contact",
+const evidenceLabels: Record<SignalEvidenceCategory, string> = {
+  verified_public_fact: "Verified public facts",
+  likely_inference: "Likely inferences",
+  mountline_observation: "Private Mountline observations",
+  unverified_claim: "Unverified claims",
+  unknown: "Unknowns and limitations",
 }
 
-const modeLabels: Record<string, string> = {
-  local_student: "Warm local",
-  professional_studio: "Professional studio",
-  warm_connection: "Warm connection",
+const evidenceOrder: SignalEvidenceCategory[] = [
+  "verified_public_fact",
+  "likely_inference",
+  "mountline_observation",
+  "unverified_claim",
+  "unknown",
+]
+
+const pipelineStages: Array<{ value: SignalPipelineStage; label: string }> = [
+  { value: "found", label: "Found" },
+  { value: "analyzed", label: "Analyzed" },
+  { value: "concept_ready", label: "Concept ready" },
+  { value: "contacted", label: "Contacted" },
+  { value: "interested", label: "Interested" },
+  { value: "proposal", label: "Proposal" },
+  { value: "won", label: "Won" },
+  { value: "lost", label: "Lost" },
+]
+
+function list(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
 }
 
-const channelLabels: Record<string, string> = {
-  call: "Call",
-  email: "Email",
-  instagram: "Instagram",
-  contact_form: "Contact form",
-  warm_intro: "Warm intro",
-  research_more: "Research more",
-}
-
-const conversationStyleLabels: Record<string, string> = {
-  friendly_local: "Friendly local",
-  traditional_owner_operator: "Traditional owner-operator",
-  modern_casual_brand: "Modern casual brand",
-  formal_business: "Formal business",
-  clinical_professional: "Clinical professional",
-  concise_busy_owner: "Concise busy owner",
-}
-
-const communicationProfileLabels: Record<SignalCommunicationProfile, string> = {
-  plainspoken_owner_operator: "Plainspoken owner-operator",
-  friendly_local: "Friendly local business",
-  modern_casual_brand: "Modern casual brand",
-  busy_operations_manager: "Busy operations manager",
-  formal_business: "Formal business",
-  clinical_professional: "Clinical professional",
-  warm_existing_connection: "Warm existing connection",
-}
-
-const contactReadinessLabels: Record<string, string> = {
-  verified_email_available: "Verified email available",
-  verified_phone_available: "Verified phone available",
-  verified_contact_form_available: "Verified contact form available",
-  verified_social_contact_available: "Verified social contact available",
-  contact_missing: "Contact missing",
-  contact_history_only: "Contact history only",
-  suppressed: "Suppressed",
-}
-
-const laneLabels: Record<string, string> = {
-  website_first: "Website First",
-  systems_discovery: "Systems Discovery",
-  do_not_pursue: "Do Not Pursue",
-  compliance_gated: "Compliance-Gated",
-}
-
-const localityLabels: Record<string, string> = {
-  keller_local: "Keller local",
-  dfw_nearby: "DFW nearby",
-  remote: "Remote",
-  unknown: "Unknown",
-}
-
-const relationshipLabels: Record<string, string> = {
-  none: "None",
-  personally_visited: "Personally visited",
-  knows_owner: "Knows owner",
-  family_referral: "Family referral",
-  customer: "Customer",
-  referred: "Referred",
-}
-
-const outreachHistoryLabels: Record<string, string> = {
-  never_contacted: "Never contacted",
-  emailed: "Emailed",
-  called: "Called",
-  dm_attempted: "DM attempted",
-  awaiting_reply: "Awaiting reply",
-  follow_up_due: "Follow-up due",
-}
-
-function arrayFromJson(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : []
-}
-
-function formatDateTime(value: string | null | undefined) {
-  if (!value) return "-"
+function dateTime(value: string | null | undefined) {
+  if (!value) return "Not recorded"
   return new Date(value).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+    month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
   })
 }
 
-function getScan(analysis: SignalAnalysis | null) {
-  const signals = analysis?.website_signals
-  if (!signals || typeof signals !== "object") return null
-  if ("scan" in signals && signals.scan && typeof signals.scan === "object") {
-    return signals.scan as Record<string, unknown>
+function verdictTone(verdict: SignalProspect["verdict"]) {
+  if (verdict === "pursue") return "green" as const
+  if (verdict === "investigate") return "amber" as const
+  if (verdict === "skip") return "red" as const
+  return "default" as const
+}
+
+function analysisStatusLabel(status: SignalProspect["analysis_status"]) {
+  if (["resolving", "researching", "analyzing"].includes(status || "ready")) return "Analysis in progress"
+  if (status === "queued") return "Analysis queued"
+  if (status === "needs_review") return "Analysis needs review"
+  if (status === "failed") return "Analysis failed"
+  return status === "ready" ? "Analysis ready" : formatSignalLabel(status || "unknown")
+}
+
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false)
+  async function copy() {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1400)
   }
-  return signals as Record<string, unknown>
-}
-
-function evidenceFromAnalysis(analysis: SignalAnalysis | null) {
-  const evidence = analysis?.evidence
-  if (Array.isArray(evidence)) return evidence as Array<Record<string, unknown>>
-  if (evidence && typeof evidence === "object" && "website" in evidence && Array.isArray(evidence.website)) {
-    return evidence.website as Array<Record<string, unknown>>
-  }
-  return []
-}
-
-function scriptStudioFromDraft(draft: SignalOutreachDraft | null) {
-  const value = draft?.script_studio
-  if (!value || typeof value !== "object") return null
-  return value as Record<string, unknown>
-}
-
-function demoRoute(value: string | null | undefined) {
-  if (value === "auto-detailing") return "/work/auto-detailing"
-  if (value === "barber-shop") return "/work/barber-shop"
-  return null
-}
-
-function evidenceWeighting(analysis: SignalAnalysis | null) {
-  const weighting = analysis?.evidence_weighting
-  return weighting && typeof weighting === "object" ? (weighting as Record<string, unknown>) : null
-}
-
-function stringList(value: unknown) {
-  if (!Array.isArray(value)) return []
-  return value.filter((item) => item !== null && item !== undefined).map((item) => {
-    if (typeof item === "string") return item
-    if (item && typeof item === "object") {
-      const record = item as Record<string, unknown>
-      return [record.signal, record.snippet, record.url].filter(Boolean).join(": ")
-    }
-    return String(item)
-  }).filter(Boolean)
-}
-
-function readableFacts(value: unknown, prefix = ""): string[] {
-  if (!value || typeof value !== "object") return []
-  if (Array.isArray(value)) return value.flatMap((item) => readableFacts(item, prefix)).slice(0, 8)
-  return Object.entries(value as Record<string, unknown>).flatMap(([key, item]) => {
-    const label = prefix ? `${prefix} · ${formatSignalLabel(key)}` : formatSignalLabel(key)
-    if (typeof item === "string" || typeof item === "number" || typeof item === "boolean") {
-      return [`${label}: ${formatScoreReason(String(item))}`]
-    }
-    return item && typeof item === "object" ? readableFacts(item, label) : []
-  }).slice(0, 8)
-}
-
-function visualAnalysisFromEvidence(evidence: SignalVisualEvidence[]) {
-  const latest = evidence.find((item) => item.analysis && typeof item.analysis === "object")
-  return latest?.analysis && typeof latest.analysis === "object"
-    ? (latest.analysis as Record<string, unknown>)
-    : null
-}
-
-function stringsFromRecordArray(value: unknown, keys: string[]) {
-  if (!Array.isArray(value)) return []
-  return value
-    .map((item) => {
-      if (!item || typeof item !== "object") return null
-      const record = item as Record<string, unknown>
-      return keys.map((key) => record[key]).filter(Boolean).join(": ")
-    })
-    .filter((item): item is string => Boolean(item))
-}
-
-function buildStrategyBoxes({
-  analysis,
-  playbookQuestions,
-  prospect,
-  scan,
-  verifiedObservations,
-  visualEvidence,
-}: {
-  analysis: SignalAnalysis | null
-  playbookQuestions: string[]
-  prospect: SignalProspect
-  scan: Record<string, unknown> | null
-  verifiedObservations: SignalVerifiedObservation[]
-  visualEvidence: SignalVisualEvidence[]
-}) {
-  const facts = [
-    prospect.website_url && `Official website saved: ${prospect.website_url}`,
-    prospect.city && `Location saved: ${[prospect.city, prospect.state].filter(Boolean).join(", ")}`,
-    scan?.page_title && `Official homepage title: ${String(scan.page_title)}`,
-    ...stringsFromRecordArray(scan?.evidence, ["signal", "snippet"]).slice(0, 4),
-    ...verifiedObservations.slice(0, 4).map((item) =>
-      `${formatSignalLabel(item.category)}: ${item.note}${item.url ? ` (${item.url})` : ""}`,
-    ),
-    visualEvidence.some((item) => item.screenshot_type === "desktop") && "Desktop public-site screenshot is stored.",
-    visualEvidence.some((item) => item.screenshot_type === "mobile") && "Mobile public-site screenshot is stored.",
-  ].filter(Boolean) as string[]
-
-  const inferences = [
-    analysis?.recommended_lane && `Recommended lane: ${laneLabels[analysis.recommended_lane] || analysis.recommended_lane}.`,
-    analysis?.recommended_primary_offer && `A practical first offer may be: ${analysis.recommended_primary_offer}.`,
-    analysis?.recommended_secondary_offer && `Secondary opportunity to confirm later: ${analysis.recommended_secondary_offer}.`,
-    analysis?.systems_opportunity_score !== null &&
-      analysis?.systems_opportunity_score !== undefined &&
-      "Systems/workflow ideas should stay discovery-led unless confirmed by the business.",
-    prospect.existing_booking_platform && `Existing ${prospect.existing_booking_platform} booking can likely remain in place unless the team says otherwise.`,
-  ].filter(Boolean) as string[]
-
-  const questions = [
-    ...(arrayFromJson(analysis?.discovery_confirmation_needed).length
-      ? arrayFromJson(analysis?.discovery_confirmation_needed)
-      : []),
-    ...playbookQuestions,
-  ].slice(0, 8)
-
-  return {
-    facts,
-    inferences,
-    questions,
-  }
-}
-
-function buildTimeline({
-  alerts,
-  analyses,
-  drafts,
-  feedback,
-  outreachEvents,
-  prospect,
-  verifiedObservations,
-  visualEvidence,
-}: {
-  alerts: SignalAlert[]
-  analyses: SignalAnalysis[]
-  drafts: SignalOutreachDraft[]
-  feedback: SignalFeedback[]
-  outreachEvents: SignalOutreachEvent[]
-  prospect: SignalProspect
-  verifiedObservations: SignalVerifiedObservation[]
-  visualEvidence: SignalVisualEvidence[]
-}) {
-  const timeline = [
-    {
-      date: prospect.created_at,
-      category: "research",
-      title: "Prospect created",
-      detail: formatSignalLabel(prospect.source),
-    },
-    ...analyses.map((analysis) => ({
-      date: analysis.created_at,
-      category: analysis.analysis_type === "deep_dive" ? "analysis" : "research",
-      title: formatSignalLabel(analysis.analysis_type),
-      detail: analysis.recommended_primary_offer || analysis.executive_summary || "Analysis saved",
-    })),
-    ...drafts.map((draft) => ({
-      date: draft.created_at,
-      category: "outreach",
-      title: "Draft prepared",
-      detail: draft.first_contact_subject || draft.outreach_mode,
-    })),
-    ...outreachEvents.map((event) => ({
-      date: event.event_date || event.created_at,
-      category:
-        event.event_type === "demo_sent"
-          ? "demo"
-          : event.event_type === "replied"
-            ? "reply"
-            : event.follow_up_date
-              ? "follow_up"
-              : "outreach",
-      title: formatSignalLabel(event.event_type),
-      detail: [event.channel, event.summary].filter(Boolean).join(": "),
-    })),
-    ...visualEvidence.map((item) => ({
-      date: item.analyzed_at || item.created_at,
-      category: item.analyzed_at ? "analysis" : "research",
-      title: `${item.screenshot_type} screenshot`,
-      detail: item.analyzed_at ? "Visual analysis saved" : "Visual evidence uploaded",
-    })),
-    ...verifiedObservations.map((item) => ({
-      date: item.created_at,
-      category: "note",
-      title: formatSignalLabel(item.category),
-      detail: item.note,
-    })),
-    ...feedback.map((item) => ({
-      date: item.created_at,
-      category: "correction",
-      title: formatSignalLabel(item.feedback_type),
-      detail: item.corrected_value || item.note || item.original_value || "Correction saved",
-    })),
-    ...alerts.map((alert) => ({
-      date: alert.created_at,
-      category: "status",
-      title: alert.title,
-      detail: alert.message,
-    })),
-  ]
-
-  return timeline
-    .filter((item) => item.date)
-    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
-    .slice(0, 40)
-}
-
-function gradeForScore(value: number | null | undefined) {
-  if (typeof value !== "number") return "-"
-  if (value >= 85) return "A"
-  if (value >= 70) return "B"
-  if (value >= 50) return "C"
-  return "skip"
-}
-
-function scoreColor(value: number | null | undefined, inverse = false) {
-  if (typeof value !== "number") return "bg-muted"
-  const good = inverse ? value <= 30 : value >= 75
-  const medium = inverse ? value <= 60 : value >= 55
-  if (good) return "bg-green-400"
-  if (medium) return "bg-yellow-400"
-  return "bg-red-400"
-}
-
-function notesSuggestPriorOutreach(prospect: SignalProspect) {
-  const text = [
-    prospect.human_notes,
-    prospect.locality_relationship,
-    prospect.what_looks_good,
-    prospect.visible_problem,
-  ].filter(Boolean).join(" ")
-  return /already\s+(sent\s+an\s+)?email|emailed\s+(and\s+)?(waiting|awaiting)|waiting\s+for\s+(a\s+)?response|awaiting\s+reply|dm\s+(sent|attempted)|called\s+(already|before)?/i.test(text)
-}
-
-function hasRecordedPriorOutreach(events: SignalOutreachEvent[]) {
-  return events.some((event) => event.direction === "outbound")
-}
-
-function hasIgnoredOutreachNote(feedback: SignalFeedback[]) {
-  return feedback.some((item) => item.feedback_type === "contact_history_note_ignored")
-}
-
-function deriveContactReadiness(prospect: SignalProspect, events: SignalOutreachEvent[], suppressed: boolean) {
-  if (suppressed || prospect.outreach_status === "do_not_contact") return "suppressed"
-  if (prospect.public_email) return "verified_email_available"
-  if (prospect.public_phone) return "verified_phone_available"
-  if (prospect.public_contact_form_url) return "verified_contact_form_available"
-  if (prospect.instagram_url) return "verified_social_contact_available"
-  if (hasRecordedPriorOutreach(events)) return "contact_history_only"
-  return prospect.contact_readiness || "contact_missing"
-}
-
-function recommendedActionForUi(
-  prospect: SignalProspect,
-  events: SignalOutreachEvent[],
-  contactReadiness: string,
-  mismatch: boolean,
-  analysisAction: string | null | undefined,
-) {
-  if (mismatch) return "Confirm prior outreach before preparing scripts. Record the email sent or ignore the note."
-  if (prospect.outreach_status === "do_not_contact") return "Block outreach drafting and contact actions."
-  const hasOutbound = hasRecordedPriorOutreach(events)
-  const hasReply = events.some((event) =>
-    ["replied", "permission_to_send_demo", "discovery_call_booked", "interested", "declined"].includes(event.event_type),
+  return (
+    <button type="button" onClick={copy} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Clipboard className="h-3.5 w-3.5" />}
+      {copied ? "Copied" : "Copy"}
+    </button>
   )
-  const followUp = events.find((event) => event.follow_up_date)?.follow_up_date || prospect.follow_up_date
-  if (hasOutbound && !hasReply) {
-    if (followUp) return `Wait for a response. If no reply by ${followUp}, send one short follow-up.`
-    return "Wait for a response. If no reply by the follow-up date, send one short follow-up."
-  }
-  if (contactReadiness === "contact_missing" && ["researched", "needs_review"].includes(prospect.outreach_status)) {
-    return "Research contact route before outreach."
-  }
-  if (contactReadiness === "contact_history_only") {
-    return "Add the contact route used for prior outreach so follow-ups can be tracked accurately."
-  }
-  return analysisAction || "Review latest evidence and prepare the next manual step."
 }
 
-export function SignalProspectDetail({
-  alerts,
+function ScriptBlock({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null
+  return (
+    <div className="rounded-lg border border-border bg-muted/20 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-medium text-foreground">{label}</h3>
+        <CopyButton value={value} />
+      </div>
+      <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{value}</p>
+    </div>
+  )
+}
+
+export function SignalLeadWorkspace({
+  prospect,
   analyses,
   drafts,
-  feedback,
   outreachEvents,
-  prospect,
-  suppressed,
-  verifiedObservations,
-  visualEvidence,
+  evidence,
+  activities,
+  stageHistory,
+  concepts,
 }: {
-  alerts: SignalAlert[]
+  prospect: SignalProspect
   analyses: SignalAnalysis[]
   drafts: SignalOutreachDraft[]
-  feedback: SignalFeedback[]
   outreachEvents: SignalOutreachEvent[]
-  prospect: SignalProspect
-  suppressed: boolean
-  verifiedObservations: SignalVerifiedObservation[]
-  visualEvidence: SignalVisualEvidence[]
+  evidence: SignalEvidenceLedgerItem[]
+  activities: SignalLeadActivity[]
+  stageHistory: SignalLeadStageHistory[]
+  concepts: SignalConcept[]
 }) {
   const router = useRouter()
-  const latestAnalysis = useMemo(
-    () => analyses.find((analysis) => analysis.overall_opportunity_score !== null) || analyses[0] || null,
-    [analyses],
+  const started = useRef(false)
+  const [working, setWorking] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(prospect.analysis_error || null)
+  const [stage, setStage] = useState<SignalPipelineStage>(prospect.pipeline_stage || "found")
+  const [note, setNote] = useState("")
+  const [eventSummary, setEventSummary] = useState("")
+  const [eventChannel, setEventChannel] = useState("call")
+  const [conceptInstructions, setConceptInstructions] = useState("")
+  const [nextActionDraft, setNextActionDraft] = useState(prospect.next_action || "")
+  const [nextActionDue, setNextActionDue] = useState(
+    prospect.next_action_due_at ? new Date(prospect.next_action_due_at).toISOString().slice(0, 10) : "",
   )
-  const latestScanAnalysis = useMemo(
-    () => analyses.find((analysis) => analysis.website_signals) || latestAnalysis,
-    [analyses, latestAnalysis],
-  )
+  const [identityDraft, setIdentityDraft] = useState({
+    business_name: prospect.business_name,
+    industry: prospect.industry,
+    city: prospect.city || "",
+    state: prospect.state || "",
+    public_address: prospect.public_address || "",
+    public_phone: prospect.public_phone || "",
+    website_url: prospect.website_url || "",
+    instagram_url: prospect.instagram_url || "",
+    facebook_url: prospect.facebook_url || "",
+    chain_status: prospect.chain_status || "uncertain",
+  })
+
+  const latestAnalysis = analyses[0] || null
   const latestDraft = drafts[0] || null
-  const scriptStudio = scriptStudioFromDraft(latestDraft)
-  const unreadAlert = alerts.find((alert) => !alert.read_at)
-  const playbook = getSignalPlaybook(prospect.industry_playbook)
-  const scan = getScan(latestScanAnalysis)
-  const evidence = evidenceFromAnalysis(latestScanAnalysis)
-  const weighting = evidenceWeighting(latestAnalysis)
-  const visualAnalysis = visualAnalysisFromEvidence(visualEvidence)
-  const desktopEvidence = visualEvidence.find((item) => item.screenshot_type === "desktop")
-  const mobileEvidence = visualEvidence.find((item) => item.screenshot_type === "mobile")
-  const selectedDemoRoute = demoRoute(latestAnalysis?.recommended_demo || prospect.relevant_demo)
-  const externalReadiness =
-    scriptStudio?.external_readiness && typeof scriptStudio.external_readiness === "object"
-        ? (scriptStudio.external_readiness as Record<string, unknown>)
-        : latestAnalysis?.external_readiness && typeof latestAnalysis.external_readiness === "object"
-          ? (latestAnalysis.external_readiness as Record<string, unknown>)
-        : null
-  const externalReady = externalReadiness?.passed !== false
-  const readinessWarning = String(externalReadiness?.warning || "")
-  const contactReadiness = deriveContactReadiness(prospect, outreachEvents, suppressed)
-  const followUpMode =
-    ["contacted", "awaiting_reply"].includes(prospect.outreach_status) ||
-    hasRecordedPriorOutreach(outreachEvents)
-  const contactHistoryMismatch =
-    notesSuggestPriorOutreach(prospect) &&
-    !hasRecordedPriorOutreach(outreachEvents) &&
-    !hasIgnoredOutreachNote(feedback)
-  const displayedNextAction = recommendedActionForUi(
-    prospect,
-    outreachEvents,
-    contactReadiness,
-    contactHistoryMismatch,
-    latestAnalysis?.recommended_next_action,
-  )
-  const communicationProfile =
-    prospect.suggested_communication_profile ||
-    latestAnalysis?.communication_profile ||
-    (prospect.compliance_tier === "compliance_gated" ? "clinical_professional" : "friendly_local")
-  const [working, setWorking] = useState<WorkingAction>(null)
-  const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [followUpDate, setFollowUpDate] = useState(prospect.follow_up_date || "")
-  const conversationStyle =
-    prospect.conversation_style || latestAnalysis?.suggested_conversation_style || "friendly_local"
-  const [profile, setProfile] = useState<string>(communicationProfile)
-  const [scriptGuidance, setScriptGuidance] = useState(prospect.script_guidance || "")
-  const [recordChannel, setRecordChannel] = useState("email")
-  const [recordEventType, setRecordEventType] = useState("delivered")
-  const [recordDate, setRecordDate] = useState(new Date().toISOString().slice(0, 10))
-  const [recordContact, setRecordContact] = useState("")
-  const [recordSummary, setRecordSummary] = useState("")
-  const [screenshotType, setScreenshotType] = useState("desktop")
-  const [screenshotFile, setScreenshotFile] = useState<File | null>(null)
-  const [categoryDraft, setCategoryDraft] = useState(prospect.industry_playbook || "general_local_business")
-  const [quickScoreStages, setQuickScoreStages] = useState<Array<{
-    key: string
-    label: string
-    note?: string
-    status: "done" | "skipped"
-  }>>([])
-  const [quickScoreVisualNote, setQuickScoreVisualNote] = useState<string | null>(null)
-  const [observationCategory, setObservationCategory] = useState("site_design")
-  const [observationSource, setObservationSource] = useState("manual_public_site_review")
-  const [observationNote, setObservationNote] = useState("")
-  const [observationUrl, setObservationUrl] = useState("")
-  const guidanceHistoryConflict =
-    /already\s+(sent\s+an\s+)?email|already\s+emailed|generate follow-up only|follow-up only|already called/i.test(scriptGuidance) &&
-    !hasRecordedPriorOutreach(outreachEvents)
-  const strategyBoxes = buildStrategyBoxes({
-    analysis: latestAnalysis,
-    playbookQuestions: playbook.discoveryQuestions,
-    prospect,
-    scan,
-    verifiedObservations,
-    visualEvidence,
-  })
-  const timeline = buildTimeline({
-    alerts,
-    analyses,
-    drafts,
-    feedback,
-    outreachEvents,
-    prospect,
-    verifiedObservations,
-    visualEvidence,
-  })
+  const latestConcept = concepts[0] || null
+  const groupedEvidence = useMemo(() => Object.fromEntries(
+    evidenceOrder.map((category) => [category, evidence.filter((item) => item.evidence_category === category)]),
+  ) as Record<SignalEvidenceCategory, SignalEvidenceLedgerItem[]>, [evidence])
 
-  const doNotContact = prospect.outreach_status === "do_not_contact" || suppressed
-  const permissionMode = prospect.outreach_status === "permission_to_send_demo"
-  const demoSentMode = prospect.outreach_status === "demo_sent"
-  const discoveryMode = prospect.outreach_status === "interested" || prospect.outreach_status === "discovery_call"
-  const firstContactMode =
-    ["researched", "needs_review", "ready_to_contact"].includes(prospect.outreach_status) &&
-    !followUpMode
-
-  const runAction = async (action: WorkingAction, path: string, body?: Record<string, unknown>) => {
-    setWorking(action)
+  async function runAnalysis() {
+    if (working) return
+    setWorking("analysis")
     setError(null)
-    setMessage(null)
-
     try {
-      const response = await fetch(path, {
-        method: body ? "PATCH" : "POST",
-        headers: body ? { "Content-Type": "application/json" } : undefined,
-        body: body ? JSON.stringify(body) : undefined,
-      })
-      const data = await response.json().catch(() => ({}))
-
-      if (!response.ok) {
-        setError(data.error || "Signal action failed.")
-        return
-      }
-
-      setMessage(
-        data.ai_unavailable
-          ? "Action complete. AI analysis unavailable; rule-based score shown."
-          : "Action complete.",
-      )
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/analyze`, { method: "POST" })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Analysis could not complete.")
       router.refresh()
-    } catch {
-      setError("Signal action failed.")
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Analysis could not complete.")
     } finally {
       setWorking(null)
     }
   }
 
-  const updateStatus = (status: string, action: WorkingAction) => {
-    runAction(action, `/api/signal/prospects/${prospect.id}`, { outreach_status: status })
-  }
+  useEffect(() => {
+    if (prospect.analysis_status !== "queued" || started.current) return
+    started.current = true
+    void runAnalysis()
+    // The queue state is the only trigger. The function is intentionally not
+    // a dependency so a refresh cannot start duplicate work.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prospect.analysis_status])
 
-  const prepareScriptsWithGuidance = async () => {
-    setWorking("scripts")
+  async function updateStage(nextStage: SignalPipelineStage) {
+    setWorking("stage")
     setError(null)
-    setMessage(null)
     try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/prepare-scripts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          conversation_style: conversationStyle,
-          communication_profile: profile,
-          guidance: scriptGuidance,
-        }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Scripts could not be prepared.")
-        return
-      }
-      setMessage(data.needs_manual_review ? "Script Studio prepared, but draft needs manual review." : "Script Studio prepared.")
-      router.refresh()
-    } catch {
-      setError("Scripts could not be prepared.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const uploadScreenshot = async () => {
-    if (!screenshotFile) {
-      setError("Choose a screenshot file first.")
-      return
-    }
-    setWorking("visual_upload")
-    setError(null)
-    setMessage(null)
-    try {
-      const formData = new FormData()
-      formData.set("screenshot_type", screenshotType)
-      formData.set("file", screenshotFile)
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence`, {
-        method: "POST",
-        body: formData,
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.setup_needed || data.error || "Screenshot upload failed.")
-        return
-      }
-      setScreenshotFile(null)
-      setMessage("Screenshot uploaded.")
-      router.refresh()
-    } catch {
-      setError("Screenshot upload failed.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const captureScreenshot = async () => {
-    setWorking("visual_capture")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence/capture`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ screenshot_type: screenshotType }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Automated screenshot capture is unavailable. Manual upload remains available.")
-        return
-      }
-      setMessage("Public homepage screenshot captured.")
-      router.refresh()
-    } catch {
-      setError("Automated screenshot capture is unavailable. Manual upload remains available.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const analyzeVisualDesign = async () => {
-    setWorking("visual_analyze")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence`, {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/pipeline`, {
         method: "PATCH",
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Visual analysis failed.")
-        return
-      }
-      setMessage("Visual design analysis saved. Run Initial Analysis or Deep Dive to refresh scores.")
-      router.refresh()
-    } catch {
-      setError("Visual analysis failed.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const removeScreenshot = async (evidenceId: string) => {
-    setWorking("visual_remove")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/visual-evidence`, {
-        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ evidence_id: evidenceId }),
+        body: JSON.stringify({ pipeline_stage: nextStage }),
       })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Screenshot could not be removed.")
-        return
-      }
-      setMessage("Screenshot removed.")
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Stage could not be updated.")
+      setStage(nextStage)
       router.refresh()
-    } catch {
-      setError("Screenshot could not be removed.")
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Stage could not be updated.")
     } finally {
       setWorking(null)
     }
   }
 
-  const addObservation = async () => {
-    setWorking("observation")
+  async function saveNextAction(event: React.FormEvent) {
+    event.preventDefault()
+    setWorking("next-action")
     setError(null)
-    setMessage(null)
     try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/observations`, {
-        method: "POST",
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/pipeline`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          category: observationCategory,
-          source: observationSource,
-          note: observationNote,
-          url: observationUrl || null,
+          pipeline_stage: stage,
+          next_action: nextActionDraft.trim() || null,
+          next_action_due_at: nextActionDue ? new Date(`${nextActionDue}T12:00:00`).toISOString() : null,
         }),
       })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Observation could not be saved.")
-        return
-      }
-      setObservationNote("")
-      setObservationUrl("")
-      setMessage("Verified observation saved.")
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Next action could not be saved.")
       router.refresh()
-    } catch {
-      setError("Observation could not be saved.")
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Next action could not be saved.")
     } finally {
       setWorking(null)
     }
   }
 
-  const recordPriorOutreach = async (quickEmail = false) => {
-    setWorking("contacted")
+  async function saveIdentity(event: React.FormEvent) {
+    event.preventDefault()
+    setWorking("identity")
     setError(null)
-    setMessage(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...identityDraft, classification_manual_override: true }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Identity corrections could not be saved.")
+      router.refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Identity corrections could not be saved.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  async function generateSalesPack() {
+    setWorking("sales")
+    setError(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/deep-dive`, { method: "POST" })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Sales pack could not be prepared.")
+      router.refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Sales pack could not be prepared.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  async function buildConcept() {
+    setWorking("concept")
+    setError(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/concept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instructions: conceptInstructions.trim() || null }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Concept prompt could not be prepared.")
+      setConceptInstructions("")
+      setStage(data.pipeline_stage || stage)
+      router.refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Concept prompt could not be prepared.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  async function savePrivateNote(event: React.FormEvent) {
+    event.preventDefault()
+    if (!note.trim()) return
+    setWorking("note")
+    setError(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Note could not be saved.")
+      setNote("")
+      router.refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Note could not be saved.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  async function logOutreach(event: React.FormEvent) {
+    event.preventDefault()
+    setWorking("outreach")
+    setError(null)
     try {
       const response = await fetch(`/api/signal/prospects/${prospect.id}/outreach-events`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          channel: quickEmail ? "email" : recordChannel,
-          event_type: quickEmail ? "delivered" : recordEventType,
-          direction: "outbound",
-          event_date: recordDate,
-          follow_up_date: followUpDate || null,
-          contact_value: quickEmail ? recordContact : recordContact,
-          summary: quickEmail
-            ? "Prior email recorded from prospect notes."
-            : recordSummary || "Prior outreach recorded from Signal detail.",
+          channel: eventChannel,
+          event_type: "attempted",
+          summary: eventSummary.trim() || null,
         }),
       })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Could not record outreach.")
-        return
-      }
-      setMessage("Prior outreach recorded.")
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Outreach could not be logged.")
+      setEventSummary("")
+      await updateStage("contacted")
       router.refresh()
-    } catch {
-      setError("Could not record outreach.")
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Outreach could not be logged.")
     } finally {
       setWorking(null)
     }
   }
 
-  const ignoreOutreachNote = async () => {
-    setWorking("contacted")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/feedback`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          feedback_type: "contact_history_note_ignored",
-          original_value: prospect.human_notes,
-          note: "Team ignored prior-outreach inference from notes.",
-        }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Could not save feedback.")
-        return
-      }
-      setMessage("Outreach note ignored for this prospect.")
-      router.refresh()
-    } catch {
-      setError("Could not save feedback.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const submitCorrection = async (feedbackType: string, originalValue?: string | null) => {
-    const corrected = window.prompt("Corrected value or short guidance?")
-    if (corrected === null) return
-    setWorking("scripts")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/feedback`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          analysis_id: latestAnalysis?.id || null,
-          feedback_type: feedbackType,
-          original_value: originalValue || null,
-          corrected_value: corrected,
-        }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Could not save feedback.")
-        return
-      }
-      setMessage("Signal correction saved for this prospect.")
-      router.refresh()
-    } catch {
-      setError("Could not save feedback.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const findContactRoute = async () => {
-    setWorking("scan")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/scan`, { method: "POST" })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Contact route research failed.")
-        return
-      }
-      const scan = data.scan || {}
-      const email = Array.isArray(scan.visible_emails) ? scan.visible_emails[0] : null
-      const phone = Array.isArray(scan.visible_phones) ? scan.visible_phones[0] : null
-      const contactForm = Array.isArray(scan.booking_links) ? scan.booking_links[0] : null
-      if (!email && !phone && !contactForm) {
-        setMessage("Scan complete. No public contact route found on scanned official pages.")
-        router.refresh()
-        return
-      }
-      const confirmed = window.confirm(
-        `Use found contact route?\n${email ? `Email: ${email}\n` : ""}${phone ? `Phone: ${phone}\n` : ""}${contactForm ? `Contact/booking: ${contactForm}` : ""}`,
-      )
-      if (!confirmed) return
-      await fetch(`/api/signal/prospects/${prospect.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          public_email: email || prospect.public_email,
-          public_phone: phone || prospect.public_phone,
-          public_contact_form_url: contactForm || prospect.public_contact_form_url,
-          contact_readiness: email
-            ? "verified_email_available"
-            : phone
-              ? "verified_phone_available"
-              : "verified_contact_form_available",
-          contact_readiness_reason: "Confirmed from official-site scan on Signal detail.",
-        }),
-      })
-      setMessage("Contact route saved.")
-      router.refresh()
-    } catch {
-      setError("Contact route research failed.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const createCallSession = async () => {
-    setWorking("session")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch("/api/signal/call-sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prospect_ids: [prospect.id] }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Call session could not be created.")
-        return
-      }
-      router.push(`/dashboard/signal/call-session/${data.session.id}`)
-    } catch {
-      setError("Call session could not be created.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const addToFocusMode = async () => {
-    setWorking("focus")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch("/api/signal/focus/items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prospect_id: prospect.id,
-          focus_reason:
-            latestAnalysis?.executive_summary ||
-            latestAnalysis?.recommended_primary_offer ||
-            "Added from Signal prospect detail.",
-          recommended_action: displayedNextAction,
-        }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Could not add to Focus Mode.")
-        return
-      }
-      setMessage(data.existing ? "Prospect is already in Focus Mode." : "Prospect added to Focus Mode.")
-      router.refresh()
-    } catch {
-      setError("Could not add to Focus Mode.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const runQuickScore = async () => {
-    setWorking("quick_score")
-    setError(null)
-    setMessage(null)
-    setQuickScoreStages([])
-    setQuickScoreVisualNote(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/quick-score`, {
-        method: "POST",
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Quick score could not complete.")
-        return
-      }
-      setQuickScoreStages(data.stages || [])
-      setQuickScoreVisualNote(data.visual_unavailable_message || null)
-      setMessage(
-        data.ai_unavailable
-          ? "Quick score complete. AI unavailable; rule-based quick score shown."
-          : "Quick score complete.",
-      )
-      router.refresh()
-    } catch {
-      setError("Quick score could not complete.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const saveCategoryCorrection = async () => {
-    setWorking("correct_category")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          industry_playbook: categoryDraft,
-          classification_manual_override: true,
-        }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Category correction could not be saved.")
-        return
-      }
-      await fetch(`/api/signal/prospects/${prospect.id}/feedback`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          analysis_id: latestAnalysis?.id || null,
-          feedback_type: "wrong_playbook",
-          original_value: prospect.industry_playbook,
-          corrected_value: categoryDraft,
-          note: "Manual category correction from Signal detail.",
-        }),
-      }).catch(() => null)
-      setMessage("Category correction saved.")
-      router.refresh()
-    } catch {
-      setError("Category correction could not be saved.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const copyText = async (text: string | null | undefined, label: string) => {
-    if (!text) return
-    await navigator.clipboard.writeText(text)
-    setMessage(`${label} copied.`)
-  }
-
-  const suppress = async () => {
-    if (!window.confirm("Add this business to Signal do-not-contact?")) return
-    setWorking("suppress")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/suppress`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: "Marked from Signal prospect detail" }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Could not add to do-not-contact.")
-        return
-      }
-      setMessage("Prospect added to do-not-contact.")
-      router.refresh()
-    } catch {
-      setError("Could not add to do-not-contact.")
-    } finally {
-      setWorking(null)
-    }
-  }
-
-  const convert = async () => {
-    if (!window.confirm("Create an existing lead from this Signal prospect?")) return
-    setWorking("convert")
-    setError(null)
-    setMessage(null)
-    try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/convert`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirm: true }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        setError(data.error || "Lead could not be created.")
-        return
-      }
-      setMessage("Existing lead created from Signal prospect.")
-      router.refresh()
-    } catch {
-      setError("Lead could not be created.")
-    } finally {
-      setWorking(null)
-    }
-  }
+  const statusInProgress = ["queued", "resolving", "researching", "analyzing"].includes(prospect.analysis_status || "ready")
+  const mustVerify = list(prospect.must_verify)
+  const doNotPitch = list(prospect.do_not_pitch)
 
   return (
     <div className="space-y-6">
+      <Link href="/dashboard/signal" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-4 w-4" /> Signal inbox
+      </Link>
       <PageHeader
-        eyebrow="Mountline Signal"
+        eyebrow="Signal lead workspace"
         title={prospect.business_name}
-        subtitle={`${playbook.name} · ${[prospect.city, prospect.state].filter(Boolean).join(", ") || "Location unknown"}`}
-        meta={
-          <Link href="/dashboard/signal" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Signal
-          </Link>
-        }
+        subtitle={[prospect.industry, prospect.city, prospect.state].filter(Boolean).join(" · ") || "Business identity needs review"}
+        meta={<StatusBadge tone={verdictTone(prospect.verdict)}>{prospect.verdict === "pending" ? analysisStatusLabel(prospect.analysis_status) : formatSignalLabel(prospect.verdict)}</StatusBadge>}
         actions={
           <>
-            <PrimaryAction disabled={doNotContact || working === "quick_score"} onClick={runQuickScore} icon={working === "quick_score" ? Loader2 : Sparkles}>
-              Quick Score
+            {prospect.website_url && <SecondaryAction href={prospect.website_url} icon={ExternalLink}>Public site</SecondaryAction>}
+            <SecondaryAction href={`/dashboard/clients/new?signalId=${prospect.id}`} icon={Plus}>Create client</SecondaryAction>
+            <SecondaryAction href={`/dashboard/projects/new?signalId=${prospect.id}`} icon={Plus}>Create project</SecondaryAction>
+            <PrimaryAction onClick={runAnalysis} disabled={working === "analysis"} icon={working === "analysis" ? Loader2 : RefreshCw}>
+              {statusInProgress ? "Analyzing…" : "Re-run analysis"}
             </PrimaryAction>
-            <SecondaryAction disabled={doNotContact || working === "focus"} onClick={addToFocusMode} icon={RadioTower}>
-              Add to Focus Mode
-            </SecondaryAction>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button type="button" className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-                  <MoreHorizontal className="h-4 w-4" />
-                  More
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onSelect={() => runAction("scan", `/api/signal/prospects/${prospect.id}/scan`)}>
-                  Scan Website
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled={doNotContact} onSelect={prepareScriptsWithGuidance}>
-                  Prepare Scripts
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled={doNotContact} onSelect={createCallSession}>
-                  Prepare Call Session
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled={doNotContact} onSelect={convert}>
-                  Convert to Lead
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </>
         }
       />
 
-      {(message || error) && (
-        <div
-          className={`rounded-lg border px-3 py-2 text-sm ${
-            error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
-          }`}
-        >
-          {error || message}
+      {error && (
+        <div className="flex items-start gap-2 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
+        </div>
+      )}
+      {statusInProgress && (
+        <div className="flex items-center gap-3 rounded-lg border border-blue-500/25 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <div><p className="font-medium">{analysisStatusLabel(prospect.analysis_status)}</p><p className="mt-0.5 text-blue-100/70">The record is already saved. This workspace can be reopened if the request is interrupted.</p></div>
         </div>
       )}
 
-      {unreadAlert && (
-        <div className="rounded-xl border border-green-500/25 bg-green-500/10 p-4 text-sm text-green-200">
-          <div className="flex items-start gap-3">
-            <RadioTower className="mt-0.5 h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-medium">High-Fit Prospect</p>
-              <p className="mt-1 text-green-200/80">{unreadAlert.message}</p>
-            </div>
+      <SectionPanel title="Pipeline" description="Choose a stage explicitly. Every change is recorded in stage history.">
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="flex flex-wrap gap-2" aria-label="Pipeline stages">
+            {pipelineStages.map((item) => (
+              <button key={item.value} type="button" onClick={() => updateStage(item.value)} disabled={working === "stage"} className={cn(
+                "rounded-md border px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50",
+                stage === item.value ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}>{item.label}</button>
+            ))}
           </div>
+          <p className="text-xs text-muted-foreground">Updated {dateTime(prospect.updated_at)}</p>
         </div>
-      )}
+        <form onSubmit={saveNextAction} className="mt-4 grid gap-3 border-t border-border pt-4 lg:grid-cols-[1fr_180px_auto]">
+          <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Next action</span><input value={nextActionDraft} onChange={(event) => setNextActionDraft(event.target.value)} maxLength={1000} placeholder="Specific manual next step" className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
+          <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Due date</span><input type="date" value={nextActionDue} onChange={(event) => setNextActionDue(event.target.value)} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
+          <PrimaryAction type="submit" disabled={working === "next-action"} icon={working === "next-action" ? Loader2 : Check}>Save next action</PrimaryAction>
+        </form>
+      </SectionPanel>
 
-      {(prospect.compliance_tier === "compliance_gated" || latestAnalysis?.compliance_warning) && (
-        <div className="rounded-xl border border-yellow-500/25 bg-yellow-500/10 p-4 text-sm text-yellow-100">
-          <div className="flex items-start gap-3">
-            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
-            <p>{latestAnalysis?.compliance_warning || MEDICAL_COMPLIANCE_WARNING}</p>
-          </div>
-        </div>
-      )}
-
-      {doNotContact && (
-        <div className="rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-200">
-          This prospect is on the Signal do-not-contact list. Outreach drafts and contact-ready actions should stay disabled unless the team intentionally re-enables the record.
-        </div>
-      )}
-
-      {contactHistoryMismatch && (
-        <div className="rounded-xl border border-yellow-500/25 bg-yellow-500/10 p-4 text-sm text-yellow-100">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="font-medium">Outreach history needs confirmation</p>
-              <p className="mt-1 text-yellow-100/80">
-                Your notes indicate an email was already sent, but no outreach event is recorded.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => recordPriorOutreach(true)}
-                className="rounded-lg bg-yellow-100 px-3 py-2 text-xs font-medium text-black transition-colors hover:bg-yellow-50"
-              >
-                Record email sent
-              </button>
-              <button
-                type="button"
-                onClick={ignoreOutreachNote}
-                className="rounded-lg border border-yellow-400/40 px-3 py-2 text-xs font-medium text-yellow-100 transition-colors hover:bg-yellow-400/10"
-              >
-                Ignore note
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Tabs defaultValue="overview" className="space-y-5">
-        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-lg border border-border bg-card p-1">
-          {["Overview", "Evidence", "Strategy", "Scripts", "Timeline", "Visual Audit"].map((tab) => (
-            <TabsTrigger key={tab} value={tab.toLowerCase().replace(" ", "-")} className="flex-none px-3">
-              {tab}
-            </TabsTrigger>
+      <Tabs defaultValue="summary" className="space-y-5">
+        <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1">
+          {["summary", "research", "verdict", "concept", "sales", "outreach", "notes", "activity"].map((tab) => (
+            <TabsTrigger key={tab} value={tab} className="shrink-0 capitalize">{tab}</TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-5">
-      <section className="grid gap-4 lg:grid-cols-4">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Recommended Lane</p>
-          <p className="mt-2 text-lg font-semibold">
-            {latestAnalysis?.recommended_lane
-              ? laneLabels[latestAnalysis.recommended_lane] || latestAnalysis.recommended_lane
-              : "-"}
-          </p>
-          {selectedDemoRoute && (
-            <Link
-              href={selectedDemoRoute}
-              target="_blank"
-              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              Relevant demo: {selectedDemoRoute}
-            </Link>
-          )}
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Recommended Next Action</p>
-          <p className="mt-2 text-sm text-foreground">
-            {displayedNextAction}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Pursuit Priority</p>
-          <p className="mt-2 text-lg font-semibold">
-            {latestAnalysis?.priority || "-"}
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Based on the strongest grounded lane, not an average of unrelated fit.
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">External Readiness</p>
-          <p className="mt-2 text-lg font-semibold">
-            {externalReady ? "Ready to Review" : "Needs Manual Review"}
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {externalReady ? "Copy actions are enabled for ready drafts." : "Copy is disabled until drafts pass validation."}
-          </p>
-        </div>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-4">
-        <MetricCard
-          label="Website Opportunity"
-          value={`${latestAnalysis?.website_opportunity_score ?? "-"} / ${gradeForScore(latestAnalysis?.website_opportunity_score)}`}
-        />
-        <MetricCard
-          label="Systems / AI Opportunity"
-          value={`${latestAnalysis?.systems_opportunity_score ?? "-"} / ${gradeForScore(latestAnalysis?.systems_opportunity_score)}`}
-        />
-        <MetricCard
-          label="Outreach Readiness"
-          value={contactReadinessLabels[contactReadiness] || contactReadiness}
-          note={contactReadiness === "contact_history_only" ? "Add the contact route used for prior outreach." : undefined}
-        />
-        <MetricCard
-          label="Communication Profile"
-          value={communicationProfileLabels[communicationProfile as SignalCommunicationProfile] || communicationProfile}
-          note={prospect.follow_up_date ? `Follow-up date: ${prospect.follow_up_date}` : undefined}
-        />
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <Panel title="Prospect Summary">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Meta label="Industry" value={prospect.industry} />
-            <Meta label="Playbook" value={playbook.name} />
-            <Meta label="Category confidence" value={prospect.classification_confidence || latestAnalysis?.confidence || "-"} />
-            <Meta label="Classification source" value={prospect.classification_source ? formatSignalLabel(prospect.classification_source) : "-"} />
-            <Meta label="Location" value={[prospect.city, prospect.state].filter(Boolean).join(", ") || "-"} />
-            <Meta label="Locality" value={localityLabels[prospect.locality_scope || "unknown"] || prospect.locality_scope || "-"} />
-            <Meta label="Relationship" value={relationshipLabels[prospect.relationship_type || "none"] || prospect.relationship_type || "-"} />
-            <Meta label="Outreach History" value={outreachHistoryLabels[prospect.outreach_history || "never_contacted"] || prospect.outreach_history || "-"} />
-            <Meta label="Context Notes" value={prospect.locality_relationship || "-"} />
-            <Meta label="Priority" value={latestAnalysis?.priority || "-"} />
-            <Meta label="Overall Score" value={latestAnalysis?.overall_opportunity_score?.toString() || "-"} />
-            <Meta label="Value Band" value={latestAnalysis?.potential_project_value_band || "-"} />
-            <Meta label="Confidence" value={latestAnalysis?.confidence || "-"} />
-            <Meta label="Conversation Style" value={conversationStyleLabels[prospect.conversation_style] || prospect.conversation_style} />
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2 text-sm">
-            {prospect.website_url && <ContactLink href={prospect.website_url} icon="site" label="Website" />}
-            {prospect.public_email && <ContactLink href={`mailto:${prospect.public_email}`} icon="mail" label={prospect.public_email} />}
-            {prospect.public_phone && <ContactLink href={`tel:${prospect.public_phone}`} icon="phone" label={prospect.public_phone} />}
-            {prospect.public_contact_form_url && <ContactLink href={prospect.public_contact_form_url} icon="site" label="Contact form" />}
-          </div>
-        </Panel>
-
-        <Panel title="Actions">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <ActionButton working={working === "scan"} onClick={() => runAction("scan", `/api/signal/prospects/${prospect.id}/scan`)}>
-              <RadioTower className="h-4 w-4" />
-              Scan Website
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "quick_score"} onClick={runQuickScore}>
-              <Sparkles className="h-4 w-4" />
-              Quick Score Website
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "initial"} onClick={() => runAction("initial", `/api/signal/prospects/${prospect.id}/initial`)}>
-              <Sparkles className="h-4 w-4" />
-              Run Initial Analysis
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "deep"} onClick={() => runAction("deep", `/api/signal/prospects/${prospect.id}/deep-dive`)}>
-              <Sparkles className="h-4 w-4" />
-              Run Deep Dive
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "scripts"} onClick={prepareScriptsWithGuidance}>
-              <Sparkles className="h-4 w-4" />
-              Prepare Scripts
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "scan"} onClick={findContactRoute}>
-              <RadioTower className="h-4 w-4" />
-              Find Contact Route
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "session"} onClick={createCallSession}>
-              <Phone className="h-4 w-4" />
-              Prepare Call Session
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "focus"} onClick={addToFocusMode}>
-              <RadioTower className="h-4 w-4" />
-              Add to Focus Mode
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "contacted"} onClick={() => updateStatus("contacted", "contacted")}>
-              <CheckCircle2 className="h-4 w-4" />
-              Mark Contacted
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "awaiting"} onClick={() => updateStatus("awaiting_reply", "awaiting")}>
-              <Mail className="h-4 w-4" />
-              Awaiting Reply
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "demo"} onClick={() => updateStatus("demo_sent", "demo")}>
-              <ExternalLink className="h-4 w-4" />
-              Mark Demo Sent
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "interested"} onClick={() => updateStatus("interested", "interested")}>
-              <CheckCircle2 className="h-4 w-4" />
-              Mark Interested
-            </ActionButton>
-            <ActionButton disabled={doNotContact} working={working === "convert"} onClick={convert}>
-              <CheckCircle2 className="h-4 w-4" />
-              Convert to Lead
-            </ActionButton>
-          </div>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <input
-              type="date"
-              value={followUpDate}
-              onChange={(event) => setFollowUpDate(event.target.value)}
-              className="h-9 rounded-lg border border-border bg-muted px-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
-            />
-            <button
-              type="button"
-              disabled={working === "followup"}
-              onClick={() => runAction("followup", `/api/signal/prospects/${prospect.id}`, { follow_up_date: followUpDate || null })}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-            >
-              {working === "followup" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calendar className="h-4 w-4" />}
-              Set Follow-Up
-            </button>
-          </div>
-          <button
-            type="button"
-            disabled={working === "suppress"}
-            onClick={suppress}
-            className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-red-500/25 px-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50"
-          >
-            {working === "suppress" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
-            Add to Do Not Contact
-          </button>
-          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-sm font-medium">Quick Score Progress</p>
-            <div className="mt-3 grid gap-2">
-              {(quickScoreStages.length > 0
-                ? quickScoreStages
-                : [
-                    { key: "confirming_site", label: "Confirming official site", status: "skipped" as const },
-                    { key: "reading_homepage", label: "Reading homepage", status: "skipped" as const },
-                    { key: "checking_pages", label: "Checking services and contact routes", status: "skipped" as const },
-                    { key: "capturing_screenshot", label: "Capturing screenshot", status: "skipped" as const },
-                    { key: "analyzing_presentation", label: "Analyzing presentation", status: "skipped" as const },
-                    { key: "calculating_score", label: "Calculating score", status: "skipped" as const },
-                    { key: "ready_for_review", label: "Ready for review", status: "skipped" as const },
-                  ]).map((stage) => (
-                <div key={stage.key} className="rounded-md border border-border bg-background/60 px-3 py-2 text-xs text-muted-foreground">
-                  <div className="flex items-center justify-between gap-3">
-                    <span>{stage.label}</span>
-                    <span className={stage.status === "done" ? "text-green-300" : "text-muted-foreground"}>
-                      {working === "quick_score" ? "running" : stage.status}
-                    </span>
-                  </div>
-                  {stage.note && <p className="mt-1">{stage.note}</p>}
-                </div>
-              ))}
-            </div>
-            {quickScoreVisualNote && (
-              <p className="mt-3 rounded-md border border-yellow-500/25 bg-yellow-500/10 p-2 text-xs text-yellow-100">
-                {quickScoreVisualNote}
-              </p>
-            )}
-          </div>
-          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-sm font-medium">Record Prior Outreach</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <select value={recordChannel} onChange={(event) => setRecordChannel(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
-                {["email", "call", "voicemail", "instagram", "contact_form", "text", "in_person", "other"].map((value) => (
-                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
-                ))}
-              </select>
-              <select value={recordEventType} onChange={(event) => setRecordEventType(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
-                {["attempted", "delivered", "voicemail_left", "replied", "permission_to_send_demo", "demo_sent", "follow_up_sent", "interested", "declined"].map((value) => (
-                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
-                ))}
-              </select>
-              <input type="date" value={recordDate} onChange={(event) => setRecordDate(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm" />
-              <input value={recordContact} onChange={(event) => setRecordContact(event.target.value)} placeholder="Email, phone, or URL used" className="h-9 rounded-lg border border-border bg-background px-3 text-sm" />
-            </div>
-            <textarea value={recordSummary} onChange={(event) => setRecordSummary(event.target.value)} placeholder="Short note about what happened" className="mt-2 min-h-16 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-            <button type="button" onClick={() => recordPriorOutreach(false)} className="mt-2 inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              Save Outreach Event
-            </button>
-          </div>
-        </Panel>
-      </section>
-
-        </TabsContent>
-
-        <TabsContent value="visual-audit" className="space-y-5">
-      <Panel title="Visual Website Evidence">
-        <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-          Visual evidence from uploaded public-site screenshot. Do not upload customer portals, private dashboards, credentials, PHI, or sensitive content.
-        </div>
-        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <div className="grid gap-2 sm:grid-cols-[140px_1fr]">
-              <select
-                value={screenshotType}
-                onChange={(event) => setScreenshotType(event.target.value)}
-                className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
-              >
-                <option value="desktop">Desktop</option>
-                <option value="mobile">Mobile</option>
-              </select>
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => setScreenshotFile(event.target.files?.[0] || null)}
-                className="h-10 rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              />
-            </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <ActionButton disabled={doNotContact} working={working === "visual_upload"} onClick={uploadScreenshot}>
-                <Upload className="h-4 w-4" />
-                Upload Screenshot
-              </ActionButton>
-              <ActionButton disabled={doNotContact} working={working === "visual_capture"} onClick={captureScreenshot}>
-                <ImageIcon className="h-4 w-4" />
-                Capture Homepage
-              </ActionButton>
-              <ActionButton disabled={visualEvidence.length === 0} working={working === "visual_analyze"} onClick={analyzeVisualDesign}>
-                <ImageIcon className="h-4 w-4" />
-                Analyze Visual Design
-              </ActionButton>
-            </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              PNG, JPG/JPEG, or WEBP. Maximum 5 MB. One desktop and one mobile screenshot are stored per prospect.
-            </p>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
+        <TabsContent value="summary" className="space-y-5">
+          <div className="grid gap-3 md:grid-cols-3">
             {[
-              { label: "desktop", item: desktopEvidence },
-              { label: "mobile", item: mobileEvidence },
-            ].map(({ label, item }) => (
-              <div key={label} className="rounded-lg border border-border bg-muted/30 p-3">
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium capitalize">{item?.screenshot_type || label} screenshot</p>
-                  {item && (
-                    <button
-                      type="button"
-                      disabled={working === "visual_remove"}
-                      onClick={() => removeScreenshot(item.id)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Remove
-                    </button>
-                  )}
-                </div>
-                {item ? (
-                  <>
-                    <img
-                      src={`/api/signal/prospects/${prospect.id}/visual-evidence/${item.id}/image`}
-                      alt={`${item.screenshot_type} screenshot evidence`}
-                      className="aspect-video w-full rounded-md border border-border object-cover"
-                    />
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Uploaded {formatDateTime(item.created_at)} · {item.confidence || "not analyzed"}
-                    </p>
-                  </>
-                ) : (
-                  <div className="flex aspect-video items-center justify-center rounded-md border border-dashed border-border text-xs text-muted-foreground">
-                    Visual design not assessed.
-                  </div>
-                )}
+              ["Opportunity", prospect.opportunity_label],
+              ["Confidence", prospect.confidence_label],
+              ["Approachability", prospect.approachability_label],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg border border-border bg-card p-4">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+                <p className="mt-2 text-xl font-semibold capitalize text-foreground">{value || "Unknown"}</p>
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Visual Analysis</p>
-            {visualAnalysis ? (
-              <div className="mt-3 space-y-3">
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <Meta label="Visual quality" value={String(visualAnalysis.visual_quality_score ?? "-")} />
-                  <Meta label="Hero clarity" value={String(visualAnalysis.hero_clarity_score ?? "-")} />
-                  <Meta label="CTA visibility" value={String(visualAnalysis.cta_visibility_score ?? "-")} />
-                  <Meta label="Service clarity" value={String(visualAnalysis.service_clarity_score ?? "-")} />
-                  <Meta label="Gallery/proof" value={String(visualAnalysis.gallery_or_proof_score ?? "-")} />
-                  <Meta label="Mobile readability" value={String(visualAnalysis.mobile_readability_score ?? "-")} />
-                </div>
-                <TextBlock label="Evidence-grounded summary" value={String(visualAnalysis.evidence_grounded_summary || "")} />
-              </div>
-            ) : (
-              <p className="mt-2 text-sm text-muted-foreground">Visual design not assessed.</p>
-            )}
+          <div className="grid gap-5 xl:grid-cols-2">
+            <SectionPanel title="Primary opportunity" description="One focused problem, not a list of speculative services.">
+              <p className="text-lg font-medium text-foreground">{prospect.primary_opportunity || "Analysis has not identified a defensible opportunity yet."}</p>
+              {prospect.why_it_matters && <p className="mt-3 text-sm leading-6 text-muted-foreground">{prospect.why_it_matters}</p>}
+            </SectionPanel>
+            <SectionPanel title="Smallest sensible offer" description="The narrowest useful starting scope supported by current evidence.">
+              <p className="text-lg font-medium text-foreground">{prospect.smallest_offer || "Verify the business before defining an offer."}</p>
+              <p className="mt-3 text-sm text-muted-foreground">Next: {prospect.next_action || "Complete focused analysis."}</p>
+            </SectionPanel>
           </div>
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <EvidenceGroup title="Visible Improvement Opportunities" items={stringList(visualAnalysis?.visible_improvement_opportunities)} />
-            <div className="mt-3">
-              <EvidenceGroup title="What Looks Good" items={stringList(visualAnalysis?.what_looks_good)} />
+          <SectionPanel title="Identity and contact routes">
+            <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
+              <div><p className="text-xs text-muted-foreground">Identity</p><p className="mt-1 capitalize">{formatSignalLabel(prospect.identity_status)}</p></div>
+              <div><p className="text-xs text-muted-foreground">Phone</p><p className="mt-1">{prospect.public_phone || "Not verified"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Address or service area</p><p className="mt-1">{prospect.public_address || [prospect.city, prospect.state].filter(Boolean).join(", ") || "Not verified"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Preferred channel</p><p className="mt-1 capitalize">{latestAnalysis?.suggested_channel ? formatSignalLabel(latestAnalysis.suggested_channel) : "Needs research"}</p></div>
             </div>
-          </div>
-        </div>
-      </Panel>
+            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
+              <div><p className="text-xs text-muted-foreground">Business status</p><p className="mt-1">{formatSignalLabel(prospect.business_status || "unknown")}</p></div>
+              <div><p className="text-xs text-muted-foreground">Ownership pattern</p><p className="mt-1">{formatSignalLabel(prospect.chain_status || "uncertain")}</p></div>
+              <div><p className="text-xs text-muted-foreground">Instagram</p><p className="mt-1 break-all">{prospect.instagram_url || "Not verified"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Facebook</p><p className="mt-1 break-all">{prospect.facebook_url || "Not verified"}</p></div>
+            </div>
+            {list(prospect.opening_hours).length > 0 && <p className="mt-4 text-xs leading-5 text-muted-foreground">Verified listing hours: {list(prospect.opening_hours).join(" · ")}</p>}
+            <details className="mt-4 border-t border-border pt-4">
+              <summary className="cursor-pointer text-sm font-medium text-foreground">Correct identity details</summary>
+              <form onSubmit={saveIdentity} className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {([
+                  ["business_name", "Business name"], ["industry", "Category"], ["city", "City"], ["state", "State"],
+                  ["public_phone", "Phone"], ["website_url", "Official website"], ["facebook_url", "Facebook"], ["instagram_url", "Instagram"],
+                ] as const).map(([field, label]) => <label key={field} className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">{label}</span><input value={identityDraft[field]} onChange={(event) => setIdentityDraft((current) => ({ ...current, [field]: event.target.value }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>)}
+                <label className="space-y-1.5 sm:col-span-2"><span className="text-xs font-medium text-muted-foreground">Address or service area</span><input value={identityDraft.public_address} onChange={(event) => setIdentityDraft((current) => ({ ...current, public_address: event.target.value }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
+                <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Ownership pattern</span><select value={identityDraft.chain_status} onChange={(event) => setIdentityDraft((current) => ({ ...current, chain_status: event.target.value as typeof current.chain_status }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"><option value="uncertain">Uncertain</option><option value="independent">Independent</option><option value="likely_independent">Likely independent</option><option value="local_multi_location">Local multi-location</option><option value="likely_franchise">Likely franchise</option><option value="chain">Chain</option></select></label>
+                <div className="sm:col-span-2 xl:col-span-3"><PrimaryAction type="submit" disabled={working === "identity"} icon={working === "identity" ? Loader2 : Check}>Save identity corrections</PrimaryAction></div>
+              </form>
+            </details>
+          </SectionPanel>
         </TabsContent>
 
-        <TabsContent value="evidence" className="space-y-5">
-      <section className="grid gap-4 xl:grid-cols-2">
-        <Panel title="Research and Evidence">
-          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Official Website Evidence</p>
-            <div className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-              <Meta label="Title" value={String(scan?.page_title || "-")} />
-              <Meta label="Platform" value={String(scan?.detected_website_platform || prospect.existing_website_platform || "-")} />
-              <Meta label="Booking" value={String(scan?.detected_booking_platform || prospect.existing_booking_platform || "-")} />
-              <Meta label="Scanned" value={formatDateTime(String(scan?.scanned_at || latestScanAnalysis?.created_at || ""))} />
-              <Meta label="Official source" value={latestAnalysis?.confirmed_official_url || prospect.website_url || "-"} />
-              <Meta label="Scan coverage" value={latestAnalysis?.scan_coverage_confidence || "-"} />
-              <Meta label="Coverage note" value={latestAnalysis?.scan_coverage_note || "-"} />
-            </div>
-            {latestAnalysis?.scan_coverage_confidence === "low" && (
-              <p className="mt-3 rounded-md border border-yellow-500/25 bg-yellow-500/10 p-2 text-xs text-yellow-100">
-                Official scan coverage is weak. Signal should not make confident visual/site-quality claims from HTML alone; upload a screenshot or add verified observations.
-              </p>
-            )}
-            {weighting && (
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <EvidenceGroup title="Official Website Evidence" items={stringList(weighting.official_website_evidence)} />
-                <EvidenceGroup title="Visual Screenshot Evidence" items={readableFacts((weighting.visual_screenshot_evidence as Record<string, unknown> | undefined)?.analysis)} />
-                <EvidenceGroup title="Human-Entered Observations" items={stringList(weighting.user_research_observations)} />
-                <EvidenceGroup title="System-Derived Classification" items={readableFacts(weighting.system_derived_classification)} />
-                <EvidenceGroup title="AI Interpretation" items={stringList([weighting.ai_interpretation])} />
-              </div>
-            )}
-            <div className="mt-3 space-y-2">
-              {evidence.slice(0, 8).map((item, index) => (
-                <div key={index} className="rounded-md border border-border bg-background/50 p-2 text-xs text-muted-foreground">
-                  <span className="text-foreground">{String(item.signal || "Evidence")}:</span>{" "}
-                  {String(item.snippet || "")}
-                </div>
-              ))}
-              {evidence.length === 0 && (
-                <p className="text-sm text-muted-foreground">No website evidence stored yet.</p>
-              )}
-            </div>
+        <TabsContent value="research" className="space-y-5">
+          <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+            Evidence categories are intentionally separate. Private observations can guide review, but only verified public facts may be used as public business claims.
           </div>
-          <div className="mt-4 grid gap-3">
-            <TextBlock label="Human notes" value={prospect.human_notes} />
-            <TextBlock label="What looks good" value={prospect.what_looks_good} />
-            <TextBlock label="Visible problem" value={prospect.visible_problem} />
-          </div>
-          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-sm font-medium">Add Verified Observation</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <select value={observationCategory} onChange={(event) => setObservationCategory(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
-                {["site_design", "services", "booking", "gallery", "public_contact", "reputation", "platform", "business_context"].map((value) => (
-                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
-                ))}
-              </select>
-              <select value={observationSource} onChange={(event) => setObservationSource(event.target.value)} className="h-9 rounded-lg border border-border bg-background px-3 text-sm">
-                {["manual_public_site_review", "official_public_site", "existing_conversation", "personal_relationship"].map((value) => (
-                  <option key={value} value={value}>{formatSignalLabel(value)}</option>
-                ))}
-              </select>
-            </div>
-            <textarea value={observationNote} onChange={(event) => setObservationNote(event.target.value)} placeholder="Verified public observation" className="mt-2 min-h-16 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-            <input value={observationUrl} onChange={(event) => setObservationUrl(event.target.value)} placeholder="Optional source URL" className="mt-2 h-9 w-full rounded-lg border border-border bg-background px-3 text-sm" />
-            <button type="button" disabled={!observationNote.trim() || working === "observation"} onClick={addObservation} className="mt-2 inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
-              {working === "observation" ? "Saving..." : "Save Observation"}
-            </button>
-            {verifiedObservations.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {verifiedObservations.slice(0, 6).map((item) => (
-                  <div key={item.id} className="rounded-md border border-border bg-background/50 p-2 text-xs text-muted-foreground">
-                    <span className="text-foreground">{formatSignalLabel(item.category)}</span>
-                    {" "}· {formatSignalLabel(item.source)} · {formatDateTime(item.created_at)}
-                    <p className="mt-1 text-sm text-foreground">{item.note}</p>
-                    {item.url && <p className="mt-1 break-all">{item.url}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </Panel>
-
-        <Panel title="Score Breakdown">
-          <Score label="Website opportunity" value={latestAnalysis?.website_opportunity_score} />
-          <Score label="Systems/AI opportunity" value={latestAnalysis?.systems_opportunity_score} />
-          <Score label="Website quality" value={latestAnalysis?.website_quality_score} />
-          <Score label="Business viability" value={latestAnalysis?.business_viability_score} />
-          <Score label="Operational opportunity" value={latestAnalysis?.operational_opportunity_score} />
-          <Score label="Website service fit" value={latestAnalysis?.website_service_fit_score} />
-          <Score label="AI workflow fit" value={latestAnalysis?.ai_workflow_fit_score} />
-          <Score label="Reachability" value={latestAnalysis?.reachability_score} />
-          <Score label="Compliance risk" value={latestAnalysis?.compliance_risk_score} inverse />
-          <Score label="Total opportunity" value={latestAnalysis?.overall_opportunity_score} />
-        </Panel>
-      </section>
-        </TabsContent>
-
-        <TabsContent value="strategy" className="space-y-5">
-      <Panel title="Offer Strategy">
-        <div className="grid gap-4 lg:grid-cols-2">
-          <TextBlock label="Recommended primary offer" value={latestAnalysis?.recommended_primary_offer} />
-          <TextBlock label="Recommended secondary offer" value={latestAnalysis?.recommended_secondary_offer} />
-          <TextBlock label="Recommended lane" value={latestAnalysis?.recommended_lane ? laneLabels[latestAnalysis.recommended_lane] || latestAnalysis.recommended_lane : null} />
-          <TextBlock label="Relevant demo" value={selectedDemoRoute || latestAnalysis?.recommended_demo || prospect.relevant_demo} />
-          <TextBlock label="Commercial fit" value={latestAnalysis?.commercial_fit} />
-          <TextBlock label="Evidence supporting value band" value={arrayFromJson(latestAnalysis?.evidence_supporting_value_band).join("\n")} />
-          <TextBlock label="What requires discovery confirmation" value={arrayFromJson(latestAnalysis?.discovery_confirmation_needed).join("\n")} />
-          <TextBlock label="Public customer positioning" value={latestAnalysis?.public_customer_positioning} />
-          <TextBlock label="Brand voice summary" value={latestAnalysis?.brand_voice_summary} />
-          <TextBlock label="Conversation style reason" value={prospect.conversation_style_reason || latestAnalysis?.conversation_style_reason} />
-          <TextBlock label="Value reasoning" value={latestAnalysis?.potential_project_value_reason} />
-          <TextBlock label="What not to pitch" value={arrayFromJson(latestAnalysis?.red_flags).join("\n") || latestAnalysis?.compliance_warning} />
-        </div>
-      </Panel>
-
-      <Panel title="Facts, Inferences, Discovery Questions">
-        <div className="grid gap-4 lg:grid-cols-3">
-          <EvidenceGroup title="Verified Facts" items={strategyBoxes.facts} />
-          <EvidenceGroup title="Reasonable Inferences" items={strategyBoxes.inferences} />
-          <EvidenceGroup title="Discovery Questions" items={strategyBoxes.questions} />
-        </div>
-      </Panel>
-        </TabsContent>
-
-        <TabsContent value="scripts" className="space-y-5">
-      <Panel title="Outreach Cockpit">
-        <div className="mb-4 grid gap-3 sm:grid-cols-3">
-          <Meta label="Selected mode" value={modeLabels[prospect.outreach_mode] || prospect.outreach_mode} />
-          <Meta label="Recommended channel" value={latestAnalysis?.suggested_channel ? channelLabels[latestAnalysis.suggested_channel] : "-"} />
-          <Meta label="Draft created" value={formatDateTime(latestDraft?.created_at)} />
-        </div>
-        {!externalReady && (
-          <div className="mb-4 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
-            {readinessWarning || "This script has not passed external-readiness checks. Review before using."}
-          </div>
-        )}
-        <div className="mb-4 flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row sm:items-end">
-          <label className="block flex-1 space-y-2">
-            <span className="text-sm font-medium">Conversation style</span>
-            <select
-              value={profile}
-              onChange={(event) => setProfile(event.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
-            >
-              {Object.entries(communicationProfileLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            disabled={doNotContact || working === "scripts"}
-            onClick={prepareScriptsWithGuidance}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
-          >
-            {working === "scripts" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            Prepare Scripts
-          </button>
-        </div>
-        <label className="mb-4 block space-y-2">
-          <span className="text-sm font-medium">Guidance for this Prospect</span>
-          <textarea
-            value={scriptGuidance}
-            onChange={(event) => setScriptGuidance(event.target.value)}
-            placeholder="Private guidance, e.g. already emailed them; generate only a follow-up, keep it simple, avoid AI."
-            className="min-h-20 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-foreground/20"
-          />
-          <span className="text-xs text-muted-foreground">Private guidance affects tone only and is never sent to the prospect.</span>
-        </label>
-        {guidanceHistoryConflict && (
-          <div className="mb-4 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
-            Guidance mentions prior outreach, but no outreach event is recorded. Record prior outreach before relying on follow-up-only drafts.
-          </div>
-        )}
-        {latestDraft ? (
-          <div className="space-y-4">
-            {followUpMode && (
-              <div className="rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
-                Do not contact through a second channel unless manually chosen.
-              </div>
-            )}
-            {doNotContact ? (
-              <div className="rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-200">
-                Outreach scripts are disabled for do-not-contact prospects.
-              </div>
-            ) : (
-              <div className="grid gap-4 xl:grid-cols-2">
-                {followUpMode && (
-                  <DraftBlock
-                    copyDisabled={!externalReady}
-                    title="Follow-Up Draft"
-                    value={latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || "")}
-                    onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || latestDraft.first_contact_email || ""), "Follow-up draft")}
-                  />
-                )}
-                {permissionMode && (
-                  <DraftBlock
-                    copyDisabled={!externalReady}
-                    title="Demo-Send Response"
-                    value={latestDraft.demo_send_followup}
-                    onCopy={() => copyText(latestDraft.demo_send_followup, "Demo response")}
-                  />
-                )}
-                {demoSentMode && (
-                  <DraftBlock
-                    copyDisabled={!externalReady}
-                    title="Post-Demo Check-In"
-                    value={latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || "")}
-                    onCopy={() => copyText(latestDraft.follow_up_email || String(scriptStudio?.follow_up_draft || ""), "Post-demo check-in")}
-                  />
-                )}
-                {discoveryMode && (
-                  <DraftBlock
-                    copyDisabled={!externalReady}
-                    title="Proposal Angle"
-                    value={latestDraft.proposal_angle}
-                    onCopy={() => copyText(latestDraft.proposal_angle, "Proposal angle")}
-                  />
-                )}
-                {firstContactMode && (
-                  <>
-                    <DraftBlock copyDisabled={!externalReady} title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
-                    <DraftBlock copyDisabled={!externalReady} title="Call Opener" value={latestDraft.owner_call_opener} onCopy={() => copyText(latestDraft.owner_call_opener, "Call opener")} />
-                    <DraftBlock copyDisabled={!externalReady} title="Gatekeeper Script" value={latestDraft.gatekeeper_script} onCopy={() => copyText(latestDraft.gatekeeper_script, "Gatekeeper script")} />
-                    <DraftBlock copyDisabled={!externalReady} title="Voicemail" value={latestDraft.voicemail_script} onCopy={() => copyText(latestDraft.voicemail_script, "Voicemail script")} />
-                    {latestDraft.permission_based_dm && (
-                      <DraftBlock copyDisabled={!externalReady} title="Permission-Based DM" value={latestDraft.permission_based_dm} onCopy={() => copyText(latestDraft.permission_based_dm, "DM draft")} />
-                    )}
-                  </>
-                )}
-                {scriptStudio && (
-                  <>
-                    <DraftBlock copyDisabled={!externalReady} title="If They Ask How Much" value={String(scriptStudio.how_much_response || "")} onCopy={() => copyText(String(scriptStudio.how_much_response || ""), "Price response")} />
-                    <DraftBlock copyDisabled={!externalReady} title="Already Use Booking Software" value={String(scriptStudio.already_use_booking_response || "")} onCopy={() => copyText(String(scriptStudio.already_use_booking_response || ""), "Booking response")} />
-                    <DraftBlock copyDisabled={!externalReady} title="Already Have a Website" value={String(scriptStudio.already_have_website_response || "")} onCopy={() => copyText(String(scriptStudio.already_have_website_response || ""), "Website response")} />
-                  </>
-                )}
-              </div>
-            )}
-            {!doNotContact && !firstContactMode && (
-              <details className="rounded-lg border border-border bg-muted/30 p-3">
-                <summary className="cursor-pointer text-sm font-medium">View archived / alternate scripts</summary>
-                <div className="mt-3 grid gap-4 xl:grid-cols-2">
-                  <DraftBlock copyDisabled={!externalReady} title="Email Draft" value={latestDraft.first_contact_email} onCopy={() => copyText(latestDraft.first_contact_email, "Email draft")} />
-                  <DraftBlock copyDisabled={!externalReady} title="DM Draft" value={latestDraft.permission_based_dm} onCopy={() => copyText(latestDraft.permission_based_dm, "DM draft")} />
-                  <DraftBlock copyDisabled={!externalReady} title="Call Opener" value={latestDraft.owner_call_opener} onCopy={() => copyText(latestDraft.owner_call_opener, "Call opener")} />
-                  <DraftBlock copyDisabled={!externalReady} title="Gatekeeper Script" value={latestDraft.gatekeeper_script} onCopy={() => copyText(latestDraft.gatekeeper_script, "Gatekeeper script")} />
-                  <DraftBlock copyDisabled={!externalReady} title="Voicemail" value={latestDraft.voicemail_script} onCopy={() => copyText(latestDraft.voicemail_script, "Voicemail script")} />
-                </div>
-              </details>
-            )}
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="mb-2 text-sm font-medium">Discovery Questions</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                {arrayFromJson(latestDraft.discovery_call_questions).map((question) => (
-                  <li key={question}>• {question}</li>
-                ))}
-              </ul>
-            </div>
-            {scriptStudio && Array.isArray(scriptStudio.evidence_citations) && (
-              <div className="rounded-lg border border-border bg-muted/30 p-3">
-                <p className="mb-2 text-sm font-medium">Source Evidence</p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  {(scriptStudio.evidence_citations as string[]).map((item) => (
-                    <li key={item}>{item}</li>
+          {evidenceOrder.map((category) => (
+            <SectionPanel key={category} title={evidenceLabels[category]} description={`${groupedEvidence[category].length} item${groupedEvidence[category].length === 1 ? "" : "s"}`}>
+              {groupedEvidence[category].length > 0 ? (
+                <div className="space-y-2">
+                  {groupedEvidence[category].map((item) => (
+                    <div key={item.id} className="rounded-lg border border-border bg-muted/15 p-3">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div><p className="text-sm font-medium text-foreground">{formatSignalLabel(item.claim_type)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{item.claim_text}</p></div>
+                        <StatusBadge tone={item.verification_status === "verified" ? "green" : item.verification_status === "contradicted" ? "red" : "default"}>{formatSignalLabel(item.verification_status)}</StatusBadge>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span>{formatSignalLabel(item.evidence_tier)}</span>
+                        {item.confidence != null && <span>{item.confidence}% evidence confidence</span>}
+                        {item.source_url && <a href={item.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-foreground">Source <ExternalLink className="h-3 w-3" /></a>}
+                      </div>
+                    </div>
                   ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Run a deep dive to generate draft-only outreach scripts for manual review.
-          </p>
-        )}
-      </Panel>
-
-      <Panel title="Correct Signal">
-        <div className="mb-4 grid gap-2 sm:grid-cols-[1fr_auto]">
-          <select
-            value={categoryDraft}
-            onChange={(event) => setCategoryDraft(event.target.value)}
-            className="h-10 rounded-lg border border-border bg-muted px-3 text-sm"
-          >
-            {[
-              "auto_detailing",
-              "barber_salon",
-              "beauty_wellness",
-              "hvac",
-              "roofing_contractors_home_services",
-              "medical_dental",
-              "restaurant_food",
-              "general_local_business",
-              "unknown_needs_review",
-            ].map((value) => (
-              <option key={value} value={value}>
-                {formatSignalLabel(value)}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            disabled={working === "correct_category"}
-            onClick={saveCategoryCorrection}
-            className="inline-flex h-10 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-          >
-            Correct Category
-          </button>
-        </div>
-        {Array.isArray(prospect.classification_evidence) && prospect.classification_evidence.length > 0 && (
-          <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Classification Evidence</p>
-            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-              {(prospect.classification_evidence as string[]).slice(0, 6).map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <div className="flex flex-wrap gap-2">
-          <CorrectionButton onClick={() => submitCorrection("wrong_playbook", prospect.industry_playbook)}>Wrong playbook</CorrectionButton>
-          <CorrectionButton onClick={() => submitCorrection("wrong_demo", latestAnalysis?.recommended_demo || prospect.relevant_demo)}>Wrong demo</CorrectionButton>
-          <CorrectionButton onClick={() => submitCorrection("wrong_channel", latestAnalysis?.suggested_channel)}>Wrong channel</CorrectionButton>
-          <CorrectionButton onClick={() => submitCorrection("wrong_communication_profile", communicationProfile)}>Wrong communication profile</CorrectionButton>
-          <CorrectionButton onClick={() => submitCorrection("wrong_score_lane", latestAnalysis?.recommended_lane)}>Wrong score/lane</CorrectionButton>
-          <CorrectionButton onClick={() => submitCorrection("draft_sounds_unnatural", latestDraft?.id)}>Draft sounds unnatural</CorrectionButton>
-          <CorrectionButton onClick={() => submitCorrection("contact_history_incorrect", prospect.outreach_history)}>Contact/history incorrect</CorrectionButton>
-        </div>
-      </Panel>
+                </div>
+              ) : <p className="text-sm text-muted-foreground">No items in this category.</p>}
+            </SectionPanel>
+          ))}
         </TabsContent>
 
-        <TabsContent value="timeline" className="space-y-5">
-      <Panel title="Timeline">
-        <div className="space-y-2">
-          {timeline.map((item, index) => (
-            <div key={`${item.date}-${item.title}-${index}`} className="rounded-lg border border-border bg-muted/30 p-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="font-medium">{item.title}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{item.detail}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-full border border-border bg-background px-2 py-0.5">
-                    {item.category}
-                  </span>
-                  <span>{formatDateTime(item.date)}</span>
-                </div>
-              </div>
+        <TabsContent value="verdict" className="space-y-5">
+          <SectionPanel title={`${formatSignalLabel(prospect.verdict)} verdict`} description="A sales decision, not a guarantee of fit or outcome.">
+            <p className="text-lg font-medium text-foreground">{prospect.why_it_matters || "The verdict will appear after analysis."}</p>
+          </SectionPanel>
+          <div className="grid gap-5 xl:grid-cols-2">
+            <SectionPanel title="Must verify" description="Resolve these before first contact or concept publication.">
+              {mustVerify.length ? <ul className="space-y-2 text-sm text-muted-foreground">{mustVerify.map((item) => <li key={item} className="flex gap-2"><FileSearch className="mt-0.5 h-4 w-4 shrink-0" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No unresolved items were recorded.</p>}
+            </SectionPanel>
+            <SectionPanel title="Do not pitch" description="Claims or angles that would overstate the current evidence.">
+              {doNotPitch.length ? <ul className="space-y-2 text-sm text-muted-foreground">{doNotPitch.map((item) => <li key={item} className="flex gap-2"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-yellow-200" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No pitch guardrails recorded yet.</p>}
+            </SectionPanel>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="concept" className="space-y-5">
+          <SectionPanel title="Build concept" description="Optional direction changes the presentation, never the verified business facts.">
+            <div className="space-y-3">
+              <textarea value={conceptInstructions} onChange={(event) => setConceptInstructions(event.target.value)} rows={3} maxLength={1000} placeholder="Make it warmer, focus on catering, keep the phone button dominant…" className="w-full resize-y rounded-lg border border-border bg-background p-3 text-sm outline-none focus:border-foreground/30" />
+              <PrimaryAction onClick={buildConcept} disabled={working === "concept" || prospect.verdict === "skip"} icon={working === "concept" ? Loader2 : Sparkles}>{latestConcept ? "Regenerate concept prompt" : "Build concept"}</PrimaryAction>
             </div>
-          ))}
-          {timeline.length === 0 && (
-            <p className="text-sm text-muted-foreground">No timeline events stored yet.</p>
-          )}
-        </div>
-      </Panel>
+          </SectionPanel>
+          <SectionPanel title="Concept direction" description="The prompt uses verified public facts and labels every unknown as a placeholder.">
+            {latestConcept ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3"><StatusBadge tone={latestConcept.status === "ready" ? "green" : "blue"}>{formatSignalLabel(latestConcept.status)}</StatusBadge><CopyButton value={latestConcept.generation_prompt} /></div>
+                <pre className="max-h-[560px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 font-sans text-sm leading-6 text-muted-foreground">{latestConcept.generation_prompt}</pre>
+                {latestConcept.concept_url && <a href={latestConcept.concept_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline">Open concept <ExternalLink className="h-4 w-4" /></a>}
+              </div>
+            ) : <p className="text-sm text-muted-foreground">A concept prompt appears after a Pursue or Investigate analysis. Skip verdicts do not generate one.</p>}
+          </SectionPanel>
+        </TabsContent>
+
+        <TabsContent value="sales" className="space-y-5">
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><p className="font-medium text-foreground">Evidence-grounded sales pack</p><p className="mt-1 text-sm text-muted-foreground">Generate only after reviewing the verdict and Must verify list. Scripts never promise results.</p></div>
+            <PrimaryAction onClick={generateSalesPack} disabled={working === "sales" || prospect.verdict === "skip"} icon={working === "sales" ? Loader2 : Sparkles}>{latestDraft ? "Regenerate sales pack" : "Prepare sales pack"}</PrimaryAction>
+          </div>
+          {latestDraft ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              <ScriptBlock label="Call opener" value={latestDraft.owner_call_opener} />
+              <ScriptBlock label="Gatekeeper" value={latestDraft.gatekeeper_script} />
+              <ScriptBlock label="Voicemail" value={latestDraft.voicemail_script} />
+              <ScriptBlock label="First email" value={latestDraft.first_contact_email} />
+              <ScriptBlock label="Social message" value={latestDraft.permission_based_dm} />
+              <ScriptBlock label="Follow-up" value={latestDraft.follow_up_email || latestDraft.demo_send_followup} />
+              <ScriptBlock label="Proposal angle" value={latestDraft.proposal_angle} />
+            </div>
+          ) : <SectionPanel><p className="text-sm text-muted-foreground">No sales pack has been prepared. Review evidence first, then generate a draft for manual approval.</p></SectionPanel>}
+        </TabsContent>
+
+        <TabsContent value="outreach" className="space-y-5">
+          <SectionPanel title="Log manual outreach" description="Signal prepares drafts; it does not send outreach automatically.">
+            <form onSubmit={logOutreach} className="grid gap-3 lg:grid-cols-[180px_1fr_auto]">
+              <select value={eventChannel} onChange={(event) => setEventChannel(event.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm">
+                <option value="call">Call</option><option value="email">Email</option><option value="instagram">Instagram</option><option value="contact_form">Contact form</option><option value="in_person">In person</option>
+              </select>
+              <input value={eventSummary} onChange={(event) => setEventSummary(event.target.value)} placeholder="Short outcome or context" className="h-10 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" />
+              <PrimaryAction type="submit" disabled={working === "outreach"} icon={MessageSquare}>Log attempt</PrimaryAction>
+            </form>
+          </SectionPanel>
+          <SectionPanel title="Outreach history">
+            {outreachEvents.length ? <div className="space-y-2">{outreachEvents.map((item) => <div key={item.id} className="rounded-lg border border-border bg-muted/15 p-3"><div className="flex flex-wrap items-center gap-2"><StatusBadge>{formatSignalLabel(item.channel)}</StatusBadge><p className="text-sm font-medium">{formatSignalLabel(item.event_type)}</p><span className="text-xs text-muted-foreground">{dateTime(item.event_date || item.created_at)}</span></div>{item.summary && <p className="mt-2 text-sm text-muted-foreground">{item.summary}</p>}</div>)}</div> : <p className="text-sm text-muted-foreground">No outreach has been logged.</p>}
+          </SectionPanel>
+        </TabsContent>
+
+        <TabsContent value="notes" className="space-y-5">
+          <SectionPanel title="Private Mountline notes" description="Notes stay separate from verified public facts and are not copied into public claims.">
+            <form onSubmit={savePrivateNote} className="space-y-3"><textarea value={note} onChange={(event) => setNote(event.target.value)} rows={4} placeholder="Add context from a visit, call, or internal review." className="w-full resize-y rounded-lg border border-border bg-background p-3 text-sm outline-none focus:border-foreground/30" /><PrimaryAction type="submit" disabled={!note.trim() || working === "note"} icon={Plus}>Add private note</PrimaryAction></form>
+          </SectionPanel>
+          {groupedEvidence.mountline_observation.map((item) => <div key={item.id} className="rounded-lg border border-border bg-card p-4"><p className="text-sm leading-6 text-muted-foreground">{item.claim_text}</p><p className="mt-2 text-xs text-muted-foreground">Added {dateTime(item.created_at)}</p></div>)}
+        </TabsContent>
+
+        <TabsContent value="activity" className="space-y-5">
+          <SectionPanel title="Activity timeline" description="Research, stage changes, concept work, and manual actions.">
+            <div className="space-y-4 border-l border-border pl-5">
+              {activities.length ? activities.map((item) => <div key={item.id} className="relative"><span className="absolute -left-[25px] top-1.5 h-2 w-2 rounded-full bg-foreground" /><p className="text-sm font-medium text-foreground">{item.summary}</p><p className="mt-1 text-xs text-muted-foreground">{formatSignalLabel(item.activity_type)} · {dateTime(item.occurred_at)}</p></div>) : <p className="text-sm text-muted-foreground">No activity recorded.</p>}
+            </div>
+          </SectionPanel>
+          <SectionPanel title="Stage history">
+            <div className="space-y-2">{stageHistory.map((item) => <div key={item.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm"><span className="text-muted-foreground">{item.from_stage ? formatSignalLabel(item.from_stage) : "Created"}</span><ArrowRight className="h-3.5 w-3.5" /><span className="font-medium">{formatSignalLabel(item.to_stage)}</span><span className="ml-auto text-xs text-muted-foreground">{dateTime(item.created_at)}</span></div>)}</div>
+          </SectionPanel>
         </TabsContent>
       </Tabs>
-    </div>
-  )
-}
-
-function Panel({ children, title }: { children: React.ReactNode; title: string }) {
-  return (
-    <section className="rounded-xl border border-border bg-card p-5">
-      <h2 className="mb-4 font-semibold">{title}</h2>
-      {children}
-    </section>
-  )
-}
-
-function Meta({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1 break-words text-sm text-foreground">{value || "-"}</p>
-    </div>
-  )
-}
-
-function MetricCard({ label, note, value }: { label: string; note?: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-2 break-words text-lg font-semibold">{value}</p>
-      {note && <p className="mt-2 text-xs text-muted-foreground">{note}</p>}
-    </div>
-  )
-}
-
-function TextBlock({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) return null
-  return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{value}</p>
-    </div>
-  )
-}
-
-function EvidenceGroup({ items, title }: { items: string[]; title: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-background/50 p-3">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
-      {items.length > 0 ? (
-        <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-          {items.slice(0, 5).map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-2 text-xs text-muted-foreground">No stored evidence in this category yet.</p>
-      )}
-    </div>
-  )
-}
-
-function ContactLink({ href, icon, label }: { href: string; icon: "site" | "mail" | "phone"; label: string }) {
-  const normalizedHref = href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")
-    ? href
-    : `https://${href}`
-  const Icon = icon === "mail" ? Mail : icon === "phone" ? Phone : ExternalLink
-
-  return (
-    <a
-      href={normalizedHref}
-      target={normalizedHref.startsWith("http") ? "_blank" : undefined}
-      rel={normalizedHref.startsWith("http") ? "noreferrer" : undefined}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-    >
-      <Icon className="h-3.5 w-3.5" />
-      {label}
-    </a>
-  )
-}
-
-function ActionButton({
-  children,
-  disabled,
-  onClick,
-  working,
-}: {
-  children: React.ReactNode
-  disabled?: boolean
-  onClick: () => void
-  working: boolean
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled || working}
-      onClick={onClick}
-      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {working ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
-    </button>
-  )
-}
-
-function CorrectionButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-    >
-      {children}
-    </button>
-  )
-}
-
-function Score({ inverse, label, value }: { inverse?: boolean; label: string; value: number | null | undefined }) {
-  const width = typeof value === "number" ? `${Math.max(0, Math.min(100, value))}%` : "0%"
-  return (
-    <div className="mb-4 last:mb-0">
-      <div className="mb-1 flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-mono">{value ?? "-"}</span>
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted">
-        <div className={`h-full ${scoreColor(value, inverse)}`} style={{ width }} />
-      </div>
-    </div>
-  )
-}
-
-function DraftBlock({
-  copyDisabled,
-  onCopy,
-  title,
-  value,
-}: {
-  copyDisabled?: boolean
-  onCopy: () => void
-  title: string
-  value: string | null | undefined
-}) {
-  return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-sm font-medium">{title}</p>
-        <button
-          type="button"
-          disabled={!value || copyDisabled}
-          onClick={onCopy}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
-        >
-          <Clipboard className="h-3.5 w-3.5" />
-          Copy
-        </button>
-      </div>
-      {copyDisabled && (
-        <p className="mb-2 text-xs text-yellow-200">Needs Manual Review before copy is enabled.</p>
-      )}
-      <p className="whitespace-pre-wrap text-sm text-muted-foreground">{value || "No draft yet."}</p>
     </div>
   )
 }

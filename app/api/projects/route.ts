@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const { 
     project_name, client_id, package_type, status,
     start_date, target_launch_date, live_url, preview_url,
-    payment_link, next_step, notes
+    payment_link, next_step, notes, signal_id
   } = body
 
   if (!project_name) {
@@ -72,6 +72,42 @@ export async function POST(request: Request) {
           },
           { onConflict: "project_id,client_email" },
         )
+    }
+  }
+
+  if (signal_id) {
+    const { data: signalProspect } = await supabase
+      .from("signal_prospects")
+      .select("pipeline_stage")
+      .eq("id", signal_id)
+      .maybeSingle()
+    const { error: signalError } = await supabase
+      .from("signal_prospects")
+      .update({
+        converted_project_id: data.id,
+        converted_client_id: client_id || undefined,
+        pipeline_stage: "won",
+        outreach_status: "won",
+        next_action: "Open the project and confirm the delivery next step.",
+      })
+      .eq("id", signal_id)
+    if (signalError) {
+      console.error("[mountline] Signal project conversion update failed:", signalError.message)
+    } else {
+      await supabase.from("signal_lead_stage_history").insert({
+        prospect_id: signal_id,
+        from_stage: signalProspect?.pipeline_stage || "interested",
+        to_stage: "won",
+        reason: "Project created from the Signal workspace.",
+        created_by: authCheck.access.userId,
+      })
+      await supabase.from("signal_lead_activities").insert({
+        prospect_id: signal_id,
+        activity_type: "project_created",
+        summary: `Project created for ${project_name}.`,
+        metadata: { project_id: data.id, client_id: client_id || null },
+        created_by: authCheck.access.userId,
+      })
     }
   }
 

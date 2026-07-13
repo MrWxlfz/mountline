@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { business_name, contact_name, email, phone, website, notes, lead_id } = body
+  const { business_name, contact_name, email, phone, website, notes, lead_id, signal_id } = body
 
   if (!business_name || !contact_name || !email) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -41,6 +41,41 @@ export async function POST(request: Request) {
 
     if (leadError) {
       console.error("[mountline] Lead conversion status update failed:", leadError.message)
+    }
+  }
+
+  if (signal_id) {
+    const { data: signalProspect } = await supabase
+      .from("signal_prospects")
+      .select("pipeline_stage")
+      .eq("id", signal_id)
+      .maybeSingle()
+    const { error: signalError } = await supabase
+      .from("signal_prospects")
+      .update({
+        converted_client_id: data.id,
+        pipeline_stage: "interested",
+        outreach_status: "interested",
+        next_action: "Create and scope the first client project.",
+      })
+      .eq("id", signal_id)
+    if (signalError) {
+      console.error("[mountline] Signal client conversion update failed:", signalError.message)
+    } else {
+      await supabase.from("signal_lead_stage_history").insert({
+        prospect_id: signal_id,
+        from_stage: signalProspect?.pipeline_stage || "analyzed",
+        to_stage: "interested",
+        reason: "Client record created from the Signal workspace.",
+        created_by: authCheck.access.userId,
+      })
+      await supabase.from("signal_lead_activities").insert({
+        prospect_id: signal_id,
+        activity_type: "client_created",
+        summary: `Client record created for ${business_name}.`,
+        metadata: { client_id: data.id },
+        created_by: authCheck.access.userId,
+      })
     }
   }
 

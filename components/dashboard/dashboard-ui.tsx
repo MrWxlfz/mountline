@@ -154,7 +154,10 @@ export function MetricStrip({
   }>
 }) {
   return (
-    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+    <div className={cn(
+      "grid gap-2 sm:grid-cols-2",
+      items.length >= 5 ? "lg:grid-cols-5" : items.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3",
+    )}>
       {items.map((item) => {
         const content = (
           <>
@@ -185,6 +188,57 @@ export function MetricStrip({
           </div>
         )
       })}
+    </div>
+  )
+}
+
+export function StateNotice({
+  children,
+  title,
+  tone = "default",
+}: {
+  children?: React.ReactNode
+  title: string
+  tone?: "default" | "info" | "success" | "warning" | "error"
+}) {
+  return (
+    <div className={cn(
+      "rounded-lg border px-4 py-3 text-sm",
+      tone === "default" && "border-border bg-muted/20",
+      tone === "info" && "border-blue-500/25 bg-blue-500/10 text-blue-100",
+      tone === "success" && "border-green-500/25 bg-green-500/10 text-green-100",
+      tone === "warning" && "border-yellow-500/25 bg-yellow-500/10 text-yellow-100",
+      tone === "error" && "border-red-500/25 bg-red-500/10 text-red-200",
+    )}>
+      <p className="font-medium text-current">{title}</p>
+      {children && <div className="mt-1 leading-5 opacity-75">{children}</div>}
+    </div>
+  )
+}
+
+export function FilterBar({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
+      {children}
+    </div>
+  )
+}
+
+export function Timeline({
+  items,
+}: {
+  items: Array<{ id: string; title: React.ReactNode; meta?: React.ReactNode; body?: React.ReactNode }>
+}) {
+  return (
+    <div className="space-y-4 border-l border-border pl-5">
+      {items.map((item) => (
+        <div key={item.id} className="relative">
+          <span className="absolute -left-[25px] top-1.5 h-2 w-2 rounded-full bg-foreground" />
+          <div className="text-sm font-medium text-foreground">{item.title}</div>
+          {item.meta && <div className="mt-1 text-xs text-muted-foreground">{item.meta}</div>}
+          {item.body && <div className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</div>}
+        </div>
+      ))}
     </div>
   )
 }

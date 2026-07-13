@@ -18,6 +18,7 @@ import { assessSignalOfficialWebsite, assessSignalSocialProfile, detectSignalPar
 import { formatConfidence, formatOnlinePresence, formatRunStatus, formatSignalLabel } from "../presentation.ts"
 import { genericEntities, independentEntities, knownChains, leadQualityFixtures, mapFirstOpportunities } from "../fixtures/signal-evaluation-fixtures.ts"
 import { normalizeSignalWorkbookCell } from "../workbook-values.ts"
+import { buildSignalConceptPrompt, derivePrimaryOpportunity, deriveSignalDecision, parseSignalAnalysisInput } from "../analysis-model.ts"
 
 test("known chains have zero leakage", () => {
   for (const fixture of knownChains) {
@@ -256,6 +257,74 @@ test("concept prompts are specific, substantial, safe, and category-aware", () =
     assert.equal(result.valid, true, `${fixture.name}: ${result.issues.join(" ")}`)
   })
   assert.equal(validateSignalConceptPrompt({ prompt: "Make a nice website.", businessName: "Pine & Paws Grooming", verifiedFacts: ["fear-free grooming appointments"] }).valid, false)
+})
+
+test("focused analysis accepts supported business input shapes", () => {
+  const maps = parseSignalAnalysisInput("Oak & Ember Grooming, Southlake, TX https://www.google.com/maps/search/?api=1&query=Oak&query_place_id=ChIJN1t_tDeuEmsRUsoyG83frY4")
+  assert.equal(maps.googlePlaceId, "ChIJN1t_tDeuEmsRUsoyG83frY4")
+  assert.equal(maps.businessNameHint, "Oak & Ember Grooming")
+
+  const website = parseSignalAnalysisInput("https://cedarchairbarber.example")
+  assert.equal(website.officialWebsiteUrl, "https://cedarchairbarber.example/")
+  assert.equal(website.businessNameHint, "Cedarchairbarber")
+
+  const social = parseSignalAnalysisInput("https://www.instagram.com/pineandpawsgrooming/ (817) 555-0191")
+  assert.equal(social.socialUrls.length, 1)
+  assert.equal(social.phone, "(817) 555-0191")
+  assert.equal(social.businessNameHint, "Pineandpawsgrooming")
+})
+
+test("focused verdicts distinguish opportunity, uncertainty, strong sites, and chains", () => {
+  const fixtures = [
+    { name: "independent donut shop", expected: "pursue", input: { identityStatus: "verified" as const, opportunityScore: 82, confidence: "high" as const, reachabilityScore: 76 } },
+    { name: "independent groomer", expected: "pursue", input: { identityStatus: "likely" as const, opportunityScore: 74, confidence: "medium" as const, reachabilityScore: 68 } },
+    { name: "spa needing compliance review", expected: "investigate", input: { identityStatus: "needs_review" as const, opportunityScore: 73, confidence: "medium" as const, reachabilityScore: 66 } },
+    { name: "strong existing site", expected: "skip", input: { identityStatus: "verified" as const, opportunityScore: 50, confidence: "high" as const, reachabilityScore: 72, strongExistingSite: true } },
+    { name: "social-primary business", expected: "investigate", input: { identityStatus: "needs_review" as const, opportunityScore: 69, confidence: "low" as const, reachabilityScore: 58 } },
+    { name: "known chain", expected: "skip", input: { identityStatus: "rejected" as const, opportunityScore: 84, confidence: "high" as const, reachabilityScore: 80, isChain: true } },
+    { name: "ambiguous identity", expected: "investigate", input: { identityStatus: "ambiguous" as const, opportunityScore: 78, confidence: "low" as const, reachabilityScore: 70 } },
+  ]
+  for (const fixture of fixtures) {
+    assert.equal(deriveSignalDecision(fixture.input).verdict, fixture.expected, fixture.name)
+  }
+})
+
+test("primary opportunity stays distinct from the recommended offer", () => {
+  const noSite = derivePrimaryOpportunity({
+    identityStatus: "verified",
+    websiteStatus: "no_official_website_verified",
+    websiteQualityScore: 0,
+    hasContactForm: false,
+    bookingLinkCount: 0,
+    socialProfileCount: 1,
+  })
+  assert.match(noSite, /no official website was verified/i)
+  assert.doesNotMatch(noSite, /package|offer|build a/i)
+
+  const strongSite = derivePrimaryOpportunity({
+    identityStatus: "verified",
+    websiteStatus: "verified_official_website",
+    websiteQualityScore: 88,
+    hasContactForm: true,
+    bookingLinkCount: 1,
+    socialProfileCount: 1,
+  })
+  assert.match(strongSite, /no clear website replacement opportunity/i)
+})
+
+test("private observations never become concept claims", () => {
+  const privateObservation = "The owner seemed overwhelmed during a private visit."
+  const prompt = buildSignalConceptPrompt({
+    businessName: "Morning Ring Donuts",
+    industry: "Donut shop",
+    primaryOpportunity: "Clarify the public catering request path",
+    smallestOffer: "A focused catering inquiry page",
+    verifiedFacts: ["The official site lists custom donut orders."],
+    unknowns: ["Confirm catering lead time."],
+  })
+  assert.match(prompt, /official site lists custom donut orders/i)
+  assert.doesNotMatch(prompt, new RegExp(privateObservation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"))
+  assert.match(prompt, /do not invent testimonials/i)
 })
 
 test("map-first no-site groomer is a strong opportunity, not missing evidence", () => {

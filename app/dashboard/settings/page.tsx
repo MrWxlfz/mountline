@@ -1,225 +1,32 @@
-"use client"
+import { CheckCircle2, CircleAlert, KeyRound, Shield, User } from "lucide-react"
+import { PageHeader, SectionPanel, StatusBadge } from "@/components/dashboard/dashboard-ui"
+import { requireNorthlineTeamMember } from "@/lib/auth/team"
+import { getSignalPlacesSetup } from "@/lib/signal/places"
 
-import { useState } from "react"
-import { useUser } from "@clerk/nextjs"
-import { 
-  User,
-  Bell,
-  Shield,
-  Palette,
-  Globe,
-  CreditCard,
-  Save,
-  Loader2
-} from "lucide-react"
-
-export default function SettingsPage() {
-  const { user, isLoaded } = useUser()
-  const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState("profile")
-
-  const tabs = [
-    { id: "profile", label: "Profile", icon: User },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "security", label: "Security", icon: Shield },
-    { id: "appearance", label: "Appearance", icon: Palette },
-    { id: "billing", label: "Billing", icon: CreditCard },
-  ]
-
-  const handleSave = async () => {
-    setSaving(true)
-    // Simulate save
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setSaving(false)
-  }
-
+function ProviderRow({ configured, label, note }: { configured: boolean; label: string; note: string }) {
+  return <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/15 p-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-start gap-3">{configured ? <CheckCircle2 className="mt-0.5 h-4 w-4 text-green-300" /> : <CircleAlert className="mt-0.5 h-4 w-4 text-yellow-200" />}<div><p className="text-sm font-medium">{label}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{note}</p></div></div><StatusBadge tone={configured ? "green" : "amber"}>{configured ? "Configured" : "Not configured"}</StatusBadge></div>
+}
+export default async function SettingsPage() {
+  const access = await requireNorthlineTeamMember()
+  const places = getSignalPlacesSetup()
+  const provider = process.env.SIGNAL_RESEARCH_PROVIDER?.toLowerCase()
+  const aiProvider = process.env.SIGNAL_AI_PROVIDER?.toLowerCase()
+  const screenshotProvider = process.env.SIGNAL_SCREENSHOT_PROVIDER?.toLowerCase()
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and preferences.
-        </p>
+    <div className="space-y-7">
+      <PageHeader eyebrow="Settings" title="Account and provider status" subtitle="Read-only deployment health. Secrets and provider credentials are never displayed in the dashboard." />
+      <div className="grid gap-5 xl:grid-cols-2">
+        <SectionPanel title="Mountline ID" description="Identity and security are managed by Clerk."><div className="space-y-4"><div className="flex items-start gap-3 rounded-lg border border-border p-4"><User className="mt-0.5 h-4 w-4 text-muted-foreground" /><div><p className="text-sm font-medium">Signed-in team account</p><p className="mt-1 text-sm text-muted-foreground">{access.emails[0] || access.userId}</p></div></div><div className="flex items-start gap-3 rounded-lg border border-border p-4"><Shield className="mt-0.5 h-4 w-4 text-muted-foreground" /><div><p className="text-sm font-medium">Team authorization</p><p className="mt-1 text-sm text-muted-foreground">Active Mountline team-member access confirmed. Use the account control in the sidebar for profile and Clerk security settings.</p></div></div></div></SectionPanel>
+        <SectionPanel title="Security boundaries" description="Operational reminders for this deployment."><div className="space-y-3 text-sm text-muted-foreground"><p className="flex gap-2"><KeyRound className="mt-0.5 h-4 w-4 shrink-0" />Dashboard and API access require a Clerk-authenticated Mountline team record.</p><p className="flex gap-2"><KeyRound className="mt-0.5 h-4 w-4 shrink-0" />Supabase service-role access stays in server-only modules and is not exposed to the browser.</p><p className="flex gap-2"><KeyRound className="mt-0.5 h-4 w-4 shrink-0" />Client portal authorization remains project-assignment based.</p></div></SectionPanel>
       </div>
-
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-border pb-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div className="bg-card rounded-xl border border-border">
-        {activeTab === "profile" && (
-          <div className="p-6 space-y-6">
-            <div>
-              <h2 className="font-semibold mb-4">Profile Information</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">First Name</label>
-                  <input
-                    type="text"
-                    defaultValue={user?.firstName || ""}
-                    className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Last Name</label>
-                  <input
-                    type="text"
-                    defaultValue={user?.lastName || ""}
-                    className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium">Email</label>
-                  <input
-                    type="email"
-                    defaultValue={user?.emailAddresses[0]?.emailAddress || ""}
-                    disabled
-                    className="w-full px-4 py-2 bg-muted/50 border border-border rounded-lg text-sm text-muted-foreground cursor-not-allowed"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Email is managed through Clerk. Click your profile picture to change it.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-6">
-              <h2 className="font-semibold mb-4">Business Information</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Company Name</label>
-                  <input
-                    type="text"
-                    placeholder="Your company"
-                    className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Website</label>
-                  <input
-                    type="url"
-                    placeholder="https://yoursite.com"
-                    className="w-full px-4 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                Save Changes
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "notifications" && (
-          <div className="p-6 space-y-6">
-            <h2 className="font-semibold mb-4">Notification Preferences</h2>
-            <div className="space-y-4">
-              {[
-                { label: "New lead notifications", desc: "Get notified when someone submits the contact form" },
-                { label: "Project updates", desc: "Receive updates about project status changes" },
-                { label: "Weekly summary", desc: "Get a weekly summary of your dashboard activity" },
-                { label: "Marketing emails", desc: "Receive tipsastro tricks for growing your business" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                  <div>
-                    <p className="font-medium">{item.label}</p>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" defaultChecked={i < 2} className="sr-only peer" />
-                    <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "security" && (
-          <div className="p-6 space-y-6">
-            <h2 className="font-semibold mb-4">Security Settings</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Security settings are managed through Clerk. Click the button below to manage your security preferences.
-            </p>
-            <button className="flex items-center gap-2 px-4 py-2 bg-muted border border-border rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors">
-              <Shield className="w-4 h-4" />
-              Manage Security in Clerk
-            </button>
-          </div>
-        )}
-
-        {activeTab === "appearance" && (
-          <div className="p-6 space-y-6">
-            <h2 className="font-semibold mb-4">Appearance</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Theme</label>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Choose your preferred color scheme
-                </p>
-                <div className="flex gap-3">
-                  {["light", "dark", "system"].map((theme) => (
-                    <button
-                      key={theme}
-                      className="px-4 py-2 bg-muted border border-border rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors capitalize"
-                    >
-                      {theme}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "billing" && (
-          <div className="p-6 space-y-6">
-            <h2 className="font-semibold mb-4">Billing & Subscription</h2>
-            <div className="p-4 bg-muted rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="font-medium">Free Plan</p>
-                  <p className="text-sm text-muted-foreground">You&apos;re currently on the free plan</p>
-                </div>
-                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                  Active
-                </span>
-              </div>
-              <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
-                Upgrade to Pro
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <SectionPanel title="Signal providers" description="Configuration presence only. Values are resolved from server environment variables.">
+        <div className="grid gap-3 lg:grid-cols-2">
+          <ProviderRow configured={places.enabled} label="Google Places" note={places.enabled ? "Structured place details are available for supported Maps inputs." : places.warning || "Map details require a server-side provider key."} />
+          <ProviderRow configured={provider === "tavily" && Boolean(process.env.TAVILY_API_KEY)} label="Public web research" note={provider === "tavily" ? "Tavily is selected for public business research." : "Focused analysis still works with direct public sources; broader search is limited."} />
+          <ProviderRow configured={Boolean(aiProvider && aiProvider !== "disabled" && (process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY))} label="AI analysis" note="When unavailable, Signal uses deterministic scoring and clearly marks the limitation." />
+          <ProviderRow configured={Boolean(screenshotProvider && screenshotProvider !== "disabled" && (process.env.BROWSERLESS_API_KEY || process.env.FIRECRAWL_API_KEY))} label="Screenshot analysis" note="Optional visual evidence. Website text analysis and manual screenshot upload remain available without it." />
+        </div>
+      </SectionPanel>
     </div>
   )
 }

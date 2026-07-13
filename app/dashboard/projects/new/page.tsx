@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { ArrowLeft, Loader2, Save } from "lucide-react"
 import Link from "next/link"
 
@@ -13,6 +14,8 @@ interface Client {
 
 export default function NewProjectPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const signalId = searchParams.get("signalId")
   const [saving, setSaving] = useState(false)
   const [loadingClients, setLoadingClients] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -53,6 +56,30 @@ export default function NewProjectPage() {
     fetchClients()
   }, [])
 
+  useEffect(() => {
+    if (!signalId) return
+    async function loadSignalLead() {
+      try {
+        const response = await fetch(`/api/signal/prospects/${signalId}`)
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || "Signal lead could not be loaded.")
+        setForm((current) => ({
+          ...current,
+          project_name: current.project_name || `${data.prospect.business_name} project`,
+          client_id: current.client_id || data.prospect.converted_client_id || "",
+          next_step: current.next_step || "Confirm the smallest useful scope and delivery milestone.",
+          notes: current.notes || [
+            data.prospect.primary_opportunity ? `Signal opportunity: ${data.prospect.primary_opportunity}` : null,
+            data.prospect.why_it_matters ? `Signal summary: ${data.prospect.why_it_matters}` : null,
+          ].filter(Boolean).join("\n\n"),
+        }))
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : "Signal lead could not be loaded.")
+      }
+    }
+    void loadSignalLead()
+  }, [signalId])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
@@ -64,6 +91,7 @@ export default function NewProjectPage() {
         body: JSON.stringify({
           ...form,
           client_id: form.client_id || null,
+          signal_id: signalId,
         }),
       })
       const data = await res.json()

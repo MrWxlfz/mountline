@@ -6,7 +6,12 @@ const isPortalRoute = createRouteMatcher(['/portal(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isDashboardRoute(req)) {
-    await auth.protect()
+    const { userId } = await auth()
+    if (!userId) {
+      const loginUrl = new URL('/id', req.url)
+      loginUrl.searchParams.set('redirect_url', `${req.nextUrl.pathname}${req.nextUrl.search}`)
+      return NextResponse.redirect(loginUrl)
+    }
   }
 
   if (isPortalRoute(req)) {

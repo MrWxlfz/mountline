@@ -351,8 +351,8 @@ export function SignalFocusMode({
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground"
           }`}
         >
           {error || message}
@@ -452,7 +452,7 @@ export function SignalFocusMode({
                 </div>
 
                 {item.lane === "awaiting_reply" && (
-                  <div className="mt-4 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+                  <div className="mt-4 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm text-warning-foreground">
                     Wait until the scheduled follow-up date.
                   </div>
                 )}

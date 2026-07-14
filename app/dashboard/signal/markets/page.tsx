@@ -119,7 +119,7 @@ export default async function SignalMarketsPage() {
                     <StatusBadge tone={statusTone(market.status)}>{formatSignalLabel(market.status)}</StatusBadge>
                   </div>
                   <div className="mt-4 h-1.5 rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-blue-400" style={{ width: `${Math.min(progress, 100)}%` }} />
+                    <div className="h-full rounded-full bg-information" style={{ width: `${Math.min(progress, 100)}%` }} />
                   </div>
                   <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-4">
                     <span>{market.candidates.length} discovered</span>

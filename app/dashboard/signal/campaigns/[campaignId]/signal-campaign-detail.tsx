@@ -61,9 +61,9 @@ const candidateStatusLabels: Record<string, string> = {
 }
 
 function badgeClass(status: string) {
-  if (status === "approved" || status === "imported_to_signal") return "border-green-500/25 bg-green-500/10 text-green-300"
-  if (status === "needs_confirmation" || status === "duplicate") return "border-yellow-500/25 bg-yellow-500/10 text-yellow-200"
-  if (status === "rejected" || status === "research_failed") return "border-red-500/25 bg-red-500/10 text-red-300"
+  if (status === "approved" || status === "imported_to_signal") return "border-success-border bg-success-soft text-success-foreground"
+  if (status === "needs_confirmation" || status === "duplicate") return "border-warning-border bg-warning-soft text-warning-foreground"
+  if (status === "rejected" || status === "research_failed") return "border-error-border bg-error-soft text-error-foreground"
   return "border-border bg-muted text-muted-foreground"
 }
 
@@ -290,8 +290,8 @@ export function SignalCampaignDetail({
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground"
           }`}
         >
           {error || message}

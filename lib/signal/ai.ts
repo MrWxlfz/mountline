@@ -91,6 +91,26 @@ const signalLeadSalesPackSchema = z.object({
   lovable_prompt: z.string().trim().min(1).max(7000),
 })
 
+const signalLeadDealDiagnosisSchema = z.object({
+  business_summary: z.string().trim().min(20).max(420),
+  verified_strengths: z.array(z.string().trim().min(3).max(240)).min(1).max(5),
+  strongest_verified_opportunity: z.string().trim().min(12).max(420),
+  likely_practical_impact: z.string().trim().min(12).max(360),
+  current_customer_path: z.string().trim().min(12).max(360),
+  decision_maker_access: z.string().trim().min(8).max(260),
+  best_contact_channel: z.string().trim().min(3).max(120),
+  relationship_stage: z.string().trim().min(3).max(180),
+  known_facts: z.array(z.string().trim().min(3).max(260)).min(1).max(8),
+  unknowns: z.array(z.string().trim().min(3).max(260)).max(8),
+  discovery_required: z.array(z.string().trim().min(3).max(260)).min(1).max(5),
+  disqualifiers: z.array(z.string().trim().min(3).max(260)).min(1).max(5),
+  smallest_useful_offer: z.string().trim().min(12).max(360),
+  desired_next_commitment: z.string().trim().min(8).max(260),
+  current_context: z.string().trim().min(3).max(180),
+  should_pursue: z.boolean(),
+  do_not_contact: z.boolean(),
+})
+
 const signalLeadSalesStrategySchema = z.object({
   strongest_angle: z.string().trim().min(20).max(420),
   lead_value: z.string().trim().min(20).max(420),
@@ -100,6 +120,20 @@ const signalLeadSalesStrategySchema = z.object({
   tone: z.string().trim().min(10).max(220),
   facts_to_mention: z.array(z.string().trim().min(3).max(260)).min(2).max(5),
   facts_not_to_mention: z.array(z.string().trim().min(3).max(260)).min(2).max(6),
+  opening_strategy: z.string().trim().min(12).max(320),
+  source_backed_compliment: z.string().trim().min(8).max(280),
+  curiosity_hook: z.string().trim().min(8).max(280),
+  permission_question: z.string().trim().min(8).max(220),
+  discovery_priorities: z.array(z.string().trim().min(5).max(220)).length(3),
+  value_bridge: z.string().trim().min(12).max(420),
+  concept_reveal_strategy: z.string().trim().min(12).max(360),
+  objection_isolation_questions: z.array(z.string().trim().min(5).max(240)).min(2).max(5),
+  proof_required: z.array(z.string().trim().min(3).max(220)).max(5),
+  recommended_close: z.string().trim().min(8).max(300),
+  fallback_close: z.string().trim().min(8).max(300),
+  graceful_exit: z.string().trim().min(8).max(260),
+  prohibited_claims: z.array(z.string().trim().min(3).max(220)).min(2).max(8),
+  pacing_notes: z.array(z.string().trim().min(3).max(180)).min(3).max(6),
 })
 
 const signalLeadScriptsSchema = z.object({
@@ -114,10 +148,36 @@ const signalLeadScriptsSchema = z.object({
   follow_up_text: z.string().trim().min(10).max(500),
   objections: z.array(z.object({
     objection: z.string().trim().min(3).max(160),
+    acknowledge: z.string().trim().min(3).max(160),
+    clarify: z.string().trim().min(5).max(220),
+    reframe: z.string().trim().min(8).max(320),
+    next_step: z.string().trim().min(5).max(220),
     response: z.string().trim().min(12).max(520),
+    loop_limit: z.number().int().min(0).max(2),
   })).length(4),
   do_not_say: z.array(z.string().trim().min(3).max(220)).min(3).max(6),
   next_steps: z.array(z.string().trim().min(3).max(220)).min(3).max(5),
+  objective: z.string().trim().min(8).max(260),
+  value_bridge: z.string().trim().min(12).max(420),
+  concept_reveal: z.string().trim().min(8).max(420),
+  recommended_close: z.string().trim().min(8).max(320),
+  fallback_close: z.string().trim().min(8).max(320),
+  graceful_exit: z.string().trim().min(8).max(280),
+  delivery_notes: z.array(z.string().trim().min(3).max(180)).min(3).max(6),
+  variants: z.object({
+    natural: z.string().trim().min(8).max(650),
+    more_direct: z.string().trim().min(8).max(650),
+    more_specific: z.string().trim().min(8).max(650),
+    remove_jargon: z.string().trim().min(8).max(650),
+    warmer: z.string().trim().min(8).max(650),
+    shorter: z.string().trim().min(8).max(420),
+    higher_confidence: z.string().trim().min(8).max(650),
+    low_pressure: z.string().trim().min(8).max(650),
+    phone: z.string().trim().min(8).max(650),
+    walk_in: z.string().trim().min(8).max(650),
+    text: z.string().trim().min(8).max(500),
+    email: z.string().trim().min(8).max(1000),
+  }),
 })
 
 const signalChainClassificationSchema = z.object({
@@ -436,8 +496,12 @@ export async function runDeepAiAnalysis(
 }
 
 export type SignalLeadSalesPackOutput = z.infer<typeof signalLeadSalesPackSchema>
+export type SignalLeadDealDiagnosisOutput = z.infer<typeof signalLeadDealDiagnosisSchema>
 export type SignalLeadSalesStrategyOutput = z.infer<typeof signalLeadSalesStrategySchema>
 export type SignalLeadScriptsOutput = z.infer<typeof signalLeadScriptsSchema>
+
+export const SIGNAL_SALES_PROMPT_VERSION = "signal-sales-three-pass-v2"
+export const SIGNAL_SALES_STRATEGY_VERSION = "ethical-stage-aware-v2"
 
 export type SignalLeadSalesContext = {
   businessName: string
@@ -454,6 +518,15 @@ export type SignalLeadSalesContext = {
   uncertainties: string[]
   forbiddenClaims: string[]
   recommendedChannel: string
+  pipelineStage?: string
+  contactHistory?: string[]
+  observations?: string[]
+  sentAssets?: string[]
+  conceptStatus?: string
+  priceDiscussed?: boolean
+  explicitlyDeclined?: boolean
+  promisedNextStep?: string | null
+  currentContext?: string
 }
 
 function salesContext(input: SignalLeadSalesContext) {
@@ -469,6 +542,15 @@ function salesContext(input: SignalLeadSalesContext) {
     `Communication profile: ${input.communicationProfile.join(" | ") || "Keep the approach direct and respectful."}`,
     `Strongest opportunity: ${input.strongestOpportunity}`,
     `Recommended first channel: ${input.recommendedChannel}`,
+    `Current pipeline stage: ${input.pipelineStage || "found"}`,
+    `Previous contact history: ${input.contactHistory?.join(" | ") || "No prior contact recorded."}`,
+    `Mountline observations: ${input.observations?.join(" | ") || "No private observations supplied."}`,
+    `Already sent: ${input.sentAssets?.join(" | ") || "Nothing recorded as sent."}`,
+    `Concept status: ${input.conceptStatus || "not_started"}`,
+    `Price already discussed: ${input.priceDiscussed ? "yes" : "no or unknown"}`,
+    `Explicit decline recorded: ${input.explicitlyDeclined ? "yes" : "no"}`,
+    `Promised next step: ${input.promisedNextStep || "none recorded"}`,
+    `Conversation context: ${input.currentContext || "Select the safest stage-appropriate context."}`,
     `Facts to verify: ${input.uncertainties.join(" | ") || "None listed."}`,
     `Forbidden claims: ${input.forbiddenClaims.join(" | ") || "Do not add unsupported facts."}`,
     "Evidence:",
@@ -484,17 +566,43 @@ function verifiedFactGrounded(values: string[], facts: string[]) {
   return new Set(factTokens.filter((token) => output.includes(token))).size >= Math.min(2, new Set(factTokens).size)
 }
 
-export async function runSignalLeadSalesStrategyAi(input: SignalLeadSalesContext) {
+export async function runSignalLeadDealDiagnosisAi(input: SignalLeadSalesContext) {
   let critique = ""
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     const prompt = [
-      "Create the strategy pass for one Mountline Signal sales plan.",
+      "Pass 1 of 3 — produce a structured deal diagnosis for one Mountline Signal lead.",
+      safetyInstructions(),
+      "Separate verified facts from unknowns. Do not diagnose a problem that is not supported by evidence.",
+      "Account for pipeline stage, prior contact, what was sent, concept status, price discussion, explicit declines, and promised next steps.",
+      "If the lead explicitly declined, set do_not_contact true and make the desired commitment a respectful exit. If the business already has a strong customer path, recommend disqualification instead of manufacturing a need.",
+      "Return strict JSON only with: business_summary, verified_strengths, strongest_verified_opportunity, likely_practical_impact, current_customer_path, decision_maker_access, best_contact_channel, relationship_stage, known_facts, unknowns, discovery_required, disqualifiers, smallest_useful_offer, desired_next_commitment, current_context, should_pursue, do_not_contact.",
+      critique,
+      salesContext(input),
+    ].filter(Boolean).join("\n\n")
+    const result = await callProvider(prompt, true)
+    if (!result) continue
+    const parsed = signalLeadDealDiagnosisSchema.safeParse(result.json)
+    if (parsed.success && verifiedFactGrounded(parsed.data.known_facts, input.publicFacts)) {
+      return { output: parsed.data, provider: result.provider, model: result.model, attempt }
+    }
+    critique = "The previous diagnosis failed validation. Use distinctive supplied facts in known_facts, move every uncertain claim to unknowns, and keep the next commitment consistent with the recorded stage and decline state."
+  }
+  return null
+}
+
+export async function runSignalLeadSalesStrategyAi(input: SignalLeadSalesContext & { diagnosis: SignalLeadDealDiagnosisOutput }) {
+  let critique = ""
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const prompt = [
+      "Pass 2 of 3 — create the conversation strategy for one Mountline Signal lead from the approved diagnosis.",
       safetyInstructions(),
       "Choose exactly one primary angle and the smallest credible offer. Use at least two supplied business-specific facts.",
       "Keep the voice local, observant, friendly, credible, and direct. Do not pretend Mountline is a large agency.",
       "Do not use first-person singular. Use 'Luke with Mountline', 'Mountline', 'we', or 'our'. Never mention school or age.",
       "Treat every uncertainty as something to verify, never as a fact. Do not promise revenue, traffic, or conversion results.",
-      "Return strict JSON only with: strongest_angle, lead_value, best_approach, recommended_offer, likely_objections, tone, facts_to_mention, facts_not_to_mention.",
+      "Plan acknowledge → clarify/isolate → verified reframe → small next step for objections. Limit objection loops to one or two attempts, then exit respectfully.",
+      "Return strict JSON only with: strongest_angle, lead_value, best_approach, recommended_offer, likely_objections, tone, facts_to_mention, facts_not_to_mention, opening_strategy, source_backed_compliment, curiosity_hook, permission_question, discovery_priorities, value_bridge, concept_reveal_strategy, objection_isolation_questions, proof_required, recommended_close, fallback_close, graceful_exit, prohibited_claims, pacing_notes.",
+      `Approved diagnosis: ${JSON.stringify(input.diagnosis)}`,
       critique,
       salesContext(input),
     ].filter(Boolean).join("\n\n")
@@ -509,22 +617,35 @@ export async function runSignalLeadSalesStrategyAi(input: SignalLeadSalesContext
   return null
 }
 
-export async function runSignalLeadScriptsAi(input: SignalLeadSalesContext & { strategy: SignalLeadSalesStrategyOutput }) {
-  let critique = ""
+export async function runSignalLeadScriptsAi(input: SignalLeadSalesContext & {
+  diagnosis: SignalLeadDealDiagnosisOutput
+  strategy: SignalLeadSalesStrategyOutput
+  qualityCritique?: string
+}) {
+  let critique = input.qualityCritique || ""
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     const prompt = [
-      "Write the script pass for one Mountline Signal sales plan using the approved strategy below.",
+      "Pass 3 of 3 — write the scripts from the approved diagnosis and conversation strategy.",
       safetyInstructions(),
+      "Do not infer from raw provider text. Use only the approved diagnosis, strategy, and verified fact ledger below.",
       "The result must sound natural when read aloud and must fail the swap test: changing only the business name cannot make it fit another lead.",
       "Use at least two verified business-specific references across the briefing, opener, call script, and follow-up.",
       "Do not use first-person singular. Use 'Luke with Mountline', 'Mountline', 'we', or 'our'. Never mention school or age.",
-      "Word limits: briefing 150; walk-in opener 70; busy response 30; concept transition 35; call script 120; follow-up text 60; each objection response 20–60.",
+      "The opener must establish Luke/Mountline, local relevance when verified, why this business stood out, one specific opportunity, low pressure, and a permission question. Keep it under 55 words and normally under 25 seconds aloud.",
+      "Return exactly three discovery questions. Do not ask what the diagnosis already knows unless confirmation is useful. Cover the desired outcome, current process or friction, and decision/timing path.",
+      "Write a value bridge as a labeled branch based on a likely answer, never as something the owner already said. Keep concept reveal short: reason, strongest screen, customer path, opportunity, stop, reaction question.",
+      "For each objection, provide acknowledge, clarify, verified reframe, small next_step, a natural combined response, and loop_limit 0–2. A persistent no must lead to the graceful exit.",
+      "Match the close to readiness: low readiness earns permission/contact/follow-up; moderate readiness earns an adjusted concept or short review; high readiness may earn a scope or agreement step only when buying intent is recorded.",
+      "Variants may change delivery and format only. They must preserve every verified fact and must not add claims.",
+      "variants must contain exactly: natural, more_direct, more_specific, remove_jargon, warmer, shorter, higher_confidence, low_pressure, phone, walk_in, text, email.",
+      "Word limits: briefing 150; walk-in opener 55; busy response 30; concept transition 35; call script 110; follow-up text 55; each combined objection response 18–55.",
       "Return exactly three conversational discovery questions, exactly four relevant objections, three to six do-not-say items, and three to five next steps.",
       "Do not add a Lovable prompt; concept generation is deterministic from verified evidence.",
-      "Return strict JSON only with: one_minute_briefing, best_angle, walk_in_opener, busy_response, concept_transition, discovery_questions, price_transition, call_script, follow_up_text, objections, do_not_say, next_steps.",
+      "Return strict JSON only with: one_minute_briefing, best_angle, walk_in_opener, busy_response, concept_transition, discovery_questions, price_transition, call_script, follow_up_text, objections, do_not_say, next_steps, objective, value_bridge, concept_reveal, recommended_close, fallback_close, graceful_exit, delivery_notes, variants.",
+      `Approved diagnosis: ${JSON.stringify(input.diagnosis)}`,
       `Approved strategy: ${JSON.stringify(input.strategy)}`,
+      `Verified fact ledger and constraints: ${JSON.stringify({ businessName: input.businessName, city: input.city, websiteStatus: input.websiteStatus, publicFacts: input.publicFacts, verifiedContact: input.verifiedContact, forbiddenClaims: input.forbiddenClaims, pipelineStage: input.pipelineStage, contactHistory: input.contactHistory, sentAssets: input.sentAssets, conceptStatus: input.conceptStatus, priceDiscussed: input.priceDiscussed, explicitlyDeclined: input.explicitlyDeclined, promisedNextStep: input.promisedNextStep, currentContext: input.currentContext })}`,
       critique,
-      salesContext(input),
     ].filter(Boolean).join("\n\n")
     const result = await callProvider(prompt, true)
     if (!result) continue

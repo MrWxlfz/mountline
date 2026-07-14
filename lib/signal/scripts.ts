@@ -22,6 +22,12 @@ import {
 } from "./calibration"
 import { getSignalPlaybook, MEDICAL_COMPLIANCE_WARNING } from "./playbooks"
 import type { SignalWebsiteScan } from "./website"
+import type {
+  SignalLeadDealDiagnosisOutput,
+  SignalLeadSalesStrategyOutput,
+  SignalLeadScriptsOutput,
+} from "./ai"
+import { buildSignalSalesStageGuidance } from "./sales-stage"
 
 export type SignalScriptStudio = {
   conversation_style: SignalConversationStyle
@@ -51,6 +57,20 @@ export type SignalScriptStudio = {
     warning: string | null
   }
   recommended_next_action: string
+  deal_diagnosis: SignalLeadDealDiagnosisOutput | Record<string, unknown> | null
+  conversation_strategy: SignalLeadSalesStrategyOutput | Record<string, unknown> | null
+  objective: string
+  strongest_angle: string
+  walk_in_opener: string
+  busy_response: string
+  concept_transition: string
+  value_bridge: string
+  concept_reveal: string
+  recommended_close: string
+  fallback_close: string
+  graceful_exit: string
+  delivery_notes: string[]
+  variants: Record<string, string>
 }
 
 function compact(value: string | null | undefined) {
@@ -147,6 +167,52 @@ function websiteResponse(
 ) {
   const observation = supportedObservation(prospect, analysis, scan)
   return `That makes sense. This would stay respectful and specific. The only reason for reaching out is one visible improvement area: ${observation}. If it is not useful, Mountline can leave it there.`
+}
+
+function facebookResponse(prospect: SignalProspect) {
+  return `That makes sense—Facebook can keep doing the day-to-day work. The useful question is whether ${prospect.business_name} needs one dependable place for the service details, trust information, and next step that customers otherwise have to piece together. Do people ever ask where to find those basics?`
+}
+
+function enoughBusinessResponse() {
+  return "That is fair. More demand does not have to be the goal. Is the bigger opportunity reducing repetitive questions or making the process easier for the customers already reaching out? If neither is a problem, there may not be a useful project here."
+}
+
+function thinkResponse() {
+  return "Of course. To make the follow-up useful, is the main question the value, price, timing, scope, or another decision-maker? If now is simply not the right time, Mountline can leave it there."
+}
+
+function stageAwareOpener({
+  coldOpener,
+  observation,
+  prospect,
+}: {
+  coldOpener: string
+  observation: string
+  prospect: SignalProspect
+}) {
+  const stage = prospect.pipeline_stage || "found"
+  const guidance = buildSignalSalesStageGuidance({
+    businessName: prospect.business_name,
+    verifiedFact: observation,
+    pipelineStage: stage,
+    outreachStatus: prospect.outreach_status,
+    conceptReady: prospect.concept_status === "ready",
+    demoSent: prospect.outreach_status === "demo_sent",
+    interestedButHesitant: prospect.outreach_status === "discovery_call",
+    sendLinkRequested: prospect.outreach_status === "permission_to_send_demo",
+    explicitlyDeclined: prospect.outreach_status === "do_not_contact",
+  })
+  if (guidance.situation !== "brand_new_cold") return guidance.opener
+  return coldOpener
+}
+
+function stageClose(prospect: SignalProspect) {
+  const stage = prospect.pipeline_stage || "found"
+  if (stage === "proposal") return "Would a ten-minute review help resolve the remaining scope, timing, or price question?"
+  if (stage === "interested") return "Would Tuesday or Wednesday be better for a short review of the adjusted direction and a simple scope?"
+  if (["contacted", "concept_ready"].includes(stage)) return "Would it be useful if Mountline adjusted the concept around the actual services, then checked back on a specific day?"
+  if (stage === "lost" || prospect.outreach_status === "do_not_contact") return "Thank them for the clarity and do not schedule another follow-up."
+  return "Would you be open to a quick look, or is there a better person and time for this conversation?"
 }
 
 function followUpDraft(prospect: SignalProspect, analysis: SignalAnalysis | null) {
@@ -326,16 +392,15 @@ export function buildSignalScriptStudio({
   const recommendedNextAction = analysis?.recommended_next_action || getRecommendedNextAction(prospect, analysis)
 
   const localAsk = `Mountline noticed ${observation}. Would you be open to Mountline sending a quick concept site or a few notes?`
-  const first_call_opener =
-    prospect.outreach_status === "awaiting_reply" || prospect.outreach_status === "contacted"
-      ? "Wait for the follow-up date before calling. If a call becomes appropriate later, keep it short and reference the previous note naturally."
-      : profile === "plainspoken_owner_operator"
+  const coldOpener =
+    profile === "plainspoken_owner_operator"
         ? `Hi, Luke with Mountline Studio in the Keller area. Is this the right person for ${prospect.business_name}'s website? Mountline had one simple idea that could make services and contact info easier for customers to find.`
       : profile === "modern_casual_brand"
         ? `Hey, Luke with Mountline Studio. Is this the right person for ${prospect.business_name}'s website or booking setup? Mountline had one quick idea for making the site feel more polished and easier to use.`
       : prospect.outreach_mode === "local_student"
         ? `${firstLine} Is this the right person for ${prospect.business_name}'s website? ${localAsk}`
         : `${firstLine} Is this the right person for ${prospect.business_name}'s website or customer inquiry process? Mountline noticed ${observation}. Could Mountline send a short, specific concept, or is there a better person to ask?`
+  const first_call_opener = stageAwareOpener({ coldOpener, observation, prospect })
 
   const receptionist_script =
     prospect.outreach_mode === "local_student"
@@ -360,10 +425,11 @@ export function buildSignalScriptStudio({
   const how_much_response = howMuchResponse(analysis)
 
   const discovery_call_questions = playbook.discoveryQuestions.slice(0, 7)
-  const safeQuestions =
+  const safeQuestions = (
     prospect.compliance_tier === "compliance_gated"
       ? discovery_call_questions.filter((question) => !/patient|records|symptoms|ehr/i.test(question))
       : discovery_call_questions
+  ).slice(0, 3)
 
   const first_email_draft = firstEmailDraft({
     analysis,
@@ -385,6 +451,29 @@ export function buildSignalScriptStudio({
     how_much: how_much_response,
     already_use_booking: already_use_booking_response,
     already_have_website: already_have_website_response,
+    already_have_facebook: facebookResponse(prospect),
+    enough_business: enoughBusinessResponse(),
+    send_it: `${sure_send_it_response} What is the best number or email, and would Wednesday be alright for a brief check-back?`,
+    need_to_think: thinkResponse(),
+  }
+
+  const recommendedClose = stageClose(prospect)
+  const valueBridge = `That makes sense. Based on what you said, Mountline would not try to build something huge. We would focus on ${offer.toLowerCase()}, so customers can take the next step without adding more work for the team.`
+  const conceptReveal = `Mountline kept this focused on ${observation}. Start with the customer path, not every section. What feels useful, and what would you change?`
+  const gracefulExit = "Thanks for the clarity. Mountline will leave it there and will not keep following up."
+  const variants = {
+    natural: first_call_opener,
+    more_direct: `${firstLine} Mountline prepared one focused idea for ${prospect.business_name} around ${observation}. Would a quick look be useful?`,
+    more_specific: `${firstLine} ${prospect.business_name} stood out because ${positive}. Mountline prepared one focused idea around ${observation}. Would you be open to seeing it?`,
+    remove_jargon: `${firstLine} Mountline noticed one practical idea for ${prospect.business_name}: ${observation}. Would a quick look be useful?`,
+    warmer: `Hi—Luke with Mountline here. ${prospect.business_name} stood out for ${positive}. There is one respectful idea around ${observation}; would you be open to seeing it?`,
+    shorter: `Luke with Mountline here. We prepared one focused idea for ${prospect.business_name} around ${observation}. Open to a quick look?`,
+    higher_confidence: `${firstLine} Mountline recommends starting with ${offer.toLowerCase()}, not a large rebuild. Would you be open to the focused concept?`,
+    low_pressure: `${firstLine} Mountline noticed ${observation} at ${prospect.business_name}. If a quick concept would be useful, we can show it; if not, no problem.`,
+    phone: first_call_opener,
+    walk_in: `${firstLine} ${prospect.business_name} stood out because ${positive}. Mountline put together one quick idea around ${observation}. Would you be open to seeing it?`,
+    text: permission_based_dm,
+    email: first_email_draft,
   }
 
   const studioWithoutReadiness = {
@@ -413,6 +502,25 @@ export function buildSignalScriptStudio({
     evidence_citations: citations,
     compliance_warning: complianceWarning || null,
     recommended_next_action: recommendedNextAction,
+    deal_diagnosis: null,
+    conversation_strategy: null,
+    objective: recommendedNextAction,
+    strongest_angle: observation,
+    walk_in_opener: variants.walk_in,
+    busy_response: "No problem. What is the best contact for a short concept, and when would a brief follow-up be reasonable?",
+    concept_transition: "It was easier to show the customer path than describe it. Would a quick look be useful?",
+    value_bridge: valueBridge,
+    concept_reveal: conceptReveal,
+    recommended_close: recommendedClose,
+    fallback_close: "Would it be useful if Mountline sent one short outline and checked back on a specific day?",
+    graceful_exit: gracefulExit,
+    delivery_notes: [
+      "Open warmly and slow down the first sentence.",
+      "Pause after the business-specific observation.",
+      "Ask one question at a time and do not fill the silence.",
+      "Sound certain about the process, not an unknown outcome.",
+    ],
+    variants,
   }
 
   return {
@@ -460,5 +568,62 @@ export function scriptStudioFromJson(value: unknown): SignalScriptStudio | null 
         ? (record.external_readiness as SignalScriptStudio["external_readiness"])
         : { passed: true, blocked_terms: [], warning: null },
     recommended_next_action: compact(record.recommended_next_action) || "Review the latest prospect status before outreach.",
+    deal_diagnosis: record.deal_diagnosis && typeof record.deal_diagnosis === "object" ? record.deal_diagnosis : null,
+    conversation_strategy: record.conversation_strategy && typeof record.conversation_strategy === "object" ? record.conversation_strategy : null,
+    objective: compact(record.objective) || compact(record.recommended_next_action) || "Choose one honest next step.",
+    strongest_angle: compact(record.strongest_angle) || compact(record.proposal_angle),
+    walk_in_opener: compact(record.walk_in_opener) || compact(record.first_call_opener),
+    busy_response: compact(record.busy_response) || "No problem. Ask for the best contact and a reasonable follow-up time.",
+    concept_transition: compact(record.concept_transition) || "Would a quick look be useful?",
+    value_bridge: compact(record.value_bridge),
+    concept_reveal: compact(record.concept_reveal),
+    recommended_close: compact(record.recommended_close) || compact(record.recommended_next_action),
+    fallback_close: compact(record.fallback_close) || "Ask permission to send one concise outline.",
+    graceful_exit: compact(record.graceful_exit) || "Thank them and leave the relationship intact.",
+    delivery_notes: arrayFromJson(record.delivery_notes),
+    variants: record.variants && typeof record.variants === "object" ? record.variants as Record<string, string> : {},
   }
+}
+
+export function applySignalGeneratedSalesPack({
+  diagnosis,
+  scripts,
+  strategy,
+  studio,
+}: {
+  diagnosis: SignalLeadDealDiagnosisOutput
+  scripts: SignalLeadScriptsOutput
+  strategy: SignalLeadSalesStrategyOutput
+  studio: SignalScriptStudio
+}) {
+  const objectionResponses = Object.fromEntries(
+    scripts.objections.map((item) => [item.objection, item.response]),
+  )
+  const next: SignalScriptStudio = {
+    ...studio,
+    first_call_opener: scripts.call_script,
+    permission_based_dm: scripts.variants.text,
+    first_email_draft: scripts.variants.email,
+    sure_send_it_response: scripts.follow_up_text,
+    discovery_call_questions: scripts.discovery_questions,
+    follow_up_draft: scripts.follow_up_text,
+    proposal_angle: scripts.best_angle,
+    objection_responses: objectionResponses,
+    recommended_next_action: scripts.next_steps[0] || diagnosis.desired_next_commitment,
+    deal_diagnosis: diagnosis,
+    conversation_strategy: strategy,
+    objective: scripts.objective,
+    strongest_angle: scripts.best_angle,
+    walk_in_opener: scripts.walk_in_opener,
+    busy_response: scripts.busy_response,
+    concept_transition: scripts.concept_transition,
+    value_bridge: scripts.value_bridge,
+    concept_reveal: scripts.concept_reveal,
+    recommended_close: scripts.recommended_close,
+    fallback_close: scripts.fallback_close,
+    graceful_exit: scripts.graceful_exit,
+    delivery_notes: scripts.delivery_notes,
+    variants: scripts.variants,
+  }
+  return { ...next, external_readiness: readinessForStudio(next) }
 }

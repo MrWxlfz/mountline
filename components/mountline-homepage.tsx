@@ -23,6 +23,7 @@ import {
 import { useEffect, useState } from "react"
 import { DemoGallery } from "./demo-gallery"
 import { NorthlineLogo } from "./northline-logo"
+import { AppearanceSelector } from "./dashboard/appearance-selector"
 
 const navItems = [
   { label: "Work", href: "#work" },
@@ -196,6 +197,7 @@ function HomeNavbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
+          <AppearanceSelector compact syncServer={false} />
           <Link
             href="/id"
             className="text-sm font-medium text-zinc-300 transition-colors hover:text-white"
@@ -240,6 +242,7 @@ function HomeNavbar() {
             ))}
           </div>
           <div className="mt-4 grid gap-3 border-t border-white/10 pt-4">
+            <AppearanceSelector syncServer={false} className="w-full" />
             <Link
               href="/id"
               className="px-2 py-3 text-base font-medium text-zinc-200"
@@ -466,7 +469,7 @@ function PortalPreview() {
 
 export function MountlineHomepage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
+    <main className="mountline-marketing min-h-screen overflow-hidden bg-black text-white">
       <HomeNavbar />
 
       <section className="relative px-4 pb-20 pt-36 sm:px-6 sm:pb-28 sm:pt-40 lg:pt-44">
@@ -477,7 +480,7 @@ export function MountlineHomepage() {
           className="absolute inset-0 opacity-45"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)",
+              "linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)",
             backgroundSize: "36px 36px",
             maskImage: "linear-gradient(to bottom, black, black 58%, transparent 92%)",
           }}

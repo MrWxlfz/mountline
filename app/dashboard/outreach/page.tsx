@@ -30,7 +30,7 @@ export default async function OutreachPage() {
   return (
     <div className="space-y-7">
       <PageHeader eyebrow="Outreach" title="Manual outreach" subtitle="Review contact attempts and follow-ups logged from Signal workspaces. Mountline OS does not send outreach automatically." actions={<PrimaryAction href="/dashboard/signal" icon={ArrowRight}>Open Signal</PrimaryAction>} />
-      {error && <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">Outreach activity could not be loaded: {error.message}</div>}
+      {error && <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">Outreach activity could not be loaded: {error.message}</div>}
       <MetricStrip items={[
         { label: "Contacted", value: rows.filter((item) => item.pipeline_stage === "contacted").length, tone: "blue" },
         { label: "Interested", value: rows.filter((item) => item.pipeline_stage === "interested").length, tone: "green" },

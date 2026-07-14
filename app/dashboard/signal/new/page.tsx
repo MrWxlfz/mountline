@@ -107,13 +107,13 @@ export default function NewSignalProspectPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">
           {error}
         </div>
       )}
 
       {playbook.complianceTier === "compliance_gated" && (
-        <div className="flex gap-3 rounded-xl border border-yellow-500/25 bg-yellow-500/10 p-4 text-sm text-yellow-100">
+        <div className="flex gap-3 rounded-xl border border-warning-border bg-warning-soft p-4 text-sm text-warning-foreground">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
           <p>{MEDICAL_COMPLIANCE_WARNING}</p>
         </div>

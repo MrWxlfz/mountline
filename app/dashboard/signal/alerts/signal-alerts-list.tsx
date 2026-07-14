@@ -61,7 +61,7 @@ export function SignalAlertsList({
   return (
     <div className="space-y-3">
       {error && (
-        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">
           {error}
         </div>
       )}
@@ -71,7 +71,7 @@ export function SignalAlertsList({
           className={`rounded-lg border p-4 ${
             row.read_at
               ? "border-border bg-muted/20"
-              : "border-green-500/25 bg-green-500/10"
+              : "border-success-border bg-success-soft"
           }`}
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

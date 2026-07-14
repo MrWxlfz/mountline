@@ -88,7 +88,7 @@ export function SignalCampaignNewForm() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">
           {error}
         </div>
       )}

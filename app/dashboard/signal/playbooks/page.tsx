@@ -43,7 +43,7 @@ export default async function SignalPlaybooksPage() {
             </div>
 
             {playbook.complianceTier === "compliance_gated" && (
-              <div className="mb-4 flex gap-2 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+              <div className="mb-4 flex gap-2 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm text-warning-foreground">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>{playbook.complianceNotes[0]}</p>
               </div>

@@ -416,17 +416,17 @@ export function SignalLeadEngine({
       </section>
 
       {missingProviders.length > 0 && (
-        <div role="alert" className="flex flex-col gap-3 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-50 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex gap-3"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-medium">Scout needs a research connection.</p><p className="mt-1 leading-5 text-amber-100/80">Configure at least one local discovery connection to start live research. Existing runs remain safe to review.</p></div></div>
+        <div role="alert" className="flex flex-col gap-3 rounded-xl border border-warning-border bg-warning-soft p-4 text-sm text-warning-foreground sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex gap-3"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="font-medium">Scout needs a research connection.</p><p className="mt-1 leading-5 text-warning-foreground/80">Configure at least one local discovery connection to start live research. Existing runs remain safe to review.</p></div></div>
         </div>
       )}
 
       {storageMessage && (
-        <div role="alert" className="flex gap-3 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-50">
+        <div role="alert" className="flex gap-3 rounded-xl border border-warning-border bg-warning-soft p-4 text-sm text-warning-foreground">
           <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-medium">Scout needs its run storage.</p>
-            <p className="mt-1 leading-5 text-amber-100/80">{storageMessage}</p>
+            <p className="mt-1 leading-5 text-warning-foreground/80">{storageMessage}</p>
           </div>
         </div>
       )}
@@ -442,7 +442,7 @@ export function SignalLeadEngine({
       )}
 
       {(message || error) && (
-        <div role="status" className={`rounded-lg border px-4 py-3 text-sm ${error ? "border-red-400/25 bg-red-400/10 text-red-100" : "border-emerald-400/25 bg-emerald-400/10 text-emerald-100"}`}>{error || message}</div>
+        <div role="status" className={`rounded-lg border px-4 py-3 text-sm ${error ? "border-error-border bg-error-soft text-error-foreground" : "border-success-border bg-success-soft text-success-foreground"}`}>{error || message}</div>
       )}
 
       <section className="rounded-xl border border-border bg-card">
@@ -503,9 +503,9 @@ export function SignalLeadEngine({
       )}
 
       {currentRun?.status === "failed" && (
-        <section className="flex flex-col gap-4 rounded-xl border border-amber-400/25 bg-amber-400/10 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+        <section className="flex flex-col gap-4 rounded-xl border border-warning-border bg-warning-soft p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-amber-100/70">Run paused safely</p>
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-warning-foreground/70">Run paused safely</p>
             <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Scout kept the checkpoint. Retry when ready.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{currentRun.error_message || "A public research step did not finish. No completed evidence was discarded."}</p>
           </div>
@@ -540,9 +540,9 @@ function RunEventFeed({ events }: { events: SignalRunEvent[] }) {
 function RecentRunCard({ run }: { run: SignalRun }) {
   const active = activeRun(run)
   const statusClass = run.status === "completed"
-    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+    ? "border-success-border bg-success-soft text-success-foreground"
     : run.status === "failed"
-      ? "border-red-400/30 bg-red-400/10 text-red-200"
+      ? "border-error-border bg-error-soft text-error-foreground"
       : "border-border bg-muted/50 text-muted-foreground"
   return (
     <Link href={`/dashboard/signal/runs/${run.id}`} className="group rounded-lg border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20">
@@ -563,10 +563,10 @@ function ResultLeadCard({ lead, rank }: { lead: SignalRunLead; rank: number }) {
   const action = textFrom(salesPack, ["best_first_action", "recommended_first_action", "next_action"])
   const location = [lead.city, lead.state].filter(Boolean).join(", ") || lead.address || "Location to verify"
   const presence = onlinePresence(lead)
-  const statusTone = ["no_site", "weak_site", "social_only", "no_website_found", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(presence) ? "border-amber-400/30 bg-amber-400/10 text-amber-100" : ["strong_site", "website_strong"].includes(presence) ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200" : "border-border bg-muted/50 text-muted-foreground"
+  const statusTone = ["no_site", "weak_site", "social_only", "no_website_found", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(presence) ? "border-warning-border bg-warning-soft text-warning-foreground" : ["strong_site", "website_strong"].includes(presence) ? "border-success-border bg-success-soft text-success-foreground" : "border-border bg-muted/50 text-muted-foreground"
   const href = `/dashboard/signal/runs/${lead.run_id}?lead=${lead.id}`
 
-  return <article className="rounded-xl border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 sm:p-5"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone}`}>{formatOnlinePresence(presence)}</span></div><h3 className="mt-3 truncate text-lg font-semibold text-foreground">{leadName(lead)}</h3><p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"><span>{formatBusinessCategory(lead.primary_category || lead.industry)}</span><span className="text-border">/</span><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span></p></div><div className="shrink-0 text-right"><p className="font-mono text-2xl font-semibold text-foreground">{lead.final_score ?? "—"}</p><p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">Scout score</p><p className="mt-2 text-xs text-muted-foreground">{formatConfidence(lead.confidence_score)}</p></div></div><div className="mt-5 rounded-lg border border-border bg-card/50 p-3"><p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Why it may stand out</p><p className="mt-2 text-sm leading-5 text-foreground">{pitch || reasons[0] || "Open this suggestion to review its discovery evidence."}</p>{action && <p className="mt-2 text-xs leading-5 text-muted-foreground"><span className="text-foreground">Suggested move:</span> {action}</p>}</div>{reasons.length > 0 && <ul className="mt-4 space-y-2">{reasons.map((reason, index) => <li key={`${reason}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />{reason}</li>)}</ul>}<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4"><div className="flex flex-wrap gap-3 text-xs text-muted-foreground">{lead.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{lead.phone}</span>}{lead.is_independent_likely && <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5" />Likely independent</span>}</div><div className="flex flex-wrap gap-2"><Link href={href} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><FileText className="h-3.5 w-3.5" />Review discovery</Link><AnalyzeRunLeadButton lead={lead} /></div></div></article>
+  return <article className="rounded-xl border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 sm:p-5"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-card px-1 font-mono text-xs text-muted-foreground">{rank}</span><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone}`}>{formatOnlinePresence(presence)}</span></div><h3 className="mt-3 truncate text-lg font-semibold text-foreground">{leadName(lead)}</h3><p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"><span>{formatBusinessCategory(lead.primary_category || lead.industry)}</span><span className="text-border">/</span><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span></p></div><div className="shrink-0 text-right"><p className="font-mono text-2xl font-semibold text-foreground">{lead.final_score ?? "—"}</p><p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">Scout score</p><p className="mt-2 text-xs text-muted-foreground">{formatConfidence(lead.confidence_score)}</p></div></div><div className="mt-5 rounded-lg border border-border bg-card/50 p-3"><p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Why it may stand out</p><p className="mt-2 text-sm leading-5 text-foreground">{pitch || reasons[0] || "Open this suggestion to review its discovery evidence."}</p>{action && <p className="mt-2 text-xs leading-5 text-muted-foreground"><span className="text-foreground">Suggested move:</span> {action}</p>}</div>{reasons.length > 0 && <ul className="mt-4 space-y-2">{reasons.map((reason, index) => <li key={`${reason}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success-foreground" />{reason}</li>)}</ul>}<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4"><div className="flex flex-wrap gap-3 text-xs text-muted-foreground">{lead.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{lead.phone}</span>}{lead.is_independent_likely && <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5" />Likely independent</span>}</div><div className="flex flex-wrap gap-2"><Link href={href} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><FileText className="h-3.5 w-3.5" />Review discovery</Link><AnalyzeRunLeadButton lead={lead} /></div></div></article>
 }
 
 function AnalyzeRunLeadButton({ lead }: { lead: SignalRunLead }) {
@@ -585,10 +585,10 @@ function AnalyzeRunLeadButton({ lead }: { lead: SignalRunLead }) {
       setWorking(false)
     }
   }
-  return <div className="flex flex-col items-end gap-1"><button type="button" onClick={analyze} disabled={working} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-xs font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">{working ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}Analyze in Signal</button>{error && <span className="max-w-48 text-right text-[11px] text-red-300">{error}</span>}</div>
+  return <div className="flex flex-col items-end gap-1"><button type="button" onClick={analyze} disabled={working} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-xs font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50">{working ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}Analyze in Signal</button>{error && <span className="max-w-48 text-right text-[11px] text-error-foreground">{error}</span>}</div>
 }
 
 function SavedLeadCard({ lead }: { lead: SignalRunLead }) {
   const href = `/dashboard/signal/runs/${lead.run_id}?lead=${lead.id}`
-  return <Link href={href} className="group rounded-lg border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="flex items-center gap-2"><Bookmark className="h-4 w-4 text-emerald-300" /><p className="truncate font-medium text-foreground">{leadName(lead)}</p></div><p className="mt-2 text-sm text-muted-foreground">{[formatBusinessCategory(lead.primary_category || lead.industry), lead.city, lead.state].filter(Boolean).join(" · ")}</p></div><span className="font-mono text-lg font-semibold text-foreground">{lead.final_score ?? "—"}</span></div><div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground"><span>{lead.phone || lead.website_url || "Open sales pack"}</span><span className="inline-flex items-center gap-1 group-hover:text-foreground">Open <ArrowUpRight className="h-3.5 w-3.5" /></span></div></Link>
+  return <Link href={href} className="group rounded-lg border border-border bg-background/40 p-4 transition-colors hover:border-foreground/25 hover:bg-muted/20"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="flex items-center gap-2"><Bookmark className="h-4 w-4 text-success-foreground" /><p className="truncate font-medium text-foreground">{leadName(lead)}</p></div><p className="mt-2 text-sm text-muted-foreground">{[formatBusinessCategory(lead.primary_category || lead.industry), lead.city, lead.state].filter(Boolean).join(" · ")}</p></div><span className="font-mono text-lg font-semibold text-foreground">{lead.final_score ?? "—"}</span></div><div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground"><span>{lead.phone || lead.website_url || "Open sales pack"}</span><span className="inline-flex items-center gap-1 group-hover:text-foreground">Open <ArrowUpRight className="h-3.5 w-3.5" /></span></div></Link>
 }

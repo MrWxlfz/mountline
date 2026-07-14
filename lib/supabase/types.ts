@@ -659,6 +659,14 @@ export type SignalOutreachDraft = {
   script_studio: SignalJson | null
   follow_up_email: string | null
   objection_responses: SignalJson | null
+  deal_diagnosis?: SignalJson | null
+  conversation_strategy?: SignalJson | null
+  prompt_version?: string | null
+  strategy_version?: string | null
+  quality_score?: number | null
+  retry_count?: number
+  fallback_status?: "not_used" | "used" | "insufficient_evidence" | "provider_unavailable" | "quality_rejected"
+  generation_metadata?: SignalJson
   user_approved: boolean
   approved_at: string | null
 }

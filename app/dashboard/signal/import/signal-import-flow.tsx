@@ -115,8 +115,8 @@ export function SignalImportFlow() {
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground"
           }`}
         >
           {error || message}

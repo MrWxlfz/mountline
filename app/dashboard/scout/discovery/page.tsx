@@ -54,9 +54,9 @@ export default async function ScoutDiscoveryPage() {
   ])
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-yellow-500/25 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-100">
+      <div className="rounded-lg border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-foreground">
         <p className="font-medium">Experimental Scout discovery</p>
-        <p className="mt-1 text-yellow-100/75">City and map runs produce suggestions only. Open a suggestion in Signal before treating it as an operational lead.</p>
+        <p className="mt-1 text-warning-foreground/75">City and map runs produce suggestions only. Open a suggestion in Signal before treating it as an operational lead.</p>
       </div>
       <SignalLeadEngine
         initialActiveEvents={data.activeEvents}
@@ -71,4 +71,3 @@ export default async function ScoutDiscoveryPage() {
     </div>
   )
 }
-

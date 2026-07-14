@@ -228,12 +228,12 @@ export function ProjectEditForm({
 
       <form onSubmit={handleSave} className="bg-card border border-border rounded-xl p-6 space-y-6">
         {error && (
-          <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+          <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">
             {error}
           </div>
         )}
         {success && (
-          <div className="flex items-center gap-2 rounded-lg border border-green-500/25 bg-green-500/10 px-3 py-2 text-sm text-green-400">
+          <div className="flex items-center gap-2 rounded-lg border border-success-border bg-success-soft px-3 py-2 text-sm text-success-foreground">
             <Check className="h-4 w-4" />
             Project saved.
           </div>
@@ -400,7 +400,7 @@ export function ProjectEditForm({
         </div>
 
         {accessError && (
-          <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+          <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">
             {accessError}
           </div>
         )}

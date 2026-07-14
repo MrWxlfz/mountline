@@ -170,8 +170,8 @@ export function SignalResearchFlow() {
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground"
           }`}
         >
           {error || message}
@@ -308,7 +308,7 @@ export function SignalResearchFlow() {
       )}
 
       {result && (
-        <div className="rounded-xl border border-green-500/25 bg-green-500/10 p-5 text-green-100">
+        <div className="rounded-xl border border-success-border bg-success-soft p-5 text-success-foreground">
           <div className="flex items-start gap-3">
             <RadioTower className="mt-0.5 h-5 w-5 shrink-0" />
             <div className="flex-1">
@@ -331,7 +331,7 @@ export function SignalResearchFlow() {
                 </Link>
                 <Link
                   href={`/dashboard/signal/${result.prospect.id}`}
-                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-green-500/30 px-3 text-sm font-medium text-green-100 hover:bg-green-500/10"
+                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-success-border px-3 text-sm font-medium text-success-foreground hover:bg-success-soft"
                 >
                   Prepare Scripts
                 </Link>
@@ -376,8 +376,8 @@ function Field({
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wider text-green-100/70">{label}</p>
-      <p className="mt-1 text-sm text-green-50">{value}</p>
+      <p className="text-xs font-medium uppercase tracking-wider text-success-foreground/70">{label}</p>
+      <p className="mt-1 text-sm text-success-foreground">{value}</p>
     </div>
   )
 }

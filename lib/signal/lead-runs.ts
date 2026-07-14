@@ -6,7 +6,14 @@ import {
   addSignalCandidateSuppression,
   findSignalCandidateSuppression,
 } from "./alerts"
-import { runSignalChainClassificationAi, runSignalLeadSalesStrategyAi, runSignalLeadScriptsAi } from "./ai"
+import {
+  SIGNAL_SALES_PROMPT_VERSION,
+  SIGNAL_SALES_STRATEGY_VERSION,
+  runSignalChainClassificationAi,
+  runSignalLeadDealDiagnosisAi,
+  runSignalLeadSalesStrategyAi,
+  runSignalLeadScriptsAi,
+} from "./ai"
 import {
   getSignalAiProviderSetup,
   getSignalMarketRuntimeConfig,
@@ -1388,10 +1395,42 @@ function fallbackSalesPack(input: {
   const briefing = `${name} is a ${input.lead.industry || "local business"} in ${location}. ${specificFact}. The clearest opportunity is to ${strongestAngle.charAt(0).toLowerCase()}${strongestAngle.slice(1)} This lead is worth pursuing because the public evidence supports a specific, realistic first offer. Best first move: ${channel}. Verify ${input.scores.fit.unknowns[0]?.toLowerCase() || "the preferred customer contact path"} before outreach.`
   const callScript = `Luke with Mountline here—did we catch you with thirty seconds? ${name} stood out because ${specificFact.toLowerCase()}. We noticed ${input.website.gaps[0]?.toLowerCase() || "one customer step that may be worth simplifying"} and prepared one focused concept. This is not a pitch for a large rebuild. Would a quick explanation be useful, or should Mountline send the preview instead?`
   const conciseObjections = [
-    { objection: "We already use social media.", response: "That can stay exactly where it is. The concept gives customers one reliable place to understand services and take the next step, while social continues handling updates and day-to-day visibility." },
-    { objection: "We already get enough business.", response: "More traffic does not need to be the goal. The useful question is whether the current path saves time for the customers and team already calling, messaging, or asking the same questions." },
-    { objection: "Can you send the idea?", response: "Absolutely. Mountline can send the labeled concept with one sentence explaining the specific opportunity. It will stay concise, and there is no automated follow-up sequence attached to it." },
-    { objection: "What would it cost?", response: `${input.plan.pricing_angle} Mountline would confirm the smallest useful scope first, then put the exact pages, customer flow, timeline, and price in writing before anything starts.` },
+    {
+      objection: "We already use social media.",
+      acknowledge: "That makes sense—social can keep doing the day-to-day work.",
+      clarify: "Do customers ever ask where to find service details or the right next step?",
+      reframe: "The concept gives those essentials one dependable home without replacing social.",
+      next_step: "Would a quick look help decide whether that is useful here?",
+      response: "That makes sense—social can keep doing the day-to-day work. Do customers ever ask where to find service details or the right next step? The concept gives those essentials one dependable home. Would a quick look help decide whether that is useful here?",
+      loop_limit: 1,
+    },
+    {
+      objection: "We already get enough business.",
+      acknowledge: "That is fair; more demand does not have to be the goal.",
+      clarify: "Is repetitive customer back-and-forth a problem, or is the current process already working well?",
+      reframe: "The practical value may be a clearer process for existing inquiries, not more traffic.",
+      next_step: "Would it be useful to look only at that workflow?",
+      response: "That is fair; more demand does not have to be the goal. Is repetitive back-and-forth a problem, or is the process already working well? The value may be clarity for existing inquiries. Would it be useful to look only at that?",
+      loop_limit: 1,
+    },
+    {
+      objection: "Can you send the idea?",
+      acknowledge: "Absolutely.",
+      clarify: "What is the best number or email?",
+      reframe: "Mountline will send the labeled concept and one short explanation, not a giant proposal.",
+      next_step: "Would Wednesday be alright for a brief check-back?",
+      response: "Absolutely. What is the best number or email? Mountline will send the labeled concept and one short explanation, not a giant proposal. Would Wednesday be alright for a brief check-back?",
+      loop_limit: 0,
+    },
+    {
+      objection: "What would it cost?",
+      acknowledge: "Fair question.",
+      clarify: "Were you expecting a small focused page, or a broader site?",
+      reframe: "Mountline would start with the smallest useful scope instead of discounting an oversized project.",
+      next_step: "Would a one-page scope with the exact price be useful?",
+      response: `Fair question. Were you expecting a focused page or a broader site? ${input.plan.pricing_angle} Mountline would start with the smallest useful scope. Would a one-page outline with the exact price be useful?`,
+      loop_limit: 1,
+    },
   ]
   const conceptSections = /barber|salon/i.test(input.lead.industry || "")
     ? "Hero with appointment intent; verified services; work-gallery placeholders; barber or stylist selection only if verified; location and hours; focused booking or call section."
@@ -1424,6 +1463,32 @@ function fallbackSalesPack(input: {
       "Prepare one focused concept using placeholders for every unknown fact.",
       `Start with a ${channel} and record the outcome manually.`,
     ],
+    objective: input.plan.best_first_action === "walk_in" ? "Earn permission to show one focused concept." : "Earn permission for one specific, low-pressure next step.",
+    value_bridge: `That makes sense. Based on what you said, Mountline would not try to build something huge. We would focus on ${input.plan.recommended_offer.toLowerCase()}, so customers can take the next step without adding more work for the team.`,
+    concept_reveal: `Mountline kept this focused on ${strongestAngle.toLowerCase()} Start with the customer path, not every section. What feels useful, and what would you change?`,
+    recommended_close: "Would it be useful if Mountline adjusted this around the actual services, then checked back Wednesday?",
+    fallback_close: "What is the best number or email for one short concept, and when would a brief follow-up be reasonable?",
+    graceful_exit: "Thanks for the clarity. Mountline will leave it there and will not keep following up.",
+    delivery_notes: [
+      "Open warmly and slow down the first sentence.",
+      "Pause after the business-specific observation.",
+      "Ask one question at a time and do not fill the silence.",
+      "Sound certain about the process, not an unknown outcome.",
+    ],
+    variants: {
+      natural: opener,
+      more_direct: `Luke with Mountline here. ${name} stood out because ${specificFact.toLowerCase()}. We prepared one focused idea. Open to a quick look?`,
+      more_specific: `Luke with Mountline here. ${name} stood out because ${specificFact.toLowerCase()}. We noticed ${input.website.gaps[0]?.toLowerCase() || "one customer step worth simplifying"}. Open to a quick look?`,
+      remove_jargon: `Luke with Mountline here. We noticed one practical customer step for ${name} and prepared a quick example. Would you be open to seeing it?`,
+      warmer: `Hi—Luke with Mountline here. ${name} stood out for ${specificFact.toLowerCase()}. There is one respectful idea worth showing; would you be open to seeing it?`,
+      shorter: `Luke with Mountline here. We prepared one focused idea for ${name}. Open to a quick look?`,
+      higher_confidence: `Luke with Mountline here. The focused recommendation for ${name} is ${input.plan.recommended_offer.toLowerCase()}, not a large rebuild. Would a quick look be useful?`,
+      low_pressure: `Luke with Mountline here. We noticed one idea for ${name}. If a quick concept would be useful, Mountline can show it; if not, no problem.`,
+      phone: callScript,
+      walk_in: opener,
+      text: `Quick follow-up on the ${name} concept. It stays focused on ${strongestAngle.toLowerCase()} Would Wednesday be a reasonable time to check back?`,
+      email: `Subject: ${name} concept\n\nMountline kept this focused on ${strongestAngle.toLowerCase()} If the direction is useful, we can send the smallest clear scope. If not, no problem.`,
+    },
     lead_briefing: briefing,
     strongest_honest_angle: strongestAngle,
     fifteen_second_opener: opener,
@@ -3407,10 +3472,9 @@ async function buildSalesPack(run: MutableRun, lead: MutableLead, kind: "scripts
   ])
   if (evidenceError) throw new Error(evidenceError.message)
   if (observationError) throw new Error(observationError.message)
-  facts = unique([
-    ...facts,
-    ...(storedObservations || []).map((item) => `Luke's observation (${String(item.category).replace(/_/g, " ")}): ${item.note}`),
-  ], 16)
+  // Private observations inform diagnosis and discovery, but never enter the
+  // verified public-fact ledger used to validate prospect-facing claims.
+  facts = unique(facts, 16)
   const fallback = fallbackSalesPack({
     lead,
     website,
@@ -3448,36 +3512,92 @@ async function buildSalesPack(run: MutableRun, lead: MutableLead, kind: "scripts
     uncertainties: risks,
     forbiddenClaims: fallback.what_to_avoid,
     recommendedChannel: plan.best_first_action,
+    pipelineStage: "found",
+    contactHistory: [] as string[],
+    observations: (storedObservations || []).map((item) => `${String(item.category).replace(/_/g, " ")}: ${item.note}`),
+    sentAssets: [] as string[],
+    conceptStatus: lead.lovable_prompt ? "prompt_ready" : "not_started",
+    priceDiscussed: false,
+    explicitlyDeclined: false,
+    promisedNextStep: null,
+    currentContext: lead.lovable_prompt ? "cold walk-in with a concept prompt" : "cold walk-in with no concept",
   }
-  const aiStrategy = kind === "lovable" ? null : await runSignalLeadSalesStrategyAi(salesContext)
-  const aiScripts = aiStrategy ? await runSignalLeadScriptsAi({ ...salesContext, strategy: aiStrategy.output }) : null
+  const aiDiagnosis = kind === "lovable" ? null : await runSignalLeadDealDiagnosisAi(salesContext)
+  const aiStrategy = aiDiagnosis
+    ? await runSignalLeadSalesStrategyAi({ ...salesContext, diagnosis: aiDiagnosis.output })
+    : null
+  let aiScripts = aiDiagnosis && aiStrategy
+    ? await runSignalLeadScriptsAi({ ...salesContext, diagnosis: aiDiagnosis.output, strategy: aiStrategy.output })
+    : null
   if (kind !== "lovable" && !aiScripts && getSignalLeadRunProviderSetup().ai) {
     await writeProviderWarning(run, "AI sales-pack generation was unavailable for one lead; Signal used the deterministic public-evidence fallback.")
   }
   const previous = asObject(lead.sales_pack)
-  const aiOutput = aiScripts && aiStrategy
-    ? {
+  const composeAiOutput = () => aiScripts && aiStrategy && aiDiagnosis
+    ? ({
       ...fallback,
       ...aiScripts.output,
       what_stood_out: fallback.what_stood_out,
       likely_pain_points: fallback.likely_pain_points,
       risks_to_verify: fallback.risks_to_verify,
       lovable_prompt: fallback.lovable_prompt,
+      deal_diagnosis: aiDiagnosis.output,
       sales_strategy: aiStrategy.output,
       ai_phrase_provider: `${aiScripts.provider}:${aiScripts.model}`,
-    }
+    })
     : null
-  const selectedPack = selectSignalSalesPack({ fallback, aiPack: aiOutput, businessName: lead.business_name, verifiedFacts: facts })
+  let aiOutput = composeAiOutput()
+  const qualityContext = {
+    businessName: lead.business_name,
+    verifiedFacts: facts,
+    pipelineStage: salesContext.pipelineStage,
+    contactHistory: salesContext.contactHistory,
+    explicitlyDeclined: salesContext.explicitlyDeclined,
+    promisedNextStep: salesContext.promisedNextStep,
+  }
+  let selectedPack = selectSignalSalesPack({ fallback, aiPack: aiOutput, ...qualityContext })
+  let qualityRetryCount = 0
+  if (
+    aiOutput &&
+    selectedPack.generatedBy === "deterministic_fallback" &&
+    aiDiagnosis &&
+    aiStrategy &&
+    getSignalLeadRunProviderSetup().ai
+  ) {
+    const retriedScripts = await runSignalLeadScriptsAi({
+      ...salesContext,
+      diagnosis: aiDiagnosis.output,
+      strategy: aiStrategy.output,
+      qualityCritique: selectedPack.issues.slice(0, 8).join(" "),
+    })
+    if (retriedScripts) {
+      aiScripts = retriedScripts
+      qualityRetryCount = 1
+      aiOutput = composeAiOutput()
+      selectedPack = selectSignalSalesPack({ fallback, aiPack: aiOutput, ...qualityContext })
+    }
+  }
   if (aiOutput && selectedPack.generatedBy === "deterministic_fallback") {
     await writeProviderWarning(run, `AI sales-pack grounding failed for ${lead.business_name}; Signal used the verified fallback.`)
   }
   const acceptedAi = selectedPack.generatedBy === "ai"
   const output = selectedPack.pack
-  const quality = evaluateSignalSalesPackQuality({ pack: output, businessName: lead.business_name, verifiedFacts: facts })
-  const generationAttempt = Math.max(aiStrategy?.attempt || 0, aiScripts?.attempt || 0)
+  const quality = evaluateSignalSalesPackQuality({ pack: output, ...qualityContext })
+  const generationAttempt = (aiDiagnosis?.attempt || 0) + (aiStrategy?.attempt || 0) + (aiScripts?.attempt || 0) + qualityRetryCount
   const nextPack: JsonObject = kind === "lovable"
-    ? { ...previous, lovable_prompt: fallback.lovable_prompt, generated_at: currentIso(), generated_by: "deterministic_fallback", prompt_version: "signal-sales-pack-v3" }
-    : { ...previous, ...output, generated_at: currentIso(), generated_by: acceptedAi ? "ai" : "deterministic_fallback", prompt_version: "signal-sales-pack-v3" }
+    ? { ...previous, lovable_prompt: fallback.lovable_prompt, generated_at: currentIso(), generated_by: "deterministic_fallback", prompt_version: SIGNAL_SALES_PROMPT_VERSION }
+    : { ...previous, ...output, generated_at: currentIso(), generated_by: acceptedAi ? "ai" : "deterministic_fallback", prompt_version: SIGNAL_SALES_PROMPT_VERSION, strategy_version: SIGNAL_SALES_STRATEGY_VERSION }
+  const evaluationMetadata = asObject(lead.evaluation_metadata)
+  const fallbackDiagnosis = {
+    strongest_verified_opportunity: fallback.strongest_honest_angle,
+    smallest_useful_offer: fallback.recommended_offer,
+    desired_next_commitment: fallback.next_action_checklist?.[0] || "Confirm the correct contact route.",
+    current_context: salesContext.currentContext,
+    should_pursue: lead.lead_quality_status !== "reject",
+    do_not_contact: false,
+    known_facts: facts.slice(0, 6),
+    unknowns: fallback.risks_to_verify,
+  }
   const { data, error } = await supabase
     .from("signal_run_leads")
     .update({
@@ -3485,8 +3605,12 @@ async function buildSalesPack(run: MutableRun, lead: MutableLead, kind: "scripts
       lovable_prompt: asString(nextPack.lovable_prompt) || fallback.lovable_prompt,
       next_steps: plan.next_step_checklist,
       script_generation_type: kind === "lovable" ? lead.script_generation_type : acceptedAi ? "ai" : "deterministic_fallback",
-      prompt_version: "signal-sales-pack-v3",
-      sales_strategy: aiStrategy?.output || {
+      prompt_version: SIGNAL_SALES_PROMPT_VERSION,
+      sales_strategy: aiStrategy ? {
+        ...aiStrategy.output,
+        deal_diagnosis: aiDiagnosis?.output || fallbackDiagnosis,
+        strategy_version: SIGNAL_SALES_STRATEGY_VERSION,
+      } : {
         strongest_angle: fallback.best_angle,
         lead_value: fallback.why_this_fits,
         best_approach: fallback.best_first_action,
@@ -3495,11 +3619,25 @@ async function buildSalesPack(run: MutableRun, lead: MutableLead, kind: "scripts
         tone: "Direct, local, respectful, and focused on one verified customer-flow opportunity.",
         facts_to_mention: facts.slice(0, 4),
         facts_not_to_mention: fallback.risks_to_verify,
+        deal_diagnosis: aiDiagnosis?.output || fallbackDiagnosis,
+        strategy_version: SIGNAL_SALES_STRATEGY_VERSION,
       },
       script_quality_score: quality.score,
       generation_attempt: generationAttempt,
       generation_failure_reason: acceptedAi ? null : selectedPack.issues.slice(0, 6).join(" ") || (aiScripts ? "AI draft did not meet the quality threshold." : "AI generation was unavailable."),
       fallback_usage: !acceptedAi,
+      evaluation_metadata: {
+        ...evaluationMetadata,
+        sales_generation: {
+          prompt_version: SIGNAL_SALES_PROMPT_VERSION,
+          strategy_version: SIGNAL_SALES_STRATEGY_VERSION,
+          quality_score: quality.score,
+          quality_dimensions: quality.dimensions,
+          retry_count: qualityRetryCount,
+          fallback_status: acceptedAi ? "not_used" : aiOutput ? "quality_rejected" : "provider_unavailable",
+          deal_diagnosis: aiDiagnosis?.output || fallbackDiagnosis,
+        },
+      },
     })
     .eq("id", lead.id)
     .select("*")

@@ -165,17 +165,17 @@ function displayStage(stage: string | null | undefined) {
 }
 
 function statusTone(status: SignalRun["status"]) {
-  if (status === "completed") return "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
-  if (status === "partial" || status === "completed_with_limits") return "border-amber-400/30 bg-amber-400/10 text-amber-100"
-  if (status === "failed") return "border-red-400/30 bg-red-400/10 text-red-200"
+  if (status === "completed") return "border-success-border bg-success-soft text-success-foreground"
+  if (status === "partial" || status === "completed_with_limits") return "border-warning-border bg-warning-soft text-warning-foreground"
+  if (status === "failed") return "border-error-border bg-error-soft text-error-foreground"
   return "border-border bg-muted/50 text-muted-foreground"
 }
 
 function websiteTone(status: string) {
   if (["no_site", "weak_site", "social_only", "no_website_found", "directory_only", "website_unreachable", "website_broken", "website_weak"].includes(status)) {
-    return "border-amber-400/30 bg-amber-400/10 text-amber-100"
+    return "border-warning-border bg-warning-soft text-warning-foreground"
   }
-  if (status === "strong_site" || status === "website_strong") return "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+  if (status === "strong_site" || status === "website_strong") return "border-success-border bg-success-soft text-success-foreground"
   return "border-border bg-muted/50 text-muted-foreground"
 }
 
@@ -622,16 +622,16 @@ export function SignalRunDetail({
       {(message || error || run.error_message) && (
         <div
           role="status"
-          className={`rounded-lg border px-4 py-3 text-sm ${error || run.error_message ? "border-red-400/25 bg-red-400/10 text-red-100" : "border-emerald-400/25 bg-emerald-400/10 text-emerald-100"}`}
+          className={`rounded-lg border px-4 py-3 text-sm ${error || run.error_message ? "border-error-border bg-error-soft text-error-foreground" : "border-success-border bg-success-soft text-success-foreground"}`}
         >
           {error || run.error_message || message}
         </div>
       )}
 
       {providerErrors.length > 0 && (
-        <div className="rounded-lg border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+        <div className="rounded-lg border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-foreground">
           <p className="font-medium">Some website details could not be verified.</p>
-          <p className="mt-1 leading-5 text-amber-100/80">Signal kept identity and location checks intact and relied more heavily on verified listings and public profiles. {providerErrors.slice(0, 2).map((item) => formatScoreReason(item)).join(" ")}</p>
+          <p className="mt-1 leading-5 text-warning-foreground/80">Signal kept identity and location checks intact and relied more heavily on verified listings and public profiles. {providerErrors.slice(0, 2).map((item) => formatScoreReason(item)).join(" ")}</p>
         </div>
       )}
 
@@ -857,7 +857,7 @@ function RunLeadCard({
         <ul className="mt-4 space-y-2">
           {reasons.map((reason, index) => (
             <li key={`${reason}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground">
-              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" />
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success-foreground" />
               {reason}
             </li>
           ))}
@@ -900,7 +900,7 @@ function WatchlistLeadCard({ lead, onOpen }: { lead: SignalRunLead; onOpen: () =
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-xs font-medium text-amber-100">{tier}</span>
+            <span className="rounded-full border border-warning-border bg-warning-soft px-2.5 py-1 text-xs font-medium text-warning-foreground">{tier}</span>
             <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${websiteTone(presence)}`}>{formatOnlinePresence(presence)}</span>
           </div>
           <h3 className="mt-3 truncate font-medium text-foreground">{leadName(lead)}</h3>
@@ -996,7 +996,7 @@ function LeadDrawer({
             {formatOnlinePresence(presence)}
           </span>
           {(lead.lead_quality_status || lead.qualification_status) && <span className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground">{formatQualificationStatus(lead.lead_quality_status || lead.qualification_status)}</span>}
-          {lead.is_independent_likely && <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-200">Independent likely</span>}
+          {lead.is_independent_likely && <span className="rounded-full border border-success-border bg-success-soft px-2.5 py-1 text-xs font-medium text-success-foreground">Independent likely</span>}
         </div>
         <SheetTitle className="mt-3 text-2xl tracking-tight">{leadName(lead)}</SheetTitle>
         <SheetDescription className="mt-1">
@@ -1014,7 +1014,7 @@ function LeadDrawer({
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-100">{error}</div>
+          <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">{error}</div>
         )}
 
         {loading ? (
@@ -1323,7 +1323,7 @@ function ScoreBar({
       <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-foreground" style={{ width: `${Math.max(0, Math.min(100, (value / Math.max(1, max)) * 100))}%` }} /></div>
       {rationale && <p className="mt-2 text-xs leading-5 text-muted-foreground">{rationale}</p>}
       {evidence.length > 0 && <p className="mt-2 text-xs leading-5 text-foreground/85"><span className="mr-1 font-medium text-muted-foreground">Evidence:</span>{evidence.join(" · ")}</p>}
-      {unknowns.length > 0 && <p className="mt-1 text-xs leading-5 text-amber-100/80"><span className="mr-1 font-medium text-amber-200">Verify:</span>{unknowns.join(" · ")}</p>}
+      {unknowns.length > 0 && <p className="mt-1 text-xs leading-5 text-warning-foreground/80"><span className="mr-1 font-medium text-warning-foreground">Verify:</span>{unknowns.join(" · ")}</p>}
     </div>
   )
 }
@@ -1335,7 +1335,7 @@ function MiniText({ label, value }: { label: string; value: string | null }) {
 
 function BulletList({ items, title, tone = "default" }: { items: string[]; title?: string; tone?: "default" | "warning" }) {
   return (
-    <div>{title && <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</p>}<ul className="space-y-2">{items.map((item, index) => <li key={`${item}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${tone === "warning" ? "bg-amber-300" : "bg-foreground"}`} />{item}</li>)}</ul></div>
+    <div>{title && <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</p>}<ul className="space-y-2">{items.map((item, index) => <li key={`${item}-${index}`} className="flex gap-2 text-sm leading-5 text-muted-foreground"><span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${tone === "warning" ? "bg-warning" : "bg-foreground"}`} />{item}</li>)}</ul></div>
   )
 }
 

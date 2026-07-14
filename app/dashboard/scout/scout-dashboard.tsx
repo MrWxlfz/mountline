@@ -50,10 +50,10 @@ const statusLabels: Record<ScoutOutreachStatus, string> = {
 
 const statusStyles: Record<ScoutOutreachStatus, string> = {
   not_contacted: "bg-muted text-muted-foreground border-border",
-  reviewed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  contacted: "bg-green-500/10 text-green-400 border-green-500/20",
-  not_fit: "bg-red-500/10 text-red-400 border-red-500/20",
-  lead_created: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  reviewed: "bg-information-soft text-information-foreground border-information-border",
+  contacted: "bg-success-soft text-success-foreground border-success-border",
+  not_fit: "bg-error-soft text-error-foreground border-error-border",
+  lead_created: "bg-information-soft text-information-foreground border-information-border",
 }
 
 function normalizeArray(value: unknown) {
@@ -71,10 +71,10 @@ function formatDate(value: string | null) {
 
 function scoreClass(score: number | null) {
   if (score === null) return "text-muted-foreground"
-  if (score >= 85) return "text-green-400"
-  if (score >= 65) return "text-blue-400"
-  if (score >= 40) return "text-yellow-400"
-  return "text-red-400"
+  if (score >= 85) return "text-success-foreground"
+  if (score >= 65) return "text-information-foreground"
+  if (score >= 40) return "text-warning-foreground"
+  return "text-error-foreground"
 }
 
 export function ScoutDashboard({
@@ -254,8 +254,8 @@ export function ScoutDashboard({
           className={cn(
             "rounded-lg border px-3 py-2 text-sm",
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300",
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground",
           )}
         >
           {error || message}
@@ -474,7 +474,7 @@ function ProspectRow({
             </p>
           )}
           {redFlags.length > 0 && (
-            <p className="mt-1 text-xs text-red-300">{redFlags[0]}</p>
+            <p className="mt-1 text-xs text-error-foreground">{redFlags[0]}</p>
           )}
         </div>
       </td>

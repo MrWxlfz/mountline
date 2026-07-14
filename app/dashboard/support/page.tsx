@@ -67,7 +67,7 @@ export default async function SupportInboxPage() {
       <PageHeader eyebrow="Support" title="Support inbox" subtitle="Open client messages from assigned project portals. Reading this inbox never creates a support thread." />
 
       {error ? (
-        <div className="rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-400">
+        <div className="rounded-xl border border-error-border bg-error-soft p-4 text-sm text-error-foreground">
           Support threads could not be loaded: {error.message}
         </div>
       ) : threads && threads.length > 0 ? (

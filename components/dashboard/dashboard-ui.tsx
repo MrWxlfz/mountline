@@ -122,7 +122,7 @@ export function SecondaryAction({
   const className = cn(
     "inline-flex h-10 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
     tone === "danger"
-      ? "border-red-500/30 text-red-300 hover:bg-red-500/10"
+      ? "border-error-border text-error-foreground hover:bg-error-soft"
       : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
   )
 
@@ -165,10 +165,10 @@ export function MetricStrip({
             <p
               className={cn(
                 "mt-1 font-mono text-2xl font-semibold",
-                item.tone === "blue" && "text-blue-300",
-                item.tone === "green" && "text-green-300",
-                item.tone === "amber" && "text-yellow-200",
-                item.tone === "red" && "text-red-300",
+                item.tone === "blue" && "text-information-foreground",
+                item.tone === "green" && "text-success-foreground",
+                item.tone === "amber" && "text-warning-foreground",
+                item.tone === "red" && "text-error-foreground",
               )}
             >
               {item.value}
@@ -205,10 +205,10 @@ export function StateNotice({
     <div className={cn(
       "rounded-lg border px-4 py-3 text-sm",
       tone === "default" && "border-border bg-muted/20",
-      tone === "info" && "border-blue-500/25 bg-blue-500/10 text-blue-100",
-      tone === "success" && "border-green-500/25 bg-green-500/10 text-green-100",
-      tone === "warning" && "border-yellow-500/25 bg-yellow-500/10 text-yellow-100",
-      tone === "error" && "border-red-500/25 bg-red-500/10 text-red-200",
+      tone === "info" && "border-information-border bg-information-soft text-information-foreground",
+      tone === "success" && "border-success-border bg-success-soft text-success-foreground",
+      tone === "warning" && "border-warning-border bg-warning-soft text-warning-foreground",
+      tone === "error" && "border-error-border bg-error-soft text-error-foreground",
     )}>
       <p className="font-medium text-current">{title}</p>
       {children && <div className="mt-1 leading-5 opacity-75">{children}</div>}
@@ -255,10 +255,10 @@ export function StatusBadge({
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
         tone === "default" && "border-border bg-muted text-muted-foreground",
-        tone === "blue" && "border-blue-500/30 bg-blue-500/10 text-blue-300",
-        tone === "green" && "border-green-500/30 bg-green-500/10 text-green-300",
-        tone === "amber" && "border-yellow-500/30 bg-yellow-500/10 text-yellow-200",
-        tone === "red" && "border-red-500/30 bg-red-500/10 text-red-300",
+        tone === "blue" && "border-information-border bg-information-soft text-information-foreground",
+        tone === "green" && "border-success-border bg-success-soft text-success-foreground",
+        tone === "amber" && "border-warning-border bg-warning-soft text-warning-foreground",
+        tone === "red" && "border-error-border bg-error-soft text-error-foreground",
       )}
     >
       {children}

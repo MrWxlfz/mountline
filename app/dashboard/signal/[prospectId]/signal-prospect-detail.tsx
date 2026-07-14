@@ -7,19 +7,27 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  CalendarClock,
   Check,
   Clipboard,
+  Eye,
   ExternalLink,
   FileSearch,
   Loader2,
   Mail,
+  MessageCircleMore,
   MessageSquare,
   Phone,
+  Play,
   Plus,
   RefreshCw,
+  Send,
   ShieldAlert,
   Sparkles,
+  Smartphone,
+  Target,
 } from "lucide-react"
+import { toast } from "sonner"
 import {
   PageHeader,
   PrimaryAction,
@@ -74,6 +82,12 @@ function list(value: unknown) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
 }
 
+function record(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
+}
+
 function dateTime(value: string | null | undefined) {
   if (!value) return "Not recorded"
   return new Date(value).toLocaleString(undefined, {
@@ -96,7 +110,7 @@ function analysisStatusLabel(status: SignalProspect["analysis_status"]) {
   return status === "ready" ? "Analysis ready" : formatSignalLabel(status || "unknown")
 }
 
-function CopyButton({ value }: { value: string }) {
+function CopyButton({ value, label = "Copy" }: { value: string; label?: string }) {
   const [copied, setCopied] = useState(false)
   async function copy() {
     await navigator.clipboard.writeText(value)
@@ -106,20 +120,65 @@ function CopyButton({ value }: { value: string }) {
   return (
     <button type="button" onClick={copy} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
       {copied ? <Check className="h-3.5 w-3.5" /> : <Clipboard className="h-3.5 w-3.5" />}
-      {copied ? "Copied" : "Copy"}
+      {copied ? "Copied" : label}
     </button>
   )
 }
 
-function ScriptBlock({ label, value }: { label: string; value: string | null | undefined }) {
+function ScriptBlock({
+  label,
+  value,
+  variants,
+}: {
+  label: string
+  value: string | null | undefined
+  variants?: Record<string, string>
+}) {
+  const [activeVariant, setActiveVariant] = useState("original")
+  const [currentValue, setCurrentValue] = useState(value || "")
+  useEffect(() => {
+    setCurrentValue(value || "")
+    setActiveVariant("original")
+  }, [value])
   if (!value) return null
+  const controls = [
+    ["shorter", "Tighten"],
+    ["natural", "Make more natural"],
+    ["more_specific", "Make more specific"],
+    ["remove_jargon", "Remove jargon"],
+    ["higher_confidence", "Add confidence"],
+    ["low_pressure", "Reduce pressure"],
+  ] as const
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h3 className="text-sm font-medium text-foreground">{label}</h3>
-        <CopyButton value={value} />
+        <CopyButton value={currentValue} />
       </div>
-      <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{value}</p>
+      <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{currentValue}</p>
+      {variants && (
+        <div className="mt-4 flex flex-wrap gap-1.5 border-t border-border pt-3" aria-label={`${label} delivery controls`}>
+          {controls.map(([key, controlLabel]) => variants[key] && (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                setActiveVariant(key)
+                setCurrentValue(variants[key])
+              }}
+              className={cn(
+                "rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
+                activeVariant === key
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border text-muted-foreground hover:bg-hover hover:text-foreground",
+              )}
+            >
+              {controlLabel}
+            </button>
+          ))}
+          {activeVariant !== "original" && <button type="button" onClick={() => { setActiveVariant("original"); setCurrentValue(value) }} className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground">Reset</button>}
+        </div>
+      )}
     </div>
   )
 }
@@ -145,9 +204,12 @@ export function SignalLeadWorkspace({
 }) {
   const router = useRouter()
   const started = useRef(false)
+  const pipelineSection = useRef<HTMLDivElement>(null)
+  const dueDateInput = useRef<HTMLInputElement>(null)
   const [working, setWorking] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(prospect.analysis_error || null)
   const [stage, setStage] = useState<SignalPipelineStage>(prospect.pipeline_stage || "found")
+  const [activeTab, setActiveTab] = useState("summary")
   const [note, setNote] = useState("")
   const [eventSummary, setEventSummary] = useState("")
   const [eventChannel, setEventChannel] = useState("call")
@@ -171,6 +233,10 @@ export function SignalLeadWorkspace({
 
   const latestAnalysis = analyses[0] || null
   const latestDraft = drafts[0] || null
+  const latestStudio = record(latestDraft?.script_studio)
+  const studioVariants = Object.fromEntries(
+    Object.entries(record(latestStudio.variants)).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+  )
   const latestConcept = concepts[0] || null
   const groupedEvidence = useMemo(() => Object.fromEntries(
     evidenceOrder.map((category) => [category, evidence.filter((item) => item.evidence_category === category)]),
@@ -184,6 +250,7 @@ export function SignalLeadWorkspace({
       const response = await fetch(`/api/signal/prospects/${prospect.id}/analyze`, { method: "POST" })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Analysis could not complete.")
+      toast.success("Signal analysis complete.")
       router.refresh()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Analysis could not complete.")
@@ -212,6 +279,8 @@ export function SignalLeadWorkspace({
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Stage could not be updated.")
+      if (nextStage === "won") toast.success("Lead won — nice work.")
+      else if (nextStage === "contacted" && stage !== "contacted") toast.success("First contact recorded.")
       setStage(nextStage)
       router.refresh()
     } catch (caught) {
@@ -272,6 +341,7 @@ export function SignalLeadWorkspace({
       const response = await fetch(`/api/signal/prospects/${prospect.id}/deep-dive`, { method: "POST" })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Sales pack could not be prepared.")
+      toast.success("Sales pack ready for review.")
       router.refresh()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Sales pack could not be prepared.")
@@ -293,6 +363,7 @@ export function SignalLeadWorkspace({
       if (!response.ok) throw new Error(data.error || "Concept prompt could not be prepared.")
       setConceptInstructions("")
       setStage(data.pipeline_stage || stage)
+      toast.success("Concept prompt ready.")
       router.refresh()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Concept prompt could not be prepared.")
@@ -352,6 +423,17 @@ export function SignalLeadWorkspace({
   const statusInProgress = ["queued", "resolving", "researching", "analyzing"].includes(prospect.analysis_status || "ready")
   const mustVerify = list(prospect.must_verify)
   const doNotPitch = list(prospect.do_not_pitch)
+  const quickOpener = latestDraft?.owner_call_opener || null
+  const quickFollowUp = latestDraft?.follow_up_email || latestDraft?.demo_send_followup || null
+
+  function moveToPipeline() {
+    pipelineSection.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }
+
+  function scheduleFollowUp() {
+    moveToPipeline()
+    window.setTimeout(() => dueDateInput.current?.focus(), 350)
+  }
 
   return (
     <div className="space-y-6">
@@ -375,18 +457,42 @@ export function SignalLeadWorkspace({
         }
       />
 
+      <section className="rounded-lg border border-border bg-surface p-3" aria-label="Lead quick actions">
+        <div className="mb-2 flex items-center justify-between gap-3 px-1">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Quick actions</p>
+          <p className="hidden text-xs text-muted-foreground sm:block">Only available actions use stored contact data.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=focus`} icon={Target} label="Focus" />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=practice`} icon={MessageCircleMore} label="Practice" />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play} label="Teleprompter" />
+          {quickOpener ? <CopyButton value={quickOpener} label="Copy opener" /> : <QuickAction icon={Clipboard} label="Copy opener" disabled />}
+          {quickFollowUp ? <CopyButton value={quickFollowUp} label="Copy follow-up" /> : <QuickAction icon={Send} label="Copy follow-up" disabled />}
+          <QuickAction href={prospect.website_url || undefined} icon={ExternalLink} label="Website" disabled={!prospect.website_url} external />
+          <QuickAction href={prospect.public_phone ? `tel:${prospect.public_phone}` : undefined} icon={Phone} label="Call" disabled={!prospect.public_phone} />
+          <QuickAction href={prospect.public_phone ? `sms:${prospect.public_phone}` : undefined} icon={Smartphone} label="Text" disabled={!prospect.public_phone} />
+          <QuickAction href={prospect.public_email ? `mailto:${prospect.public_email}` : undefined} icon={Mail} label="Email" disabled={!prospect.public_email} />
+          <QuickAction onClick={() => setActiveTab("concept")} icon={Sparkles} label="Build concept" disabled={prospect.verdict === "skip"} />
+          <QuickAction onClick={() => setActiveTab("notes")} icon={Plus} label="Add observation" />
+          <QuickAction onClick={scheduleFollowUp} icon={CalendarClock} label="Schedule follow-up" />
+          <QuickAction onClick={() => updateStage("contacted")} icon={Check} label="Mark contacted" disabled={stage === "contacted" || working === "stage"} />
+          <QuickAction onClick={moveToPipeline} icon={Eye} label="Move stage" />
+        </div>
+      </section>
+
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <div className="flex items-start gap-2 rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
         </div>
       )}
       {statusInProgress && (
-        <div className="flex items-center gap-3 rounded-lg border border-blue-500/25 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">
+        <div className="flex items-center gap-3 rounded-lg border border-information-border bg-information-soft px-4 py-3 text-sm text-information-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <div><p className="font-medium">{analysisStatusLabel(prospect.analysis_status)}</p><p className="mt-0.5 text-blue-100/70">The record is already saved. This workspace can be reopened if the request is interrupted.</p></div>
+          <div><p className="font-medium">{analysisStatusLabel(prospect.analysis_status)}</p><p className="mt-0.5 text-information-foreground/70">The record is already saved. This workspace can be reopened if the request is interrupted.</p></div>
         </div>
       )}
 
+      <div ref={pipelineSection}>
       <SectionPanel title="Pipeline" description="Choose a stage explicitly. Every change is recorded in stage history.">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex flex-wrap gap-2" aria-label="Pipeline stages">
@@ -401,12 +507,13 @@ export function SignalLeadWorkspace({
         </div>
         <form onSubmit={saveNextAction} className="mt-4 grid gap-3 border-t border-border pt-4 lg:grid-cols-[1fr_180px_auto]">
           <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Next action</span><input value={nextActionDraft} onChange={(event) => setNextActionDraft(event.target.value)} maxLength={1000} placeholder="Specific manual next step" className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
-          <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Due date</span><input type="date" value={nextActionDue} onChange={(event) => setNextActionDue(event.target.value)} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
+          <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Due date</span><input ref={dueDateInput} type="date" value={nextActionDue} onChange={(event) => setNextActionDue(event.target.value)} className="h-10 w-full rounded-md border border-border bg-input-background px-3 text-sm outline-none focus:border-focus-ring" /></label>
           <PrimaryAction type="submit" disabled={working === "next-action"} icon={working === "next-action" ? Loader2 : Check}>Save next action</PrimaryAction>
         </form>
       </SectionPanel>
+      </div>
 
-      <Tabs defaultValue="summary" className="space-y-5">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
         <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1">
           {["summary", "research", "verdict", "concept", "sales", "outreach", "notes", "activity"].map((tab) => (
             <TabsTrigger key={tab} value={tab} className="shrink-0 capitalize">{tab}</TabsTrigger>
@@ -501,7 +608,7 @@ export function SignalLeadWorkspace({
               {mustVerify.length ? <ul className="space-y-2 text-sm text-muted-foreground">{mustVerify.map((item) => <li key={item} className="flex gap-2"><FileSearch className="mt-0.5 h-4 w-4 shrink-0" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No unresolved items were recorded.</p>}
             </SectionPanel>
             <SectionPanel title="Do not pitch" description="Claims or angles that would overstate the current evidence.">
-              {doNotPitch.length ? <ul className="space-y-2 text-sm text-muted-foreground">{doNotPitch.map((item) => <li key={item} className="flex gap-2"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-yellow-200" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No pitch guardrails recorded yet.</p>}
+              {doNotPitch.length ? <ul className="space-y-2 text-sm text-muted-foreground">{doNotPitch.map((item) => <li key={item} className="flex gap-2"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning-foreground" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No pitch guardrails recorded yet.</p>}
             </SectionPanel>
           </div>
         </TabsContent>
@@ -527,17 +634,27 @@ export function SignalLeadWorkspace({
         <TabsContent value="sales" className="space-y-5">
           <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
             <div><p className="font-medium text-foreground">Evidence-grounded sales pack</p><p className="mt-1 text-sm text-muted-foreground">Generate only after reviewing the verdict and Must verify list. Scripts never promise results.</p></div>
-            <PrimaryAction onClick={generateSalesPack} disabled={working === "sales" || prospect.verdict === "skip"} icon={working === "sales" ? Loader2 : Sparkles}>{latestDraft ? "Regenerate sales pack" : "Prepare sales pack"}</PrimaryAction>
+            <div className="flex flex-wrap gap-2">
+              {latestDraft && <SecondaryAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play}>Rehearse</SecondaryAction>}
+              <PrimaryAction onClick={generateSalesPack} disabled={working === "sales" || prospect.verdict === "skip"} icon={working === "sales" ? Loader2 : Sparkles}>{latestDraft ? "Regenerate sales pack" : "Prepare sales pack"}</PrimaryAction>
+            </div>
           </div>
           {latestDraft ? (
             <div className="grid gap-4 xl:grid-cols-2">
-              <ScriptBlock label="Call opener" value={latestDraft.owner_call_opener} />
+              <ScriptBlock label="Call opener" value={latestDraft.owner_call_opener} variants={studioVariants} />
+              <ScriptBlock label="Walk-in opener" value={typeof latestStudio.walk_in_opener === "string" ? latestStudio.walk_in_opener : null} variants={studioVariants} />
               <ScriptBlock label="Gatekeeper" value={latestDraft.gatekeeper_script} />
               <ScriptBlock label="Voicemail" value={latestDraft.voicemail_script} />
               <ScriptBlock label="First email" value={latestDraft.first_contact_email} />
               <ScriptBlock label="Social message" value={latestDraft.permission_based_dm} />
               <ScriptBlock label="Follow-up" value={latestDraft.follow_up_email || latestDraft.demo_send_followup} />
+              <ScriptBlock label="Value bridge · use after discovery" value={typeof latestStudio.value_bridge === "string" ? latestStudio.value_bridge : null} />
+              <ScriptBlock label="Concept reveal" value={typeof latestStudio.concept_reveal === "string" ? latestStudio.concept_reveal : null} />
+              <ScriptBlock label="Recommended close" value={typeof latestStudio.recommended_close === "string" ? latestStudio.recommended_close : null} />
+              <ScriptBlock label="Fallback close" value={typeof latestStudio.fallback_close === "string" ? latestStudio.fallback_close : null} />
+              <ScriptBlock label="Graceful exit" value={typeof latestStudio.graceful_exit === "string" ? latestStudio.graceful_exit : null} />
               <ScriptBlock label="Proposal angle" value={latestDraft.proposal_angle} />
+              {list(latestStudio.delivery_notes).length > 0 && <div className="rounded-lg border border-border bg-muted/20 p-4"><h3 className="text-sm font-medium text-foreground">Delivery notes</h3><ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">{list(latestStudio.delivery_notes).map((item) => <li key={item} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />{item}</li>)}</ul></div>}
             </div>
           ) : <SectionPanel><p className="text-sm text-muted-foreground">No sales pack has been prepared. Review evidence first, then generate a draft for manual approval.</p></SectionPanel>}
         </TabsContent>
@@ -577,4 +694,29 @@ export function SignalLeadWorkspace({
       </Tabs>
     </div>
   )
+}
+
+function QuickAction({
+  disabled = false,
+  external = false,
+  href,
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  disabled?: boolean
+  external?: boolean
+  href?: string
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  onClick?: () => void
+}) {
+  const className = cn(
+    "inline-flex h-9 items-center gap-2 rounded-md border border-border bg-surface px-3 text-xs font-medium text-foreground-subtle transition-colors",
+    disabled ? "cursor-not-allowed opacity-40" : "hover:bg-hover hover:text-foreground",
+  )
+  if (href && !disabled) {
+    return <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className={className}><Icon className="h-3.5 w-3.5" />{label}</a>
+  }
+  return <button type="button" disabled={disabled} onClick={onClick} className={className}><Icon className="h-3.5 w-3.5" />{label}</button>
 }

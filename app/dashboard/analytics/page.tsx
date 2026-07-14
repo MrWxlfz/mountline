@@ -36,7 +36,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
     <div className="space-y-7">
       <PageHeader eyebrow="Analytics" title="Operating metrics" subtitle="Counts come from persisted Signal, outreach, client, and project records. No estimated trends or implied outcomes." meta={<StatusBadge>{windowLabel}</StatusBadge>} />
       <div className="flex flex-wrap gap-2">{Object.keys(windows).map((value) => <Link key={value} href={`/dashboard/analytics?window=${value}`} className={`rounded-md border px-3 py-2 text-xs font-medium ${selected === value ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"}`}>{value === "all" ? "All time" : `${value} days`}</Link>)}</div>
-      {(prospectError || eventError) && <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">Some metrics could not be loaded: {(prospectError || eventError)?.message}</div>}
+      {(prospectError || eventError) && <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">Some metrics could not be loaded: {(prospectError || eventError)?.message}</div>}
       <MetricStrip items={[
         { href: "/dashboard/leads", label: `Signal leads · ${windowLabel}`, value: rows.length },
         { href: "/dashboard/signal", label: `Analyses completed · ${windowLabel}`, value: analyzed, tone: "blue" },

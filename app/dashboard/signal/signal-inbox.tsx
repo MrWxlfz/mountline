@@ -197,7 +197,7 @@ export function SignalInbox({
             </button>
           )}
           {error && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <div className="flex items-start gap-2 rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -226,7 +226,7 @@ export function SignalInbox({
         description="Operational leads from focused analysis. Scout suggestions only appear here after Analyze in Signal is chosen."
       >
         {storageError && (
-          <div className="mb-4 rounded-lg border border-yellow-500/25 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-100">
+          <div className="mb-4 rounded-lg border border-warning-border bg-warning-soft px-3 py-2 text-sm text-warning-foreground">
             Signal storage is not ready: {storageError}
           </div>
         )}

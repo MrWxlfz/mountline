@@ -65,7 +65,7 @@ export function PipelineBoard({ initialProspects, storageError }: { initialProsp
         <label className="relative block w-full sm:max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><span className="sr-only">Search pipeline</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search pipeline" className="h-10 w-full rounded-md border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-foreground/30" /></label>
         <p className="text-sm text-muted-foreground">{prospects.length} operational lead{prospects.length === 1 ? "" : "s"}</p>
       </div>
-      {error && <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</div>}
+      {error && <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">{error}</div>}
       {prospects.length ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {stages.map((stage) => (

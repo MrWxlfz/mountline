@@ -59,14 +59,15 @@ export type SignalScriptQuality = {
   score: number
   dimensions: {
     specificity: number
-    naturalness: number
     evidenceGrounding: number
+    naturalness: number
+    confidence: number
     concision: number
-    usefulness: number
+    stageAwareness: number
     voiceMatch: number
     objectionRelevance: number
-    offerFit: number
-    claimSafety: number
+    nextStepClarity: number
+    ethicalSafety: number
   }
   issues: string[]
 }
@@ -75,12 +76,18 @@ export function evaluateSignalSalesPackQuality(input: {
   pack: unknown
   businessName: string
   verifiedFacts: string[]
+  pipelineStage?: string
+  contactHistory?: string[]
+  explicitlyDeclined?: boolean
+  promisedNextStep?: string | null
 }) : SignalScriptQuality {
   const pack = asRecord(input.pack)
   const visibleKeys = [
     "one_minute_briefing", "best_angle", "walk_in_opener", "busy_response", "concept_transition",
     "discovery_questions", "price_transition", "call_script", "follow_up_text", "objections",
-    "do_not_say", "next_steps", "lovable_prompt",
+    "do_not_say", "next_steps", "lovable_prompt", "objective", "value_bridge",
+    "concept_reveal", "recommended_close", "fallback_close", "graceful_exit",
+    "delivery_notes", "variants",
   ]
   const allText = visibleKeys.map((key) => text(pack[key])).join(" ")
   const normalizedText = allText.toLowerCase()
@@ -103,10 +110,18 @@ export function evaluateSignalSalesPackQuality(input: {
     issues.push("The pack repeats a paragraph.")
   }
 
+  let confidence = 92
+  const hedges = allText.match(/\b(?:maybe|perhaps|kind of|sort of|i guess|hopefully)\b/gi)?.length || 0
+  confidence -= Math.min(36, hedges * 7)
+  if (/\b(?:crush it|game[- ]changer|dominate|no[- ]brainer|close them)\b/i.test(allText)) {
+    confidence -= 30
+    issues.push("The pack uses performative or sales-bro confidence language.")
+  }
+
   const evidenceGrounding = clamp(30 + Math.min(55, groundedTokens.length * 18) + (namedSections >= 3 ? 15 : 0))
   const limits: Array<[string, number]> = [
-    ["one_minute_briefing", 150], ["walk_in_opener", 70], ["busy_response", 30],
-    ["concept_transition", 35], ["call_script", 120], ["follow_up_text", 60],
+    ["one_minute_briefing", 150], ["walk_in_opener", 55], ["busy_response", 30],
+    ["concept_transition", 35], ["call_script", 110], ["follow_up_text", 55],
   ]
   let concision = 100
   for (const [key, limit] of limits) {
@@ -121,9 +136,25 @@ export function evaluateSignalSalesPackQuality(input: {
     "discovery_questions", "price_transition", "call_script", "follow_up_text", "objections",
     "do_not_say", "next_steps", "lovable_prompt",
   ]
-  const present = requiredSections.filter((key) => text(pack[key]).trim()).length
-  const usefulness = clamp(present / requiredSections.length * 100)
   for (const key of requiredSections) if (!text(pack[key]).trim()) issues.push(`Missing required sales-pack section: ${key}.`)
+
+  const stage = input.pipelineStage || "found"
+  const opener = text(pack.walk_in_opener)
+  const laterStage = ["contacted", "interested", "proposal", "won", "lost"].includes(stage)
+  let stageAwareness = 94
+  if (laterStage && /\b(?:came across|first time|are you the owner|cold call|reaching out for the first time)\b/i.test(opener)) {
+    stageAwareness -= 55
+    issues.push("The opener resets a lead that already has contact history to a cold introduction.")
+  }
+  if (input.promisedNextStep && !normalizedText.includes(input.promisedNextStep.toLowerCase().split(/\s+/).slice(0, 4).join(" "))) {
+    stageAwareness -= 16
+    issues.push("The pack does not reference the recorded promised next step.")
+  }
+  if ((input.explicitlyDeclined || stage === "lost") && !/\b(?:thank|leave it there|respect|no further follow|won't keep|will not keep)\b/i.test(text(pack.graceful_exit) || allText)) {
+    stageAwareness -= 55
+    issues.push("A declined lead does not have a clear respectful exit.")
+  }
+  if ((input.contactHistory?.length || 0) > 0 && !laterStage && stage === "found") stageAwareness -= 12
 
   let voiceMatch = 100
   if (/\b(?:i|i'm|i’m|my|me)\b/i.test(`${text(pack.walk_in_opener)} ${text(pack.call_script)} ${text(pack.follow_up_text)}`)) {
@@ -138,44 +169,61 @@ export function evaluateSignalSalesPackQuality(input: {
   const objections = Array.isArray(pack.objections) ? pack.objections : []
   let objectionRelevance = objections.length === 4 ? 90 : 45
   for (const objection of objections) {
-    const responseWords = wordCount(asRecord(objection).response)
-    if (responseWords < 20 || responseWords > 60) {
+    const objectionRecord = asRecord(objection)
+    const responseWords = wordCount(objectionRecord.response)
+    if (responseWords < 18 || responseWords > 55) {
       objectionRelevance -= 12
-      issues.push("An objection response falls outside the 20–60 word limit.")
+      issues.push("An objection response falls outside the 18–55 word limit.")
     }
+    if (objectionRecord.acknowledge && objectionRecord.clarify && objectionRecord.reframe && objectionRecord.next_step) objectionRelevance += 2
+    if (typeof objectionRecord.loop_limit === "number" && objectionRecord.loop_limit > 2) objectionRelevance -= 25
   }
-  const offerFit = text(pack.price_transition) && text(pack.best_angle) && text(pack.next_steps) ? 90 : 45
-  let claimSafety = 100
+  const nextStepText = `${text(pack.next_steps)} ${text(pack.recommended_close)} ${text(pack.fallback_close)} ${text(pack.follow_up_text)}`
+  let nextStepClarity = 45
+  if (/\b(?:show|send|schedule|review|confirm|call|check back|follow up|number|email|proposal|agreement)\b/i.test(nextStepText)) nextStepClarity += 30
+  if (/\b(?:today|tomorrow|monday|tuesday|wednesday|thursday|friday|next week|specific time|best number|best email)\b/i.test(nextStepText)) nextStepClarity += 18
+  if (/\b(?:pay now|deposit today|sign today)\b/i.test(nextStepText) && !["proposal", "interested"].includes(stage)) {
+    nextStepClarity -= 35
+    issues.push("The close asks for a high-readiness commitment without recorded buying intent.")
+  }
+
+  let ethicalSafety = 100
   if (/\b(?:guarantee|guaranteed|increase (?:your )?revenue|will (?:bring|drive|get) (?:you )?(?:more )?(?:sales|customers|leads)|double your)\b/i.test(allText)) {
-    claimSafety -= 60
+    ethicalSafety -= 60
     issues.push("The pack contains an unsupported outcome claim.")
   }
+  if (/\b(?:act now|limited spots|before it is too late|you are losing money|fear of missing|pressure them|won't take no)\b/i.test(allText)) {
+    ethicalSafety -= 55
+    issues.push("The pack contains pressure, fake urgency, or manufactured fear language.")
+  }
   if (/\b[a-z]+_[a-z]+\b/.test(allText)) {
-    claimSafety -= 30
+    ethicalSafety -= 30
     issues.push("A raw internal enum appears in the sales pack.")
   }
 
   const dimensions = {
     specificity,
-    naturalness: clamp(naturalness),
     evidenceGrounding,
+    naturalness: clamp(naturalness),
+    confidence: clamp(confidence),
     concision: clamp(concision),
-    usefulness,
+    stageAwareness: clamp(stageAwareness),
     voiceMatch: clamp(voiceMatch),
     objectionRelevance: clamp(objectionRelevance),
-    offerFit,
-    claimSafety: clamp(claimSafety),
+    nextStepClarity: clamp(nextStepClarity),
+    ethicalSafety: clamp(ethicalSafety),
   }
   const score = clamp(
-    dimensions.specificity * 0.16
+    dimensions.specificity * 0.13
+    + dimensions.evidenceGrounding * 0.14
     + dimensions.naturalness * 0.11
-    + dimensions.evidenceGrounding * 0.16
-    + dimensions.concision * 0.1
-    + dimensions.usefulness * 0.12
-    + dimensions.voiceMatch * 0.11
+    + dimensions.confidence * 0.08
+    + dimensions.concision * 0.09
+    + dimensions.stageAwareness * 0.12
     + dimensions.objectionRelevance * 0.08
-    + dimensions.offerFit * 0.07
-    + dimensions.claimSafety * 0.09,
+    + dimensions.nextStepClarity * 0.09
+    + dimensions.voiceMatch * 0.07
+    + dimensions.ethicalSafety * 0.09,
   )
   return { score, dimensions, issues: Array.from(new Set(issues)) }
 }
@@ -184,6 +232,10 @@ export function validateSignalSalesPackGrounding(input: {
   pack: unknown
   businessName: string
   verifiedFacts: string[]
+  pipelineStage?: string
+  contactHistory?: string[]
+  explicitlyDeclined?: boolean
+  promisedNextStep?: string | null
 }) {
   const pack = asRecord(input.pack)
   const issues: string[] = []
@@ -211,7 +263,7 @@ export function validateSignalSalesPackGrounding(input: {
 
   const quality = evaluateSignalSalesPackQuality(input)
   issues.push(...quality.issues)
-  if (quality.score < 76) issues.push(`Script quality ${quality.score}/100 is below the persistence threshold.`)
+  if (quality.score < 78) issues.push(`Script quality ${quality.score}/100 is below the persistence threshold.`)
   return { valid: issues.length === 0, issues: Array.from(new Set(issues)), quality }
 }
 
@@ -220,15 +272,19 @@ export function selectSignalSalesPack(input: {
   aiPack: JsonRecord | null
   businessName: string
   verifiedFacts: string[]
+  pipelineStage?: string
+  contactHistory?: string[]
+  explicitlyDeclined?: boolean
+  promisedNextStep?: string | null
 }) {
   if (!input.aiPack) {
     const pack = { ...input.fallback, generated_by: "deterministic_fallback" }
-    return { pack, generatedBy: "deterministic_fallback" as const, issues: ["AI pack unavailable."], quality: evaluateSignalSalesPackQuality({ pack, businessName: input.businessName, verifiedFacts: input.verifiedFacts }) }
+    return { pack, generatedBy: "deterministic_fallback" as const, issues: ["AI pack unavailable."], quality: evaluateSignalSalesPackQuality({ ...input, pack }) }
   }
-  const grounding = validateSignalSalesPackGrounding({ pack: input.aiPack, businessName: input.businessName, verifiedFacts: input.verifiedFacts })
+  const grounding = validateSignalSalesPackGrounding({ ...input, pack: input.aiPack })
   if (!grounding.valid) {
     const pack = { ...input.fallback, generated_by: "deterministic_fallback" }
-    return { pack, generatedBy: "deterministic_fallback" as const, issues: grounding.issues, quality: evaluateSignalSalesPackQuality({ pack, businessName: input.businessName, verifiedFacts: input.verifiedFacts }) }
+    return { pack, generatedBy: "deterministic_fallback" as const, issues: grounding.issues, quality: evaluateSignalSalesPackQuality({ ...input, pack }) }
   }
   return { pack: { ...input.aiPack, generated_by: "ai" }, generatedBy: "ai" as const, issues: [], quality: grounding.quality }
 }

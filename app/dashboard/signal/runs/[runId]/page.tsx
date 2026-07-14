@@ -28,7 +28,7 @@ export default async function SignalRunPage({
   } catch (error) {
     console.error("[signal] Run detail page failed:", error)
     return (
-      <section className="rounded-lg border border-red-500/30 bg-red-500/5 p-6">
+      <section className="rounded-lg border border-error-border bg-error-soft p-6">
         <p className="text-sm font-medium text-foreground">Signal could not load this lead run.</p>
         <p className="mt-2 text-sm text-muted-foreground">
           Confirm the Signal lead-run migration has been applied, then try again.

@@ -148,7 +148,7 @@ export default async function SignalCampaignsPage() {
                   <MiniStat label="Confirm" value={needsConfirmation} />
                 </div>
                 <div className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success-foreground" />
                   <p>{campaign.next_action || `Last run ${formatDate(campaign.last_run_at)}`}</p>
                 </div>
               </Link>

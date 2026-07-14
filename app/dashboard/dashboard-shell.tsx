@@ -28,6 +28,11 @@ import {
 import { cn } from "@/lib/utils"
 import { NorthlineLogo } from "@/components/northline-logo"
 import { Skeleton } from "@/components/ui/skeleton"
+import { AppearanceSelector } from "@/components/dashboard/appearance-selector"
+import {
+  DashboardCommandPalette,
+  type CommandLead,
+} from "@/components/dashboard/dashboard-command-palette"
 
 const navGroups = [
   {
@@ -64,10 +69,12 @@ const bottomNav = [
 
 export function DashboardShell({
   children,
+  commandLeads = [],
   supportOpenCount = 0,
   signalUnreadCount = 0,
 }: {
   children: React.ReactNode
+  commandLeads?: CommandLead[]
   supportOpenCount?: number
   signalUnreadCount?: number
 }) {
@@ -109,7 +116,7 @@ export function DashboardShell({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-overlay backdrop-blur-sm lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -176,8 +183,8 @@ export function DashboardShell({
                           className={cn(
                             "ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
                             isActive(item.href)
-                              ? "bg-blue-500/15 text-blue-300"
-                              : "bg-blue-500/15 text-blue-400",
+                              ? "bg-information-soft text-information-foreground"
+                              : "bg-information-soft text-information-foreground",
                             collapsed && "lg:absolute lg:right-1 lg:top-1 lg:ml-0 lg:px-1",
                           )}
                         >
@@ -189,8 +196,8 @@ export function DashboardShell({
                           className={cn(
                             "ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
                             isActive(item.href)
-                              ? "bg-blue-500/15 text-blue-300"
-                              : "bg-blue-500/15 text-blue-400",
+                              ? "bg-information-soft text-information-foreground"
+                              : "bg-information-soft text-information-foreground",
                             collapsed && "lg:absolute lg:right-1 lg:top-1 lg:ml-0 lg:px-1",
                           )}
                         >
@@ -266,7 +273,11 @@ export function DashboardShell({
               Mountline OS <span className="px-1 opacity-40">/</span> {pathname === "/dashboard" ? "Overview" : pathname.split("/").filter(Boolean).slice(1).map((part) => part.replace(/-/g, " ")).join(" / ")}
             </p>
           </div>
-          <Link href="/dashboard/signal" className="mr-3 hidden h-8 items-center rounded-md bg-foreground px-3 text-xs font-medium text-background hover:bg-foreground/90 sm:inline-flex">
+          <div className="mr-2 flex items-center gap-2">
+            <DashboardCommandPalette leads={commandLeads} />
+            <AppearanceSelector compact className="hidden lg:inline-grid" />
+          </div>
+          <Link href="/dashboard/signal/new" className="mr-3 hidden h-8 items-center rounded-md bg-foreground px-3 text-xs font-medium text-background hover:bg-foreground/90 sm:inline-flex">
             Analyze business
           </Link>
           <Link

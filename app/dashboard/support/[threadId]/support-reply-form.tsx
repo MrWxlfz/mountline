@@ -54,16 +54,16 @@ export function SupportReplyForm({ threadId }: { threadId: string }) {
             }
           }}
           rows={4}
-          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-focus-ring"
           placeholder="Write a reply to the client..."
         />
       </label>
 
       {state === "error" && error && (
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-sm text-error-foreground">{error}</p>
       )}
       {state === "sent" && (
-        <p className="flex items-center gap-2 text-sm text-green-400">
+        <p className="flex items-center gap-2 text-sm text-success-foreground">
           <Check className="h-4 w-4" />
           Reply sent.
         </p>

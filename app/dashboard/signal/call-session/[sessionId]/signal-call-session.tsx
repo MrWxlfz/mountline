@@ -156,8 +156,8 @@ export function SignalCallSessionView({
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground"
           }`}
         >
           {error || message}
@@ -298,7 +298,7 @@ export function SignalCallSessionView({
                       {working === `${row.item.id}:${outcome}` ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : outcome === row.item.outcome ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-400" />
+                        <CheckCircle2 className="h-4 w-4 text-success-foreground" />
                       ) : (
                         <PhoneCall className="h-4 w-4" />
                       )}
@@ -325,7 +325,7 @@ function Badge({ label }: { label: string }) {
 
 function Warning({ text }: { text: string }) {
   return (
-    <div className="flex gap-2 rounded-lg border border-yellow-500/25 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+    <div className="flex gap-2 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm text-warning-foreground">
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
       <p>{text}</p>
     </div>

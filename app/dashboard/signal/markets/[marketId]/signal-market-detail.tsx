@@ -534,8 +534,8 @@ export function SignalMarketDetail({
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground"
           }`}
         >
           {error || message}
@@ -551,7 +551,7 @@ export function SignalMarketDetail({
                 <span className="text-muted-foreground">{progress.percent}%</span>
               </div>
               <div className="mt-2 h-2 rounded-full bg-muted">
-                <div className="h-full rounded-full bg-blue-400 transition-all" style={{ width: `${Math.min(progress.percent, 100)}%` }} />
+                <div className="h-full rounded-full bg-information transition-all" style={{ width: `${Math.min(progress.percent, 100)}%` }} />
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <span>{progress.total ? `${progress.current} of ${progress.total}` : "Waiting for persisted progress"}</span>
@@ -925,7 +925,7 @@ function ProspectCard({
             <DropdownMenuItem onSelect={onConfirmSite}>Confirm official site</DropdownMenuItem>
             <DropdownMenuItem onSelect={onCorrectCategory}>Correct category</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onReject} className="text-red-300">
+            <DropdownMenuItem onSelect={onReject} className="text-error-foreground">
               <XCircle className="h-4 w-4" />Reject
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -938,10 +938,10 @@ function ProspectCard({
 function MiniScore({ label, tone, value }: { label: string; tone: "blue" | "green" | "amber"; value: number | null }) {
   const toneClass =
     tone === "blue"
-      ? "text-blue-300"
+      ? "text-information-foreground"
       : tone === "green"
-        ? "text-green-300"
-        : "text-yellow-200"
+        ? "text-success-foreground"
+        : "text-warning-foreground"
   return (
     <div className="rounded-md border border-border bg-muted/20 px-3 py-2">
       <span className="block text-xs text-muted-foreground">{label}</span>
@@ -1023,7 +1023,7 @@ function CompactCandidateRow({
       <span className="font-mono text-xs text-muted-foreground">{candidate.website_opportunity_score ?? "-"}</span>
       <div className="flex gap-2">
         <button type="button" onClick={onOpenEvidence} className="text-xs text-muted-foreground hover:text-foreground">Evidence</button>
-        <button type="button" onClick={onApprove} className="text-xs text-blue-300 hover:text-blue-200">Approve</button>
+        <button type="button" onClick={onApprove} className="text-xs text-information-foreground hover:text-information-foreground">Approve</button>
       </div>
     </div>
   )
@@ -1187,7 +1187,7 @@ function RawCandidateTable({
                       <DropdownMenuItem onSelect={() => onRejectMarket(candidate)}>
                         <XCircle className="h-4 w-4" />Reject this market
                       </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => onRejectPermanent(candidate)} className="text-red-300">
+                      <DropdownMenuItem onSelect={() => onRejectPermanent(candidate)} className="text-error-foreground">
                         <XCircle className="h-4 w-4" />Reject permanently
                       </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => onRestore(candidate)}>Restore</DropdownMenuItem>

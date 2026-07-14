@@ -119,7 +119,7 @@ export default async function SupportThreadPage({
                         ? "border-foreground/20 bg-foreground text-background"
                         : isSystem
                           ? "border-border bg-muted/50"
-                          : "border-blue-500/25 bg-blue-500/10"
+                          : "border-information-border bg-information-soft"
                     }`}
                   >
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-3">

@@ -471,8 +471,8 @@ export function SignalDashboard({
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             error
-              ? "border-red-500/25 bg-red-500/10 text-red-300"
-              : "border-green-500/25 bg-green-500/10 text-green-300"
+              ? "border-error-border bg-error-soft text-error-foreground"
+              : "border-success-border bg-success-soft text-success-foreground"
           }`}
         >
           {error || message}
@@ -573,7 +573,7 @@ export function SignalDashboard({
                     <StatusBadge>{formatSignalLabel(market.status)}</StatusBadge>
                   </div>
                   <div className="mt-4 h-1.5 rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-blue-400" style={{ width: `${Math.min(progress, 100)}%` }} />
+                    <div className="h-full rounded-full bg-information" style={{ width: `${Math.min(progress, 100)}%` }} />
                   </div>
                   <div className="mt-3 grid grid-cols-4 gap-2 text-xs text-muted-foreground">
                     <MiniStat label="Discovered" value={market.candidates.length} />
@@ -716,7 +716,7 @@ export function SignalDashboard({
               <SlidersHorizontal className="h-4 w-4" />
               Filters
               {activeFilters.length > 0 && (
-                <span className="rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[10px] text-blue-300">
+                <span className="rounded-full bg-information-soft px-1.5 py-0.5 text-[10px] text-information-foreground">
                   {activeFilters.length}
                 </span>
               )}
@@ -932,8 +932,8 @@ function SignalRow({
         <div className="max-w-[240px]">
           <div className="flex items-center gap-2">
             <p className="font-medium text-foreground">{row.business_name}</p>
-            {row.unread_alert && <AlertTriangle className="h-4 w-4 text-green-400" />}
-            {row.compliance_tier === "compliance_gated" && <AlertTriangle className="h-4 w-4 text-yellow-400" />}
+            {row.unread_alert && <AlertTriangle className="h-4 w-4 text-success-foreground" />}
+            {row.compliance_tier === "compliance_gated" && <AlertTriangle className="h-4 w-4 text-warning-foreground" />}
           </div>
           {row.website_url && (
             <a

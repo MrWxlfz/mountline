@@ -20,6 +20,7 @@ import {
   Mail,
 } from "lucide-react"
 import { MountlineLogo } from "@/components/mountline-logo"
+import { AppearanceSelector } from "@/components/dashboard/appearance-selector"
 
 type MountlineIdFormProps = {
   redirectUrl: string
@@ -45,9 +46,12 @@ const oauthLabels: Record<string, string> = {
 
 export function MountlineIdForm({ redirectUrl, useCustomFlow }: MountlineIdFormProps) {
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-black text-white">
+    <div className="mountline-id relative min-h-dvh overflow-hidden bg-black text-white">
       <AuthBackground />
       <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6 lg:right-8">
+          <AppearanceSelector compact syncServer={false} />
+        </div>
         <div className="grid flex-1 items-center gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
           <AuthIntro />
           <section className="motion-safe:animate-scale-in w-full max-w-[440px] justify-self-center lg:justify-self-end">
@@ -74,13 +78,13 @@ export function MountlineIdForm({ redirectUrl, useCustomFlow }: MountlineIdFormP
 function AuthBackground() {
   return (
     <>
-      <div className="absolute inset-0 bg-black" />
+      <div className="absolute inset-0 bg-background" />
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-[0.17]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px)",
+            "linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)",
           backgroundSize: "42px 42px",
           maskImage: "radial-gradient(circle at 52% 38%, black 0%, transparent 72%)",
         }}
@@ -95,7 +99,7 @@ function AuthBackground() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_48%,rgba(0,0,0,0.72)_100%)]"
+        className="auth-vignette pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_48%,rgba(0,0,0,0.72)_100%)]"
       />
       <div
         aria-hidden="true"
@@ -112,8 +116,7 @@ function AuthIntro() {
         <MountlineLogo
           size="lg"
           showWordmark
-          inverted
-          className="text-white [&_path]:!stroke-white [&_path:first-child]:!fill-white/10 [&_span]:!text-white"
+          className="text-foreground"
         />
       </div>
 
@@ -547,12 +550,8 @@ function StableClerkSignIn({ redirectUrl }: { redirectUrl: string }) {
           variables: {
             borderRadius: "8px",
             colorBackground: "transparent",
-            colorDanger: "#fb7185",
-            colorInputBackground: "rgba(9,9,11,0.62)",
-            colorInputText: "#fafafa",
-            colorPrimary: "#ffffff",
-            colorText: "#f5f5f5",
-            colorTextSecondary: "#a1a1aa",
+            colorDanger: "var(--error)",
+            colorPrimary: "var(--foreground)",
             fontFamily: "var(--font-sans), system-ui, sans-serif",
           },
           elements: {

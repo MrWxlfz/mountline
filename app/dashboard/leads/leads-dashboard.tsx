@@ -45,7 +45,7 @@ export function LeadsDashboard({ prospects, inquiries, storageError }: { prospec
   return (
     <div className="space-y-7">
       <PageHeader eyebrow="Leads" title="Lead records" subtitle="Signal prospects are the operational sales source of truth. Contact-form inquiries remain separate until qualified." actions={<PrimaryAction href="/dashboard/signal" icon={ArrowRight}>Analyze business</PrimaryAction>} />
-      {storageError && <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-300">Lead data could not be loaded: {storageError}</div>}
+      {storageError && <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">Lead data could not be loaded: {storageError}</div>}
       <SectionPanel title="Operational leads" description="Focused Signal records with verdict, pipeline stage, and next action.">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row">
           <label className="relative block flex-1 sm:max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><span className="sr-only">Search operational leads</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search business, city, or opportunity" className="h-10 w-full rounded-md border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-foreground/30" /></label>
@@ -59,4 +59,3 @@ export function LeadsDashboard({ prospects, inquiries, storageError }: { prospec
     </div>
   )
 }
-

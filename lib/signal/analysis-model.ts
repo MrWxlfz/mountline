@@ -4,129 +4,16 @@ import type {
   SignalLevel,
   SignalVerdict,
 } from "@/lib/supabase/types"
+import {
+  parseSignalBusinessInput,
+  type ParsedSignalBusinessInput,
+  type SignalInputOverrides,
+} from "./input-parser.ts"
 
-const SOCIAL_HOSTS = [
-  "facebook.com",
-  "instagram.com",
-  "tiktok.com",
-  "linkedin.com",
-  "x.com",
-  "twitter.com",
-]
+export type ParsedSignalAnalysisInput = ParsedSignalBusinessInput
 
-const MAP_HOSTS = ["google.com", "maps.google.com", "goo.gl", "maps.app.goo.gl"]
-
-export type ParsedSignalAnalysisInput = {
-  raw: string
-  urls: string[]
-  officialWebsiteUrl: string | null
-  socialUrls: string[]
-  mapsUrl: string | null
-  googlePlaceId: string | null
-  phone: string | null
-  businessNameHint: string | null
-  locationHint: string | null
-  query: string
-}
-
-function normalizeUrl(value: string) {
-  const trimmed = value.trim().replace(/[),.;]+$/, "")
-  try {
-    const url = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`)
-    if (!['http:', 'https:'].includes(url.protocol)) return null
-    return url.toString()
-  } catch {
-    return null
-  }
-}
-
-function hostname(value: string) {
-  try {
-    return new URL(value).hostname.toLowerCase().replace(/^www\./, "")
-  } catch {
-    return ""
-  }
-}
-
-function hasHost(value: string, hosts: string[]) {
-  const host = hostname(value)
-  return hosts.some((item) => host === item || host.endsWith(`.${item}`))
-}
-
-function titleFromHostname(value: string) {
-  const host = hostname(value).split(".")[0] || ""
-  if (!host) return null
-  return host
-    .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
-    .trim() || null
-}
-
-function titleFromProfileOrMap(value: string) {
-  try {
-    const url = new URL(value)
-    const segments = decodeURIComponent(url.pathname).split("/").filter(Boolean)
-    const placeIndex = segments.findIndex((segment) => segment.toLowerCase() === "place")
-    const raw = placeIndex >= 0 ? segments[placeIndex + 1] : segments.at(-1)
-    if (!raw || /^(maps|posts|photos|reels?|profile\.php)$/i.test(raw)) return null
-    return raw
-      .replace(/^@/, "")
-      .replace(/[+._-]+/g, " ")
-      .replace(/\b\w/g, (letter) => letter.toUpperCase())
-      .trim() || null
-  } catch {
-    return null
-  }
-}
-
-function extractPlaceId(value: string) {
-  try {
-    const url = new URL(value)
-    const fromQuery =
-      url.searchParams.get("place_id") ||
-      url.searchParams.get("query_place_id") ||
-      url.searchParams.get("destination_place_id")
-    if (fromQuery) return fromQuery
-    return decodeURIComponent(url.pathname).match(/\b(ChI[A-Za-z0-9_-]{12,})\b/)?.[1] || null
-  } catch {
-    return null
-  }
-}
-
-export function parseSignalAnalysisInput(rawInput: string): ParsedSignalAnalysisInput {
-  const raw = rawInput.trim()
-  const urlMatches = raw.match(/(?:https?:\/\/|www\.)[^\s]+/gi) || []
-  const urls = Array.from(new Set(urlMatches.map(normalizeUrl).filter(Boolean) as string[]))
-  const mapsUrl = urls.find((url) => hasHost(url, MAP_HOSTS) && /maps|place|goo\.gl/i.test(url)) || null
-  const socialUrls = urls.filter((url) => hasHost(url, SOCIAL_HOSTS))
-  const officialWebsiteUrl = urls.find((url) => !hasHost(url, [...SOCIAL_HOSTS, ...MAP_HOSTS])) || null
-  const phoneMatch = raw.match(/(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/)
-  const phone = phoneMatch?.[0]?.trim() || null
-  const textOnly = raw
-    .replace(/(?:https?:\/\/|www\.)[^\s]+/gi, " ")
-    .replace(phoneMatch?.[0] || /$^/, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-  const parts = textOnly.split(",").map((part) => part.trim()).filter(Boolean)
-  const businessNameHint =
-    parts[0] ||
-    (officialWebsiteUrl ? titleFromHostname(officialWebsiteUrl) : null) ||
-    (socialUrls[0] ? titleFromProfileOrMap(socialUrls[0]) : null) ||
-    (mapsUrl ? titleFromProfileOrMap(mapsUrl) : null)
-  const locationHint = parts.length > 1 ? parts.slice(1).join(", ") : null
-
-  return {
-    raw,
-    urls,
-    officialWebsiteUrl,
-    socialUrls,
-    mapsUrl,
-    googlePlaceId: mapsUrl ? extractPlaceId(mapsUrl) : null,
-    phone,
-    businessNameHint,
-    locationHint,
-    query: [businessNameHint, locationHint, phone].filter(Boolean).join(" ") || raw,
-  }
+export function parseSignalAnalysisInput(rawInput: string, overrides: SignalInputOverrides = {}) {
+  return parseSignalBusinessInput(rawInput, overrides)
 }
 
 function levelForScore(score: number | null | undefined): SignalLevel {

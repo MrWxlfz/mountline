@@ -22,6 +22,12 @@ export async function POST(request: Request) {
       observation: parsed.data.observation,
       createdBy: authCheck.access.userId,
       analyzeNow: parsed.data.analyze_now,
+      parsedOverrides: parsed.data.parsed_overrides ? {
+        businessName: parsed.data.parsed_overrides.business_name,
+        address: parsed.data.parsed_overrides.address,
+        phone: parsed.data.parsed_overrides.phone,
+        websiteUrl: parsed.data.parsed_overrides.website_url,
+      } : undefined,
     })
     return NextResponse.json({
       prospect: result.prospect,

@@ -23,9 +23,11 @@ import {
   RefreshCw,
   Send,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   Smartphone,
   Target,
+  X,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -41,29 +43,26 @@ import type {
   SignalConcept,
   SignalEvidenceCategory,
   SignalEvidenceLedgerItem,
+  SignalIdentityCandidateRecord,
+  SignalIdentityCorrectionHistoryItem,
   SignalLeadActivity,
   SignalLeadStageHistory,
   SignalOutreachDraft,
   SignalOutreachEvent,
   SignalPipelineStage,
   SignalProspect,
+  SignalVerificationItem,
 } from "@/lib/supabase/types"
+import { signalIdentityStateLabel } from "@/lib/signal/identity-resolution"
 import { formatSignalLabel } from "@/lib/signal/presentation"
 import { cn } from "@/lib/utils"
-
-const evidenceLabels: Record<SignalEvidenceCategory, string> = {
-  verified_public_fact: "Verified public facts",
-  likely_inference: "Likely inferences",
-  mountline_observation: "Private Mountline observations",
-  unverified_claim: "Unverified claims",
-  unknown: "Unknowns and limitations",
-}
 
 const evidenceOrder: SignalEvidenceCategory[] = [
   "verified_public_fact",
   "likely_inference",
-  "mountline_observation",
   "unverified_claim",
+  "rejected_source",
+  "mountline_observation",
   "unknown",
 ]
 
@@ -98,8 +97,15 @@ function dateTime(value: string | null | undefined) {
 function verdictTone(verdict: SignalProspect["verdict"]) {
   if (verdict === "pursue") return "green" as const
   if (verdict === "investigate") return "amber" as const
-  if (verdict === "skip") return "red" as const
+  if (["skip", "wrong_match", "could_not_resolve"].includes(verdict || "")) return "red" as const
   return "default" as const
+}
+
+function confidenceExplanation(value: number | null | undefined) {
+  if (value == null) return "Confidence not calibrated"
+  if (value >= 78) return "Strong support from independent identity facts"
+  if (value >= 55) return "Moderate support; one strong corroborating fact is still useful"
+  return "Limited support; do not use this as a business fact yet"
 }
 
 function analysisStatusLabel(status: SignalProspect["analysis_status"]) {
@@ -192,6 +198,9 @@ export function SignalLeadWorkspace({
   activities,
   stageHistory,
   concepts,
+  identityCandidates,
+  verificationItems,
+  correctionHistory,
 }: {
   prospect: SignalProspect
   analyses: SignalAnalysis[]
@@ -201,6 +210,9 @@ export function SignalLeadWorkspace({
   activities: SignalLeadActivity[]
   stageHistory: SignalLeadStageHistory[]
   concepts: SignalConcept[]
+  identityCandidates: SignalIdentityCandidateRecord[]
+  verificationItems: SignalVerificationItem[]
+  correctionHistory: SignalIdentityCorrectionHistoryItem[]
 }) {
   const router = useRouter()
   const started = useRef(false)
@@ -209,7 +221,7 @@ export function SignalLeadWorkspace({
   const [working, setWorking] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(prospect.analysis_error || null)
   const [stage, setStage] = useState<SignalPipelineStage>(prospect.pipeline_stage || "found")
-  const [activeTab, setActiveTab] = useState("summary")
+  const [activeTab, setActiveTab] = useState("decision")
   const [note, setNote] = useState("")
   const [eventSummary, setEventSummary] = useState("")
   const [eventChannel, setEventChannel] = useState("call")
@@ -220,6 +232,7 @@ export function SignalLeadWorkspace({
   )
   const [identityDraft, setIdentityDraft] = useState({
     business_name: prospect.business_name,
+    canonical_name: prospect.canonical_name || prospect.business_name,
     industry: prospect.industry,
     city: prospect.city || "",
     state: prospect.state || "",
@@ -229,6 +242,10 @@ export function SignalLeadWorkspace({
     instagram_url: prospect.instagram_url || "",
     facebook_url: prospect.facebook_url || "",
     chain_status: prospect.chain_status || "uncertain",
+    business_location_type: prospect.business_location_type || "unknown",
+    maps_url: prospect.submitted_url?.includes("google") || prospect.submitted_url?.includes("goo.gl") ? prospect.submitted_url : "",
+    verification_source: "personally_verified",
+    note: "",
   })
 
   const latestAnalysis = analyses[0] || null
@@ -241,16 +258,37 @@ export function SignalLeadWorkspace({
   const groupedEvidence = useMemo(() => Object.fromEntries(
     evidenceOrder.map((category) => [category, evidence.filter((item) => item.evidence_category === category)]),
   ) as Record<SignalEvidenceCategory, SignalEvidenceLedgerItem[]>, [evidence])
+  const evidenceSections = useMemo(() => [
+    { key: "verified", label: "Verified", items: evidence.filter((item) => item.evidence_category === "verified_public_fact") },
+    { key: "needs-confirmation", label: "Needs confirmation", items: evidence.filter((item) => ["likely_inference", "unverified_claim"].includes(item.evidence_category)) },
+    { key: "observations", label: "Luke’s observations", items: evidence.filter((item) => item.evidence_category === "mountline_observation") },
+    { key: "unknown", label: "Unknown", items: evidence.filter((item) => item.evidence_category === "unknown") },
+  ], [evidence])
+  const identityState = prospect.identity_resolution_state || (prospect.identity_status === "verified" ? "verified" : "unresolved")
+  const identityVerified = ["exact_match", "user_confirmed", "verified"].includes(identityState)
+  const sufficiency = record(prospect.research_sufficiency)
+  const opportunitySufficiency = record(sufficiency.opportunity).status
+  const salesPackState = prospect.sales_pack_state || "not_ready"
+  const confidenceDimensionValues = record(prospect.confidence_dimensions)
+  const approachabilityPlan = record(prospect.approachability_plan)
+  const canBuildConcept = identityVerified && prospect.verdict === "pursue" && opportunitySufficiency === "sufficient"
+  const canPrepareSales = ["draft_outreach", "fully_personalized"].includes(salesPackState)
+  const canCreateClientProject = identityVerified && ["interested", "proposal", "won"].includes(stage) && record(sufficiency.sales).status !== "insufficient"
+  const openVerificationItems = verificationItems.filter((item) => item.status === "unresolved")
 
-  async function runAnalysis() {
+  async function runAnalysis(scope: "full" | "identity" | "website" | "social" | "opportunity" | "sales" = "full") {
     if (working) return
     setWorking("analysis")
     setError(null)
     try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}/analyze`, { method: "POST" })
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scope }),
+      })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Analysis could not complete.")
-      toast.success("Signal analysis complete.")
+      toast.success(scope === "full" ? "Signal analysis complete." : `${formatSignalLabel(scope)} resolution updated.`)
       router.refresh()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Analysis could not complete.")
@@ -319,16 +357,86 @@ export function SignalLeadWorkspace({
     setWorking("identity")
     setError(null)
     try {
-      const response = await fetch(`/api/signal/prospects/${prospect.id}`, {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/identity`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...identityDraft, classification_manual_override: true }),
+        body: JSON.stringify({
+          ...identityDraft,
+          public_address: identityDraft.public_address || null,
+          public_phone: identityDraft.public_phone || null,
+          website_url: identityDraft.website_url || null,
+          facebook_url: identityDraft.facebook_url || null,
+          instagram_url: identityDraft.instagram_url || null,
+          maps_url: identityDraft.maps_url || null,
+          note: identityDraft.note || null,
+        }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Identity corrections could not be saved.")
+      toast.success("Identity correction saved. Re-run identity when ready.")
       router.refresh()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Identity corrections could not be saved.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  async function updateCandidate(candidateId: string, action: "confirm" | "unrelated") {
+    setWorking(`candidate:${candidateId}`)
+    setError(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/identity/candidates/${candidateId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Identity candidate could not be updated.")
+      toast.success(action === "confirm" ? "Business confirmed. Signal will continue from this identity." : "Candidate marked unrelated.")
+      router.refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Identity candidate could not be updated.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  async function rejectAllCandidates() {
+    setWorking("none-candidates")
+    setError(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/identity`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "none_of_these" }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Candidates could not be rejected.")
+      toast.success("Suggested matches rejected. The submitted business name is preserved.")
+      router.refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Candidates could not be rejected.")
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  async function resolveVerification(itemId: string, status: "resolved" | "unrelated") {
+    setWorking(`verification:${itemId}`)
+    setError(null)
+    try {
+      const response = await fetch(`/api/signal/prospects/${prospect.id}/verification/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Verification item could not be updated.")
+      toast.success(status === "resolved" ? "Verification item resolved." : "Source marked unrelated.")
+      router.refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Verification item could not be updated.")
     } finally {
       setWorking(null)
     }
@@ -442,16 +550,16 @@ export function SignalLeadWorkspace({
       </Link>
       <PageHeader
         eyebrow="Signal lead workspace"
-        title={prospect.business_name}
-        subtitle={[prospect.industry, prospect.city, prospect.state].filter(Boolean).join(" · ") || "Business identity needs review"}
+        title={prospect.display_name || prospect.submitted_name || prospect.business_name}
+        subtitle={[prospect.submitted_location || prospect.public_address || [prospect.city, prospect.state].filter(Boolean).join(", "), signalIdentityStateLabel(identityState)].filter(Boolean).join(" · ")}
         meta={<StatusBadge tone={verdictTone(prospect.verdict)}>{prospect.verdict === "pending" ? analysisStatusLabel(prospect.analysis_status) : formatSignalLabel(prospect.verdict)}</StatusBadge>}
         actions={
           <>
             {prospect.website_url && <SecondaryAction href={prospect.website_url} icon={ExternalLink}>Public site</SecondaryAction>}
-            <SecondaryAction href={`/dashboard/clients/new?signalId=${prospect.id}`} icon={Plus}>Create client</SecondaryAction>
-            <SecondaryAction href={`/dashboard/projects/new?signalId=${prospect.id}`} icon={Plus}>Create project</SecondaryAction>
-            <PrimaryAction onClick={runAnalysis} disabled={working === "analysis"} icon={working === "analysis" ? Loader2 : RefreshCw}>
-              {statusInProgress ? "Analyzing…" : "Re-run analysis"}
+            {canCreateClientProject && <SecondaryAction href={`/dashboard/clients/new?signalId=${prospect.id}`} icon={Plus}>Create client</SecondaryAction>}
+            {canCreateClientProject && <SecondaryAction href={`/dashboard/projects/new?signalId=${prospect.id}`} icon={Plus}>Create project</SecondaryAction>}
+            <PrimaryAction onClick={() => identityVerified ? void runAnalysis("full") : setActiveTab("identity")} disabled={working === "analysis"} icon={working === "analysis" ? Loader2 : identityVerified ? RefreshCw : ShieldCheck}>
+              {statusInProgress ? "Analyzing…" : identityVerified ? "Re-run analysis" : "Confirm identity"}
             </PrimaryAction>
           </>
         }
@@ -463,20 +571,20 @@ export function SignalLeadWorkspace({
           <p className="hidden text-xs text-muted-foreground sm:block">Only available actions use stored contact data.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=focus`} icon={Target} label="Focus" />
-          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=practice`} icon={MessageCircleMore} label="Practice" />
-          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play} label="Teleprompter" />
-          {quickOpener ? <CopyButton value={quickOpener} label="Copy opener" /> : <QuickAction icon={Clipboard} label="Copy opener" disabled />}
-          {quickFollowUp ? <CopyButton value={quickFollowUp} label="Copy follow-up" /> : <QuickAction icon={Send} label="Copy follow-up" disabled />}
-          <QuickAction href={prospect.website_url || undefined} icon={ExternalLink} label="Website" disabled={!prospect.website_url} external />
-          <QuickAction href={prospect.public_phone ? `tel:${prospect.public_phone}` : undefined} icon={Phone} label="Call" disabled={!prospect.public_phone} />
-          <QuickAction href={prospect.public_phone ? `sms:${prospect.public_phone}` : undefined} icon={Smartphone} label="Text" disabled={!prospect.public_phone} />
-          <QuickAction href={prospect.public_email ? `mailto:${prospect.public_email}` : undefined} icon={Mail} label="Email" disabled={!prospect.public_email} />
-          <QuickAction onClick={() => setActiveTab("concept")} icon={Sparkles} label="Build concept" disabled={prospect.verdict === "skip"} />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=focus`} icon={Target} label="Focus" disabled={!identityVerified || prospect.verdict !== "pursue"} />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=practice`} icon={MessageCircleMore} label="Practice" disabled={!canPrepareSales} />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play} label="Teleprompter" disabled={!canPrepareSales} />
+          {quickOpener && canPrepareSales ? <CopyButton value={quickOpener} label="Copy opener" /> : <QuickAction icon={Clipboard} label="Copy opener" disabled />}
+          {quickFollowUp && canPrepareSales ? <CopyButton value={quickFollowUp} label="Copy follow-up" /> : <QuickAction icon={Send} label="Copy follow-up" disabled />}
+          <QuickAction href={prospect.website_url || undefined} icon={ExternalLink} label="Website" disabled={!identityVerified || !prospect.website_url} external />
+          <QuickAction href={prospect.public_phone ? `tel:${prospect.public_phone}` : undefined} icon={Phone} label="Call" disabled={!canPrepareSales || !prospect.public_phone} />
+          <QuickAction href={prospect.public_phone ? `sms:${prospect.public_phone}` : undefined} icon={Smartphone} label="Text" disabled={!canPrepareSales || !prospect.public_phone} />
+          <QuickAction href={prospect.public_email ? `mailto:${prospect.public_email}` : undefined} icon={Mail} label="Email" disabled={!canPrepareSales || !prospect.public_email} />
+          <QuickAction onClick={() => setActiveTab("concept")} icon={Sparkles} label="Build concept" disabled={!canBuildConcept} />
           <QuickAction onClick={() => setActiveTab("notes")} icon={Plus} label="Add observation" />
-          <QuickAction onClick={scheduleFollowUp} icon={CalendarClock} label="Schedule follow-up" />
-          <QuickAction onClick={() => updateStage("contacted")} icon={Check} label="Mark contacted" disabled={stage === "contacted" || working === "stage"} />
-          <QuickAction onClick={moveToPipeline} icon={Eye} label="Move stage" />
+          <QuickAction onClick={scheduleFollowUp} icon={CalendarClock} label="Schedule follow-up" disabled={!identityVerified} />
+          <QuickAction onClick={() => updateStage("contacted")} icon={Check} label="Mark contacted" disabled={!canPrepareSales || stage === "contacted" || working === "stage"} />
+          <QuickAction onClick={moveToPipeline} icon={Eye} label="Move stage" disabled={!identityVerified} />
         </div>
       </section>
 
@@ -491,13 +599,28 @@ export function SignalLeadWorkspace({
           <div><p className="font-medium">{analysisStatusLabel(prospect.analysis_status)}</p><p className="mt-0.5 text-information-foreground/70">The record is already saved. This workspace can be reopened if the request is interrupted.</p></div>
         </div>
       )}
+      {!identityVerified && !statusInProgress && (
+        <div className="rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-foreground">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium">Signal has not verified that the discovered sources belong to {prospect.submitted_name || prospect.business_name}.</p>
+              <p className="mt-1 text-warning-foreground/75">The submitted name remains the workspace identity. Opportunity, concepts, outreach, and client/project creation stay gated.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={() => setActiveTab("identity")} className="rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background">Review matches</button>
+                <button type="button" onClick={() => { setActiveTab("identity"); window.setTimeout(() => document.getElementById("identity-correction")?.scrollIntoView({ behavior: "smooth" }), 100) }} className="rounded-md border border-warning-border px-3 py-2 text-xs font-medium">Correct identity</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div ref={pipelineSection}>
-      <SectionPanel title="Pipeline" description="Choose a stage explicitly. Every change is recorded in stage history.">
+      <SectionPanel title="Pipeline" description={identityVerified ? "Choose a stage explicitly. Every change is recorded in stage history." : "Pipeline actions unlock after the exact business is confirmed."}>
         <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex flex-wrap gap-2" aria-label="Pipeline stages">
             {pipelineStages.map((item) => (
-              <button key={item.value} type="button" onClick={() => updateStage(item.value)} disabled={working === "stage"} className={cn(
+              <button key={item.value} type="button" onClick={() => updateStage(item.value)} disabled={!identityVerified || working === "stage"} className={cn(
                 "rounded-md border px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50",
                 stage === item.value ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
               )}>{item.label}</button>
@@ -508,19 +631,19 @@ export function SignalLeadWorkspace({
         <form onSubmit={saveNextAction} className="mt-4 grid gap-3 border-t border-border pt-4 lg:grid-cols-[1fr_180px_auto]">
           <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Next action</span><input value={nextActionDraft} onChange={(event) => setNextActionDraft(event.target.value)} maxLength={1000} placeholder="Specific manual next step" className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
           <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Due date</span><input ref={dueDateInput} type="date" value={nextActionDue} onChange={(event) => setNextActionDue(event.target.value)} className="h-10 w-full rounded-md border border-border bg-input-background px-3 text-sm outline-none focus:border-focus-ring" /></label>
-          <PrimaryAction type="submit" disabled={working === "next-action"} icon={working === "next-action" ? Loader2 : Check}>Save next action</PrimaryAction>
+          <PrimaryAction type="submit" disabled={!identityVerified || working === "next-action"} icon={working === "next-action" ? Loader2 : Check}>Save next action</PrimaryAction>
         </form>
       </SectionPanel>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
         <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1">
-          {["summary", "research", "verdict", "concept", "sales", "outreach", "notes", "activity"].map((tab) => (
-            <TabsTrigger key={tab} value={tab} className="shrink-0 capitalize">{tab}</TabsTrigger>
+          {[["decision", "Decision"], ["identity", "Identity"], ["opportunity", "Opportunity"], ["concept", "Concept"], ["sales", "Sales"], ["outreach", "Outreach"], ["notes", "Notes"], ["activity", "Activity"]].map(([tab, label]) => (
+            <TabsTrigger key={tab} value={tab} className="shrink-0">{label}</TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="summary" className="space-y-5">
+        <TabsContent value="decision" className="space-y-5">
           <div className="grid gap-3 md:grid-cols-3">
             {[
               ["Opportunity", prospect.opportunity_label],
@@ -533,6 +656,14 @@ export function SignalLeadWorkspace({
               </div>
             ))}
           </div>
+          <SectionPanel title="Why Signal believes this" description="Confidence is separated by decision area instead of collapsed into one unexplained percentage.">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {["identity", "location", "contact", "website", "social_profiles", "opportunity", "approachability"].map((key) => {
+                const value = record(confidenceDimensionValues[key])
+                return <div key={key} className="rounded-md border border-border bg-muted/15 p-3"><p className="text-xs text-muted-foreground">{formatSignalLabel(key)}</p><p className="mt-1 font-medium capitalize text-foreground">{typeof value.label === "string" ? value.label : "Limited"}</p>{typeof value.explanation === "string" && <p className="mt-1 text-xs leading-5 text-muted-foreground">{value.explanation}</p>}</div>
+              })}
+            </div>
+          </SectionPanel>
           <div className="grid gap-5 xl:grid-cols-2">
             <SectionPanel title="Primary opportunity" description="One focused problem, not a list of speculative services.">
               <p className="text-lg font-medium text-foreground">{prospect.primary_opportunity || "Analysis has not identified a defensible opportunity yet."}</p>
@@ -543,6 +674,11 @@ export function SignalLeadWorkspace({
               <p className="mt-3 text-sm text-muted-foreground">Next: {prospect.next_action || "Complete focused analysis."}</p>
             </SectionPanel>
           </div>
+          <SectionPanel title="Best first move" description="Timing is only stated when supported by public evidence or Mountline observations.">
+            <p className="text-lg font-medium text-foreground">{typeof approachabilityPlan.best_first_move === "string" ? approachabilityPlan.best_first_move : "Verify a reliable contact route first."}</p>
+            {typeof approachabilityPlan.why === "string" && <p className="mt-2 text-sm text-muted-foreground">{approachabilityPlan.why}</p>}
+            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3"><div><p className="text-xs text-muted-foreground">Timing</p><p className="mt-1">{typeof approachabilityPlan.best_likely_timing === "string" ? approachabilityPlan.best_likely_timing : "Unknown"}</p></div><div><p className="text-xs text-muted-foreground">Backup route</p><p className="mt-1">{typeof approachabilityPlan.backup_route === "string" ? approachabilityPlan.backup_route : "Not verified"}</p></div><div><p className="text-xs text-muted-foreground">Prepare</p><p className="mt-1">{typeof approachabilityPlan.prepare === "string" ? approachabilityPlan.prepare : "Evidence summary"}</p></div></div>
+          </SectionPanel>
           <SectionPanel title="Identity and contact routes">
             <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
               <div><p className="text-xs text-muted-foreground">Identity</p><p className="mt-1 capitalize">{formatSignalLabel(prospect.identity_status)}</p></div>
@@ -557,49 +693,148 @@ export function SignalLeadWorkspace({
               <div><p className="text-xs text-muted-foreground">Facebook</p><p className="mt-1 break-all">{prospect.facebook_url || "Not verified"}</p></div>
             </div>
             {list(prospect.opening_hours).length > 0 && <p className="mt-4 text-xs leading-5 text-muted-foreground">Verified listing hours: {list(prospect.opening_hours).join(" · ")}</p>}
-            <details className="mt-4 border-t border-border pt-4">
-              <summary className="cursor-pointer text-sm font-medium text-foreground">Correct identity details</summary>
-              <form onSubmit={saveIdentity} className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {([
-                  ["business_name", "Business name"], ["industry", "Category"], ["city", "City"], ["state", "State"],
-                  ["public_phone", "Phone"], ["website_url", "Official website"], ["facebook_url", "Facebook"], ["instagram_url", "Instagram"],
-                ] as const).map(([field, label]) => <label key={field} className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">{label}</span><input value={identityDraft[field]} onChange={(event) => setIdentityDraft((current) => ({ ...current, [field]: event.target.value }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>)}
-                <label className="space-y-1.5 sm:col-span-2"><span className="text-xs font-medium text-muted-foreground">Address or service area</span><input value={identityDraft.public_address} onChange={(event) => setIdentityDraft((current) => ({ ...current, public_address: event.target.value }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
-                <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Ownership pattern</span><select value={identityDraft.chain_status} onChange={(event) => setIdentityDraft((current) => ({ ...current, chain_status: event.target.value as typeof current.chain_status }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"><option value="uncertain">Uncertain</option><option value="independent">Independent</option><option value="likely_independent">Likely independent</option><option value="local_multi_location">Local multi-location</option><option value="likely_franchise">Likely franchise</option><option value="chain">Chain</option></select></label>
-                <div className="sm:col-span-2 xl:col-span-3"><PrimaryAction type="submit" disabled={working === "identity"} icon={working === "identity" ? Loader2 : Check}>Save identity corrections</PrimaryAction></div>
-              </form>
-            </details>
           </SectionPanel>
         </TabsContent>
 
-        <TabsContent value="research" className="space-y-5">
+        <TabsContent value="identity" className="space-y-5">
+          <SectionPanel
+            title={signalIdentityStateLabel(identityState)}
+            description={typeof record(prospect.identity_resolution).explanation === "string" ? String(record(prospect.identity_resolution).explanation) : "Signal compares every source with the submitted business before accepting it."}
+          >
+            <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
+              <div><p className="text-xs text-muted-foreground">Submitted business</p><p className="mt-1 font-medium text-foreground">{prospect.submitted_name || prospect.business_name}</p></div>
+              <div><p className="text-xs text-muted-foreground">Submitted location</p><p className="mt-1">{prospect.submitted_address || prospect.submitted_location || "Not supplied"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Anchor</p><p className="mt-1">{formatSignalLabel(prospect.identity_anchor_type || "unknown")} · {formatSignalLabel(prospect.identity_anchor_strength || "weak")}</p></div>
+              <div><p className="text-xs text-muted-foreground">Canonical source</p><p className="mt-1">{formatSignalLabel(prospect.canonical_name_source || "submitted_input")}</p></div>
+            </div>
+          </SectionPanel>
+
+          {!identityVerified && identityCandidates.filter((candidate) => ["possible", "selected", "user_confirmed"].includes(candidate.resolution_status)).length > 0 && (
+            <SectionPanel title={`Possible matches for ${prospect.submitted_name || prospect.business_name}`} description="Choose only when the name and stable location or contact details describe the exact business.">
+              <div className="grid gap-3 lg:grid-cols-2">
+                {identityCandidates.filter((candidate) => ["possible", "selected", "user_confirmed"].includes(candidate.resolution_status)).map((candidate) => (
+                  <div key={candidate.id} className="rounded-lg border border-border bg-muted/15 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-foreground">{candidate.candidate_name || "Unnamed candidate"}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{candidate.address || [candidate.city, candidate.state].filter(Boolean).join(", ") || "Location not confirmed"}</p>
+                      </div>
+                      <StatusBadge tone={candidate.match_score >= 78 ? "green" : candidate.match_score >= 55 ? "amber" : "default"}>{candidate.match_score >= 78 ? "Strong match" : candidate.match_score >= 55 ? "Likely match" : "Possible"}</StatusBadge>
+                    </div>
+                    <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                      <span>{candidate.phone || "Phone not matched"}</span>
+                      <span className="break-all">{candidate.domain || formatSignalLabel(candidate.source_classification)}</span>
+                    </div>
+                    {list(candidate.match_reasons).length > 0 && <p className="mt-3 text-xs text-muted-foreground">Why it matched: {list(candidate.match_reasons).join(" · ")}</p>}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button type="button" onClick={() => void updateCandidate(candidate.id, "confirm")} disabled={working === `candidate:${candidate.id}`} className="rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background disabled:opacity-50">This is the business</button>
+                      <button type="button" onClick={() => void updateCandidate(candidate.id, "unrelated")} disabled={working === `candidate:${candidate.id}`} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground disabled:opacity-50">Mark unrelated</button>
+                      {candidate.source_url && <a href={candidate.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">Open source <ExternalLink className="h-3 w-3" /></a>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
+                <button type="button" onClick={() => void rejectAllCandidates()} disabled={working === "none-candidates"} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">None of these</button>
+                <button type="button" onClick={() => document.getElementById("identity-correction")?.scrollIntoView({ behavior: "smooth" })} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">Edit submitted details</button>
+              </div>
+            </SectionPanel>
+          )}
+
+          <SectionPanel title="Verification checklist" description="Each open item explains why it affects the decision and the fastest way to resolve it.">
+            {openVerificationItems.length ? (
+              <div className="space-y-3">
+                {openVerificationItems.map((item) => (
+                  <div key={item.id} className="rounded-lg border border-border bg-muted/15 p-4">
+                    <div className="flex items-start gap-3">
+                      <FileSearch className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2"><p className="font-medium text-foreground">{item.title}</p>{item.required && <StatusBadge tone="amber">Required</StatusBadge>}</div>
+                        <p className="mt-2 text-sm text-muted-foreground"><span className="text-foreground">Why:</span> {item.why_it_matters}</p>
+                        <p className="mt-1 text-sm text-muted-foreground"><span className="text-foreground">Current evidence:</span> {item.current_evidence}</p>
+                        <p className="mt-1 text-sm text-muted-foreground"><span className="text-foreground">Fastest check:</span> {item.fastest_method}</p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {item.action_url && <a href={item.action_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-xs font-medium">{item.action_type === "search_phone" ? "Search exact phone" : item.action_type === "add_maps_url" ? "Check Places" : item.action_type === "confirm_website" && !item.action_url.includes(prospect.website_url || "__none__") ? "Search official site" : "Open source"} <ExternalLink className="h-3 w-3" /></a>}
+                          <button type="button" onClick={() => void resolveVerification(item.id, "resolved")} disabled={working === `verification:${item.id}`} className="rounded-md bg-foreground px-3 py-2 text-xs font-medium text-background disabled:opacity-50">Mark verified</button>
+                          {item.action_url && <button type="button" onClick={() => void resolveVerification(item.id, "unrelated")} disabled={working === `verification:${item.id}`} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground disabled:opacity-50">Mark unrelated</button>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">No required verification items remain.</p>
+                <PrimaryAction onClick={() => void runAnalysis("full")} disabled={working === "analysis"} icon={RefreshCw}>Continue analysis</PrimaryAction>
+              </div>
+            )}
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
+              <button type="button" onClick={() => void runAnalysis("website")} disabled={working === "analysis"} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">Re-run website only</button>
+              <button type="button" onClick={() => void runAnalysis("social")} disabled={working === "analysis"} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">Re-run social only</button>
+              <button type="button" onClick={() => void runAnalysis("identity")} disabled={working === "analysis"} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">Re-run identity only</button>
+            </div>
+          </SectionPanel>
+
+          <SectionPanel title="Correct identity details" description="Verified corrections persist across re-analysis and outrank weaker public sources.">
+            <form id="identity-correction" onSubmit={saveIdentity} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {([
+                ["canonical_name", "Canonical business name"], ["industry", "Category"], ["city", "City"], ["state", "State"],
+                ["public_phone", "Phone"], ["website_url", "Official website"], ["facebook_url", "Facebook"], ["instagram_url", "Instagram"], ["maps_url", "Places / Maps URL"],
+              ] as const).map(([field, label]) => <label key={field} className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">{label}</span><input value={identityDraft[field]} onChange={(event) => setIdentityDraft((current) => ({ ...current, [field]: event.target.value }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>)}
+              <label className="space-y-1.5 sm:col-span-2"><span className="text-xs font-medium text-muted-foreground">Address or service area</span><input value={identityDraft.public_address} onChange={(event) => setIdentityDraft((current) => ({ ...current, public_address: event.target.value }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
+              <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Ownership pattern</span><select value={identityDraft.chain_status} onChange={(event) => setIdentityDraft((current) => ({ ...current, chain_status: event.target.value as typeof current.chain_status }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"><option value="uncertain">Uncertain</option><option value="independent">Independent</option><option value="likely_independent">Likely independent</option><option value="local_multi_location">Local multi-location</option><option value="likely_franchise">Likely franchise</option><option value="chain">Chain</option></select></label>
+              <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">Business location</span><select value={identityDraft.business_location_type} onChange={(event) => setIdentityDraft((current) => ({ ...current, business_location_type: event.target.value as typeof current.business_location_type }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"><option value="unknown">Unknown</option><option value="storefront">Storefront</option><option value="service_area">Service area</option><option value="hybrid">Hybrid</option></select></label>
+              <label className="space-y-1.5"><span className="text-xs font-medium text-muted-foreground">How was this verified?</span><select value={identityDraft.verification_source} onChange={(event) => setIdentityDraft((current) => ({ ...current, verification_source: event.target.value }))} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"><option value="personally_verified">Verified personally</option><option value="provided_by_business">Provided by the business</option><option value="official_website">Official website</option><option value="official_social">Official social page</option><option value="places_listing">Places listing</option><option value="other">Other</option></select></label>
+              <label className="space-y-1.5 sm:col-span-2 xl:col-span-3"><span className="text-xs font-medium text-muted-foreground">Correction note</span><input value={identityDraft.note} onChange={(event) => setIdentityDraft((current) => ({ ...current, note: event.target.value }))} placeholder="What confirmed this detail?" className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" /></label>
+              <div className="sm:col-span-2 xl:col-span-3"><PrimaryAction type="submit" disabled={working === "identity"} icon={working === "identity" ? Loader2 : Check}>Save verified correction</PrimaryAction></div>
+            </form>
+            {correctionHistory.length > 0 && <details className="mt-5 border-t border-border pt-4"><summary className="cursor-pointer text-sm font-medium text-foreground">Correction history</summary><div className="mt-3 space-y-2">{correctionHistory.map((item) => <div key={item.id} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span className="font-medium text-foreground">{formatSignalLabel(item.field_name)}</span><span>{formatSignalLabel(item.verification_source)}</span><span>· {dateTime(item.created_at)}</span></div>)}</div></details>}
+          </SectionPanel>
+
           <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
-            Evidence categories are intentionally separate. Private observations can guide review, but only verified public facts may be used as public business claims.
+            Evidence is organized by decision value. Publisher and business subject stay separate, and rejected sources are collapsed below.
           </div>
-          {evidenceOrder.map((category) => (
-            <SectionPanel key={category} title={evidenceLabels[category]} description={`${groupedEvidence[category].length} item${groupedEvidence[category].length === 1 ? "" : "s"}`}>
-              {groupedEvidence[category].length > 0 ? (
+          {evidenceSections.filter((section) => section.items.length > 0 || section.key === "verified").map((section) => (
+            <SectionPanel key={section.key} title={section.label}>
+              {section.items.length > 0 ? (
                 <div className="space-y-2">
-                  {groupedEvidence[category].map((item) => (
+                  {section.items.slice(0, 8).map((item) => (
                     <div key={item.id} className="rounded-lg border border-border bg-muted/15 p-3">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div><p className="text-sm font-medium text-foreground">{formatSignalLabel(item.claim_type)}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{item.claim_text}</p></div>
                         <StatusBadge tone={item.verification_status === "verified" ? "green" : item.verification_status === "contradicted" ? "red" : "default"}>{formatSignalLabel(item.verification_status)}</StatusBadge>
                       </div>
+                      <div className="mt-3 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                        <span>Subject: {item.subject_name || prospect.display_name || prospect.business_name}</span>
+                        <span>Publisher: {item.publisher_name || item.publisher_domain || formatSignalLabel(item.source_provider || item.evidence_tier)}</span>
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">{item.decision_reason || confidenceExplanation(item.confidence)}</p>
                       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                        <span>{formatSignalLabel(item.evidence_tier)}</span>
-                        {item.confidence != null && <span>{item.confidence}% evidence confidence</span>}
+                        <span>{formatSignalLabel(item.source_classification || item.evidence_tier)}</span>
+                        <span>{confidenceExplanation(item.confidence)}</span>
                         {item.source_url && <a href={item.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-foreground">Source <ExternalLink className="h-3 w-3" /></a>}
                       </div>
                     </div>
                   ))}
+                  {section.items.length > 8 && <p className="text-xs text-muted-foreground">{section.items.length - 8} additional items are available in the raw evidence view.</p>}
                 </div>
-              ) : <p className="text-sm text-muted-foreground">No items in this category.</p>}
+              ) : <p className="text-sm text-muted-foreground">No public facts are verified yet. Confirm the correct business before Signal prepares outreach.</p>}
             </SectionPanel>
           ))}
+          {groupedEvidence.rejected_source.length > 0 && (
+            <details className="rounded-lg border border-border bg-card p-4">
+              <summary className="cursor-pointer text-sm font-medium text-foreground">Rejected sources <span className="ml-2 text-xs font-normal text-muted-foreground">{groupedEvidence.rejected_source.length}</span></summary>
+              <div className="mt-4 space-y-2">{groupedEvidence.rejected_source.map((item) => <div key={item.id} className="rounded-md border border-border bg-muted/15 p-3"><div className="flex items-start gap-2"><X className="mt-0.5 h-4 w-4 shrink-0 text-error-foreground" /><div><p className="text-sm font-medium text-foreground">{item.source_title || item.claim_text}</p><p className="mt-1 text-xs text-muted-foreground">{item.decision_reason || "Signal rejected this source because it did not agree with the submitted identity."}</p><p className="mt-1 text-xs text-muted-foreground">Publisher: {item.publisher_name || item.publisher_domain || "Unknown"} · {formatSignalLabel(item.source_classification || item.evidence_tier)}</p></div></div></div>)}</div>
+            </details>
+          )}
+          <details className="rounded-lg border border-border bg-card p-4">
+            <summary className="cursor-pointer text-sm font-medium text-foreground">Debug / raw evidence</summary>
+            <pre className="mt-4 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-md bg-background p-3 text-xs text-muted-foreground">{JSON.stringify(evidence, null, 2)}</pre>
+          </details>
         </TabsContent>
 
-        <TabsContent value="verdict" className="space-y-5">
+        <TabsContent value="opportunity" className="space-y-5">
           <SectionPanel title={`${formatSignalLabel(prospect.verdict)} verdict`} description="A sales decision, not a guarantee of fit or outcome.">
             <p className="text-lg font-medium text-foreground">{prospect.why_it_matters || "The verdict will appear after analysis."}</p>
           </SectionPanel>
@@ -617,7 +852,7 @@ export function SignalLeadWorkspace({
           <SectionPanel title="Build concept" description="Optional direction changes the presentation, never the verified business facts.">
             <div className="space-y-3">
               <textarea value={conceptInstructions} onChange={(event) => setConceptInstructions(event.target.value)} rows={3} maxLength={1000} placeholder="Make it warmer, focus on catering, keep the phone button dominant…" className="w-full resize-y rounded-lg border border-border bg-background p-3 text-sm outline-none focus:border-foreground/30" />
-              <PrimaryAction onClick={buildConcept} disabled={working === "concept" || prospect.verdict === "skip"} icon={working === "concept" ? Loader2 : Sparkles}>{latestConcept ? "Regenerate concept prompt" : "Build concept"}</PrimaryAction>
+              <PrimaryAction onClick={buildConcept} disabled={working === "concept" || !canBuildConcept} icon={working === "concept" ? Loader2 : Sparkles}>{latestConcept ? "Regenerate concept prompt" : "Build concept"}</PrimaryAction>
             </div>
           </SectionPanel>
           <SectionPanel title="Concept direction" description="The prompt uses verified public facts and labels every unknown as a placeholder.">
@@ -627,7 +862,7 @@ export function SignalLeadWorkspace({
                 <pre className="max-h-[560px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 font-sans text-sm leading-6 text-muted-foreground">{latestConcept.generation_prompt}</pre>
                 {latestConcept.concept_url && <a href={latestConcept.concept_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline">Open concept <ExternalLink className="h-4 w-4" /></a>}
               </div>
-            ) : <p className="text-sm text-muted-foreground">A concept prompt appears after a Pursue or Investigate analysis. Skip verdicts do not generate one.</p>}
+            ) : <p className="text-sm text-muted-foreground">A concept becomes available only after the identity and opportunity are sufficient and the verdict is Pursue.</p>}
           </SectionPanel>
         </TabsContent>
 
@@ -636,10 +871,19 @@ export function SignalLeadWorkspace({
             <div><p className="font-medium text-foreground">Evidence-grounded sales pack</p><p className="mt-1 text-sm text-muted-foreground">Generate only after reviewing the verdict and Must verify list. Scripts never promise results.</p></div>
             <div className="flex flex-wrap gap-2">
               {latestDraft && <SecondaryAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play}>Rehearse</SecondaryAction>}
-              <PrimaryAction onClick={generateSalesPack} disabled={working === "sales" || prospect.verdict === "skip"} icon={working === "sales" ? Loader2 : Sparkles}>{latestDraft ? "Regenerate sales pack" : "Prepare sales pack"}</PrimaryAction>
+              <PrimaryAction onClick={generateSalesPack} disabled={working === "sales" || !canPrepareSales} icon={working === "sales" ? Loader2 : Sparkles}>{latestDraft ? "Regenerate sales pack" : "Prepare sales pack"}</PrimaryAction>
             </div>
           </div>
-          {latestDraft ? (
+          {!canPrepareSales && (
+            <SectionPanel title={salesPackState === "research_briefing" ? "Research briefing only" : "Sales pack not ready"} description="Signal will not disguise generic fallback copy as personalized outreach.">
+              <div className="grid gap-4 lg:grid-cols-3">
+                <div><p className="text-xs font-medium text-muted-foreground">What is known</p><ul className="mt-2 space-y-1 text-sm text-foreground">{groupedEvidence.verified_public_fact.slice(0, 4).map((item) => <li key={item.id}>{item.claim_text}</li>)}</ul>{!groupedEvidence.verified_public_fact.length && <p className="mt-2 text-sm text-muted-foreground">No business-specific public facts are verified.</p>}</div>
+                <div><p className="text-xs font-medium text-muted-foreground">What to verify</p><ul className="mt-2 space-y-1 text-sm text-foreground">{openVerificationItems.slice(0, 4).map((item) => <li key={item.id}>{item.title}</li>)}</ul></div>
+                <div><p className="text-xs font-medium text-muted-foreground">Safe discovery questions</p><ul className="mt-2 space-y-1 text-sm text-foreground"><li>Who handles your website and customer inquiries?</li><li>What do customers most often need to call about?</li><li>Is there anything in the current online information that is out of date?</li></ul></div>
+              </div>
+            </SectionPanel>
+          )}
+          {latestDraft && canPrepareSales ? (
             <div className="grid gap-4 xl:grid-cols-2">
               <ScriptBlock label="Call opener" value={latestDraft.owner_call_opener} variants={studioVariants} />
               <ScriptBlock label="Walk-in opener" value={typeof latestStudio.walk_in_opener === "string" ? latestStudio.walk_in_opener : null} variants={studioVariants} />
@@ -666,7 +910,7 @@ export function SignalLeadWorkspace({
                 <option value="call">Call</option><option value="email">Email</option><option value="instagram">Instagram</option><option value="contact_form">Contact form</option><option value="in_person">In person</option>
               </select>
               <input value={eventSummary} onChange={(event) => setEventSummary(event.target.value)} placeholder="Short outcome or context" className="h-10 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" />
-              <PrimaryAction type="submit" disabled={working === "outreach"} icon={MessageSquare}>Log attempt</PrimaryAction>
+              <PrimaryAction type="submit" disabled={!canPrepareSales || working === "outreach"} icon={MessageSquare}>Log attempt</PrimaryAction>
             </form>
           </SectionPanel>
           <SectionPanel title="Outreach history">

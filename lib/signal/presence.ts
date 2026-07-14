@@ -1,4 +1,5 @@
 import { cleanSignalBusinessName } from "./business-name.ts"
+import { isBlockedIdentityPublisher, type SignalSourceClassification } from "./source-classification.ts"
 
 export type SignalOfficialWebsiteStatus =
   | "verified_official_website"
@@ -51,6 +52,7 @@ function nameMatches(left: string | null | undefined, right: string | null | und
   const b = normalizedName(right)
   if (!a || !b) return false
   if (a === b || a.includes(b) || b.includes(a)) return true
+  if (a.replace(/\s/g, "") === b.replace(/\s/g, "")) return true
   const leftTokens = a.split(" ").filter((token) => token.length >= 3)
   const rightTokens = b.split(" ").filter((token) => token.length >= 3)
   const shared = leftTokens.filter((token) => rightTokens.includes(token)).length
@@ -67,7 +69,7 @@ export function detectSignalParkedWebsite(input: {
   const combined = [input.url, input.pageTitle, input.description, ...(input.headings || []), input.text]
     .filter(Boolean)
     .join(" ")
-  return /\b(?:domain (?:is )?for sale|buy this domain|parked (?:free|domain)|sedo domain parking|afternic|hugedomains|coming soon page|website coming soon|future home of|default web site page)\b/i.test(combined)
+  return /\b(?:domain (?:is )?for sale|is for sale|buy this domain|parked (?:free|domain)|sedo domain parking|afternic|hugedomains|coming soon page|website coming soon|future home of|default web site page)\b/i.test(combined)
 }
 
 export function assessSignalOfficialWebsite(input: {
@@ -87,9 +89,18 @@ export function assessSignalOfficialWebsite(input: {
   linkedSocialUrls?: string[]
   expectedSocialUrls?: string[]
   pageText?: string | null
+  sourceClassification?: SignalSourceClassification | null
 }) {
   if (!input.websiteUrl) {
     return { status: "no_official_website_found" as const, confidence: 0, accepted: false, evidence: ["No website candidate was supplied."] }
+  }
+  if (input.sourceClassification && isBlockedIdentityPublisher(input.sourceClassification)) {
+    return {
+      status: "website_unknown" as const,
+      confidence: 0,
+      accepted: false,
+      evidence: [`The candidate is classified as ${input.sourceClassification.replace(/_/g, " ")} and cannot be the official website.`],
+    }
   }
   if (!input.reachable) {
     return {
@@ -159,6 +170,7 @@ export function assessSignalSocialProfile(input: {
   expectedCity?: string | null
   expectedAddress?: string | null
   expectedWebsite?: string | null
+  linkedFromVerifiedWebsite?: boolean
 }) : SignalSocialProfileAssessment {
   const text = `${input.title || ""} ${input.snippet || ""}`
   const host = normalizedHost(input.profileUrl)
@@ -173,8 +185,8 @@ export function assessSignalSocialProfile(input: {
   const matchingAddress = Boolean(expectedAddressNumber && normalizedName(text).includes(expectedAddressNumber))
   const websiteHost = normalizedHost(input.expectedWebsite)
   const matchingWebsite = Boolean(websiteHost && normalizedName(text).includes(normalizedName(websiteHost.split(".")[0])))
-  const corroborationCount = [matchingPhone, matchingCity, matchingAddress, matchingWebsite].filter(Boolean).length
-  const confidence = Math.min(96, (businessMatch ? 44 : 0) + (matchingPhone ? 28 : 0) + (matchingAddress ? 18 : 0) + (matchingWebsite ? 18 : 0) + (matchingCity ? 14 : 0))
+  const corroborationCount = [matchingPhone, matchingCity, matchingAddress, matchingWebsite, input.linkedFromVerifiedWebsite].filter(Boolean).length
+  const confidence = Math.min(96, (businessMatch ? 44 : 0) + (matchingPhone ? 28 : 0) + (matchingAddress ? 18 : 0) + (matchingWebsite ? 18 : 0) + (matchingCity ? 14 : 0) + (input.linkedFromVerifiedWebsite ? 24 : 0))
   const official = businessMatch && corroborationCount >= 1 && confidence >= 58
   const reasons = [
     businessMatch ? "display name" : null,
@@ -182,6 +194,7 @@ export function assessSignalSocialProfile(input: {
     matchingCity ? "city" : null,
     matchingAddress ? "address" : null,
     matchingWebsite ? "website" : null,
+    input.linkedFromVerifiedWebsite ? "reciprocal official-site link" : null,
   ].filter(Boolean)
   return {
     platform,

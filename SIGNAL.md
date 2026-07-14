@@ -114,6 +114,40 @@ Flow:
 
 Quick Research does not scrape Google Maps, Google reviews, Yelp, social platforms, or directory pages.
 
+## Focused business analysis and identity resolution
+
+The focused workflow at `/dashboard/signal` starts with the business supplied by the Mountline team. It stores the original input and a deterministic parse of the submitted name, address, phone, website, social or Maps URL, location, notes, anchor type, anchor strength, and identity fingerprint before public research begins.
+
+Public sources form an explainable candidate graph. Candidates are connected only by stable facts such as a Places ID, normalized phone, exact address, tightly matching coordinates, verified domain, or official social profile. Name and city similarity alone cannot merge businesses. Match records retain the component scores, contradictions, supporting links, publisher, source classification, and canonical/official-site eligibility.
+
+Directory, aggregator, marketplace, booking, review, search, map, and social publishers are classified centrally. Magicpin and other intermediary publishers can contribute limited supporting evidence, but their publisher names and domains cannot become the business identity or official website. Unresolved and ambiguous workspaces keep the submitted business name, live in the verification portion of the inbox, and withhold opportunity, concept, contact, client, project, and personalized-sales actions until their gates are satisfied.
+
+Manual corrections are stored in `signal_identity_correction_history` with their verification source. They become a user-confirmed identity anchor and outrank later weak public results. Website, social, and identity checks can be re-run independently without rebuilding unaffected sales material.
+
+The additive schema is in `20260714201831_signal_identity_resolution_v3.sql`. Apply it before using the focused business workflow. New identity tables use RLS, revoke `anon` and `authenticated`, and grant access only to the server-side `service_role`; application routes still require the Clerk team-member guard.
+
+### Legacy identity repair
+
+After applying the migration, generate a read-only report for unverified leads whose canonical name is a known directory publisher:
+
+```bash
+npm run repair:signal-identities
+```
+
+Review the record IDs and restored submitted names. Apply only after review:
+
+```bash
+npm run repair:signal-identities -- --apply
+```
+
+The apply mode stores each previous and restored field snapshot in `signal_identity_repair_audit`. It never rewrites a verified, user-confirmed, or manually corrected identity. To roll back one applied run:
+
+```bash
+npm run repair:signal-identities -- --rollback=<run-id>
+```
+
+All three modes require server-side Supabase environment variables. The script never prints the service-role key.
+
 ## City Campaigns
 
 City Campaigns are team-controlled discovery batches for a target city, optional state, optional radius, and selected playbooks. They are designed to build a review queue, not to contact prospects automatically.

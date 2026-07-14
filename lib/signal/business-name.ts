@@ -1,5 +1,7 @@
 export type SignalBusinessNameSource =
   | "manual_correction"
+  | "user_confirmed"
+  | "submitted_input"
   | "official_website_structured_data"
   | "places_listing"
   | "official_website_site_name"
@@ -26,6 +28,8 @@ export type SignalCanonicalNameResolution = {
 
 const SOURCE_SCORE: Record<SignalBusinessNameSource, number> = {
   manual_correction: 100,
+  user_confirmed: 99,
+  submitted_input: 82,
   official_website_structured_data: 96,
   places_listing: 92,
   official_website_site_name: 89,

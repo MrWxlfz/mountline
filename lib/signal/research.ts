@@ -7,6 +7,11 @@ import type {
   SignalDuplicateConfidence,
   SignalProspect,
 } from "@/lib/supabase/types"
+import {
+  classifySourceDomain,
+  sourceClassificationToLegacyType,
+  type SignalSourceClassification,
+} from "./source-classification"
 
 export type SignalResearchCandidate = {
   title: string
@@ -14,6 +19,11 @@ export type SignalResearchCandidate = {
   source_type: "likely_official_site" | "directory" | "social" | "search_result" | "unknown"
   evidence: string
   confidence: SignalConfidence
+  source_classification: SignalSourceClassification
+  publisher_name: string | null
+  canonical_identity_authority: "strong" | "supporting" | "none"
+  official_site_eligible: boolean
+  classification_reason: string
 }
 
 export type SignalCampaignDiscoveryCandidate = {
@@ -64,41 +74,6 @@ export type SignalResearchResult =
       setup_message: string
     }
 
-const DIRECTORY_HOST_PARTS = [
-  "bbb.org",
-  "chamberofcommerce",
-  "mapquest",
-  "yellowpages",
-  "yelp",
-  "angi",
-  "homeadvisor",
-  "thumbtack",
-  "nextdoor",
-  "birdeye",
-  "manta",
-  "foursquare",
-  "datanyze",
-  "zoominfo",
-]
-
-const SOCIAL_HOST_PARTS = [
-  "facebook.com",
-  "instagram.com",
-  "linkedin.com",
-  "x.com",
-  "twitter.com",
-  "tiktok.com",
-  "youtube.com",
-]
-
-const SEARCH_HOST_PARTS = [
-  "google.",
-  "maps.google",
-  "bing.",
-  "duckduckgo.",
-  "yahoo.",
-]
-
 function clean(value: string | null | undefined) {
   return value?.replace(/\s+/g, " ").trim() || ""
 }
@@ -134,17 +109,16 @@ export function normalizeSignalHostname(value: string | null | undefined) {
   }
 }
 
-function classifyUrl(url: string): SignalResearchCandidate["source_type"] {
-  const host = normalizeSignalHostname(url)
-  if (!host) return "unknown"
-  if (SOCIAL_HOST_PARTS.some((part) => host.includes(part))) return "social"
-  if (DIRECTORY_HOST_PARTS.some((part) => host.includes(part))) return "directory"
-  if (SEARCH_HOST_PARTS.some((part) => host.includes(part))) return "search_result"
-  return "likely_official_site"
+function classifyUrl(url: string, context: { title?: string | null; snippet?: string | null } = {}): SignalResearchCandidate["source_type"] {
+  return sourceClassificationToLegacyType(classifySourceDomain(url, context).classification)
 }
 
 export function classifySignalResearchUrl(url: string) {
   return classifyUrl(url)
+}
+
+export function classifySignalSource(url: string, context: { title?: string | null; snippet?: string | null } = {}) {
+  return classifySourceDomain(url, context)
 }
 
 export function isClearlyNonOfficialSignalSource(url: string) {
@@ -164,8 +138,9 @@ function candidateConfidence({
   title: string
   url: string
 }): SignalConfidence {
-  const sourceType = classifyUrl(url)
-  if (sourceType !== "likely_official_site") return "low"
+  const source = classifySourceDomain(url, { title, snippet: content })
+  const sourceType = sourceClassificationToLegacyType(source.classification)
+  if (sourceType !== "likely_official_site" || !source.canBeOfficialWebsite) return "low"
 
   const business = normalizeSignalBusinessName(businessName)
   const text = normalizeSignalBusinessName(`${title} ${content} ${url}`)
@@ -526,7 +501,8 @@ export async function runSignalPublicResearch(input: {
 
           const title = clean(typeof result.title === "string" ? result.title : url)
           const content = clean(typeof result.content === "string" ? result.content : "")
-          const sourceType = classifyUrl(url)
+          const source = classifySourceDomain(url, { title, snippet: content })
+          const sourceType = sourceClassificationToLegacyType(source.classification)
           return {
             title,
             url,
@@ -539,6 +515,11 @@ export async function runSignalPublicResearch(input: {
               title,
               url,
             }),
+            source_classification: source.classification,
+            publisher_name: source.publisherName,
+            canonical_identity_authority: source.canonicalIdentityAuthority,
+            official_site_eligible: source.canBeOfficialWebsite,
+            classification_reason: source.reason,
           } satisfies SignalResearchCandidate
         })
         .filter(Boolean) as SignalResearchCandidate[],

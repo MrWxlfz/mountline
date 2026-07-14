@@ -41,6 +41,13 @@ export async function POST(
   }
 
   const prospect = prospectData as SignalProspect
+  const identityReady = ["exact_match", "user_confirmed", "verified"].includes(prospect.identity_resolution_state || "unresolved")
+  if (!identityReady || !["interested", "proposal", "won"].includes(prospect.pipeline_stage || "found")) {
+    return NextResponse.json(
+      { error: "Confirm the business and move it to Interested or Proposal before creating a client or project record." },
+      { status: 409 },
+    )
+  }
   if (prospect.outreach_status === "do_not_contact" || (await isSignalProspectSuppressed(prospect))) {
     return NextResponse.json(
       { error: "Do-not-contact prospects cannot be converted to a lead." },

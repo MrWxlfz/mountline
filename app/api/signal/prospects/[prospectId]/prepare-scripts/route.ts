@@ -45,6 +45,9 @@ export async function POST(
   if (!prospectData) return NextResponse.json({ error: "Prospect not found" }, { status: 404 })
 
   const prospect = prospectData as SignalProspect
+  if (!["draft_outreach", "fully_personalized"].includes(prospect.sales_pack_state || "not_ready")) {
+    return NextResponse.json({ error: "Personalized scripts are gated until Signal has sufficient identity, opportunity, and contact evidence." }, { status: 409 })
+  }
   if (prospect.outreach_status === "do_not_contact" || (await isSignalProspectSuppressed(prospect))) {
     return NextResponse.json(
       { error: "Scripts are disabled while this prospect is marked do-not-contact." },

@@ -155,8 +155,31 @@ export type SignalIdentityStatus =
   | "ambiguous"
   | "rejected"
 
-export type SignalVerdict = "pending" | "pursue" | "investigate" | "skip"
+export type SignalIdentityResolutionState =
+  | "input_received"
+  | "parsed"
+  | "candidates_found"
+  | "exact_match"
+  | "likely_match"
+  | "ambiguous"
+  | "contradictory"
+  | "unresolved"
+  | "user_confirmed"
+  | "verified"
+  | "rejected"
+
+export type SignalLeadLifecycle =
+  | "draft_input"
+  | "resolving"
+  | "needs_confirmation"
+  | "analyzed"
+  | "operational"
+  | "archived"
+  | "rejected"
+
+export type SignalVerdict = "pending" | "pursue" | "investigate" | "skip" | "wrong_match" | "could_not_resolve"
 export type SignalLevel = "unknown" | "low" | "medium" | "high"
+export type SignalSalesPackState = "not_ready" | "research_briefing" | "draft_outreach" | "fully_personalized"
 export type SignalPipelineStage =
   | "found"
   | "analyzed"
@@ -446,6 +469,31 @@ export type SignalProspect = {
   public_contact_form_url: string | null
   instagram_url: string | null
   source: SignalSource
+  submitted_input?: string | null
+  submitted_name?: string | null
+  submitted_address?: string | null
+  submitted_phone?: string | null
+  submitted_url?: string | null
+  submitted_location?: string | null
+  submitted_note?: string | null
+  identity_anchor_type?: "places_url" | "official_website" | "name_address" | "name_phone" | "name_city" | "social_profile" | "business_name" | "unknown" | null
+  identity_anchor_strength?: "strong" | "moderate" | "weak" | null
+  identity_fingerprint?: string | null
+  identity_resolution_state?: SignalIdentityResolutionState
+  identity_resolution?: SignalJson
+  canonical_name?: string | null
+  canonical_name_status?: "submitted" | "user_confirmed" | "verified" | "likely"
+  canonical_name_source?: string | null
+  display_name?: string | null
+  previous_names?: SignalJson
+  manual_identity_override?: SignalJson
+  lead_lifecycle?: SignalLeadLifecycle
+  research_sufficiency?: SignalJson
+  confidence_dimensions?: SignalJson
+  sales_pack_state?: SignalSalesPackState
+  business_location_type?: "storefront" | "service_area" | "hybrid" | "unknown"
+  approachability_plan?: SignalJson
+  last_reanalysis_scope?: "full" | "identity" | "website" | "social" | "opportunity" | "sales"
   analysis_input?: string | null
   analysis_status?: SignalAnalysisStatus
   analysis_error?: string | null
@@ -515,6 +563,7 @@ export type SignalEvidenceCategory =
   | "likely_inference"
   | "mountline_observation"
   | "unverified_claim"
+  | "rejected_source"
   | "unknown"
 
 export type SignalEvidenceTier =
@@ -539,11 +588,89 @@ export type SignalEvidenceLedgerItem = {
   source_title: string | null
   source_provider: string | null
   source_excerpt: string | null
-  verification_status: "verified" | "corroborated" | "unverified" | "contradicted" | "unknown"
+  verification_status: "verified" | "corroborated" | "unverified" | "contradicted" | "rejected" | "unknown"
   confidence: number | null
   contradiction_group: string | null
   metadata: SignalJson
   created_by: string | null
+  subject_name?: string | null
+  subject_identity_key?: string | null
+  publisher_name?: string | null
+  publisher_domain?: string | null
+  source_classification?: "official_business_site" | "likely_official" | "booking_platform" | "official_social_network" | "places_map_listing" | "reputable_local_organization" | "directory" | "aggregator" | "marketplace" | "review_platform" | "search_engine" | "unknown" | null
+  decision_status?: "accepted" | "needs_confirmation" | "rejected"
+  decision_reason?: string | null
+  affected_analysis_areas?: SignalJson
+}
+
+export type SignalIdentityCandidateRecord = {
+  id: string
+  prospect_id: string
+  created_at: string
+  updated_at: string
+  candidate_key: string
+  candidate_name: string | null
+  address: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
+  latitude: number | null
+  longitude: number | null
+  phone: string | null
+  domain: string | null
+  website_url: string | null
+  social_urls: SignalJson
+  provider_place_id: string | null
+  category: string | null
+  source_url: string | null
+  source_title: string | null
+  source_provider: string
+  source_tier: string
+  source_classification: string
+  source_reliability: number
+  match_score: number
+  match_components: SignalJson
+  conflicts: SignalJson
+  match_reasons: SignalJson
+  supporting_links: SignalJson
+  canonical_eligible: boolean
+  official_website_eligible: boolean
+  resolution_status: "selected" | "possible" | "rejected" | "user_confirmed" | "unrelated"
+  rejection_reason: string | null
+  user_confirmed_at: string | null
+  user_confirmed_by: string | null
+}
+
+export type SignalVerificationItem = {
+  id: string
+  prospect_id: string
+  created_at: string
+  updated_at: string
+  requirement_key: string
+  title: string
+  why_it_matters: string
+  current_evidence: string
+  fastest_method: string
+  action_type: string
+  action_url: string | null
+  required: boolean
+  status: "unresolved" | "resolved" | "unrelated" | "dismissed"
+  resolution_note: string | null
+  resolved_at: string | null
+  resolved_by: string | null
+}
+
+export type SignalIdentityCorrectionHistoryItem = {
+  id: string
+  prospect_id: string
+  created_at: string
+  corrected_by: string | null
+  field_name: string
+  previous_value: SignalJson
+  corrected_value: SignalJson
+  verification_source: "personally_verified" | "provided_by_business" | "official_website" | "official_social" | "places_listing" | "other"
+  note: string | null
+  active: boolean
 }
 
 export type SignalLeadActivity = {
@@ -1230,7 +1357,7 @@ export type SignalRunLead = {
   research_needed_reasons: SignalJson
   provider_usage_metadata: SignalJson
   raw_names: SignalJson
-  canonical_name_source: "manual_correction" | "official_website_structured_data" | "places_listing" | "official_website_site_name" | "verified_official_social" | "reputable_business_listing" | "official_website_title" | "search_result_title" | "social_handle" | null
+  canonical_name_source: "manual_correction" | "user_confirmed" | "submitted_input" | "official_website_structured_data" | "places_listing" | "official_website_site_name" | "verified_official_social" | "reputable_business_listing" | "official_website_title" | "search_result_title" | "social_handle" | null
   canonical_name_warnings: SignalJson
   display_name: string | null
   official_website_status: "verified_official_website" | "likely_official_website" | "no_official_website_found" | "website_unreachable" | "website_parked" | "website_broken" | "website_unknown" | null

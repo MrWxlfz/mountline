@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { analyzeQueuedSignalProspect } from "@/lib/signal/analyze-business"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { signalReanalysisScopeSchema } from "@/lib/signal/validation"
 
 export const maxDuration = 60
 
@@ -30,9 +31,11 @@ export async function POST(
   const authCheck = await requireNorthlineTeamMemberApi()
   if (authCheck.response) return authCheck.response
   const { prospectId } = await params
+  const parsed = signalReanalysisScopeSchema.safeParse(await request.json().catch(() => ({})))
+  if (!parsed.success) return NextResponse.json({ error: "Invalid re-analysis scope." }, { status: 400 })
 
   try {
-    const result = await analyzeQueuedSignalProspect(prospectId, authCheck.access.userId)
+    const result = await analyzeQueuedSignalProspect(prospectId, authCheck.access.userId, parsed.data.scope)
     return NextResponse.json(result)
   } catch (error) {
     console.error("[signal] Focused analysis failed:", error)
@@ -42,4 +45,3 @@ export async function POST(
     )
   }
 }
-

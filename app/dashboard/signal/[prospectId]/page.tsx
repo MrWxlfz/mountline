@@ -7,6 +7,9 @@ import type {
   SignalEvidenceLedgerItem,
   SignalLeadActivity,
   SignalLeadStageHistory,
+  SignalIdentityCandidateRecord,
+  SignalIdentityCorrectionHistoryItem,
+  SignalVerificationItem,
   SignalOutreachDraft,
   SignalOutreachEvent,
   SignalProspect,
@@ -39,6 +42,9 @@ export default async function SignalProspectPage({
     { data: activities },
     { data: stageHistory },
     { data: concepts },
+    { data: identityCandidates },
+    { data: verificationItems },
+    { data: correctionHistory },
   ] = await Promise.all([
     supabase.from("signal_analyses").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
     supabase.from("signal_outreach_drafts").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
@@ -47,6 +53,9 @@ export default async function SignalProspectPage({
     supabase.from("signal_lead_activities").select("*").eq("prospect_id", prospectId).order("occurred_at", { ascending: false }),
     supabase.from("signal_lead_stage_history").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
     supabase.from("signal_concepts").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }),
+    supabase.from("signal_identity_candidates").select("*").eq("prospect_id", prospectId).order("match_score", { ascending: false }),
+    supabase.from("signal_verification_items").select("*").eq("prospect_id", prospectId).order("required", { ascending: false }).order("created_at", { ascending: true }),
+    supabase.from("signal_identity_correction_history").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }).limit(30),
   ])
 
   return (
@@ -59,6 +68,9 @@ export default async function SignalProspectPage({
       activities={(activities || []) as SignalLeadActivity[]}
       stageHistory={(stageHistory || []) as SignalLeadStageHistory[]}
       concepts={(concepts || []) as SignalConcept[]}
+      identityCandidates={(identityCandidates || []) as SignalIdentityCandidateRecord[]}
+      verificationItems={(verificationItems || []) as SignalVerificationItem[]}
+      correctionHistory={(correctionHistory || []) as SignalIdentityCorrectionHistoryItem[]}
     />
   )
 }

@@ -162,6 +162,9 @@ export async function POST(
   }
 
   const prospect = prospectData as SignalProspect
+  if (!["draft_outreach", "fully_personalized"].includes(prospect.sales_pack_state || "not_ready")) {
+    return NextResponse.json({ error: "This lead is limited to a research briefing until identity, opportunity, and contact sufficiency improve." }, { status: 409 })
+  }
   const { data: visualRows } = await supabase
     .from("signal_visual_evidence")
     .select("*")

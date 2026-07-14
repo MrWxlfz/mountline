@@ -29,8 +29,15 @@ export async function POST(
   if (prospectError) return NextResponse.json({ error: prospectError.message }, { status: 500 })
   if (!prospectData) return NextResponse.json({ error: "Signal lead not found." }, { status: 404 })
   const prospect = prospectData as SignalProspect
-  if (prospect.verdict === "skip") {
-    return NextResponse.json({ error: "Skip verdicts cannot create a concept until the evidence or verdict changes." }, { status: 409 })
+  const sufficiency = prospect.research_sufficiency && typeof prospect.research_sufficiency === "object" && !Array.isArray(prospect.research_sufficiency)
+    ? prospect.research_sufficiency as Record<string, unknown>
+    : {}
+  const opportunity = sufficiency.opportunity && typeof sufficiency.opportunity === "object" && !Array.isArray(sufficiency.opportunity)
+    ? sufficiency.opportunity as Record<string, unknown>
+    : {}
+  const identityReady = ["exact_match", "user_confirmed", "verified"].includes(prospect.identity_resolution_state || "unresolved")
+  if (!identityReady || prospect.verdict !== "pursue" || opportunity.status !== "sufficient") {
+    return NextResponse.json({ error: "Confirm the exact business and a supported opportunity before building a concept." }, { status: 409 })
   }
   const verifiedFacts = ((evidenceData || []) as SignalEvidenceLedgerItem[])
     .map((item) => item.claim_text)

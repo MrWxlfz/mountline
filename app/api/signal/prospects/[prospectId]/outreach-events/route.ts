@@ -42,6 +42,12 @@ export async function POST(
   if (!prospectData) return NextResponse.json({ error: "Prospect not found" }, { status: 404 })
 
   const prospect = prospectData as SignalProspect
+  if (parsed.data.direction !== "inbound" && !["draft_outreach", "fully_personalized"].includes(prospect.sales_pack_state || "not_ready")) {
+    return NextResponse.json(
+      { error: "Outbound contact is gated until the exact business, opportunity, and contact route are sufficiently verified." },
+      { status: 409 },
+    )
+  }
   if (prospect.outreach_status === "do_not_contact" || (await isSignalProspectSuppressed(prospect))) {
     return NextResponse.json(
       { error: "This prospect is marked do-not-contact." },
@@ -112,4 +118,3 @@ export async function POST(
     prospect: updatedProspect,
   })
 }
-

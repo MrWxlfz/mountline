@@ -1,5 +1,16 @@
 # Signal intelligence overhaul plan
 
+## Focused identity workflow v3 — implemented
+
+- Root cause of the `magicpin` failure: the focused parser split the submitted name/address too loosely, unknown public domains defaulted to a likely-official source, the first weak website candidate was scanned, and structured publisher metadata then outranked the submitted name in canonical-name scoring. The prospect row was also created before resolution and appeared like a normal lead.
+- The replacement parser preserves the exact submitted input and extracts a stable identity anchor, suite-aware address, E.164 phone, professional phone display, URL roles, location, notes, and duplicate fingerprint.
+- The candidate graph scores name, address, phone, coordinates, domain, social, category, locality, source reliability, and contradiction penalties separately. Only stable identifiers connect clusters.
+- A centralized source firewall prevents directories, aggregators, marketplaces, booking providers, review platforms, and search publishers from supplying canonical identity or an official site.
+- Identity, contact, online-presence, opportunity, and sales sufficiency now gate verdict generation, concepts, scripts, outreach, Focus mode, and client/project conversion.
+- Ambiguous and unresolved drafts preserve the submitted name, expose candidate selection and a concrete verification checklist, and remain separate from operational inbox leads.
+- The migration `20260714201831_signal_identity_resolution_v3.sql` adds candidate, checklist, correction-history, evidence publisher/subject, lifecycle, confidence, readiness, and repair-audit persistence with server-only grants.
+- `scripts/repair-signal-identities.ts` provides a dry run, audited apply, and per-run rollback for unverified directory-publisher canonical names.
+
 ## Audit findings
 
 - The active rebuilt experience submits to `/api/signal/runs`; the run engine in `lib/signal/lead-runs.ts` persists checkpoints in `signal_runs`, materializes `signal_run_leads`, scans one candidate per advance request, ranks ready rows, and generates packs only for ranked finalists.

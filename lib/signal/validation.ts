@@ -264,6 +264,7 @@ export const signalProspectCreateSchema = z.object({
   facebook_url: z.string().trim().max(500).optional().nullable(),
   public_address: z.string().trim().max(500).optional().nullable(),
   chain_status: z.enum(["independent", "likely_independent", "local_multi_location", "likely_franchise", "chain", "uncertain"]).optional(),
+  business_location_type: z.enum(["storefront", "service_area", "hybrid", "unknown"]).optional(),
   source: z.enum(["manual", "csv_import", "referral", "public_web_research", "scout_suggestion"]).optional(),
   existing_website_platform: shortNullableText,
   existing_booking_platform: shortNullableText,
@@ -306,6 +307,34 @@ export const signalBusinessAnalysisRequestSchema = z.object({
     .max(2000, "Keep the analysis input under 2,000 characters."),
   observation: z.string().trim().max(3000).optional().nullable(),
   analyze_now: z.boolean().optional().default(true),
+  parsed_overrides: z.object({
+    business_name: z.string().trim().max(180).optional().nullable(),
+    address: z.string().trim().max(500).optional().nullable(),
+    phone: z.string().trim().max(80).optional().nullable(),
+    website_url: z.string().trim().url().max(1000).optional().nullable(),
+  }).optional(),
+})
+
+export const signalReanalysisScopeSchema = z.object({
+  scope: z.enum(["full", "identity", "website", "social", "opportunity", "sales"]).optional().default("full"),
+})
+
+export const signalIdentityCorrectionSchema = z.object({
+  business_name: z.string().trim().min(2).max(180).optional(),
+  canonical_name: z.string().trim().min(2).max(180).optional(),
+  public_address: z.string().trim().max(500).optional().nullable(),
+  public_phone: z.string().trim().max(80).optional().nullable(),
+  industry: z.string().trim().max(160).optional().nullable(),
+  website_url: z.string().trim().url().max(1000).optional().nullable(),
+  facebook_url: z.string().trim().url().max(1000).optional().nullable(),
+  instagram_url: z.string().trim().url().max(1000).optional().nullable(),
+  maps_url: z.string().trim().url().max(1000).optional().nullable(),
+  city: z.string().trim().max(120).optional().nullable(),
+  state: z.string().trim().max(60).optional().nullable(),
+  chain_status: z.enum(["independent", "likely_independent", "local_multi_location", "likely_franchise", "chain", "uncertain"]).optional(),
+  business_location_type: z.enum(["storefront", "service_area", "hybrid", "unknown"]).optional(),
+  verification_source: z.enum(["personally_verified", "provided_by_business", "official_website", "official_social", "places_listing", "other"]),
+  note: z.string().trim().max(1000).optional().nullable(),
 })
 
 export const signalPipelineUpdateSchema = z.object({

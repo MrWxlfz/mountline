@@ -24,14 +24,16 @@ import {
   StatusBadge,
 } from "@/components/dashboard/dashboard-ui"
 import type { SignalProspect } from "@/lib/supabase/types"
+import { parseSignalBusinessInput } from "@/lib/signal/input-parser"
+import { signalIdentityStateLabel } from "@/lib/signal/identity-resolution"
 import { cn } from "@/lib/utils"
 
 type InboxView = "action" | "pursue" | "verify" | "followups" | "all"
 
 const views: Array<{ key: InboxView; label: string }> = [
   { key: "action", label: "Action needed" },
+  { key: "verify", label: "Finish verification" },
   { key: "pursue", label: "Ready to pursue" },
-  { key: "verify", label: "Needs verification" },
   { key: "followups", label: "Follow-ups due" },
   { key: "all", label: "All leads" },
 ]
@@ -41,14 +43,15 @@ function due(value: string | null | undefined) {
 }
 
 function matchesView(prospect: SignalProspect, view: InboxView) {
-  if (view === "pursue") return prospect.verdict === "pursue" && prospect.analysis_status === "ready"
+  if (view === "pursue") return prospect.verdict === "pursue" && prospect.analysis_status === "ready" && prospect.lead_lifecycle === "operational"
   if (view === "verify") {
-    return prospect.verdict === "investigate" || ["needs_review", "ambiguous"].includes(prospect.identity_status || "needs_review")
+    return ["draft_input", "resolving", "needs_confirmation"].includes(prospect.lead_lifecycle || "needs_confirmation")
   }
   if (view === "followups") return due(prospect.next_action_due_at || prospect.follow_up_date)
   if (view === "action") {
-    return ["queued", "failed", "needs_review"].includes(prospect.analysis_status || "ready") ||
-      prospect.verdict === "investigate" || due(prospect.next_action_due_at || prospect.follow_up_date)
+    return !["draft_input", "resolving", "needs_confirmation", "archived", "rejected"].includes(prospect.lead_lifecycle || "needs_confirmation") && (
+      prospect.analysis_status === "failed" || Boolean(prospect.next_action) || due(prospect.next_action_due_at || prospect.follow_up_date)
+    )
   }
   return true
 }
@@ -94,6 +97,14 @@ export function SignalInbox({
   const [submitting, setSubmitting] = useState(false)
   const [submissionMode, setSubmissionMode] = useState<"analyze" | "manual">("analyze")
   const [error, setError] = useState<string | null>(null)
+  const [editingParse, setEditingParse] = useState(false)
+  const [parsedOverrides, setParsedOverrides] = useState({ business_name: "", address: "", phone: "", website_url: "" })
+  const parsedPreview = useMemo(() => parseSignalBusinessInput(businessInput, {
+    businessName: parsedOverrides.business_name || undefined,
+    address: parsedOverrides.address || undefined,
+    phone: parsedOverrides.phone || undefined,
+    websiteUrl: parsedOverrides.website_url || undefined,
+  }), [businessInput, parsedOverrides])
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -101,6 +112,9 @@ export function SignalInbox({
       const viewMatch = matchesView(prospect, view)
       const queryMatch = !query || [
         prospect.business_name,
+        prospect.display_name,
+        prospect.submitted_name,
+        prospect.canonical_name,
         prospect.city,
         prospect.state,
         prospect.industry,
@@ -127,6 +141,12 @@ export function SignalInbox({
           business_input: businessInput,
           observation: observation.trim() || null,
           analyze_now: analyzeNow,
+          parsed_overrides: {
+            business_name: parsedOverrides.business_name || null,
+            address: parsedOverrides.address || null,
+            phone: parsedOverrides.phone || null,
+            website_url: parsedOverrides.website_url || null,
+          },
         }),
       })
       const data = await response.json()
@@ -166,13 +186,27 @@ export function SignalInbox({
             <span className="text-sm font-medium text-foreground">Business or public source</span>
             <textarea
               value={businessInput}
-              onChange={(event) => setBusinessInput(event.target.value)}
+              onChange={(event) => { setBusinessInput(event.target.value); setParsedOverrides({ business_name: "", address: "", phone: "", website_url: "" }); setEditingParse(false) }}
               rows={3}
               required
               placeholder="Oak & Ember Grooming, Southlake, TX — https://example.com"
               className="w-full resize-y rounded-lg border border-border bg-background px-3.5 py-3 text-sm outline-none transition focus:border-foreground/30 focus:ring-2 focus:ring-foreground/10"
             />
           </label>
+          {businessInput.trim() && (
+            <div className="rounded-lg border border-border bg-muted/20 p-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="grid flex-1 gap-2 text-sm sm:grid-cols-2 xl:grid-cols-4">
+                  <div><p className="text-xs text-muted-foreground">Business</p><p className="mt-1 font-medium text-foreground">{parsedPreview.submittedName || "Needs a business name"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Location</p><p className="mt-1 text-foreground">{parsedPreview.submittedAddress || parsedPreview.submittedLocation || "Not supplied"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Phone</p><p className="mt-1 text-foreground">{parsedPreview.phone || "Not supplied"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Identity anchor</p><p className="mt-1 text-foreground">{parsedPreview.identityAnchorType.replace(/_/g, " ")} · {parsedPreview.identityAnchorStrength}</p></div>
+                </div>
+                <button type="button" onClick={() => { setEditingParse((value) => !value); if (!editingParse) setParsedOverrides({ business_name: parsedPreview.submittedName || "", address: parsedPreview.submittedAddress || "", phone: parsedPreview.phone || "", website_url: parsedPreview.officialWebsiteUrl || "" }) }} className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">{editingParse ? "Done" : "Correct parse"}</button>
+              </div>
+              {editingParse && <div className="mt-3 grid gap-3 border-t border-border pt-3 sm:grid-cols-2"><label className="space-y-1"><span className="text-xs text-muted-foreground">Business name</span><input value={parsedOverrides.business_name} onChange={(event) => setParsedOverrides((current) => ({ ...current, business_name: event.target.value }))} className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm" /></label><label className="space-y-1"><span className="text-xs text-muted-foreground">Full address</span><input value={parsedOverrides.address} onChange={(event) => setParsedOverrides((current) => ({ ...current, address: event.target.value }))} className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm" /></label><label className="space-y-1"><span className="text-xs text-muted-foreground">Phone</span><input value={parsedOverrides.phone} onChange={(event) => setParsedOverrides((current) => ({ ...current, phone: event.target.value }))} className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm" /></label><label className="space-y-1"><span className="text-xs text-muted-foreground">Official website</span><input value={parsedOverrides.website_url} onChange={(event) => setParsedOverrides((current) => ({ ...current, website_url: event.target.value }))} className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm" /></label></div>}
+            </div>
+          )}
           {showObservation ? (
             <label className="block space-y-2">
               <span className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -215,7 +249,7 @@ export function SignalInbox({
               {submitting && submissionMode === "manual" ? "Saving…" : "Add manually"}
             </button>
             <p className="text-xs text-muted-foreground">
-              The lead is saved before research starts, so the workspace can be reopened safely.
+              Signal saves a draft before research starts, then promotes it only after identity resolution.
             </p>
           </div>
         </form>
@@ -246,7 +280,7 @@ export function SignalInbox({
                     : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
-                {item.label} <span className="ml-1 font-mono opacity-70">{counts[item.key]}</span>
+                    {item.label} {counts[item.key] > 0 && <span className="ml-1 font-mono opacity-70">{counts[item.key]}</span>}
               </button>
             ))}
           </div>
@@ -280,12 +314,12 @@ export function SignalInbox({
               {filtered.map((prospect) => (
                 <tr key={prospect.id} className="align-top transition-colors hover:bg-muted/25">
                   <td className="px-3 py-4">
-                    <p className="font-medium text-foreground">{prospect.business_name}</p>
+                    <p className="font-medium text-foreground">{prospect.display_name || prospect.submitted_name || prospect.canonical_name || prospect.business_name}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {[prospect.city, prospect.state].filter(Boolean).join(", ") || prospect.industry || "Location needs review"}
+                      {prospect.submitted_location || prospect.public_address || [prospect.city, prospect.state].filter(Boolean).join(", ") || "Location needs review"}
                     </p>
                   </td>
-                  <td className="px-3 py-4"><StatusBadge tone={statusTone(prospect)}>{statusLabel(prospect)}</StatusBadge></td>
+                  <td className="px-3 py-4"><StatusBadge tone={statusTone(prospect)}>{statusLabel(prospect)}</StatusBadge><p className="mt-1 text-xs text-muted-foreground">{signalIdentityStateLabel(prospect.identity_resolution_state)}</p></td>
                   <td className="px-3 py-4 text-sm capitalize text-muted-foreground">{prospect.opportunity_label || "unknown"}</td>
                   <td className="px-3 py-4 text-sm capitalize text-muted-foreground">{prospect.confidence_label || "unknown"}</td>
                   <td className="max-w-[280px] px-3 py-4 text-sm text-muted-foreground">{prospect.next_action || "Complete focused analysis"}</td>

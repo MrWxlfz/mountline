@@ -9,6 +9,7 @@ import {
   type ParsedSignalBusinessInput,
   type SignalInputOverrides,
 } from "./input-parser.ts"
+import { getSignalPlaybook, inferSignalPlaybook } from "./playbooks.ts"
 
 export type ParsedSignalAnalysisInput = ParsedSignalBusinessInput
 
@@ -105,6 +106,7 @@ export function buildSignalConceptPrompt(input: {
   unknowns: string[]
   customInstructions?: string | null
 }) {
+  const playbook = getSignalPlaybook(inferSignalPlaybook(input.industry))
   const facts = input.verifiedFacts.length > 0
     ? input.verifiedFacts.map((fact) => `- ${fact}`).join("\n")
     : "- No business-specific public facts have been verified yet."
@@ -112,15 +114,32 @@ export function buildSignalConceptPrompt(input: {
     ? input.unknowns.map((item) => `- ${item}`).join("\n")
     : "- Treat pricing, availability, policies, claims, and business history as unknown."
 
+  const modules = (playbook.offerModules || []).map((module) => `- ${module.label}: include only after answering “${module.verificationQuestion}”; otherwise use a clearly labeled placeholder or omit it.`).join("\n")
   const sections = [
-    `Create a clearly labeled concept preview for ${input.businessName}, a ${input.industry || "local business"}. This is not the official website.`,
-    `Focus on one opportunity: ${input.primaryOpportunity}. The smallest useful offer is ${input.smallestOffer}.`,
-    "Verified public facts that may appear as business claims:",
+    `Create a clearly labeled concept preview for ${input.businessName}, a ${input.industry || "local business"}.`,
+    "CONCEPT STRATEGY",
+    `Objective: Test whether ${input.smallestOffer} would make the verified customer-information path clearer.`,
+    `Target customer: A local customer trying to ${playbook.customerJourney?.primaryIntent.toLowerCase() || "confirm services, trust, location, and contact information"}. This is a category-based hypothesis, not a verified business claim.`,
+    `Primary CTA: ${playbook.customerJourney?.likelyConversionAction || "Call or use the verified contact route"}. Use only a verified phone, link, or location; otherwise label it as a non-working concept placeholder.`,
+    "Page structure: concept-preview disclaimer; clear location/service-area hero; verified information; category-relevant service placeholders; trust/evidence area; practical FAQ placeholders; directions or contact section; final CTA.",
+    "Brand direction: Respect the current public brand when supported. If no official brand system is verified, use a restrained neutral direction and do not invent a logo, history, owner story, or awards.",
+    "Mobile priorities: readable hours and location, thumb-friendly call/directions action, short sections, fast proof scan, and no fake form submission.",
+    "Trust strategy: use only verified public facts. Label image, review, credential, team, policy, and service content as owner-supplied placeholders until confirmed.",
+    `Core opportunity hypothesis: ${input.primaryOpportunity}`,
+    "VERIFIED FACTS THAT MAY APPEAR AS CLAIMS",
     facts,
-    "Unknowns that must stay as placeholders or be omitted:",
+    "FACTS TO VERIFY OR OMIT",
     unknowns,
-    "Build a mobile-first, category-specific concept with one obvious primary action, concise service guidance, proof placeholders, a practical process or FAQ section, and a secondary contact path.",
-    "Do not invent testimonials, review counts, pricing, policies, awards, team members, years in business, availability, results, payment options, or working booking functionality. Preserve the concept-preview disclaimer in the rendered page.",
+    "CATEGORY MODULES",
+    modules || "- Use only verified category details and one clear customer action.",
+    "OWNER-INFORMATION CHECKLIST",
+    "- Confirm current services and the exact wording the owner approves.\n- Confirm current hours, phone, address or service area, and primary customer action.\n- Confirm which photos, reviews, credentials, policies, prices, staff details, and booking links may be used.\n- Confirm the official website or page customers currently use.\n- Confirm which unknown placeholders should be removed rather than filled.",
+    "PRESENTATION PLAN",
+    "Show the mobile hero and primary customer action first. Explain the one verified problem in one sentence. Ask what feels useful or wrong, then stop talking. Treat corrections as new evidence and regenerate only the affected sections.",
+    "LOVABLE BUILD REQUIREMENTS",
+    "Build a polished mobile-first single-page concept using accessible semantic HTML, strong contrast, responsive layout, working local navigation, and realistic loading/empty states. Any unverified CTA must be visually labeled as a preview and must not submit, book, charge, or contact anyone.",
+    "Always display this exact notice near the top and footer: “Concept preview by Mountline Studio — not the current official website.”",
+    "Do not invent testimonials, services, pricing, reviews, hours, owner story, team, policies, booking, payment methods, credentials, awards, availability, or results.",
   ]
   if (input.customInstructions?.trim()) {
     sections.push(

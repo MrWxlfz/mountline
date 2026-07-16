@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { isSignalProspectSuppressed } from "@/lib/signal/alerts"
+import { buildSignalCopilotInputFromProspect } from "@/lib/signal/artifacts"
+import { buildSignalCopilotState, type SignalProviderIssue } from "@/lib/signal/copilot"
 import {
   deriveOutreachHistoryFromEvents,
   getContactReadiness,
@@ -12,7 +14,7 @@ import {
   signalOutreachEventCreateSchema,
 } from "@/lib/signal/validation"
 import { createAdminClient } from "@/lib/supabase/admin"
-import type { SignalOutreachEvent, SignalProspect } from "@/lib/supabase/types"
+import type { SignalEvidenceLedgerItem, SignalOutreachEvent, SignalProspect } from "@/lib/supabase/types"
 
 export async function POST(
   request: Request,
@@ -42,9 +44,10 @@ export async function POST(
   if (!prospectData) return NextResponse.json({ error: "Prospect not found" }, { status: 404 })
 
   const prospect = prospectData as SignalProspect
-  if (parsed.data.direction !== "inbound" && !["draft_outreach", "fully_personalized"].includes(prospect.sales_pack_state || "not_ready")) {
+  const identityReady = ["exact_match", "user_confirmed", "verified"].includes(prospect.identity_resolution_state || "unresolved")
+  if (parsed.data.direction !== "inbound" && !identityReady) {
     return NextResponse.json(
-      { error: "Outbound contact is gated until the exact business, opportunity, and contact route are sufficiently verified." },
+      { error: "Confirm the exact business before logging outbound contact." },
       { status: 409 },
     )
   }
@@ -85,6 +88,9 @@ export async function POST(
     outreach_history: deriveOutreachHistoryFromEvents(events),
     outreach_status: statusFromOutreachEvent(parsed.data.event_type),
   }
+  if (parsed.data.event_type === "declined" || parsed.data.event_type === "do_not_contact") update.pipeline_stage = "lost"
+  else if (parsed.data.event_type === "interested" || parsed.data.event_type === "discovery_call_booked") update.pipeline_stage = "interested"
+  else if (parsed.data.direction !== "inbound") update.pipeline_stage = "contacted"
 
   if (parsed.data.follow_up_date) update.follow_up_date = parsed.data.follow_up_date
   if (parsed.data.direction !== "inbound" && !prospect.contacted_at) {
@@ -112,9 +118,37 @@ export async function POST(
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
+  const { data: evidenceData } = await supabase
+    .from("signal_evidence_ledger")
+    .select("*")
+    .eq("prospect_id", prospect.id)
+    .order("created_at", { ascending: false })
+  const updated = updatedProspect as SignalProspect
+  const providerIssues = Array.isArray(updated.provider_limitations)
+    ? updated.provider_limitations as unknown as SignalProviderIssue[]
+    : []
+  const copilotInput = {
+    ...buildSignalCopilotInputFromProspect({
+      prospect: updated,
+      evidence: (evidenceData || []) as SignalEvidenceLedgerItem[],
+      providerIssues,
+    }),
+    lastOutreachSummary: eventPayload.summary,
+    explicitDecline: parsed.data.event_type === "declined",
+    doNotContact: parsed.data.event_type === "do_not_contact",
+  }
+  const copilotState = buildSignalCopilotState(copilotInput)
+  await supabase.from("signal_prospects").update({
+    assistance_mode: copilotState.assistance_mode,
+    executive_recommendation: copilotState.recommendation,
+    next_action: copilotState.next_action.exact_instruction,
+    next_action_plan: copilotState.next_action,
+    action_availability: copilotState.action_availability,
+  }).eq("id", prospect.id)
+
   return NextResponse.json({
     event: eventData,
     events,
-    prospect: updatedProspect,
+    prospect: { ...updated, assistance_mode: copilotState.assistance_mode, next_action: copilotState.next_action.exact_instruction },
   })
 }

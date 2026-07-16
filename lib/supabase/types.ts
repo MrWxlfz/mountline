@@ -177,6 +177,12 @@ export type SignalLeadLifecycle =
   | "archived"
   | "rejected"
 
+export type SignalAssistanceMode =
+  | "identity_resolution"
+  | "verification_outreach"
+  | "opportunity_outreach"
+  | "active_deal_support"
+
 export type SignalVerdict = "pending" | "pursue" | "investigate" | "skip" | "wrong_match" | "could_not_resolve"
 export type SignalLevel = "unknown" | "low" | "medium" | "high"
 export type SignalSalesPackState = "not_ready" | "research_briefing" | "draft_outreach" | "fully_personalized"
@@ -556,6 +562,22 @@ export type SignalProspect = {
   follow_up_date: string | null
   assigned_to: string | null
   last_researched_at: string | null
+  identity_version?: number
+  evidence_version?: number
+  website_version?: number
+  category_version?: number
+  business_profile?: SignalJson
+  uncertainty_budget?: SignalJson
+  research_missions?: SignalJson
+  assistance_mode?: SignalAssistanceMode
+  executive_recommendation?: SignalJson
+  opportunity_brief?: SignalJson
+  next_action_plan?: SignalJson
+  action_availability?: SignalJson
+  analysis_quality?: SignalJson
+  provider_limitations?: SignalJson
+  artifacts_regenerating?: boolean
+  artifacts_stale_reason?: string | null
 }
 
 export type SignalEvidenceCategory =
@@ -707,6 +729,15 @@ export type SignalConcept = {
   screenshot_url: string | null
   notes: string | null
   created_by: string | null
+  identity_version?: number
+  evidence_version?: number
+  website_version?: number
+  category_version?: number
+  prompt_version?: string | null
+  input_snapshot?: SignalJson
+  is_current?: boolean
+  stale_at?: string | null
+  stale_reason?: string | null
 }
 
 export type SignalAnalysis = {
@@ -762,6 +793,15 @@ export type SignalAnalysis = {
   communication_profile_reason: string | null
   evidence_supporting_value_band: SignalJson | null
   discovery_confirmation_needed: SignalJson | null
+  identity_version?: number
+  evidence_version?: number
+  website_version?: number
+  category_version?: number
+  prompt_version?: string | null
+  input_snapshot?: SignalJson
+  is_current?: boolean
+  stale_at?: string | null
+  stale_reason?: string | null
 }
 
 export type SignalOutreachDraft = {
@@ -796,6 +836,50 @@ export type SignalOutreachDraft = {
   generation_metadata?: SignalJson
   user_approved: boolean
   approved_at: string | null
+  identity_version?: number
+  evidence_version?: number
+  website_version?: number
+  category_version?: number
+  input_snapshot?: SignalJson
+  assistance_mode?: SignalAssistanceMode | null
+  is_current?: boolean
+  stale_at?: string | null
+  stale_reason?: string | null
+}
+
+export type SignalArtifactVersion = {
+  id: string
+  prospect_id: string
+  created_at: string
+  artifact_type: string
+  identity_version: number
+  evidence_version: number
+  website_version: number
+  category_version: number
+  prompt_version: string | null
+  input_snapshot: SignalJson
+  payload: SignalJson
+  status: "current" | "stale" | "generating" | "failed"
+  stale_at: string | null
+  stale_reason: string | null
+  generated_by: string | null
+}
+
+export type SignalProviderHealth = {
+  id: string
+  prospect_id: string | null
+  created_at: string
+  updated_at: string
+  provider: string
+  operation: string
+  status: "degraded" | "unavailable" | "recovered"
+  error_category: "authentication" | "configuration" | "timeout" | "rate_limit" | "network" | "provider" | "database" | "unknown"
+  user_explanation: string
+  retryable: boolean
+  effect_on_analysis: string
+  last_successful_use: string | null
+  resolved_at: string | null
+  metadata: SignalJson
 }
 
 export type SignalAlert = {

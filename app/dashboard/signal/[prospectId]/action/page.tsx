@@ -32,9 +32,9 @@ export default async function SignalActionPage({
     { data: evidence },
   ] = await Promise.all([
     supabase.from("signal_prospects").select("*").eq("id", prospectId).maybeSingle(),
-    supabase.from("signal_analyses").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("signal_outreach_drafts").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("signal_concepts").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("signal_analyses").select("*").eq("prospect_id", prospectId).eq("is_current", true).is("stale_at", null).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("signal_outreach_drafts").select("*").eq("prospect_id", prospectId).eq("is_current", true).is("stale_at", null).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("signal_concepts").select("*").eq("prospect_id", prospectId).eq("is_current", true).is("stale_at", null).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase
       .from("signal_evidence_ledger")
       .select("*")

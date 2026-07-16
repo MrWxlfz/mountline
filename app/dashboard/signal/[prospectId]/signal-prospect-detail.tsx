@@ -54,6 +54,7 @@ import type {
   SignalVerificationItem,
 } from "@/lib/supabase/types"
 import { signalIdentityStateLabel } from "@/lib/signal/identity-resolution"
+import { validateSignalArtifactCurrent } from "@/lib/signal/copilot"
 import { formatSignalLabel } from "@/lib/signal/presentation"
 import { cn } from "@/lib/utils"
 
@@ -248,13 +249,42 @@ export function SignalLeadWorkspace({
     note: "",
   })
 
-  const latestAnalysis = analyses[0] || null
-  const latestDraft = drafts[0] || null
+  const activeVersions = {
+    identity: prospect.identity_version || 1,
+    evidence: prospect.evidence_version || 1,
+  }
+  const activeIdentity = {
+    canonical_name: prospect.canonical_name || prospect.business_name,
+    public_address: prospect.public_address,
+    public_phone: prospect.public_phone,
+    industry: prospect.industry,
+    website_url: prospect.website_url,
+    instagram_url: prospect.instagram_url,
+    facebook_url: prospect.facebook_url,
+    provider_place_id: prospect.provider_place_id,
+    chain_status: prospect.chain_status,
+  }
+  function artifactIsCurrent(artifact: SignalAnalysis | SignalOutreachDraft | SignalConcept) {
+    if (artifact.is_current === false) return false
+    return validateSignalArtifactCurrent({
+      artifactIdentityVersion: artifact.identity_version || 1,
+      activeIdentityVersion: activeVersions.identity,
+      artifactEvidenceVersion: artifact.evidence_version || 1,
+      activeEvidenceVersion: activeVersions.evidence,
+      artifactSnapshot: record(artifact.input_snapshot),
+      activeIdentity,
+      staleAt: artifact.stale_at,
+    }).current
+  }
+  const latestAnalysis = analyses.find(artifactIsCurrent) || null
+  const latestDraft = drafts.find(artifactIsCurrent) || null
   const latestStudio = record(latestDraft?.script_studio)
   const studioVariants = Object.fromEntries(
     Object.entries(record(latestStudio.variants)).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
   )
-  const latestConcept = concepts[0] || null
+  const latestConcept = concepts.find(artifactIsCurrent) || null
+  const outdatedConcepts = concepts.filter((item) => !artifactIsCurrent(item))
+  const outdatedDrafts = drafts.filter((item) => !artifactIsCurrent(item))
   const groupedEvidence = useMemo(() => Object.fromEntries(
     evidenceOrder.map((category) => [category, evidence.filter((item) => item.evidence_category === category)]),
   ) as Record<SignalEvidenceCategory, SignalEvidenceLedgerItem[]>, [evidence])
@@ -271,10 +301,33 @@ export function SignalLeadWorkspace({
   const salesPackState = prospect.sales_pack_state || "not_ready"
   const confidenceDimensionValues = record(prospect.confidence_dimensions)
   const approachabilityPlan = record(prospect.approachability_plan)
-  const canBuildConcept = identityVerified && prospect.verdict === "pursue" && opportunitySufficiency === "sufficient"
-  const canPrepareSales = ["draft_outreach", "fully_personalized"].includes(salesPackState)
+  const actionAvailability = record(prospect.action_availability)
+  const actionState = (key: string) => record(actionAvailability[key])
+  const actionEnabled = (key: string, fallback = false) => actionState(key).enabled === true || (actionState(key).enabled === undefined && fallback)
+  const actionReason = (key: string) => typeof actionState(key).reason === "string" ? String(actionState(key).reason) : undefined
+  const canBuildConcept = actionEnabled("concept", identityVerified && prospect.verdict === "pursue" && opportunitySufficiency === "sufficient")
+  const canPrepareSales = actionEnabled("sales_pack", ["draft_outreach", "fully_personalized"].includes(salesPackState))
   const canCreateClientProject = identityVerified && ["interested", "proposal", "won"].includes(stage) && record(sufficiency.sales).status !== "insufficient"
   const openVerificationItems = verificationItems.filter((item) => item.status === "unresolved")
+  const executiveRecommendation = record(prospect.executive_recommendation)
+  const opportunityBrief = record(prospect.opportunity_brief)
+  const nextActionPlan = record(prospect.next_action_plan)
+  const businessProfile = record(prospect.business_profile)
+  const uncertaintyBudget = (Array.isArray(prospect.uncertainty_budget) ? prospect.uncertainty_budget : [])
+    .map(record)
+    .filter((item) => Object.keys(item).length > 0)
+  const researchMissions = (Array.isArray(prospect.research_missions) ? prospect.research_missions : [])
+    .map(record)
+    .filter((item) => Object.keys(item).length > 0)
+  const providerLimitations = (Array.isArray(prospect.provider_limitations) ? prospect.provider_limitations : [])
+    .map(record)
+    .filter((item) => Object.keys(item).length > 0)
+  const providerLimitation = providerLimitations[0]
+  const recommendationReasons = list(executiveRecommendation.why)
+  const verificationQuestions = uncertaintyBudget
+    .filter((item) => item.classification !== "non_blocking")
+    .map((item) => String(item.question || ""))
+    .filter(Boolean)
 
   async function runAnalysis(scope: "full" | "identity" | "website" | "social" | "opportunity" | "sales" = "full") {
     if (working) return
@@ -373,7 +426,7 @@ export function SignalLeadWorkspace({
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Identity corrections could not be saved.")
-      toast.success("Identity correction saved. Re-run identity when ready.")
+      toast.success(data.artifacts_invalidated ? "Identity corrected. Signal removed outdated work and is regenerating the affected analysis." : "Identity correction saved.")
       router.refresh()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Identity corrections could not be saved.")
@@ -565,25 +618,77 @@ export function SignalLeadWorkspace({
         }
       />
 
+      <section className="rounded-xl border border-border bg-card p-5" aria-labelledby="signal-recommendation-title">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-4xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone={verdictTone(prospect.verdict)}>{formatSignalLabel(prospect.assistance_mode || "identity_resolution")}</StatusBadge>
+              {prospect.artifacts_regenerating && <StatusBadge tone="amber">Regenerating affected work</StatusBadge>}
+            </div>
+            <h2 id="signal-recommendation-title" className="mt-4 text-2xl font-semibold tracking-tight text-foreground">
+              {typeof executiveRecommendation.decision === "string" ? executiveRecommendation.decision : prospect.verdict === "pursue" ? "Pursue now" : prospect.verdict === "investigate" ? "Verify one detail, then pursue" : "Research further"}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              {recommendationReasons[0] || prospect.why_it_matters || "Signal is resolving the exact business and the safest useful next move."}
+            </p>
+            {recommendationReasons.length > 1 && <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">{recommendationReasons.slice(1, 4).map((reason) => <li key={reason} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />{reason}</li>)}</ul>}
+          </div>
+          <div className="shrink-0">
+            {actionEnabled("call", Boolean(prospect.public_phone)) && prospect.public_phone
+              ? <PrimaryAction href={`tel:${prospect.public_phone}`} icon={Phone}>{prospect.assistance_mode === "verification_outreach" ? "Start verification call" : "Call now"}</PrimaryAction>
+              : <PrimaryAction onClick={() => setActiveTab(identityVerified ? "sales" : "identity")} icon={identityVerified ? MessageSquare : ShieldCheck}>{identityVerified ? "Open prepared tools" : "Confirm identity"}</PrimaryAction>}
+          </div>
+        </div>
+      </section>
+
+      {providerLimitation && (
+        <div className="rounded-lg border border-information-border bg-information-soft px-4 py-3 text-sm text-information-foreground">
+          <p className="font-medium">Analysis completed with a provider limitation</p>
+          <p className="mt-1 text-information-foreground/75">{String(providerLimitation.user_explanation || "One research provider was unavailable. Signal used the remaining public evidence.")}</p>
+          <Link href="/dashboard/settings" className="mt-2 inline-flex text-xs font-medium underline underline-offset-4">Review integrations</Link>
+        </div>
+      )}
+
+      <div className="grid gap-5 xl:grid-cols-3">
+        <SectionPanel title="Next move" description={typeof nextActionPlan.reason === "string" ? nextActionPlan.reason : "One exact action based on the current lead state."}>
+          <p className="text-lg font-medium leading-7 text-foreground">{typeof nextActionPlan.exact_instruction === "string" ? nextActionPlan.exact_instruction : prospect.next_action || "Finish the active analysis."}</p>
+          {typeof nextActionPlan.completion_criteria === "string" && <p className="mt-3 text-sm text-muted-foreground"><span className="font-medium text-foreground">Done when:</span> {nextActionPlan.completion_criteria}</p>}
+          {list(nextActionPlan.required_preparation).length > 0 && <details className="mt-4"><summary className="cursor-pointer text-xs font-medium text-muted-foreground">Preparation</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{list(nextActionPlan.required_preparation).map((item) => <li key={item}>• {item}</li>)}</ul></details>}
+        </SectionPanel>
+        <SectionPanel title="Opportunity" description="The customer situation, the narrow improvement, and the honest boundary.">
+          <p className="text-sm leading-6 text-muted-foreground">{typeof opportunityBrief.current_situation === "string" ? opportunityBrief.current_situation : prospect.primary_opportunity || "Signal is still resolving the opportunity."}</p>
+          <p className="mt-3 text-base font-medium leading-6 text-foreground">{typeof opportunityBrief.smallest_sensible_offer === "string" ? opportunityBrief.smallest_sensible_offer : prospect.smallest_offer || "No offer yet."}</p>
+          {verificationQuestions[0] && <p className="mt-3 text-xs text-warning-foreground">Confirm: {verificationQuestions[0]}</p>}
+        </SectionPanel>
+        <SectionPanel title="Prepared tools" description={typeof executiveRecommendation.prepared_asset === "string" ? executiveRecommendation.prepared_asset : "Tools unlock according to readiness."}>
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+            <PreparedTool label="Verification call" ready={actionEnabled("verification_call", identityVerified && Boolean(prospect.public_phone))} reason={actionReason("verification_call")} />
+            <PreparedTool label="Sales pack" ready={canPrepareSales} reason={actionReason("sales_pack")} />
+            <PreparedTool label="Concept brief" ready={canBuildConcept} reason={actionReason("concept")} />
+            <PreparedTool label="Practice and teleprompter" ready={actionEnabled("practice", canPrepareSales)} reason={actionReason("practice")} />
+          </div>
+        </SectionPanel>
+      </div>
+
       <section className="rounded-lg border border-border bg-surface p-3" aria-label="Lead quick actions">
         <div className="mb-2 flex items-center justify-between gap-3 px-1">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Quick actions</p>
           <p className="hidden text-xs text-muted-foreground sm:block">Only available actions use stored contact data.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=focus`} icon={Target} label="Focus" disabled={!identityVerified || prospect.verdict !== "pursue"} />
-          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=practice`} icon={MessageCircleMore} label="Practice" disabled={!canPrepareSales} />
-          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play} label="Teleprompter" disabled={!canPrepareSales} />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=focus`} icon={Target} label="Focus" disabled={!actionEnabled("focus", identityVerified && prospect.verdict === "pursue")} reason={actionReason("focus")} />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=practice`} icon={MessageCircleMore} label="Practice" disabled={!actionEnabled("practice", canPrepareSales)} reason={actionReason("practice")} />
+          <QuickAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play} label="Teleprompter" disabled={!actionEnabled("teleprompter", canPrepareSales)} reason={actionReason("teleprompter")} />
           {quickOpener && canPrepareSales ? <CopyButton value={quickOpener} label="Copy opener" /> : <QuickAction icon={Clipboard} label="Copy opener" disabled />}
           {quickFollowUp && canPrepareSales ? <CopyButton value={quickFollowUp} label="Copy follow-up" /> : <QuickAction icon={Send} label="Copy follow-up" disabled />}
           <QuickAction href={prospect.website_url || undefined} icon={ExternalLink} label="Website" disabled={!identityVerified || !prospect.website_url} external />
-          <QuickAction href={prospect.public_phone ? `tel:${prospect.public_phone}` : undefined} icon={Phone} label="Call" disabled={!canPrepareSales || !prospect.public_phone} />
-          <QuickAction href={prospect.public_phone ? `sms:${prospect.public_phone}` : undefined} icon={Smartphone} label="Text" disabled={!canPrepareSales || !prospect.public_phone} />
-          <QuickAction href={prospect.public_email ? `mailto:${prospect.public_email}` : undefined} icon={Mail} label="Email" disabled={!canPrepareSales || !prospect.public_email} />
-          <QuickAction onClick={() => setActiveTab("concept")} icon={Sparkles} label="Build concept" disabled={!canBuildConcept} />
+          <QuickAction href={prospect.public_phone ? `tel:${prospect.public_phone}` : undefined} icon={Phone} label="Call" disabled={!actionEnabled("call", canPrepareSales && Boolean(prospect.public_phone)) || !prospect.public_phone} reason={actionReason("call")} />
+          <QuickAction href={prospect.public_phone ? `sms:${prospect.public_phone}` : undefined} icon={Smartphone} label="Text" disabled={!actionEnabled("text", canPrepareSales && Boolean(prospect.public_phone)) || !prospect.public_phone} reason={actionReason("text")} />
+          <QuickAction href={prospect.public_email ? `mailto:${prospect.public_email}` : undefined} icon={Mail} label="Email" disabled={!actionEnabled("email", canPrepareSales && Boolean(prospect.public_email)) || !prospect.public_email} reason={actionReason("email")} />
+          <QuickAction onClick={() => setActiveTab("concept")} icon={Sparkles} label="Build concept" disabled={!canBuildConcept} reason={actionReason("concept")} />
           <QuickAction onClick={() => setActiveTab("notes")} icon={Plus} label="Add observation" />
           <QuickAction onClick={scheduleFollowUp} icon={CalendarClock} label="Schedule follow-up" disabled={!identityVerified} />
-          <QuickAction onClick={() => updateStage("contacted")} icon={Check} label="Mark contacted" disabled={!canPrepareSales || stage === "contacted" || working === "stage"} />
+          <QuickAction onClick={() => updateStage("contacted")} icon={Check} label="Mark contacted" disabled={!actionEnabled("log_outreach", canPrepareSales) || stage === "contacted" || working === "stage"} reason={actionReason("log_outreach")} />
           <QuickAction onClick={moveToPipeline} icon={Eye} label="Move stage" disabled={!identityVerified} />
         </div>
       </section>
@@ -644,19 +749,21 @@ export function SignalLeadWorkspace({
         </TabsList>
 
         <TabsContent value="decision" className="space-y-5">
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {[
-              ["Opportunity", prospect.opportunity_label],
-              ["Confidence", prospect.confidence_label],
-              ["Approachability", prospect.approachability_label],
+              ["Identity", identityVerified ? "Confirmed" : "Needs confirmation"],
+              ["Contact", prospect.public_phone || prospect.public_email ? "Ready" : "Not ready"],
+              ["Website", prospect.website_url ? "Confirmed" : "Unresolved"],
+              ["Opportunity", prospect.verdict === "pursue" ? "Supported" : prospect.verdict === "investigate" ? "Plausible" : formatSignalLabel(prospect.verdict || "pending")],
+              ["Outreach", formatSignalLabel(prospect.assistance_mode || "identity_resolution")],
             ].map(([label, value]) => (
               <div key={label} className="rounded-lg border border-border bg-card p-4">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className="mt-2 text-xl font-semibold capitalize text-foreground">{value || "Unknown"}</p>
+                <p className="mt-2 text-base font-semibold text-foreground">{value || "Unknown"}</p>
               </div>
             ))}
           </div>
-          <SectionPanel title="Why Signal believes this" description="Confidence is separated by decision area instead of collapsed into one unexplained percentage.">
+          <SectionPanel title="What Signal can safely do" description="Readiness is tied to a real action, not a decorative confidence label.">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {["identity", "location", "contact", "website", "social_profiles", "opportunity", "approachability"].map((key) => {
                 const value = record(confidenceDimensionValues[key])
@@ -665,13 +772,13 @@ export function SignalLeadWorkspace({
             </div>
           </SectionPanel>
           <div className="grid gap-5 xl:grid-cols-2">
-            <SectionPanel title="Primary opportunity" description="One focused problem, not a list of speculative services.">
-              <p className="text-lg font-medium text-foreground">{prospect.primary_opportunity || "Analysis has not identified a defensible opportunity yet."}</p>
-              {prospect.why_it_matters && <p className="mt-3 text-sm leading-6 text-muted-foreground">{prospect.why_it_matters}</p>}
+            <SectionPanel title="Current situation" description="Verified facts and clearly labeled inference.">
+              <p className="text-lg font-medium text-foreground">{typeof opportunityBrief.current_situation === "string" ? opportunityBrief.current_situation : prospect.primary_opportunity || "Analysis has not identified a defensible opportunity yet."}</p>
+              {typeof opportunityBrief.friction === "string" && <p className="mt-3 text-sm leading-6 text-muted-foreground">{opportunityBrief.friction}</p>}
             </SectionPanel>
             <SectionPanel title="Smallest sensible offer" description="The narrowest useful starting scope supported by current evidence.">
-              <p className="text-lg font-medium text-foreground">{prospect.smallest_offer || "Verify the business before defining an offer."}</p>
-              <p className="mt-3 text-sm text-muted-foreground">Next: {prospect.next_action || "Complete focused analysis."}</p>
+              <p className="text-lg font-medium text-foreground">{typeof opportunityBrief.smallest_sensible_offer === "string" ? opportunityBrief.smallest_sensible_offer : prospect.smallest_offer || "Verify the business before defining an offer."}</p>
+              <p className="mt-3 text-sm text-muted-foreground">Next: {typeof nextActionPlan.exact_instruction === "string" ? nextActionPlan.exact_instruction : prospect.next_action || "Complete focused analysis."}</p>
             </SectionPanel>
           </div>
           <SectionPanel title="Best first move" description="Timing is only stated when supported by public evidence or Mountline observations.">
@@ -835,17 +942,28 @@ export function SignalLeadWorkspace({
         </TabsContent>
 
         <TabsContent value="opportunity" className="space-y-5">
-          <SectionPanel title={`${formatSignalLabel(prospect.verdict)} verdict`} description="A sales decision, not a guarantee of fit or outcome.">
-            <p className="text-lg font-medium text-foreground">{prospect.why_it_matters || "The verdict will appear after analysis."}</p>
+          <SectionPanel title={typeof executiveRecommendation.decision === "string" ? executiveRecommendation.decision : `${formatSignalLabel(prospect.verdict)} verdict`} description="A sales decision, not a guarantee of fit or outcome.">
+            <p className="text-lg font-medium text-foreground">{recommendationReasons.join(" ") || prospect.why_it_matters || "The recommendation will appear after analysis."}</p>
           </SectionPanel>
           <div className="grid gap-5 xl:grid-cols-2">
-            <SectionPanel title="Must verify" description="Resolve these before first contact or concept publication.">
-              {mustVerify.length ? <ul className="space-y-2 text-sm text-muted-foreground">{mustVerify.map((item) => <li key={item} className="flex gap-2"><FileSearch className="mt-0.5 h-4 w-4 shrink-0" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No unresolved items were recorded.</p>}
+            <SectionPanel title="What still matters" description="Blocking, strategy-limiting, and optional unknowns are handled differently.">
+              {uncertaintyBudget.length ? <div className="space-y-3">{uncertaintyBudget.map((item) => <div key={String(item.key)} className="rounded-md border border-border p-3"><div className="flex flex-wrap items-center gap-2"><StatusBadge tone={item.classification === "blocking" ? "red" : item.classification === "strategy_limiting" ? "amber" : "default"}>{formatSignalLabel(String(item.classification || "unknown"))}</StatusBadge><p className="text-sm font-medium text-foreground">{String(item.question || "Unknown fact")}</p></div>{Boolean(item.why_it_matters) && <p className="mt-2 text-xs leading-5 text-muted-foreground">{String(item.why_it_matters)}</p>}{Boolean(item.automatic_action) && <p className="mt-2 text-xs text-muted-foreground"><span className="font-medium text-foreground">Signal next:</span> {String(item.automatic_action)}</p>}</div>)}</div> : mustVerify.length ? <ul className="space-y-2 text-sm text-muted-foreground">{mustVerify.map((item) => <li key={item} className="flex gap-2"><FileSearch className="mt-0.5 h-4 w-4 shrink-0" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No material unknowns were recorded.</p>}
             </SectionPanel>
             <SectionPanel title="Do not pitch" description="Claims or angles that would overstate the current evidence.">
               {doNotPitch.length ? <ul className="space-y-2 text-sm text-muted-foreground">{doNotPitch.map((item) => <li key={item} className="flex gap-2"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning-foreground" />{item}</li>)}</ul> : <p className="text-sm text-muted-foreground">No pitch guardrails recorded yet.</p>}
             </SectionPanel>
           </div>
+          <SectionPanel title="Business understanding" description="Verified facts stay separate from category-based hypotheses.">
+            <div className="grid gap-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
+              <div><p className="text-xs text-muted-foreground">Category</p><p className="mt-1 font-medium text-foreground">{String(businessProfile.primary_category || prospect.industry || "Unknown")}</p></div>
+              <div><p className="text-xs text-muted-foreground">Business model</p><p className="mt-1">{String(businessProfile.likely_business_model || "Still being resolved")}</p></div>
+              <div><p className="text-xs text-muted-foreground">Customer intent</p><p className="mt-1">{String(businessProfile.likely_customer_intent || "Still being resolved")}</p></div>
+              <div><p className="text-xs text-muted-foreground">Contact route</p><p className="mt-1">{String(businessProfile.dominant_contact_route || "Still being resolved")}</p></div>
+            </div>
+            {list(businessProfile.known_services).length > 0 && <p className="mt-4 text-sm text-muted-foreground"><span className="font-medium text-foreground">Verified services:</span> {list(businessProfile.known_services).join(" · ")}</p>}
+            {typeof businessProfile.public_customer_journey === "string" && <p className="mt-4 rounded-md border border-border bg-muted/15 p-3 text-sm leading-6 text-muted-foreground">{businessProfile.public_customer_journey}</p>}
+          </SectionPanel>
+          {researchMissions.length > 0 && <SectionPanel title="Research missions" description="Signal checks these before asking Mountline to investigate manually."><div className="grid gap-3 lg:grid-cols-2">{researchMissions.map((mission) => <div key={String(mission.key)} className="rounded-md border border-border p-3"><div className="flex items-center justify-between gap-3"><p className="text-sm font-medium text-foreground">{String(mission.title || "Research mission")}</p><StatusBadge tone={mission.status === "complete" ? "green" : mission.status === "limited" ? "amber" : "default"}>{formatSignalLabel(String(mission.status || "in_progress"))}</StatusBadge></div><p className="mt-2 text-xs leading-5 text-muted-foreground">{String(mission.conclusion || "Signal is still checking public evidence.")}</p>{Boolean(mission.next_automatic_step) && <p className="mt-2 text-xs text-muted-foreground"><span className="font-medium text-foreground">Next automatic step:</span> {String(mission.next_automatic_step)}</p>}</div>)}</div></SectionPanel>}
         </TabsContent>
 
         <TabsContent value="concept" className="space-y-5">
@@ -862,20 +980,21 @@ export function SignalLeadWorkspace({
                 <pre className="max-h-[560px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 font-sans text-sm leading-6 text-muted-foreground">{latestConcept.generation_prompt}</pre>
                 {latestConcept.concept_url && <a href={latestConcept.concept_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline">Open concept <ExternalLink className="h-4 w-4" /></a>}
               </div>
-            ) : <p className="text-sm text-muted-foreground">A concept becomes available only after the identity and opportunity are sufficient and the verdict is Pursue.</p>}
+            ) : <p className="text-sm text-muted-foreground">A safe concept hypothesis becomes available after the identity is confirmed. Unknown services and details remain explicit placeholders.</p>}
           </SectionPanel>
+          {outdatedConcepts.length > 0 && <details className="rounded-lg border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-medium text-foreground">Outdated concept history · {outdatedConcepts.length}</summary><div className="mt-3 space-y-2">{outdatedConcepts.map((concept) => <div key={concept.id} className="rounded-md border border-border bg-muted/15 p-3"><p className="text-sm font-medium text-warning-foreground">Outdated — generated before identity or evidence changed</p><p className="mt-1 text-xs text-muted-foreground">{concept.stale_reason || "This concept does not match the active business versions and cannot be copied as current."}</p><p className="mt-1 text-xs text-muted-foreground">Generated {dateTime(concept.created_at)}</p></div>)}</div></details>}
         </TabsContent>
 
         <TabsContent value="sales" className="space-y-5">
           <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div><p className="font-medium text-foreground">Evidence-grounded sales pack</p><p className="mt-1 text-sm text-muted-foreground">Generate only after reviewing the verdict and Must verify list. Scripts never promise results.</p></div>
+              <div><p className="font-medium text-foreground">Evidence-grounded sales pack</p><p className="mt-1 text-sm text-muted-foreground">Signal prepares verification, opportunity, or active-deal scripts according to the current assistance mode.</p></div>
             <div className="flex flex-wrap gap-2">
               {latestDraft && <SecondaryAction href={`/dashboard/signal/${prospect.id}/action?mode=teleprompter`} icon={Play}>Rehearse</SecondaryAction>}
               <PrimaryAction onClick={generateSalesPack} disabled={working === "sales" || !canPrepareSales} icon={working === "sales" ? Loader2 : Sparkles}>{latestDraft ? "Regenerate sales pack" : "Prepare sales pack"}</PrimaryAction>
             </div>
           </div>
           {!canPrepareSales && (
-            <SectionPanel title={salesPackState === "research_briefing" ? "Research briefing only" : "Sales pack not ready"} description="Signal will not disguise generic fallback copy as personalized outreach.">
+            <SectionPanel title="Sales pack not ready" description={actionReason("sales_pack") || "Confirm the exact business before preparing spoken or written outreach."}>
               <div className="grid gap-4 lg:grid-cols-3">
                 <div><p className="text-xs font-medium text-muted-foreground">What is known</p><ul className="mt-2 space-y-1 text-sm text-foreground">{groupedEvidence.verified_public_fact.slice(0, 4).map((item) => <li key={item.id}>{item.claim_text}</li>)}</ul>{!groupedEvidence.verified_public_fact.length && <p className="mt-2 text-sm text-muted-foreground">No business-specific public facts are verified.</p>}</div>
                 <div><p className="text-xs font-medium text-muted-foreground">What to verify</p><ul className="mt-2 space-y-1 text-sm text-foreground">{openVerificationItems.slice(0, 4).map((item) => <li key={item.id}>{item.title}</li>)}</ul></div>
@@ -901,6 +1020,7 @@ export function SignalLeadWorkspace({
               {list(latestStudio.delivery_notes).length > 0 && <div className="rounded-lg border border-border bg-muted/20 p-4"><h3 className="text-sm font-medium text-foreground">Delivery notes</h3><ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">{list(latestStudio.delivery_notes).map((item) => <li key={item} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />{item}</li>)}</ul></div>}
             </div>
           ) : <SectionPanel><p className="text-sm text-muted-foreground">No sales pack has been prepared. Review evidence first, then generate a draft for manual approval.</p></SectionPanel>}
+          {outdatedDrafts.length > 0 && <details className="rounded-lg border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-medium text-foreground">Outdated sales history · {outdatedDrafts.length}</summary><p className="mt-3 text-sm text-muted-foreground">These drafts are retained for history but do not match the active identity or evidence version. They are not copyable as current outreach.</p></details>}
         </TabsContent>
 
         <TabsContent value="outreach" className="space-y-5">
@@ -910,7 +1030,7 @@ export function SignalLeadWorkspace({
                 <option value="call">Call</option><option value="email">Email</option><option value="instagram">Instagram</option><option value="contact_form">Contact form</option><option value="in_person">In person</option>
               </select>
               <input value={eventSummary} onChange={(event) => setEventSummary(event.target.value)} placeholder="Short outcome or context" className="h-10 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/30" />
-              <PrimaryAction type="submit" disabled={!canPrepareSales || working === "outreach"} icon={MessageSquare}>Log attempt</PrimaryAction>
+              <PrimaryAction type="submit" disabled={!actionEnabled("log_outreach", canPrepareSales) || working === "outreach"} icon={MessageSquare}>Log attempt</PrimaryAction>
             </form>
           </SectionPanel>
           <SectionPanel title="Outreach history">
@@ -940,6 +1060,15 @@ export function SignalLeadWorkspace({
   )
 }
 
+function PreparedTool({ label, ready, reason }: { label: string; ready: boolean; reason?: string }) {
+  return (
+    <div className="flex items-start gap-2 rounded-md border border-border px-3 py-2">
+      {ready ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-success-foreground" /> : <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />}
+      <div><p className="text-sm font-medium text-foreground">{label}</p>{!ready && reason && <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{reason}</p>}</div>
+    </div>
+  )
+}
+
 function QuickAction({
   disabled = false,
   external = false,
@@ -947,6 +1076,7 @@ function QuickAction({
   icon: Icon,
   label,
   onClick,
+  reason,
 }: {
   disabled?: boolean
   external?: boolean
@@ -954,6 +1084,7 @@ function QuickAction({
   icon: React.ComponentType<{ className?: string }>
   label: string
   onClick?: () => void
+  reason?: string
 }) {
   const className = cn(
     "inline-flex h-9 items-center gap-2 rounded-md border border-border bg-surface px-3 text-xs font-medium text-foreground-subtle transition-colors",
@@ -962,5 +1093,5 @@ function QuickAction({
   if (href && !disabled) {
     return <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className={className}><Icon className="h-3.5 w-3.5" />{label}</a>
   }
-  return <button type="button" disabled={disabled} onClick={onClick} className={className}><Icon className="h-3.5 w-3.5" />{label}</button>
+  return <button type="button" disabled={disabled} onClick={onClick} className={className} title={disabled ? reason || `${label} is not available for the current lead state.` : undefined}><Icon className="h-3.5 w-3.5" />{label}</button>
 }

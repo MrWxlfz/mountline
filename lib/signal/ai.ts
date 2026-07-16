@@ -442,7 +442,7 @@ function classificationPrompt({
     "If the category is ambiguous, return unknown_needs_review.",
     "Return only strict JSON.",
     "",
-    "Allowed playbooks: auto_detailing, barber_salon, hvac, roofing_contractors_home_services, medical_dental, restaurant_food, beauty_wellness, general_local_business, unknown_needs_review.",
+    "Allowed playbooks: auto_detailing, barber_salon, dry_cleaner_laundry, pet_grooming, bakery_donut, spa_wellness, hvac, roofing_contractors_home_services, medical_dental, restaurant_food, beauty_wellness, general_local_business, unknown_needs_review.",
     "Medical/dental should win only when official content clearly indicates clinical or dental services.",
     "Beauty or med spa content without clear medical signals should usually be beauty_wellness.",
     "",

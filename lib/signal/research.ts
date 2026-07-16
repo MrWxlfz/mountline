@@ -179,6 +179,10 @@ export function buildSignalResearchQuery({
 const CAMPAIGN_QUERY_TERMS: Record<SignalPlaybookKey, string[]> = {
   auto_detailing: ["auto detailing", "mobile detailing", "ceramic coating"],
   barber_salon: ["barber shop", "hair salon", "barber salon"],
+  dry_cleaner_laundry: ["dry cleaner", "laundry service", "garment care"],
+  pet_grooming: ["dog groomer", "pet grooming", "mobile dog grooming"],
+  bakery_donut: ["donut shop", "bakery", "local bakeshop"],
+  spa_wellness: ["day spa", "massage spa", "facial spa"],
   hvac: ["HVAC contractor", "air conditioning repair", "heating cooling company"],
   roofing_contractors_home_services: [
     "roofing contractor",

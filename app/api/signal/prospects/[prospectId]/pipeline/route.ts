@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
+import { buildSignalCopilotInputFromProspect } from "@/lib/signal/artifacts"
+import { buildSignalCopilotState, type SignalProviderIssue } from "@/lib/signal/copilot"
 import { signalPipelineUpdateSchema } from "@/lib/signal/validation"
 import { createAdminClient } from "@/lib/supabase/admin"
-import type { SignalProspect } from "@/lib/supabase/types"
+import type { SignalEvidenceLedgerItem, SignalProspect } from "@/lib/supabase/types"
 
 const outreachStatusByStage = {
   found: "researched",
@@ -64,6 +66,27 @@ export async function PATCH(
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const { data: evidenceData } = await supabase.from("signal_evidence_ledger").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false })
+  const updatedProspect = data as SignalProspect
+  const providerIssues = Array.isArray(updatedProspect.provider_limitations)
+    ? updatedProspect.provider_limitations as unknown as SignalProviderIssue[]
+    : []
+  const copilotInput = {
+    ...buildSignalCopilotInputFromProspect({
+      prospect: updatedProspect,
+      evidence: (evidenceData || []) as SignalEvidenceLedgerItem[],
+      providerIssues,
+    }),
+    explicitDecline: nextStage === "lost",
+  }
+  const copilotState = buildSignalCopilotState(copilotInput)
+  await supabase.from("signal_prospects").update({
+    assistance_mode: copilotState.assistance_mode,
+    executive_recommendation: copilotState.recommendation,
+    next_action: Object.prototype.hasOwnProperty.call(body, "next_action") ? nextAction : copilotState.next_action.exact_instruction,
+    next_action_plan: copilotState.next_action,
+    action_availability: copilotState.action_availability,
+  }).eq("id", prospectId)
 
   if (nextStage !== prospect.pipeline_stage) {
     await supabase.from("signal_lead_stage_history").insert({
@@ -90,5 +113,5 @@ export async function PATCH(
       created_by: authCheck.access.userId,
     })
   }
-  return NextResponse.json({ prospect: data })
+  return NextResponse.json({ prospect: { ...updatedProspect, assistance_mode: copilotState.assistance_mode, next_action: Object.prototype.hasOwnProperty.call(body, "next_action") ? nextAction : copilotState.next_action.exact_instruction } })
 }

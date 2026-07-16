@@ -33,6 +33,11 @@ import {
   type SignalResearchSufficiency,
 } from "./research-sufficiency"
 import {
+  buildSignalCopilotInputFromProspect,
+  persistSignalCopilotState,
+  providerIssueFromSignalWarning,
+} from "./artifacts"
+import {
   classifySignalSource,
   findLikelySignalDuplicates,
   normalizeSignalBusinessName,
@@ -774,6 +779,37 @@ function buildResolvedEvidence(
 
   for (const candidate of research?.candidates || []) {
     const graphCandidate = resolved.graph.candidates.find((item) => item.sourceUrl === candidate.url)
+    const reviewProfileMatch = candidate.source_classification === "review_platform"
+      && identityAccepted
+      && Boolean(graphCandidate && graphCandidate.match.total >= 58)
+    if (reviewProfileMatch && graphCandidate) {
+      const matchedFields = unique([
+        graphCandidate.name ? `name (${graphCandidate.name})` : null,
+        graphCandidate.address ? `address (${graphCandidate.address})` : null,
+        graphCandidate.phone ? `phone (${formatSignalPhone(graphCandidate.phone)})` : null,
+      ])
+      const reviewCount = candidate.evidence.match(/\b([\d,]+)\s+(?:public\s+)?reviews?\b/i)?.[1]
+      rows.push(evidenceRow(prospectId, {
+        evidence_category: "verified_public_fact",
+        evidence_tier: "directory",
+        claim_type: "public_review_profile",
+        claim_text: `${candidate.publisher_name || "The review platform"} is a third-party profile, not the official website. It agrees with the active business ${matchedFields.join(" and ")}${reviewCount ? ` and shows ${reviewCount} public reviews` : ""}.`,
+        source_url: candidate.url,
+        source_title: candidate.title,
+        source_provider: research?.provider || "public_research",
+        source_excerpt: candidate.evidence,
+        verification_status: "corroborated",
+        confidence: Math.min(82, graphCandidate.match.total),
+        subject_name: subject,
+        subject_identity_key: subjectKey,
+        publisher_name: candidate.publisher_name,
+        publisher_domain: signalHostname(candidate.url),
+        source_classification: "review_platform",
+        decision_status: "accepted",
+        decision_reason: "The profile supports matching identity and reputation facts but cannot supply the official website or unverified business claims.",
+        affected_analysis_areas: ["identity", "reputation"],
+      }))
+    }
     const rejected = !candidate.official_site_eligible
       || Boolean(graphCandidate?.rejectionReason && graphCandidate.match.total < 58)
     rows.push(evidenceRow(prospectId, {
@@ -831,24 +867,6 @@ function buildResolvedEvidence(
     }))
   }
 
-  if (resolved.providerWarning) {
-    rows.push(evidenceRow(prospectId, {
-      evidence_category: "unknown",
-      evidence_tier: "unknown",
-      claim_type: "provider_limitation",
-      claim_text: resolved.providerWarning,
-      source_provider: "signal",
-      verification_status: "unknown",
-      confidence: null,
-      subject_name: subject,
-      subject_identity_key: subjectKey,
-      publisher_name: "Signal provider",
-      source_classification: "unknown",
-      decision_status: "needs_confirmation",
-      decision_reason: "Provider coverage limits reduce what Signal can verify.",
-      affected_analysis_areas: ["identity", "website", "social"],
-    }))
-  }
   return rows
 }
 
@@ -1152,6 +1170,7 @@ export async function analyzeQueuedSignalProspect(
       sufficiency: preliminarySufficiency,
     })
     await persistVerificationItems(prospectId, preliminaryChecklist)
+    const providerIssue = providerIssueFromSignalWarning(resolved.providerWarning)
 
     if (!identityIsReady) {
       const verdict = resolved.graph.state === "contradictory" || resolved.graph.state === "rejected"
@@ -1193,6 +1212,18 @@ export async function analyzeQueuedSignalProspect(
         last_researched_at: completedAt,
       }).eq("id", prospectId).select().single()
       if (completedError) throw new Error(completedError.message)
+      const completedProspect = completed as SignalProspect
+      await persistSignalCopilotState({
+        prospect: completedProspect,
+        copilotInput: buildSignalCopilotInputFromProspect({
+          prospect: completedProspect,
+          evidence: evidenceRows as unknown as SignalEvidenceLedgerItem[],
+          providerIssues: providerIssue ? [providerIssue] : [],
+          opportunityScore: null,
+          strongExistingSite: false,
+        }),
+        createdBy,
+      })
       await supabase.from("signal_lead_activities").insert({
         prospect_id: prospectId,
         activity_type: "identity_confirmation_required",
@@ -1200,7 +1231,7 @@ export async function analyzeQueuedSignalProspect(
         metadata: { identity_state: resolved.graph.state, candidate_count: resolved.graph.candidates.length, scope },
         created_by: createdBy,
       })
-      return { analysis: null, prospect: completed as SignalProspect, evidenceCount: evidenceRows.length, aiUnavailable: true }
+      return { analysis: null, prospect: completedProspect, evidenceCount: evidenceRows.length, aiUnavailable: true }
     }
 
     if (["identity", "website", "social"].includes(scope)) {
@@ -1229,14 +1260,26 @@ export async function analyzeQueuedSignalProspect(
         last_researched_at: completedAt,
       }).eq("id", prospectId).select().single()
       if (completedError) throw new Error(completedError.message)
+      const completedProspect = completed as SignalProspect
+      await persistSignalCopilotState({
+        prospect: completedProspect,
+        copilotInput: buildSignalCopilotInputFromProspect({
+          prospect: completedProspect,
+          evidence: evidenceRows as unknown as SignalEvidenceLedgerItem[],
+          providerIssues: providerIssue ? [providerIssue] : [],
+          opportunityScore: null,
+          strongExistingSite: false,
+        }),
+        createdBy,
+      })
       await supabase.from("signal_lead_activities").insert({
         prospect_id: prospectId,
         activity_type: "partial_analysis_completed",
-        summary: `Signal re-ran ${scope} resolution without rebuilding unaffected sales content.`,
+        summary: `Signal re-ran ${scope} resolution and kept only artifacts that still match the active identity.`,
         metadata: { scope, identity_state: resolved.graph.state },
         created_by: createdBy,
       })
-      return { analysis: null, prospect: completed as SignalProspect, evidenceCount: evidenceRows.length, aiUnavailable: false }
+      return { analysis: null, prospect: completedProspect, evidenceCount: evidenceRows.length, aiUnavailable: false }
     }
 
     const result = await runAndStoreInitialSignalAnalysis({
@@ -1296,7 +1339,7 @@ export async function analyzeQueuedSignalProspect(
     })
     await persistVerificationItems(prospectId, checklist)
     if (sufficiency.opportunity.status !== "sufficient" && decision.verdict === "pursue") decision.verdict = "investigate"
-    const mustVerify = unique([...checklist.map((item) => item.title), ...result.output.red_flags, resolved.providerWarning])
+    const mustVerify = unique([...checklist.map((item) => item.title), ...result.output.red_flags])
     const doNotPitch = unique([
       "Do not promise revenue, rankings, lead volume, or operational savings.",
       "Do not present an unverified social profile, review claim, or directory detail as a fact.",
@@ -1331,7 +1374,7 @@ export async function analyzeQueuedSignalProspect(
         : "Archive or keep for reference; do not prepare outreach."
 
     let conceptStatus: SignalConceptStatus = "not_started"
-    if (decision.verdict === "pursue" && sufficiency.opportunity.status === "sufficient") {
+    if (identityIsReady && !resolved.chain.deterministicBlock && result.output.website_quality_score < 76) {
       const prompt = buildSignalConceptPrompt({
         businessName: resolved.businessName,
         industry: identified.industry,
@@ -1340,11 +1383,12 @@ export async function analyzeQueuedSignalProspect(
         verifiedFacts,
         unknowns: mustVerify,
       })
+      const generatedAt = new Date().toISOString()
       await supabase
         .from("signal_concepts")
-        .delete()
+        .update({ status: "archived", is_current: false, stale_at: generatedAt, stale_reason: "Replaced by a newer concept prompt." })
         .eq("prospect_id", prospectId)
-        .eq("status", "prompt_ready")
+        .eq("is_current", true)
       const { error: conceptError } = await supabase.from("signal_concepts").insert({
         prospect_id: prospectId,
         analysis_id: result.analysis.id,
@@ -1352,12 +1396,29 @@ export async function analyzeQueuedSignalProspect(
         generation_prompt: prompt,
         verified_facts: verifiedFacts,
         created_by: createdBy,
+        identity_version: identified.identity_version || 1,
+        evidence_version: identified.evidence_version || 1,
+        website_version: identified.website_version || 1,
+        category_version: identified.category_version || 1,
+        prompt_version: "signal-concept-v4",
+        input_snapshot: {
+          canonical_name: resolved.businessName,
+          public_address: identified.public_address,
+          public_phone: identified.public_phone,
+          industry: identified.industry,
+          website_url: identified.website_url,
+          instagram_url: identified.instagram_url,
+          facebook_url: identified.facebook_url,
+          provider_place_id: identified.provider_place_id,
+          chain_status: identified.chain_status,
+        },
+        is_current: true,
       })
       if (conceptError) throw new Error(conceptError.message)
       conceptStatus = "prompt_ready"
     } else {
-      await supabase.from("signal_concepts").update({ status: "archived" })
-        .eq("prospect_id", prospectId).eq("status", "prompt_ready")
+      await supabase.from("signal_concepts").update({ status: "archived", is_current: false, stale_at: new Date().toISOString(), stale_reason: "The active analysis does not support a concept." })
+        .eq("prospect_id", prospectId).eq("is_current", true)
     }
 
     const previousStage = original.pipeline_stage || "found"
@@ -1402,6 +1463,18 @@ export async function analyzeQueuedSignalProspect(
       .select()
       .single()
     if (completedError) throw new Error(completedError.message)
+    const completedProspect = completed as SignalProspect
+    await persistSignalCopilotState({
+      prospect: completedProspect,
+      copilotInput: buildSignalCopilotInputFromProspect({
+        prospect: completedProspect,
+        evidence: evidenceRows as unknown as SignalEvidenceLedgerItem[],
+        providerIssues: providerIssue ? [providerIssue] : [],
+        opportunityScore: result.output.overall_opportunity_score,
+        strongExistingSite: result.output.website_quality_score >= 76,
+      }),
+      createdBy,
+    })
 
     if (nextStage !== previousStage) {
       await supabase.from("signal_lead_stage_history").insert({
@@ -1429,7 +1502,7 @@ export async function analyzeQueuedSignalProspect(
 
     return {
       analysis: result.analysis,
-      prospect: completed as SignalProspect,
+      prospect: completedProspect,
       evidenceCount: evidenceRows.length,
       aiUnavailable: result.ai_unavailable,
     }

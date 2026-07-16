@@ -187,12 +187,16 @@ export async function POST(
       .from("signal_outreach_events")
       .select("*")
       .eq("prospect_id", prospect.id)
+      .eq("is_current", true)
+      .is("stale_at", null)
       .order("created_at", { ascending: false })
       .limit(20),
     supabase
       .from("signal_concepts")
       .select("*")
       .eq("prospect_id", prospect.id)
+      .eq("is_current", true)
+      .is("stale_at", null)
       .order("created_at", { ascending: false })
       .limit(4),
     supabase
@@ -233,6 +237,8 @@ export async function POST(
     .from("signal_analyses")
     .select("*")
     .eq("prospect_id", prospect.id)
+    .eq("is_current", true)
+    .is("stale_at", null)
     .not("overall_opportunity_score", "is", null)
     .order("created_at", { ascending: false })
     .limit(1)

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
+import { invalidateSignalArtifacts } from "@/lib/signal/artifacts"
+import { changedSignalIdentityFields } from "@/lib/signal/copilot"
 import { formatSignalPhone } from "@/lib/signal/input-parser"
 import { normalizeSignalBusinessName, normalizeSignalHostname, normalizeSignalPhone } from "@/lib/signal/research"
 import { signalIdentityCorrectionSchema } from "@/lib/signal/validation"
@@ -65,10 +67,11 @@ export async function PATCH(
       ...record(existing.identity_resolution),
       manual_confirmation: { source: correction.verification_source, at: new Date().toISOString() },
     },
-    analysis_status: "needs_review",
-    lead_lifecycle: "needs_confirmation",
+    analysis_status: "queued",
+    analysis_error: null,
+    lead_lifecycle: "resolving",
     sales_pack_state: "not_ready",
-    next_action: "Re-run identity and affected analysis after this correction.",
+    next_action: "Signal is regenerating the analysis for the corrected identity.",
   }
   const { data: updated, error: updateError } = await supabase.from("signal_prospects").update(update).eq("id", prospectId).select().single()
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
@@ -87,6 +90,37 @@ export async function PATCH(
     ["business_location_type", existing.business_location_type, update.business_location_type],
   ]
   const changed = tracked.filter(([, before, after]) => JSON.stringify(before ?? null) !== JSON.stringify(after ?? null))
+  const changedIdentityFields = changedSignalIdentityFields(
+    {
+      canonical_name: existing.canonical_name || existing.business_name,
+      public_address: existing.public_address,
+      public_phone: existing.public_phone,
+      industry: existing.industry,
+      website_url: existing.website_url,
+      instagram_url: existing.instagram_url,
+      facebook_url: existing.facebook_url,
+      provider_place_id: existing.provider_place_id,
+      chain_status: existing.chain_status,
+    },
+    {
+      canonical_name: canonicalName,
+      public_address: update.public_address,
+      public_phone: phone,
+      industry: update.industry,
+      website_url: update.website_url,
+      instagram_url: update.instagram_url,
+      facebook_url: update.facebook_url,
+      provider_place_id: existing.provider_place_id,
+      chain_status: update.chain_status,
+    },
+  )
+  if (changedIdentityFields.length) {
+    await invalidateSignalArtifacts({
+      prospect: existing,
+      changedFields: changedIdentityFields,
+      createdBy: authCheck.access.userId,
+    })
+  }
   if (changed.length) {
     await supabase.from("signal_identity_correction_history").insert(changed.map(([field, before, after]) => ({
       prospect_id: prospectId,
@@ -99,7 +133,6 @@ export async function PATCH(
     })))
   }
   await Promise.all([
-    supabase.from("signal_concepts").update({ status: "archived" }).eq("prospect_id", prospectId).eq("status", "prompt_ready"),
     supabase.from("signal_lead_activities").insert({
       prospect_id: prospectId,
       activity_type: "identity_corrected",
@@ -108,7 +141,7 @@ export async function PATCH(
       created_by: authCheck.access.userId,
     }),
   ])
-  return NextResponse.json({ prospect: updated, reanalysis_scope: "identity" })
+  return NextResponse.json({ prospect: updated, reanalysis_scope: changedIdentityFields.includes("website_url") ? "website" : changedIdentityFields.includes("industry") ? "opportunity" : "identity", artifacts_invalidated: changedIdentityFields.length > 0 })
 }
 
 export async function POST(
@@ -125,6 +158,11 @@ export async function POST(
   if (!prospectData) return NextResponse.json({ error: "Signal lead not found." }, { status: 404 })
   const prospect = prospectData as SignalProspect
   const submittedName = prospect.submitted_name || prospect.business_name
+  await invalidateSignalArtifacts({
+    prospect,
+    changedFields: ["canonical_name", "public_address", "public_phone", "industry", "website_url", "instagram_url", "facebook_url", "provider_place_id", "chain_status"],
+    createdBy: authCheck.access.userId,
+  })
   await Promise.all([
     supabase.from("signal_identity_candidates").update({ resolution_status: "unrelated", rejection_reason: "Mountline marked all suggested matches as unrelated." }).eq("prospect_id", prospectId),
     supabase.from("signal_prospects").update({

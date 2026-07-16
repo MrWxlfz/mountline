@@ -56,6 +56,8 @@ export default async function SignalCallSessionPage({
           .from("signal_analyses")
           .select("*")
           .in("prospect_id", prospectIds)
+          .eq("is_current", true)
+          .is("stale_at", null)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
     prospectIds.length
@@ -63,6 +65,8 @@ export default async function SignalCallSessionPage({
           .from("signal_outreach_drafts")
           .select("*")
           .in("prospect_id", prospectIds)
+          .eq("is_current", true)
+          .is("stale_at", null)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
   ])

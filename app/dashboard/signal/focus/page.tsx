@@ -31,8 +31,8 @@ export default async function SignalFocusPage() {
     { data: events },
   ] = await Promise.all([
     supabase.from("signal_prospects").select("*").order("created_at", { ascending: false }),
-    supabase.from("signal_analyses").select("*").order("created_at", { ascending: false }),
-    supabase.from("signal_outreach_drafts").select("*").order("created_at", { ascending: false }),
+    supabase.from("signal_analyses").select("*").eq("is_current", true).is("stale_at", null).order("created_at", { ascending: false }),
+    supabase.from("signal_outreach_drafts").select("*").eq("is_current", true).is("stale_at", null).order("created_at", { ascending: false }),
     supabase
       .from("signal_focus_items")
       .select("*")

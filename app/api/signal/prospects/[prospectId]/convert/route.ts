@@ -65,6 +65,8 @@ export async function POST(
     .from("signal_analyses")
     .select("*")
     .eq("prospect_id", prospect.id)
+    .eq("is_current", true)
+    .is("stale_at", null)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle()

@@ -7,6 +7,10 @@ import type {
 export type SignalPlaybookKey =
   | "auto_detailing"
   | "barber_salon"
+  | "dry_cleaner_laundry"
+  | "pet_grooming"
+  | "bakery_donut"
+  | "spa_wellness"
   | "hvac"
   | "roofing_contractors_home_services"
   | "medical_dental"
@@ -27,6 +31,17 @@ export type SignalPlaybook = {
   discoveryQuestions: string[]
   redFlags: string[]
   complianceNotes: string[]
+  customerJourney?: {
+    model: string
+    primaryIntent: string
+    dominantContactRoute: string
+    likelyConversionAction: string
+  }
+  offerModules?: Array<{
+    key: string
+    label: string
+    verificationQuestion: string
+  }>
 }
 
 export const MEDICAL_COMPLIANCE_WARNING =
@@ -71,6 +86,13 @@ export const SIGNAL_PLAYBOOKS: Record<SignalPlaybookKey, SignalPlaybook> = {
       "Only asks for automated outreach",
     ],
     complianceNotes: ["Standard public business research only."],
+    customerJourney: { model: "Appointment or quote driven", primaryIntent: "Compare services, proof, and availability", dominantContactRoute: "Quote request, phone, or booking link", likelyConversionAction: "Request a quote or book service" },
+    offerModules: [
+      { key: "packages", label: "Verified service packages", verificationQuestion: "Which packages and add-ons should customers see?" },
+      { key: "service_area", label: "Service area or shop location", verificationQuestion: "Is service mobile, shop-based, or both?" },
+      { key: "quote", label: "Quote request", verificationQuestion: "What information is needed before giving a quote?" },
+      { key: "gallery", label: "Before-and-after proof", verificationQuestion: "Which photos may Mountline use?" },
+    ],
   },
   barber_salon: {
     key: "barber_salon",
@@ -109,6 +131,93 @@ export const SIGNAL_PLAYBOOKS: Record<SignalPlaybookKey, SignalPlaybook> = {
       "No permission to use team photos or service details",
     ],
     complianceNotes: ["Standard public business research only."],
+    customerJourney: { model: "Appointment or walk-in driven", primaryIntent: "Review services, provider availability, and pricing", dominantContactRoute: "Booking link or phone", likelyConversionAction: "Book an appointment or confirm walk-in availability" },
+    offerModules: [
+      { key: "services", label: "Verified services", verificationQuestion: "Which services and prices should be shown?" },
+      { key: "booking", label: "Existing booking route", verificationQuestion: "Which booking tool should the site preserve?" },
+      { key: "team", label: "Team or provider details", verificationQuestion: "Do clients select a provider or first available?" },
+    ],
+  },
+  dry_cleaner_laundry: {
+    key: "dry_cleaner_laundry",
+    name: "Dry Cleaner / Laundry",
+    complianceTier: "standard",
+    relevantDemo: "none",
+    recommendedOutreachMode: "professional_studio",
+    idealSignals: ["Confirmed local storefront", "Customers need services, hours, directions, and phone information", "Public reviews or listing activity show an operating business"],
+    visibleWeaknesses: ["No official website is confirmed", "Services and turnaround information are unclear", "Customers may rely on directory listings or phone calls for basic information"],
+    workflowOpportunities: ["Mobile location-and-services website", "Hours, directions, and call button", "Verified alterations information", "Verified pickup or delivery information", "Commercial account inquiry"],
+    discoveryQuestions: ["Which services do customers call about most often?", "Do customers currently use an official website or another page for hours and services?", "Are alterations, wash-and-fold, pickup, or delivery offered?"],
+    redFlags: ["Do not assume alterations, wash-and-fold, pickup, or delivery", "Do not claim the business has no website until the owner or strong public evidence confirms it"],
+    complianceNotes: ["Use only verified service and turnaround details."],
+    customerJourney: { model: "Storefront and repeat-service driven", primaryIntent: "Confirm services, hours, location, and turnaround expectations", dominantContactRoute: "Walk-in, directions, or phone", likelyConversionAction: "Visit the storefront or call with a service question" },
+    offerModules: [
+      { key: "services", label: "Verified cleaning services", verificationQuestion: "Is the business dry cleaning, general laundry, or both?" },
+      { key: "alterations", label: "Alterations information", verificationQuestion: "Are alterations offered?" },
+      { key: "wash_fold", label: "Wash-and-fold information", verificationQuestion: "Is wash-and-fold offered?" },
+      { key: "pickup_delivery", label: "Pickup or delivery information", verificationQuestion: "Is pickup or delivery offered?" },
+      { key: "hours_directions", label: "Hours, directions, and call button", verificationQuestion: "Which hours and phone number should customers use?" },
+    ],
+  },
+  pet_grooming: {
+    key: "pet_grooming",
+    name: "Dog Groomer / Pet Services",
+    complianceTier: "standard",
+    relevantDemo: "none",
+    recommendedOutreachMode: "professional_studio",
+    idealSignals: ["Appointment-driven local service", "Service and policy questions recur before booking", "Before-and-after proof matters"],
+    visibleWeaknesses: ["Booking or contact route is unclear", "Breed, size, vaccination, or new-client policies are hard to find", "Gallery is outdated or thin"],
+    workflowOpportunities: ["Service and booking clarity", "New-client and vaccination policies", "Before-and-after gallery", "Availability and contact route"],
+    discoveryQuestions: ["Are you accepting new clients?", "What should a new client know before requesting an appointment?", "Do clients book online, call, or message?"],
+    redFlags: ["Do not invent breed, size, vaccination, or new-client policies"],
+    complianceNotes: ["Use verified public policy and service information only."],
+    customerJourney: { model: "Appointment driven", primaryIntent: "Check services, policies, proof, and availability", dominantContactRoute: "Booking request, phone, or message", likelyConversionAction: "Request or book a grooming appointment" },
+    offerModules: [
+      { key: "services", label: "Verified grooming services", verificationQuestion: "Which grooming services are currently offered?" },
+      { key: "policies", label: "New-client and pet policies", verificationQuestion: "What should new clients know before booking?" },
+      { key: "gallery", label: "Before-and-after gallery", verificationQuestion: "Which photos may Mountline use?" },
+      { key: "booking", label: "Booking or contact route", verificationQuestion: "How should new clients request an appointment?" },
+    ],
+  },
+  bakery_donut: {
+    key: "bakery_donut",
+    name: "Donut Shop / Bakery",
+    complianceTier: "standard",
+    relevantDemo: "none",
+    recommendedOutreachMode: "professional_studio",
+    idealSignals: ["Walk-in local business", "Hours, location, menu highlights, and photos drive visits", "Custom orders or catering may matter when verified"],
+    visibleWeaknesses: ["Hours or directions are difficult to confirm", "Menu highlights and photos are scattered", "Custom-order contact route is unclear"],
+    workflowOpportunities: ["Mobile hours-and-location site", "Menu highlights and photos", "Directions", "Verified custom-order or catering inquiry"],
+    discoveryQuestions: ["What do first-time customers most often ask?", "Do you take custom or catering orders?", "Where should customers check current hours and holiday updates?"],
+    redFlags: ["Do not invent menu items, prices, ordering, catering, or holiday hours"],
+    complianceNotes: ["Keep menu, price, and ordering claims explicitly verified."],
+    customerJourney: { model: "Walk-in and order driven", primaryIntent: "Check hours, location, menu highlights, and ordering options", dominantContactRoute: "Directions, walk-in, or phone", likelyConversionAction: "Visit, call, or place an order" },
+    offerModules: [
+      { key: "hours_location", label: "Hours, location, and directions", verificationQuestion: "Which hours should customers rely on?" },
+      { key: "menu", label: "Verified menu highlights", verificationQuestion: "Which items should be highlighted?" },
+      { key: "custom_orders", label: "Custom-order contact", verificationQuestion: "Are custom or catering orders offered?" },
+      { key: "photos", label: "Current product photos", verificationQuestion: "Which current photos may Mountline use?" },
+    ],
+  },
+  spa_wellness: {
+    key: "spa_wellness",
+    name: "Spa / Wellness",
+    complianceTier: "standard",
+    relevantDemo: "barber-shop",
+    recommendedOutreachMode: "professional_studio",
+    idealSignals: ["Appointment-driven services", "Trust, credentials, policies, and booking influence decisions", "A calm visual presentation matters"],
+    visibleWeaknesses: ["Services or practitioner information are unclear", "Booking and policy information are scattered", "Trust signals are difficult to evaluate"],
+    workflowOpportunities: ["Verified service pages", "Practitioner and credential presentation", "Booking route", "Policies and treatment guidance"],
+    discoveryQuestions: ["Do clients choose by treatment, practitioner, or availability?", "Which booking tool should remain in place?", "Which policies or preparation questions come up most often?"],
+    redFlags: ["Do not make medical, credential, or treatment-result claims without verification"],
+    complianceNotes: ["Treat medical services as compliance-gated when official evidence supports that classification."],
+    customerJourney: { model: "Appointment driven", primaryIntent: "Compare services, trust, practitioner fit, and availability", dominantContactRoute: "Booking link or phone", likelyConversionAction: "Book or request an appointment" },
+    offerModules: [
+      { key: "services", label: "Verified services", verificationQuestion: "Which services and descriptions are current?" },
+      { key: "practitioners", label: "Practitioner information", verificationQuestion: "Which practitioners and credentials may be shown?" },
+      { key: "booking", label: "Existing booking route", verificationQuestion: "Which booking system should the site use?" },
+      { key: "policies", label: "Verified client policies", verificationQuestion: "Which booking and preparation policies should be shown?" },
+    ],
   },
   hvac: {
     key: "hvac",
@@ -370,6 +479,10 @@ export const SIGNAL_PLAYBOOKS: Record<SignalPlaybookKey, SignalPlaybook> = {
 
 const PLAYBOOK_KEYWORDS: Array<[SignalPlaybookKey, string[]]> = [
   ["medical_dental", ["medical", "clinic", "doctor", "dentist", "dental", "orthodont", "healthcare", "practice", "dermatology", "physician"]],
+  ["dry_cleaner_laundry", ["dry cleaner", "dry cleaning", "laundry", "laundromat", "wash and fold", "garment care"]],
+  ["pet_grooming", ["dog groom", "pet groom", "groomer", "grooming salon", "pet spa"]],
+  ["bakery_donut", ["donut", "doughnut", "bakery", "bakeshop", "pastry"]],
+  ["spa_wellness", ["day spa", "massage spa", "facial spa", "skin spa"]],
   ["auto_detailing", ["auto detail", "mobile detail", "car detail", "detailing", "car wash", "ceramic coating", "ceramic", "paint correction"]],
   ["barber_salon", ["barber", "barbershop", "salon", "haircut", "hair cut", "fade", "beard trim", "stylist", "blowout"]],
   ["beauty_wellness", ["beauty", "spa", "lashes", "nails", "esthetician", "facial", "wellness", "massage", "skincare", "med spa"]],

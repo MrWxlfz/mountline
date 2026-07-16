@@ -139,6 +139,13 @@ export async function runAndStoreInitialSignalAnalysis({
       "Recommendations must be read against source URLs and public evidence; unsupported business assumptions are not verified facts.",
   }
 
+  const generatedAt = new Date().toISOString()
+  await supabase
+    .from("signal_analyses")
+    .update({ is_current: false, stale_at: generatedAt, stale_reason: "Replaced by a newer analysis." })
+    .eq("prospect_id", prospect.id)
+    .eq("is_current", true)
+
   const { data: analysisData, error: analysisError } = await supabase
     .from("signal_analyses")
     .insert({
@@ -195,6 +202,25 @@ export async function runAndStoreInitialSignalAnalysis({
       red_flags: output.red_flags,
       compliance_warning: output.compliance_warning,
       executive_summary: output.executive_summary,
+      identity_version: prospect.identity_version || 1,
+      evidence_version: prospect.evidence_version || 1,
+      website_version: prospect.website_version || 1,
+      category_version: prospect.category_version || 1,
+      prompt_version: "signal-analysis-v4",
+      input_snapshot: {
+        canonical_name: prospect.canonical_name || prospect.business_name,
+        public_address: prospect.public_address,
+        public_phone: prospect.public_phone,
+        industry: prospect.industry,
+        website_url: prospect.website_url,
+        instagram_url: prospect.instagram_url,
+        facebook_url: prospect.facebook_url,
+        provider_place_id: prospect.provider_place_id,
+        chain_status: prospect.chain_status,
+      },
+      is_current: true,
+      stale_at: null,
+      stale_reason: null,
     })
     .select()
     .single()

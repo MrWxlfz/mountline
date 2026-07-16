@@ -25,6 +25,10 @@ import {
 export const signalPlaybookSchema = z.enum([
   "auto_detailing",
   "barber_salon",
+  "dry_cleaner_laundry",
+  "pet_grooming",
+  "bakery_donut",
+  "spa_wellness",
   "hvac",
   "roofing_contractors_home_services",
   "medical_dental",

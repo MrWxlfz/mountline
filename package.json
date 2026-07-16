@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "evaluate:signal": "node --experimental-strip-types scripts/evaluate-signal.ts",
+    "evaluate:signal-copilot": "node --experimental-strip-types scripts/evaluate-signal-copilot.ts",
     "repair:signal-identities": "node --experimental-strip-types scripts/repair-signal-identities.ts",
     "lint": "eslint .",
     "start": "next start",

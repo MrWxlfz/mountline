@@ -1,5 +1,25 @@
 # Signal intelligence overhaul plan
 
+## Sales copilot architecture v4 — implemented
+
+- The legacy prospect workspace and newer run engine remain intact, but every prospect now resolves into one of four explicit operating modes: identity resolution, verification outreach, opportunity outreach, or active-deal support.
+- Identity and evidence versions are the source of truth for derived artifacts. Canonical name, address, phone, category, website, social profile, provider-place ID, and chain-status corrections invalidate only their declared dependents; old analyses, concepts, and scripts remain in history with an explicit stale reason.
+- Provider health is stored separately from lead uncertainty. An integration failure can limit research coverage, but it cannot become a claim about a business or appear as a question for the owner.
+- Business understanding, research missions, uncertainty budgets, executive recommendations, opportunity briefs, action availability, next actions, and the 10-dimension quality score are persisted as structured artifacts.
+- Sales preparation uses four passes: deal diagnosis, strategy, script/asset generation, and red-team review. One repair is attempted; a safe deterministic verification script is used if the reviewed result still fails.
+- Concepts are allowed during verification only as clearly labeled hypotheses. Strong-site holds, ambiguous identity, stale identity snapshots, explicit declines, and do-not-contact state disable the relevant actions with a visible reason.
+- The prospect workspace starts with the recommendation and next move, exposes prepared tools and contextual actions, and moves research details below the operating decision.
+- The additive migration `20260715173345_signal_sales_copilot_v4.sql` creates version history, provider-health, and research-mission persistence with RLS and server-only grants.
+- Twenty deterministic fixtures cover identity failures, weak/strong/no-site businesses, category variation, provider outage, stale artifacts, active conversations, declines, and conversion. Custom Cleaners is the named regression fixture.
+
+### Dependency and invalidation flow
+
+1. Confirmed identity and accepted evidence create the active input snapshot and version numbers.
+2. The dependency graph generates the business profile, uncertainty budget, recommendation, opportunity, concept, sales pack, and next action.
+3. A correction increments the relevant input version, records which fields changed, and marks dependent current artifacts stale while preserving their history.
+4. Server routes and workspace render guards reject artifacts whose version or identity snapshot no longer matches the active prospect.
+5. Regeneration creates a new current artifact version; unrelated artifacts remain usable.
+
 ## Focused identity workflow v3 — implemented
 
 - Root cause of the `magicpin` failure: the focused parser split the submitted name/address too loosely, unknown public domains defaulted to a likely-official source, the first weak website candidate was scanned, and structured publisher metadata then outranked the submitted name in canonical-name scoring. The prospect row was also created before resolution and appeared like a normal lead.

@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
+import { invalidateSignalArtifacts } from "@/lib/signal/artifacts"
+import { changedSignalIdentityFields } from "@/lib/signal/copilot"
 import { formatSignalPhone } from "@/lib/signal/input-parser"
 import { normalizeSignalBusinessName, normalizeSignalHostname, normalizeSignalPhone } from "@/lib/signal/research"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { SignalIdentityCandidateRecord, SignalProspect } from "@/lib/supabase/types"
 
 const actionSchema = z.object({ action: z.enum(["confirm", "unrelated"]) })
+
+function stringList(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
+}
 
 export async function POST(
   request: Request,
@@ -47,11 +53,18 @@ export async function POST(
 
   const canonicalName = candidate.candidate_name || prospect.submitted_name || prospect.business_name
   const phone = formatSignalPhone(candidate.phone)
+  const candidateSocialUrls = stringList(candidate.social_urls)
+  const instagramUrl = candidateSocialUrls.find((url) => /instagram\.com/i.test(url)) || null
+  const facebookUrl = candidateSocialUrls.find((url) => /facebook\.com/i.test(url)) || null
+  // A newly confirmed identity must not inherit a domain from the previously
+  // selected entity. If this candidate has no eligible official site, clear the
+  // active URL and let focused website research establish it again.
+  const websiteUrl = candidate.official_website_eligible ? candidate.website_url : null
   const override = {
     canonical_name: canonicalName,
     public_address: candidate.address,
     public_phone: phone,
-    website_url: candidate.official_website_eligible ? candidate.website_url : null,
+    website_url: websiteUrl,
     maps_url: candidate.source_classification === "places_map_listing" ? candidate.source_url : null,
     verification_source: candidate.source_classification === "places_map_listing" ? "places_listing" : "other",
   }
@@ -84,13 +97,15 @@ export async function POST(
     manual_identity_override: override,
     public_address: candidate.address || prospect.public_address,
     public_phone: phone || prospect.public_phone,
-    website_url: candidate.official_website_eligible ? candidate.website_url : prospect.website_url,
+    website_url: websiteUrl,
+    instagram_url: instagramUrl,
+    facebook_url: facebookUrl,
     provider_place_id: candidate.provider_place_id || prospect.provider_place_id,
     city: candidate.city || prospect.city,
     state: candidate.state || prospect.state,
     industry: candidate.category || prospect.industry,
     normalized_business_name: normalizeSignalBusinessName(canonicalName) || null,
-    normalized_hostname: normalizeSignalHostname(candidate.website_url) || null,
+    normalized_hostname: normalizeSignalHostname(websiteUrl) || null,
     public_phone_normalized: normalizeSignalPhone(phone) || null,
     identity_resolution_state: "user_confirmed",
     identity_status: "verified",
@@ -102,6 +117,33 @@ export async function POST(
     next_action: "Continue analysis using the confirmed business.",
   }).eq("id", prospectId).select().single()
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+  const changedFields = changedSignalIdentityFields(
+    {
+      canonical_name: prospect.canonical_name || prospect.business_name,
+      public_address: prospect.public_address,
+      public_phone: prospect.public_phone,
+      industry: prospect.industry,
+      website_url: prospect.website_url,
+      instagram_url: prospect.instagram_url,
+      facebook_url: prospect.facebook_url,
+      provider_place_id: prospect.provider_place_id,
+      chain_status: prospect.chain_status,
+    },
+    {
+      canonical_name: canonicalName,
+      public_address: candidate.address || prospect.public_address,
+      public_phone: phone || prospect.public_phone,
+      industry: candidate.category || prospect.industry,
+      website_url: websiteUrl,
+      instagram_url: instagramUrl,
+      facebook_url: facebookUrl,
+      provider_place_id: candidate.provider_place_id || prospect.provider_place_id,
+      chain_status: prospect.chain_status,
+    },
+  )
+  if (changedFields.length) {
+    await invalidateSignalArtifacts({ prospect, changedFields, createdBy: authCheck.access.userId })
+  }
   await supabase.from("signal_lead_activities").insert({
     prospect_id: prospectId,
     activity_type: "identity_candidate_confirmed",

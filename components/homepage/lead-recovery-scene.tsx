@@ -18,7 +18,7 @@ const journey = [
 
 export function LeadRecoveryScene() {
   return (
-    <div className="mtl-inquiry-journey">
+    <div className="mtl-inquiry-journey" data-mtl-reveal="lead-journey">
       <div className="mtl-inquiry-label">
         <span><i /> Illustrative workflow</span>
         <span>No customer data</span>

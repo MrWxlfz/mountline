@@ -8,8 +8,16 @@ import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 import './homepage.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+  display: "swap",
+})
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -17,40 +25,26 @@ export const viewport: Viewport = {
   maximumScale: 5,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#fbf8f2' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+    { media: '(prefers-color-scheme: dark)', color: '#090908' },
   ],
   viewportFit: 'cover',
 }
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://mountline.dev'),
-<<<<<<< Updated upstream
-  title: 'Mountline Studio',
-  description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
-  openGraph: {
-    title: 'Mountline Studio',
-    description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
-=======
   title: 'Mountline',
   description: 'Exceptional websites and practical systems for businesses.',
   openGraph: {
     title: 'Mountline',
     description: 'Exceptional websites and practical systems for businesses.',
->>>>>>> Stashed changes
     url: 'https://mountline.dev',
-    siteName: 'Mountline Studio',
+    siteName: 'Mountline',
     type: 'website',
   },
   twitter: {
-<<<<<<< Updated upstream
-    card: 'summary',
-    title: 'Mountline Studio',
-    description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
-=======
     card: 'summary_large_image',
     title: 'Mountline',
     description: 'Exceptional websites and practical systems for businesses.',
->>>>>>> Stashed changes
   },
   icons: {
     icon: [
@@ -83,9 +77,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="bg-background">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geist.variable} ${geistMono.variable} bg-background`}
+    >
       <body className="font-sans antialiased bg-background text-foreground">
-        <ClerkProvider>
+        <ClerkProvider afterSignOutUrl="/">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

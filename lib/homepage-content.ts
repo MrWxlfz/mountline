@@ -70,6 +70,7 @@ export const workShowcase = [
     action: "Menu and call-ahead",
     href: "https://slidersdemo.mountline.dev",
     image: "/demo-previews/restaurant.jpg",
+    mobileImage: "/demo-previews/mobile/served-sliders.jpg",
     imageAlt:
       "Served Sliders restaurant concept with bold menu-first typography and food photography",
     accent: "#c86b3f",
@@ -88,6 +89,7 @@ export const workShowcase = [
     action: "Services and phone",
     href: "https://ruffscrubdemo.mountline.dev",
     image: "/demo-previews/dog-groomer.jpg",
+    mobileImage: "/demo-previews/mobile/ruff-scrub.jpg",
     imageAlt:
       "Ruff Scrub dog-grooming concept with warm typography, service actions, and a grooming photograph",
     accent: "#d66a4a",
@@ -106,6 +108,7 @@ export const workShowcase = [
     action: "Services and call",
     href: "https://barber.mountline.dev",
     image: "/demo-previews/barber-shop.jpg",
+    mobileImage: "/demo-previews/mobile/ricks-barbering.jpg",
     imageAlt:
       "Rick's Barbering concept with bold black-and-white typography and direct service actions",
     accent: "#d7d2ca",
@@ -124,6 +127,7 @@ export const workShowcase = [
     action: "Services and phone",
     href: "https://autodemo.mountline.dev",
     image: "/demo-previews/auto-detailing.jpg",
+    mobileImage: "/demo-previews/mobile/nomad-auto-spa.jpg",
     imageAlt:
       "Nomad Auto Spa concept with a minimal black layout and red service accents",
     accent: "#ef4242",
@@ -142,6 +146,7 @@ export const workShowcase = [
     action: "Plan a visit",
     href: "https://churchdemo.mountline.dev",
     image: "/demo-previews/church.jpg",
+    mobileImage: "/demo-previews/mobile/elevation.jpg",
     imageAlt:
       "Elevation church concept with a warm full-bleed worship image and clear visit actions",
     accent: "#f17a3d",
@@ -160,6 +165,7 @@ export const workShowcase = [
     action: "Request a walkthrough",
     href: "https://cleaningdemo.mountline.dev",
     image: "/demo-previews/commercial-cleaning.jpg",
+    mobileImage: "/demo-previews/mobile/squeaky-cleaning.jpg",
     imageAlt:
       "Squeaky Cleaning commercial-cleaning concept with an editorial service layout and walkthrough action",
     accent: "#4a82b7",

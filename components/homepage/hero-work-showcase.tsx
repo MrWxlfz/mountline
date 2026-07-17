@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, type CSSProperties, type KeyboardEvent } from "react"
+import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react"
 import Image from "next/image"
-import { ArrowUpRight, CalendarCheck, MapPin, Phone } from "lucide-react"
+import { ArrowUpRight, CalendarCheck, MapPin } from "lucide-react"
 import { LiquidSurface } from "@/components/homepage/liquid-surface"
 import { heroWork } from "@/lib/homepage-content"
 
 export function HeroWorkShowcase() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const selectorRef = useRef<HTMLDivElement>(null)
   const activeWork = heroWork[activeIndex]
   const sceneStyle = {
     "--project-accent": activeWork.accent,
@@ -15,6 +16,21 @@ export function HeroWorkShowcase() {
     "--project-focal": activeWork.focalPoint,
     "--project-mobile-focal": activeWork.mobileFocalPoint,
   } as CSSProperties
+
+  function selectProject(index: number) {
+    setActiveIndex(index)
+
+    if (window.innerWidth > 767) return
+    window.requestAnimationFrame(() => {
+      selectorRef.current
+        ?.querySelectorAll<HTMLButtonElement>("button")
+        [index]?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "nearest",
+          inline: "center",
+        })
+    })
+  }
 
   function moveSelection(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return
@@ -32,7 +48,7 @@ export function HeroWorkShowcase() {
   }
 
   return (
-    <figure className="mtl-hero-world" style={sceneStyle}>
+    <figure className="mtl-hero-world" style={sceneStyle} data-mtl-hero="stage">
       <LiquidSurface
         id="hero-work-panel"
         className="mtl-hero-stage"
@@ -76,18 +92,14 @@ export function HeroWorkShowcase() {
             <span className="mtl-phone-top"><i /></span>
             <span key={`${activeWork.id}-mobile`} className="mtl-hero-phone-image">
               <Image
-                src={activeWork.image}
+                src={activeWork.mobileImage}
                 alt=""
                 fill
+                preload={activeIndex === 0}
                 loading={activeIndex === 0 ? "eager" : undefined}
                 className="object-cover"
-                style={{ objectPosition: activeWork.mobileFocalPoint }}
                 sizes="(max-width: 767px) 28vw, 170px"
               />
-            </span>
-            <span className="mtl-phone-action">
-              <Phone className="size-3" />
-              {activeWork.action}
             </span>
           </div>
 
@@ -107,7 +119,7 @@ export function HeroWorkShowcase() {
           </div>
         </div>
 
-        <figcaption className="mtl-hero-caption" aria-live="polite">
+        <figcaption key={`${activeWork.id}-caption`} className="mtl-hero-caption" aria-live="polite">
           <span>
             <small>{activeWork.category}</small>
             <strong>{activeWork.title}</strong>
@@ -117,9 +129,11 @@ export function HeroWorkShowcase() {
       </LiquidSurface>
 
       <div
+        ref={selectorRef}
         className="mtl-hero-selector"
         role="tablist"
         aria-label="Choose a featured Mountline concept"
+        style={{ "--active-index": activeIndex } as CSSProperties}
       >
         {heroWork.map((work, index) => (
           <button
@@ -127,7 +141,7 @@ export function HeroWorkShowcase() {
             id={`hero-work-tab-${work.id}`}
             type="button"
             className={index === activeIndex ? "is-active" : undefined}
-            onClick={() => setActiveIndex(index)}
+            onClick={() => selectProject(index)}
             onKeyDown={(event) => moveSelection(event, index)}
             role="tab"
             aria-selected={index === activeIndex}

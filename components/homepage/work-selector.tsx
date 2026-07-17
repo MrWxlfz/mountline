@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type CSSProperties, type KeyboardEvent } from "react"
+import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight, ChevronDown, Monitor, Smartphone } from "lucide-react"
@@ -9,6 +9,7 @@ import { publicConceptRoutes, workShowcase } from "@/lib/homepage-content"
 export function WorkSelector() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [view, setView] = useState<"desktop" | "mobile">("desktop")
+  const tabsRef = useRef<HTMLDivElement>(null)
   const activeWork = workShowcase[activeIndex]
   const sceneStyle = {
     "--project-accent": activeWork.accent,
@@ -16,6 +17,21 @@ export function WorkSelector() {
     "--project-focal": activeWork.focalPoint,
     "--project-mobile-focal": activeWork.mobileFocalPoint,
   } as CSSProperties
+
+  function selectProject(index: number) {
+    setActiveIndex(index)
+
+    if (window.innerWidth > 767) return
+    window.requestAnimationFrame(() => {
+      tabsRef.current
+        ?.querySelectorAll<HTMLButtonElement>("button")
+        [index]?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "nearest",
+          inline: "center",
+        })
+    })
+  }
 
   function moveSelection(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
@@ -33,11 +49,13 @@ export function WorkSelector() {
   }
 
   return (
-    <div className="mtl-work-explorer" style={sceneStyle}>
+    <div className="mtl-work-explorer" style={sceneStyle} data-mtl-reveal="scene">
       <div
+        ref={tabsRef}
         className="mtl-work-tabs"
         role="tablist"
         aria-label="Choose a Mountline concept"
+        style={{ "--active-index": activeIndex } as CSSProperties}
       >
         {workShowcase.map((work, index) => (
           <button
@@ -45,7 +63,7 @@ export function WorkSelector() {
             id={`work-tab-${work.id}`}
             type="button"
             className={index === activeIndex ? "is-active" : undefined}
-            onClick={() => setActiveIndex(index)}
+            onClick={() => selectProject(index)}
             onKeyDown={(event) => moveSelection(event, index)}
             role="tab"
             aria-selected={index === activeIndex}
@@ -100,11 +118,11 @@ export function WorkSelector() {
             <span className="mtl-work-image-stage">
               <span key={`${activeWork.id}-${view}`} className="mtl-work-image-frame">
                 <Image
-                  src={activeWork.image}
+                  src={view === "mobile" ? activeWork.mobileImage : activeWork.image}
                   alt={activeWork.imageAlt}
                   fill
                   className="object-cover"
-                  style={{ objectPosition: view === "mobile" ? activeWork.mobileFocalPoint : activeWork.focalPoint }}
+                  style={{ objectPosition: view === "mobile" ? "50% 0%" : activeWork.focalPoint }}
                   sizes={view === "mobile"
                     ? "(max-width: 767px) 44vw, 300px"
                     : "(max-width: 767px) 100vw, (max-width: 1100px) 88vw, 65vw"}

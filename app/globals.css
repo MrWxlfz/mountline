@@ -815,7 +815,6 @@ html {
   html {
     scroll-behavior: auto;
   }
-<<<<<<< Updated upstream
 
   *,
   *::before,
@@ -829,6 +828,4 @@ html {
   .luke-cta-grid {
     animation: none;
   }
-=======
->>>>>>> Stashed changes
 }

@@ -8,6 +8,7 @@ import { reviewOptions } from "@/lib/homepage-content"
 import { reviewEventName } from "@/lib/review-interest"
 
 type FormState = "idle" | "submitting" | "success" | "error"
+type FieldErrors = Partial<Record<"name" | "business_name" | "email" | "service_needed", string>>
 
 function isReviewOption(value: string) {
   return reviewOptions.some((option) => option.value === value)
@@ -30,6 +31,7 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
   const [formData, setFormData] = useState<LeadFormData>(() => createEmptyForm(defaultInterest))
   const [formState, setFormState] = useState<FormState>("idle")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
   useEffect(() => {
     function applyInterest(value: string | null | undefined) {
@@ -76,6 +78,9 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = event.target
     setFormData((current) => ({ ...current, [name]: value }))
+    if (name in fieldErrors) {
+      setFieldErrors((current) => ({ ...current, [name]: undefined }))
+    }
 
     if (formState === "error") {
       setFormState("idle")
@@ -85,8 +90,28 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const formElement = event.currentTarget
+
+    const nextErrors: FieldErrors = {}
+    if (formData.name.trim().length < 2) nextErrors.name = "Please enter your name."
+    if (!formData.business_name?.trim()) nextErrors.business_name = "Please enter the business name."
+    if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) nextErrors.email = "Please enter a valid email address."
+    if (!formData.service_needed) nextErrors.service_needed = "Choose the closest starting point."
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors)
+      setFormState("error")
+      setErrorMessage("Please check the highlighted details.")
+      const firstName = Object.keys(nextErrors)[0]
+      window.requestAnimationFrame(() => {
+        formElement.querySelector<HTMLElement>(`[name="${firstName}"]`)?.focus()
+      })
+      return
+    }
+
     setFormState("submitting")
     setErrorMessage(null)
+    setFieldErrors({})
 
     try {
       const result = await submitLead(formData)
@@ -110,6 +135,7 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
     setFormData(createEmptyForm(isReviewOption(hashInterest) ? hashInterest : defaultInterest))
     setFormState("idle")
     setErrorMessage(null)
+    setFieldErrors({})
   }
 
   if (formState === "success") {
@@ -125,14 +151,20 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mtl-review-form" aria-busy={formState === "submitting"}>
+    <form
+      onSubmit={handleSubmit}
+      className="mtl-review-form"
+      aria-busy={formState === "submitting"}
+      noValidate
+      data-mtl-reveal="form"
+    >
       <div className="mtl-form-heading">
         <p>A few details are enough</p>
         <h3>Tell us where to look.</h3>
       </div>
 
       <div className="mtl-form-grid">
-        <FormField label="Your name" htmlFor="review-name" required>
+        <FormField label="Your name" htmlFor="review-name" required error={fieldErrors.name}>
           <input
             id="review-name"
             name="name"
@@ -143,10 +175,12 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
             onChange={handleChange}
             className="mtl-form-control"
             placeholder="Your name"
+            aria-invalid={Boolean(fieldErrors.name)}
+            aria-describedby={fieldErrors.name ? "review-name-error" : undefined}
           />
         </FormField>
 
-        <FormField label="Business name" htmlFor="review-business" required>
+        <FormField label="Business name" htmlFor="review-business" required error={fieldErrors.business_name}>
           <input
             id="review-business"
             name="business_name"
@@ -157,6 +191,8 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
             onChange={handleChange}
             className="mtl-form-control"
             placeholder="Business name"
+            aria-invalid={Boolean(fieldErrors.business_name)}
+            aria-describedby={fieldErrors.business_name ? "review-business-error" : undefined}
           />
         </FormField>
 
@@ -173,7 +209,7 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
           />
         </FormField>
 
-        <FormField label="Best way to reach you" htmlFor="review-email" hint="Email" required>
+        <FormField label="Best way to reach you" htmlFor="review-email" hint="Email" required error={fieldErrors.email}>
           <input
             id="review-email"
             name="email"
@@ -184,11 +220,17 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
             onChange={handleChange}
             className="mtl-form-control"
             placeholder="you@business.com"
+            aria-invalid={Boolean(fieldErrors.email)}
+            aria-describedby={fieldErrors.email ? "review-email-error" : undefined}
           />
         </FormField>
       </div>
 
-      <fieldset className="mtl-interest-fieldset">
+      <fieldset
+        className="mtl-interest-fieldset"
+        aria-invalid={Boolean(fieldErrors.service_needed)}
+        aria-describedby={fieldErrors.service_needed ? "review-interest-error" : undefined}
+      >
         <legend>What should we look at?</legend>
         <div>
           {reviewOptions.map((option, index) => (
@@ -205,6 +247,9 @@ export function BusinessReviewForm({ defaultInterest = "" }: { defaultInterest?:
             </label>
           ))}
         </div>
+        {fieldErrors.service_needed ? (
+          <p id="review-interest-error" className="mtl-field-error">{fieldErrors.service_needed}</p>
+        ) : null}
       </fieldset>
 
       <details className="mtl-form-more">
@@ -277,6 +322,7 @@ function FormField({
   required = false,
   optional = false,
   hint,
+  error,
   children,
 }: {
   label: string
@@ -284,6 +330,7 @@ function FormField({
   required?: boolean
   optional?: boolean
   hint?: string
+  error?: string
   children: ReactNode
 }) {
   return (
@@ -293,6 +340,7 @@ function FormField({
         {hint || optional ? <small>{hint || "Optional"}</small> : null}
       </label>
       {children}
+      {error ? <p id={`${htmlFor}-error`} className="mtl-field-error">{error}</p> : null}
     </div>
   )
 }

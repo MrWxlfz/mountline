@@ -1,7 +1,6 @@
+import type { Metadata } from "next"
 import { MountlineHomepage } from "@/components/mountline-homepage"
 
-<<<<<<< Updated upstream
-=======
 export const metadata: Metadata = {
   title: {
     absolute: "Mountline | Make Your Business Easier to Choose",
@@ -69,7 +68,14 @@ const organizationJsonLd = {
   ],
 }
 
->>>>>>> Stashed changes
 export default function Home() {
-  return <MountlineHomepage />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <MountlineHomepage />
+    </>
+  )
 }

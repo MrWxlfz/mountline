@@ -160,7 +160,7 @@ export function StartingPathWorkbench() {
   }
 
   return (
-    <div className="mtl-workbench">
+    <div className="mtl-workbench" data-mtl-reveal="scene">
       <div className="mtl-bench-topbar" aria-hidden="true">
         <span><i /> Mountline starting point</span>
         <span>Choose the closest problem</span>

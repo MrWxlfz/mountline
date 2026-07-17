@@ -23,7 +23,7 @@ function CallbackVisual() {
       <div><PhoneMissed className="size-4" /><span><small>Missed call</small><strong>New service question</strong></span><time>Now</time></div>
       <span className="mtl-cap-line"><i /><i /><i /></span>
       <div><MessageSquareText className="size-4" /><span><small>Response sent</small><strong>Callback details collected</strong></span><Check className="size-4" /></div>
-      <div><PhoneCall className="size-4" /><span><small>Assigned</small><strong>Team callback</strong></span><b>Open</b></div>
+      <div><PhoneCall className="size-4" /><span><small>Callback</small><strong>Team handoff</strong></span><b><span>Waiting</span><span>Assigned</span></b></div>
     </div>
   )
 }
@@ -79,7 +79,7 @@ function SoftwareVisual() {
 export function CapabilityGallery() {
   return (
     <div className="mtl-capability-grid">
-      <article className="mtl-capability mtl-capability--callback" tabIndex={0} aria-labelledby="cap-callback-title">
+      <article className="mtl-capability mtl-capability--callback" tabIndex={0} aria-labelledby="cap-callback-title" data-mtl-reveal="capability">
         <div className="mtl-cap-copy">
           <p><PhoneCall className="size-4" /> Calls</p>
           <h3 id="cap-callback-title">Receptionist and callback systems</h3>
@@ -89,7 +89,7 @@ export function CapabilityGallery() {
         <small className="mtl-cap-reveal">The team stays in control of the handoff.</small>
       </article>
 
-      <article className="mtl-capability mtl-capability--support" tabIndex={0} aria-labelledby="cap-support-title">
+      <article className="mtl-capability mtl-capability--support" tabIndex={0} aria-labelledby="cap-support-title" data-mtl-reveal="capability">
         <div className="mtl-cap-copy">
           <p><MessageSquareText className="size-4" /> Answers</p>
           <h3 id="cap-support-title">Customer support</h3>
@@ -99,7 +99,7 @@ export function CapabilityGallery() {
         <small className="mtl-cap-reveal">Grounded answers, with a person close by.</small>
       </article>
 
-      <article className="mtl-capability mtl-capability--booking" tabIndex={0} aria-labelledby="cap-booking-title">
+      <article className="mtl-capability mtl-capability--booking" tabIndex={0} aria-labelledby="cap-booking-title" data-mtl-reveal="capability">
         <div className="mtl-cap-copy">
           <p><CalendarDays className="size-4" /> Requests</p>
           <h3 id="cap-booking-title">Booking and intake</h3>
@@ -109,7 +109,7 @@ export function CapabilityGallery() {
         <small className="mtl-cap-reveal">Ask only for the details the business uses.</small>
       </article>
 
-      <article className="mtl-capability mtl-capability--portal" tabIndex={0} aria-labelledby="cap-portal-title">
+      <article className="mtl-capability mtl-capability--portal" tabIndex={0} aria-labelledby="cap-portal-title" data-mtl-reveal="capability">
         <div className="mtl-cap-copy">
           <p><LayoutDashboard className="size-4" /> One place</p>
           <h3 id="cap-portal-title">Client portals</h3>
@@ -128,7 +128,7 @@ export function CapabilityGallery() {
         <small className="mtl-cap-reveal">Actual Mountline portal experience.</small>
       </article>
 
-      <article className="mtl-capability mtl-capability--operations" tabIndex={0} aria-labelledby="cap-operations-title">
+      <article className="mtl-capability mtl-capability--operations" tabIndex={0} aria-labelledby="cap-operations-title" data-mtl-reveal="capability">
         <div className="mtl-cap-copy">
           <p><Workflow className="size-4" /> Team view</p>
           <h3 id="cap-operations-title">Internal operations</h3>
@@ -138,7 +138,7 @@ export function CapabilityGallery() {
         <small className="mtl-cap-reveal">Clear ownership beats another crowded dashboard.</small>
       </article>
 
-      <article className="mtl-capability mtl-capability--software" tabIndex={0} aria-labelledby="cap-software-title">
+      <article className="mtl-capability mtl-capability--software" tabIndex={0} aria-labelledby="cap-software-title" data-mtl-reveal="capability">
         <div className="mtl-cap-copy">
           <p><Sparkles className="size-4" /> Built to fit</p>
           <h3 id="cap-software-title">Custom software</h3>

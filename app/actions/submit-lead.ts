@@ -1,5 +1,6 @@
 "use server"
 
+import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 
 export type LeadFormData = {
@@ -12,6 +13,7 @@ export type LeadFormData = {
   budget_range?: string
   message?: string
   source?: "website" | "luke_qr_page"
+  website_confirmation?: string
 }
 
 export type SubmitLeadResult = {
@@ -19,8 +21,6 @@ export type SubmitLeadResult = {
   error?: string
 }
 
-<<<<<<< Updated upstream
-=======
 const leadSchema = z.object({
   name: z.string().trim().min(2).max(100),
   business_name: z.string().trim().max(140).optional().default(""),
@@ -50,33 +50,51 @@ const leadSchema = z.object({
   website_confirmation: z.string().max(200).optional().default(""),
 })
 
->>>>>>> Stashed changes
 export async function submitLead(data: LeadFormData): Promise<SubmitLeadResult> {
   try {
+    const parsed = leadSchema.safeParse(data)
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "Please check the required details and try again.",
+      }
+    }
+
+    if (parsed.data.website_confirmation) {
+      return { success: true }
+    }
+
     const supabase = await createClient()
-    const source = data.source === "luke_qr_page" ? "luke_qr_page" : "website"
+    const source = parsed.data.source === "luke_qr_page" ? "luke_qr_page" : "website"
 
     const { error } = await supabase.from("leads").insert({
-      name: data.name,
-      business_name: data.business_name || null,
-      email: data.email,
-      phone: data.phone || null,
-      current_website: data.current_website || null,
-      service_needed: data.service_needed || null,
-      budget_range: data.budget_range || null,
-      message: data.message || null,
+      name: parsed.data.name,
+      business_name: parsed.data.business_name || null,
+      email: parsed.data.email,
+      phone: parsed.data.phone || null,
+      current_website: parsed.data.current_website || null,
+      service_needed: parsed.data.service_needed || null,
+      budget_range: parsed.data.budget_range || null,
+      message: parsed.data.message || null,
       source,
       status: "new",
     })
 
     if (error) {
       console.error("[mountline] Supabase error:", error)
-      return { success: false, error: error.message }
+      return {
+        success: false,
+        error: "The request could not be saved right now. Please try again.",
+      }
     }
 
     return { success: true }
   } catch (err) {
     console.error("[mountline] Submit lead error:", err)
-    return { success: false, error: "Failed to submit. Please try again." }
+    return {
+      success: false,
+      error: "The request could not be sent right now. Please try again.",
+    }
   }
 }

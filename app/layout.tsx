@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
+import './homepage.css'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -23,19 +24,33 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://mountline.dev'),
+<<<<<<< Updated upstream
   title: 'Mountline Studio',
   description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
   openGraph: {
     title: 'Mountline Studio',
     description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
+=======
+  title: 'Mountline',
+  description: 'Exceptional websites and practical systems for businesses.',
+  openGraph: {
+    title: 'Mountline',
+    description: 'Exceptional websites and practical systems for businesses.',
+>>>>>>> Stashed changes
     url: 'https://mountline.dev',
     siteName: 'Mountline Studio',
     type: 'website',
   },
   twitter: {
+<<<<<<< Updated upstream
     card: 'summary',
     title: 'Mountline Studio',
     description: 'Websites, client portals, and practical digital systems for businesses that need to look sharper online.',
+=======
+    card: 'summary_large_image',
+    title: 'Mountline',
+    description: 'Exceptional websites and practical systems for businesses.',
+>>>>>>> Stashed changes
   },
   icons: {
     icon: [

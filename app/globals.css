@@ -720,70 +720,70 @@ html {
 
 /* The marketing and Mountline ID layouts predate semantic utilities. This
    scoped bridge preserves their composition while making light mode usable. */
-.light .mountline-marketing,
+.light .mountline-marketing:not(.mountline-homepage),
 .light .mountline-id {
   background: var(--background) !important;
   color: var(--foreground) !important;
 }
 
-.light .mountline-marketing [class*="bg-black"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="bg-black"],
 .light .mountline-id [class*="bg-black"] {
   background-color: color-mix(in oklch, var(--background) 88%, transparent) !important;
 }
 
-.light .mountline-marketing [class*="bg-zinc-950"],
-.light .mountline-marketing [class*="bg-zinc-900"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="bg-zinc-950"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="bg-zinc-900"],
 .light .mountline-id [class*="bg-zinc-950"],
 .light .mountline-id [class*="bg-zinc-900"] {
   background-color: color-mix(in oklch, var(--surface-elevated) 92%, transparent) !important;
 }
 
-.light .mountline-marketing [class*="bg-white/"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="bg-white/"],
 .light .mountline-id [class*="bg-white/"] {
   background-color: color-mix(in oklch, var(--surface-muted) 78%, transparent) !important;
 }
 
-.light .mountline-marketing [class~="bg-white"],
-.light .mountline-marketing [class~="!bg-white"],
+.light .mountline-marketing:not(.mountline-homepage) [class~="bg-white"],
+.light .mountline-marketing:not(.mountline-homepage) [class~="!bg-white"],
 .light .mountline-id [class~="bg-white"],
 .light .mountline-id [class~="!bg-white"] {
   background-color: var(--foreground) !important;
 }
 
-.light .mountline-marketing [class*="border-white"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="border-white"],
 .light .mountline-id [class*="border-white"],
-.light .mountline-marketing [class*="divide-white"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="divide-white"],
 .light .mountline-id [class*="divide-white"] {
   border-color: var(--border) !important;
 }
 
-.light .mountline-marketing [class*="divide-white"] > :not(:last-child),
+.light .mountline-marketing:not(.mountline-homepage) [class*="divide-white"] > :not(:last-child),
 .light .mountline-id [class*="divide-white"] > :not(:last-child) {
   border-color: var(--border) !important;
 }
 
-.light .mountline-marketing [class*="text-white"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="text-white"],
 .light .mountline-id [class*="text-white"] {
   color: var(--foreground) !important;
 }
 
-.light .mountline-marketing [class~="text-black"],
-.light .mountline-marketing [class~="!text-black"],
+.light .mountline-marketing:not(.mountline-homepage) [class~="text-black"],
+.light .mountline-marketing:not(.mountline-homepage) [class~="!text-black"],
 .light .mountline-id [class~="text-black"],
 .light .mountline-id [class~="!text-black"] {
   color: var(--background) !important;
 }
 
-.light .mountline-marketing [class*="text-zinc-2"],
-.light .mountline-marketing [class*="text-zinc-3"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="text-zinc-2"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="text-zinc-3"],
 .light .mountline-id [class*="text-zinc-2"],
 .light .mountline-id [class*="text-zinc-3"] {
   color: var(--foreground) !important;
 }
 
-.light .mountline-marketing [class*="text-zinc-4"],
-.light .mountline-marketing [class*="text-zinc-5"],
-.light .mountline-marketing [class*="text-zinc-6"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="text-zinc-4"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="text-zinc-5"],
+.light .mountline-marketing:not(.mountline-homepage) [class*="text-zinc-6"],
 .light .mountline-id [class*="text-zinc-4"],
 .light .mountline-id [class*="text-zinc-5"],
 .light .mountline-id [class*="text-zinc-6"] {
@@ -815,6 +815,7 @@ html {
   html {
     scroll-behavior: auto;
   }
+<<<<<<< Updated upstream
 
   *,
   *::before,
@@ -828,4 +829,6 @@ html {
   .luke-cta-grid {
     animation: none;
   }
+=======
+>>>>>>> Stashed changes
 }

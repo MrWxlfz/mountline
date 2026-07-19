@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" fill="none">
+  <g transform="translate(4 8) scale(.58)" stroke="currentColor" fill="none">
+    <path d="M90 34 145 137H35L90 34Z" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M90 146V29" stroke-width="11" stroke-linecap="round"/>
+    <path d="m70 57 20-28 20 28" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="124" y="82" fill="currentColor" font-family="Geist, Arial, sans-serif" font-size="68" font-weight="520" letter-spacing="-3.6">mountline</text>
+</svg>

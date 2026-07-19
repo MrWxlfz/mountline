@@ -1,5 +1,6 @@
 allowBuilds:
   '@clerk/shared': true
   sharp: true
+  unrs-resolver: false
 overrides:
   postcss: 8.5.14

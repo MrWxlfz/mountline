@@ -1,0 +1,794 @@
+.experience {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  isolation: isolate;
+  font-family: var(--font-geist-sans), "Geist", Arial, sans-serif;
+}
+
+.experience button,
+.experience input {
+  font: inherit;
+}
+
+.experience button:focus-visible,
+.experience input:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.eventStage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #030303;
+  color: #fff;
+}
+
+.stageAtmosphere {
+  position: absolute;
+  inset: -35%;
+  background:
+    radial-gradient(circle at 50% 48%, rgb(255 255 255 / 8%), transparent 18%),
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 8%, rgb(255 255 255 / 2%) 8.15%, transparent 8.35%);
+  opacity: 0.7;
+  transform: rotate(-8deg);
+}
+
+.stageContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.stageIcon {
+  width: 3.4rem;
+  height: 3.4rem;
+  margin-bottom: 2.2rem;
+  opacity: 0.92;
+}
+
+.stageContent h1,
+.transitionTitle h1 {
+  margin: 0;
+  font-size: clamp(3.4rem, 9vw, 8rem);
+  font-weight: 520;
+  letter-spacing: -0.075em;
+  line-height: 0.92;
+}
+
+.stageContent > p:last-child,
+.transitionTitle p {
+  margin: 1.5rem 0 0;
+  color: rgb(255 255 255 / 62%);
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  letter-spacing: -0.025em;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: rgb(255 255 255 / 52%);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.68rem;
+  font-weight: 560;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.preshow {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: #000;
+}
+
+.canvasLayer,
+.canvasLayer > div {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fallbackArt {
+  position: absolute;
+  inset: -20%;
+  overflow: hidden;
+  background: #000;
+}
+
+.fallbackArt span {
+  position: absolute;
+  inset: 12%;
+  border-radius: 42% 58% 37% 63% / 56% 35% 65% 44%;
+  background: radial-gradient(ellipse at 42% 48%, #fff 0 7%, #aaa 15%, #111 37%, #000 61%);
+  filter: blur(28px) contrast(1.8);
+  opacity: 0.42;
+  transform: rotate(18deg) scale(1.2);
+  animation: fallbackFlow 20s ease-in-out infinite alternate;
+}
+
+.fallbackArt span:nth-child(2) {
+  inset: 6% 28% 31% -8%;
+  opacity: 0.34;
+  transform: rotate(-34deg);
+  animation-duration: 27s;
+  animation-direction: alternate-reverse;
+}
+
+.fallbackArt span:nth-child(3) {
+  inset: 37% -11% -7% 34%;
+  opacity: 0.25;
+  transform: rotate(68deg);
+  animation-duration: 31s;
+}
+
+.preshow:not(.webglFallback) .fallbackArt {
+  opacity: 0;
+}
+
+.contrastVeil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 26%) 0%, transparent 28%, transparent 67%, rgb(0 0 0 / 38%) 100%),
+    radial-gradient(circle at 35% 54%, transparent 0 25%, rgb(0 0 0 / 9%) 74%);
+}
+
+.entry {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
+  align-items: end;
+  padding: max(1.5rem, 4vw);
+  background: radial-gradient(circle at 70% 44%, rgb(255 255 255 / 4%), transparent 32%);
+}
+
+.entryBrand {
+  align-self: start;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: rgb(255 255 255 / 68%);
+  font-size: 0.76rem;
+  letter-spacing: -0.015em;
+}
+
+.entryBrand p {
+  margin: 0;
+}
+
+.entryIcon {
+  width: 2.15rem;
+  height: 2.15rem;
+}
+
+.entryCopy {
+  grid-column: 1;
+  align-self: end;
+  max-width: 48rem;
+  padding-bottom: clamp(2rem, 8vh, 7rem);
+}
+
+.entryCopy h1 {
+  margin: 0;
+  font-size: clamp(4.2rem, 11vw, 10.5rem);
+  font-weight: 510;
+  letter-spacing: -0.082em;
+  line-height: 0.86;
+}
+
+.entryCopy > p:last-child {
+  margin: 2rem 0 0;
+  color: rgb(255 255 255 / 48%);
+  font-size: clamp(1rem, 1.55vw, 1.22rem);
+  letter-spacing: -0.025em;
+}
+
+.entryActions {
+  grid-column: 2;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.entryActions button {
+  min-height: 3.25rem;
+  border-radius: 999px;
+  padding: 0 1.35rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 540;
+  transition: opacity 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.entryActions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.entryActions button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.primaryButton {
+  background: #fff;
+  color: #050505;
+}
+
+.secondaryButton {
+  border-color: rgb(255 255 255 / 18%) !important;
+  background: rgb(255 255 255 / 5%);
+  color: rgb(255 255 255 / 76%);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: rgb(255 255 255 / 9%);
+}
+
+.preshowUi {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.topBrand {
+  position: absolute;
+  top: max(1.35rem, 3vw);
+  left: max(1.35rem, 3vw);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 560;
+  letter-spacing: -0.035em;
+}
+
+.topBrand img {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.messageArea {
+  position: absolute;
+  left: max(1.35rem, 7vw);
+  right: max(1.35rem, 7vw);
+  top: 52%;
+  transform: translateY(-50%);
+}
+
+.messageFrame {
+  min-height: clamp(8rem, 22vw, 15rem);
+}
+
+.openingHeadline,
+.waitingHeadline {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  max-width: 15ch;
+  color: #fff;
+  font-size: clamp(3.6rem, 9.3vw, 9.6rem);
+  font-weight: 500;
+  letter-spacing: -0.078em;
+  line-height: 0.91;
+  text-wrap: balance;
+}
+
+.openingHeadline span:nth-child(2),
+.waitingHeadline span:nth-child(2) {
+  color: rgb(255 255 255 / 78%);
+}
+
+.liveSoon {
+  position: absolute;
+  left: max(1.35rem, 3vw);
+  bottom: max(1.5rem, calc(2.4vw + env(safe-area-inset-bottom)));
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #fff;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.64rem;
+  font-weight: 580;
+  letter-spacing: 0.14em;
+}
+
+.liveSoon span {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 0 rgb(255 255 255 / 35%);
+  animation: livePulse 3.2s ease-out infinite;
+}
+
+.controls {
+  position: absolute;
+  right: max(1.35rem, 3vw);
+  bottom: max(1.25rem, calc(2vw + env(safe-area-inset-bottom)));
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 0.22rem;
+  min-height: 3.15rem;
+  padding: 0.35rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 72%);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 20%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 500ms ease, transform 500ms ease;
+  mix-blend-mode: normal;
+  backdrop-filter: blur(12px);
+}
+
+.controlsVisible,
+.controls:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 2.38rem;
+  height: 2.38rem;
+  padding: 0 0.62rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgb(255 255 255 / 68%);
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.controls button:hover,
+.controls button[data-active="true"] {
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+}
+
+.controls svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.controlLabel {
+  font-size: 0.7rem;
+}
+
+.controlDivider {
+  width: 1px;
+  height: 1.35rem;
+  margin: 0 0.18rem;
+  background: rgb(255 255 255 / 15%);
+}
+
+.volumeControl {
+  display: flex;
+  align-items: center;
+  width: 4.25rem;
+  padding: 0 0.38rem;
+}
+
+.volumeControl input,
+.operatorSlider input {
+  width: 100%;
+  height: 1px;
+  accent-color: #fff;
+  cursor: pointer;
+}
+
+.skipButton {
+  width: auto !important;
+  padding-inline: 0.8rem !important;
+  font-size: 0.67rem;
+}
+
+.formationLogo {
+  position: absolute;
+  inset: 0;
+  z-index: 16;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.formationLogo img {
+  width: clamp(6.2rem, 13vw, 10rem);
+  height: auto;
+  filter: drop-shadow(0 0 26px rgb(255 255 255 / 12%));
+}
+
+.whiteFlash {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 70ms linear;
+}
+
+.whiteFlashActive {
+  opacity: 1;
+}
+
+.transitionBlack {
+  position: absolute;
+  inset: 0;
+  z-index: 41;
+  pointer-events: none;
+  background: #000;
+  opacity: 0;
+  transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.transitionBlackActive {
+  opacity: 1;
+}
+
+.transitionTitle {
+  position: absolute;
+  inset: 0;
+  z-index: 42;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+}
+
+.operatorTab,
+.operatorPanel {
+  position: absolute;
+  z-index: 60;
+  mix-blend-mode: normal;
+}
+
+.operatorTab {
+  top: max(1rem, 2vw);
+  right: max(1rem, 2vw);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.4rem;
+  padding: 0 0.8rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 74%);
+  color: rgb(255 255 255 / 72%);
+  cursor: pointer;
+  font-size: 0.7rem;
+  backdrop-filter: blur(12px);
+}
+
+.operatorTab svg {
+  width: 0.85rem;
+}
+
+.operatorPanel {
+  top: max(1rem, 2vw);
+  right: max(1rem, 2vw);
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid rgb(255 255 255 / 17%);
+  border-radius: 1.2rem;
+  background: rgb(5 5 5 / 92%);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 48%);
+  color: #fff;
+  backdrop-filter: blur(18px);
+}
+
+.operatorPanel header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.operatorPanel header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.operatorPanel header strong {
+  font-size: 1rem;
+  font-weight: 560;
+  letter-spacing: -0.025em;
+}
+
+.operatorKicker {
+  color: rgb(255 255 255 / 42%);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.operatorPanel header button,
+.diagnosticsToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: rgb(255 255 255 / 55%);
+  cursor: pointer;
+}
+
+.operatorPanel header button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+}
+
+.operatorPanel header button:hover {
+  background: rgb(255 255 255 / 8%);
+  color: #fff;
+}
+
+.operatorPanel header svg,
+.diagnosticsToggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.beginButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  height: 3rem;
+  margin-bottom: 0.7rem;
+  border: 0;
+  border-radius: 0.72rem;
+  background: #fff;
+  color: #050505;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 590;
+}
+
+.beginButton[data-pending="true"] {
+  background: #d8d8d8;
+  cursor: wait;
+}
+
+.beginButton svg {
+  width: 0.95rem;
+}
+
+.operatorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.42rem;
+}
+
+.operatorGrid button {
+  min-height: 2.45rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0.62rem;
+  background: rgb(255 255 255 / 5%);
+  color: rgb(255 255 255 / 72%);
+  cursor: pointer;
+  font-size: 0.67rem;
+}
+
+.operatorGrid button:hover {
+  background: rgb(255 255 255 / 9%);
+  color: #fff;
+}
+
+.operatorSlider {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  color: rgb(255 255 255 / 58%);
+  font-size: 0.66rem;
+}
+
+.operatorSlider output {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.operatorSlider input {
+  grid-column: 1 / -1;
+  margin: 0.45rem 0;
+}
+
+.diagnosticsList {
+  display: grid;
+  gap: 0.38rem;
+  margin: 0.85rem 0;
+  padding: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 0.7rem;
+  background: rgb(255 255 255 / 3%);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.61rem;
+}
+
+.diagnosticsList > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.diagnosticsList dt {
+  color: rgb(255 255 255 / 36%);
+}
+
+.diagnosticsList dd {
+  margin: 0;
+  color: rgb(255 255 255 / 76%);
+}
+
+.diagnosticsToggle {
+  gap: 0.45rem;
+  width: 100%;
+  height: 2.4rem;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 0.62rem;
+  font-size: 0.65rem;
+}
+
+.diagnosticsToggle[data-active="true"] {
+  background: rgb(255 255 255 / 8%);
+  color: #fff;
+}
+
+.shortcutLegend {
+  margin: 0.85rem 0 0;
+  color: rgb(255 255 255 / 28%);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.54rem;
+  text-align: center;
+}
+
+.performanceDiagnostics {
+  position: absolute;
+  z-index: 58;
+  left: 50%;
+  top: max(1rem, 2vw);
+  display: flex;
+  gap: 0.9rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 72%);
+  color: rgb(255 255 255 / 54%);
+  transform: translateX(-50%);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.52rem;
+  backdrop-filter: blur(10px);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes fallbackFlow {
+  0% { transform: rotate(12deg) scale(1.08) translate3d(-2%, 1%, 0); }
+  50% { transform: rotate(38deg) scale(1.32) translate3d(4%, -3%, 0); }
+  100% { transform: rotate(-8deg) scale(1.18) translate3d(-4%, 3%, 0); }
+}
+
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 34%); }
+  38%, 100% { box-shadow: 0 0 0 0.55rem rgb(255 255 255 / 0%); }
+}
+
+@media (max-width: 760px) {
+  .entry {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    padding: max(1.35rem, env(safe-area-inset-top)) 1.35rem max(1.35rem, env(safe-area-inset-bottom));
+  }
+
+  .entryCopy {
+    align-self: stretch;
+    padding: 10vh 0 0;
+  }
+
+  .entryCopy h1 {
+    font-size: clamp(4rem, 22vw, 7rem);
+  }
+
+  .entryActions {
+    display: grid;
+  }
+
+  .entryActions button {
+    width: 100%;
+  }
+
+  .messageArea {
+    top: 49%;
+  }
+
+  .openingHeadline,
+  .waitingHeadline {
+    max-width: 12ch;
+    font-size: clamp(3.2rem, 16vw, 6rem);
+  }
+
+  .controls {
+    right: 1rem;
+    bottom: max(4.1rem, calc(3.5rem + env(safe-area-inset-bottom)));
+    max-width: calc(100vw - 2rem);
+  }
+
+  .controlLabel,
+  .volumeControl,
+  .controlDivider {
+    display: none;
+  }
+
+  .performanceDiagnostics {
+    top: auto;
+    bottom: 7.4rem;
+    max-width: calc(100vw - 2rem);
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fallbackArt span,
+  .liveSoon span {
+    animation: none;
+  }
+
+  .controls,
+  .entryActions button,
+  .transitionBlack {
+    transition-duration: 1.2s;
+  }
+}

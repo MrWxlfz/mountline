@@ -19,9 +19,9 @@ export const metadata: Metadata = {
     "service business websites",
   ],
   openGraph: {
-    title: "Mountline | Every call should go somewhere.",
+    title: "Mountline | AI Receptionists for Service Businesses",
     description:
-      "The customer operating layer for service businesses: answer, qualify, schedule, follow up, and keep the work visible.",
+      "AI receptionists that answer calls, book appointments, send follow-up, and hand customers to your team when needed.",
     url: "https://mountline.dev",
     siteName: "Mountline",
     locale: "en_US",
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mountline | Every call should go somewhere.",
+    title: "Mountline | AI Receptionists for Service Businesses",
     description:
-      "AI reception and customer operations systems for service businesses.",
+      "Answer calls, book appointments, send follow-up, and keep your team updated.",
   },
 }
 

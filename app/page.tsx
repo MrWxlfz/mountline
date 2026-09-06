@@ -3,24 +3,25 @@ import { MountlineHomepage } from "@/components/mountline-homepage"
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Mountline | Make Your Business Easier to Choose",
+    absolute: "Mountline | Customer Systems for Service Businesses",
   },
   description:
-    "Mountline builds exceptional websites and practical systems that help customers call, book, buy, and get answers.",
+    "Mountline builds AI reception, scheduling, follow-up, customer communication, websites, and practical operations systems for service businesses.",
   alternates: {
     canonical: "/",
   },
   keywords: [
-    "business website design",
-    "web design Keller Texas",
-    "customer experience design",
-    "local business websites",
-    "DFW local businesses",
+    "AI receptionist",
+    "business call handling",
+    "missed call recovery",
+    "service business scheduling",
+    "customer communication systems",
+    "service business websites",
   ],
   openGraph: {
-    title: "Mountline | Make Your Business Easier to Choose",
+    title: "Mountline | Every call should go somewhere.",
     description:
-      "Exceptional websites and practical systems from a founder-led studio in Keller, Texas.",
+      "The customer operating layer for service businesses: answer, qualify, schedule, follow up, and keep the work visible.",
     url: "https://mountline.dev",
     siteName: "Mountline",
     locale: "en_US",
@@ -28,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mountline | Make Your Business Easier to Choose",
+    title: "Mountline | Every call should go somewhere.",
     description:
-      "Exceptional websites and practical systems from Mountline.",
+      "AI reception and customer operations systems for service businesses.",
   },
 }
 
@@ -41,7 +42,7 @@ const organizationJsonLd = {
   url: "https://mountline.dev",
   email: "hello@mountline.dev",
   description:
-    "Mountline builds exceptional websites and practical systems that make businesses easier to choose and easier to run.",
+    "Mountline builds AI reception, customer communication, scheduling, websites, and practical operations systems for service businesses.",
   founder: {
     "@type": "Person",
     name: "Luke Nordin",
@@ -61,10 +62,13 @@ const organizationJsonLd = {
     },
   ],
   knowsAbout: [
-    "Local business websites",
-    "Lead response and follow-up",
-    "Client portals",
-    "Customer systems",
+    "AI receptionist systems",
+    "Inbound call handling",
+    "Appointment scheduling",
+    "Missed-call recovery",
+    "Customer communication systems",
+    "Service business websites",
+    "Internal workflow systems",
   ],
 }
 

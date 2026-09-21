@@ -104,12 +104,5 @@ export async function POST(
     return NextResponse.json({ error: leadError.message }, { status: 500 })
   }
 
-  const { data: updatedProspect } = await supabase
-    .from("signal_prospects")
-    .update({ outreach_status: "interested" })
-    .eq("id", prospect.id)
-    .select()
-    .single()
-
-  return NextResponse.json({ lead, prospect: updatedProspect || prospect })
+  return NextResponse.json({ lead, prospect })
 }

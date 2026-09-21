@@ -4,6 +4,7 @@ import { buildSignalCopilotInputFromProspect } from "@/lib/signal/artifacts"
 import { buildSignalCopilotState, type SignalProviderIssue } from "@/lib/signal/copilot"
 import { signalPipelineUpdateSchema } from "@/lib/signal/validation"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { uuidSchema } from "@/lib/projects/validation"
 import type { SignalEvidenceLedgerItem, SignalProspect } from "@/lib/supabase/types"
 
 const outreachStatusByStage = {
@@ -32,16 +33,45 @@ export async function PATCH(
     )
   }
   const { prospectId } = await params
+  if (!uuidSchema.safeParse(prospectId).success) {
+    return NextResponse.json({ error: "Invalid Signal lead identifier." }, { status: 400 })
+  }
   const supabase = createAdminClient()
   const { data: existing, error: existingError } = await supabase
     .from("signal_prospects")
     .select("*")
     .eq("id", prospectId)
     .maybeSingle()
-  if (existingError) return NextResponse.json({ error: existingError.message }, { status: 500 })
+  if (existingError) {
+    console.error("[mountline] Pipeline lookup failed", { code: existingError.code, message: existingError.message })
+    return NextResponse.json({ error: "Pipeline state could not be loaded." }, { status: 500 })
+  }
   if (!existing) return NextResponse.json({ error: "Signal lead not found." }, { status: 404 })
   const prospect = existing as SignalProspect
   const nextStage = parsed.data.pipeline_stage
+  if (nextStage === "won") {
+    if (!prospect.converted_project_id) {
+      return NextResponse.json(
+        { error: "Won requires a linked project with recorded scope-acceptance evidence." },
+        { status: 409 },
+      )
+    }
+    const { data: confirmedProject, error: confirmationError } = await supabase
+      .from("projects")
+      .select("id, sale_confirmed_at, sale_confirmed_by, sale_evidence_reference")
+      .eq("id", prospect.converted_project_id)
+      .maybeSingle()
+    if (confirmationError) {
+      console.error("[mountline] Sale confirmation lookup failed", { code: confirmationError.code, message: confirmationError.message })
+      return NextResponse.json({ error: "Sale evidence could not be verified." }, { status: 500 })
+    }
+    if (!confirmedProject?.sale_confirmed_at || !confirmedProject.sale_confirmed_by || !confirmedProject.sale_evidence_reference) {
+      return NextResponse.json(
+        { error: "Record accepted scope evidence on the linked project before moving this lead to Won." },
+        { status: 409 },
+      )
+    }
+  }
   const nextAction = Object.prototype.hasOwnProperty.call(body, "next_action")
     ? parsed.data.next_action || null
     : prospect.next_action
@@ -65,7 +95,10 @@ export async function PATCH(
     .eq("id", prospectId)
     .select()
     .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error("[mountline] Pipeline update failed", { code: error.code, message: error.message })
+    return NextResponse.json({ error: "Pipeline state could not be updated." }, { status: 500 })
+  }
   const { data: evidenceData } = await supabase.from("signal_evidence_ledger").select("*").eq("prospect_id", prospectId).order("created_at", { ascending: false })
   const updatedProspect = data as SignalProspect
   const providerIssues = Array.isArray(updatedProspect.provider_limitations)

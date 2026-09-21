@@ -55,9 +55,9 @@ test("authenticated preference boot runs before the dashboard shell", () => {
   assert.match(dashboardLayout, /prefers-color-scheme: dark/)
 })
 
-test("public marketing and Mountline ID expose local-only appearance controls", () => {
+test("public marketing keeps its fixed design while Mountline ID offers local appearance controls", () => {
   assert.match(homepage, /mountline-marketing/)
-  assert.match(homepage, /<AppearanceSelector compact syncServer=\{false\}/)
+  assert.doesNotMatch(homepage, /AppearanceSelector/)
   assert.match(mountlineId, /mountline-id relative/)
   assert.match(mountlineId, /<AppearanceSelector compact syncServer=\{false\}/)
   assert.match(mountlineId, /withSignUp=\{false\}/)

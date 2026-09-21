@@ -65,7 +65,7 @@ export function SupportReplyForm({ threadId }: { threadId: string }) {
       {state === "sent" && (
         <p className="flex items-center gap-2 text-sm text-success-foreground">
           <Check className="h-4 w-4" />
-          Reply sent.
+          Reply saved. This does not confirm email or notification delivery.
         </p>
       )}
 

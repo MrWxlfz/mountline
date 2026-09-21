@@ -2,9 +2,10 @@ import { NextResponse } from "next/server"
 import { currentUser } from "@clerk/nextjs/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { uuidSchema } from "@/lib/projects/validation"
 
-function getTeamSender(user: Awaited<ReturnType<typeof currentUser>>) {
-  const email = user?.emailAddresses?.[0]?.emailAddress?.trim().toLowerCase() || "unknown"
+function getTeamSender(user: Awaited<ReturnType<typeof currentUser>>, userId: string, verifiedEmails: string[]) {
+  const email = verifiedEmails[0] || `clerk-${userId}@identity.invalid`
   const name = user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(" ")
 
   return {
@@ -23,8 +24,9 @@ export async function POST(
   }
 
   const { threadId } = await params
-  const body = await request.json()
-  const message = typeof body.message === "string" ? body.message.trim() : ""
+  if (!uuidSchema.safeParse(threadId).success) return NextResponse.json({ error: "Invalid support thread identifier." }, { status: 400 })
+  const body = await request.json().catch(() => null)
+  const message = body && typeof body.message === "string" ? body.message.trim() : ""
 
   if (!message) {
     return NextResponse.json({ error: "Message is required" }, { status: 400 })
@@ -45,7 +47,8 @@ export async function POST(
     .maybeSingle()
 
   if (threadError) {
-    return NextResponse.json({ error: threadError.message }, { status: 500 })
+    console.error("[mountline] Support thread lookup failed", { code: threadError.code, message: threadError.message })
+    return NextResponse.json({ error: "Support thread could not be loaded." }, { status: 500 })
   }
 
   if (!thread) {
@@ -53,7 +56,7 @@ export async function POST(
   }
 
   const user = await currentUser()
-  const sender = getTeamSender(user)
+  const sender = getTeamSender(user, authCheck.access.userId, authCheck.access.emails)
 
   const { data, error } = await supabase
     .from("support_messages")
@@ -62,6 +65,7 @@ export async function POST(
       project_id: thread.project_id,
       sender_type: "team",
       sender_email: sender.email,
+      sender_clerk_user_id: authCheck.access.userId,
       sender_name: sender.name,
       read_at: new Date().toISOString(),
       message,
@@ -70,7 +74,8 @@ export async function POST(
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("[mountline] Team support reply failed", { code: error.code, message: error.message })
+    return NextResponse.json({ error: "Reply could not be saved." }, { status: 500 })
   }
 
   await supabase

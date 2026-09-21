@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { motion } from "framer-motion"
+import type { Variants } from "framer-motion"
+import type { LucideIcon } from "lucide-react"
 import {
   Layout,
   Palette,
@@ -27,7 +29,7 @@ import {
 import { NorthlineIcon } from "./northline-logo"
 
 export function DashboardMockup() {
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: {},
     visible: {
       transition: {
@@ -37,7 +39,7 @@ export function DashboardMockup() {
     },
   }
 
-  const panelVariants = {
+  const panelVariants: Variants = {
     hidden: {
       opacity: 0,
       x: 100,
@@ -267,7 +269,7 @@ function NavItem({
   hasSubmenu,
   color,
 }: {
-  icon: React.ElementType
+  icon: LucideIcon
   label: string
   badge?: number
   active?: boolean
@@ -341,7 +343,7 @@ function MilestoneItem({
   title,
   status,
 }: {
-  icon: React.ElementType
+  icon: LucideIcon
   title: string
   status: "complete" | "in-progress" | "pending"
 }) {

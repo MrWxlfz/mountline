@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og"
 
-export const alt = "Mountline — Make your business easier to choose and easier to run"
+export const alt = "Mountline — Cleaning inquiries captured for team follow-up"
 export const size = {
   width: 1200,
   height: 630,
@@ -165,11 +165,11 @@ export default function OpenGraphImage() {
                 lineHeight: 0.96,
               }}
             >
-              <span style={{ display: "flex" }}>Make your business</span>
+              <span style={{ display: "flex" }}>Cleaning inquiries,</span>
               <span style={{ display: "flex", color: "#e6b074" }}>
-                easier to choose—
+                captured for
               </span>
-              <span style={{ display: "flex" }}>and easier to run.</span>
+              <span style={{ display: "flex" }}>your follow-up.</span>
             </div>
             <div
               style={{
@@ -179,7 +179,7 @@ export default function OpenGraphImage() {
                 fontSize: 24,
               }}
             >
-              Exceptional websites and practical systems for businesses.
+              Configured pilot. Your team confirms pricing and scheduling.
             </div>
           </div>
 

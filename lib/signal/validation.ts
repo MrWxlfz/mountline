@@ -291,7 +291,12 @@ export const signalProspectCreateSchema = z.object({
   classification_manual_override: z.boolean().optional(),
   contact_readiness: signalContactReadinessSchema.optional(),
   contact_readiness_reason: shortNullableText,
-  outreach_status: signalOutreachStatusSchema.optional(),
+  // New records and imports cannot establish a sale. Scope acceptance must
+  // already exist on a linked project before the pipeline can mark Won.
+  outreach_status: signalOutreachStatusSchema.refine(
+    (status) => status !== "won",
+    "Record accepted scope evidence on a linked project, then mark Won from the pipeline.",
+  ).optional(),
   follow_up_date: z.string().trim().max(20).optional().nullable(),
   assigned_to: shortNullableText,
 })

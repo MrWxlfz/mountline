@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import type { Variants } from "framer-motion"
 
 interface NorthlineLogoProps {
   size?: "sm" | "md" | "lg" | "xl"
@@ -26,7 +27,7 @@ export function NorthlineLogo({
   
   const s = sizes[size]
   
-  const markVariants = {
+  const markVariants: Variants = {
     initial: { opacity: 0, scale: 0.8 },
     animate: { 
       opacity: 1, 
@@ -35,7 +36,7 @@ export function NorthlineLogo({
     },
   }
   
-  const lineVariants = {
+  const lineVariants: Variants = {
     initial: { pathLength: 0, opacity: 0 },
     animate: { 
       pathLength: 1, 
@@ -44,7 +45,7 @@ export function NorthlineLogo({
     },
   }
   
-  const textVariants = {
+  const textVariants: Variants = {
     initial: { opacity: 0, x: -8 },
     animate: { 
       opacity: 1, 

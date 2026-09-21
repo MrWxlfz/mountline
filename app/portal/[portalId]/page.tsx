@@ -19,7 +19,6 @@ import {
   Send,
 } from "lucide-react"
 import { NorthlineLogo } from "@/components/northline-logo"
-import type { SupportMessage } from "@/lib/supabase/types"
 
 type ProjectStatus =
   | "discovery"
@@ -31,7 +30,6 @@ type ProjectStatus =
   | "completed"
 
 interface PortalProject {
-  id: string
   project_name: string
   package_type: string | null
   status: ProjectStatus
@@ -40,23 +38,35 @@ interface PortalProject {
   live_url: string | null
   preview_url: string | null
   payment_link: string | null
-  payment_status: "not_sent" | "pending" | "paid" | "waived" | "manual_received"
+  billing_state: "not_sent" | "pending" | "waived" | "legacy_unverified"
+  receipt_summary: {
+    totals: Array<{ currency: string; amount_minor: number }>
+    fully_paid: boolean
+    partially_paid: boolean
+  }
   accepted_payment_methods: string[] | null
   manual_payment_instructions: string | null
   invoice_amount: number | null
   invoice_label: string | null
   next_step: string | null
-  notes: string | null
   client: {
     business_name: string
     contact_name: string
-    email: string
   } | null
+}
+
+type PortalSupportMessage = {
+  id: string
+  created_at: string
+  sender_type: "client" | "team" | "system"
+  sender_name: string | null
+  is_own: boolean
+  message: string
 }
 
 type PortalPayload = {
   project: PortalProject
-  supportMessages: SupportMessage[]
+  supportMessages: PortalSupportMessage[]
   viewer: {
     email: string | null
     isTeamMember: boolean
@@ -106,6 +116,14 @@ function formatMoney(amount: number | null) {
   }).format(amount)
 }
 
+function formatMoneyMinor(amountMinor: number, currency: string) {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(amountMinor / 100)
+}
+
 function getPaymentMethodLabel(method: string) {
   const labels: Record<string, string> = {
     stripe_card: "Stripe/card",
@@ -119,12 +137,10 @@ function getPaymentMethodLabel(method: string) {
   return labels[method] || method
 }
 
-function getMessageLabel(item: SupportMessage, viewerEmail: string | null) {
+function getMessageLabel(item: PortalSupportMessage) {
   if (item.sender_type === "team") return "Mountline"
   if (item.sender_type === "system") return "System"
-  if (viewerEmail && item.sender_email?.toLowerCase() === viewerEmail.toLowerCase()) {
-    return "You"
-  }
+  if (item.is_own) return "You"
   return item.sender_name || "Client"
 }
 
@@ -316,7 +332,7 @@ export default function PortalPage() {
               <h2 className="font-semibold">Next step</h2>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {project.next_step || project.notes || "No next step has been posted yet. Mountline will update this when there is a clear action or milestone."}
+              {project.next_step || "No client action is needed right now. Mountline will post the next confirmed step here."}
             </p>
           </section>
 
@@ -360,8 +376,7 @@ export default function PortalPage() {
               payload.supportMessages.map((item) => {
                 const ownMessage =
                   item.sender_type === "client" &&
-                  payload.viewer.email &&
-                  item.sender_email?.toLowerCase() === payload.viewer.email.toLowerCase()
+                  item.is_own
                 const teamMessage = item.sender_type === "team"
 
                 return (
@@ -380,7 +395,7 @@ export default function PortalPage() {
                     >
                       <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                         <p className={`text-sm font-medium ${ownMessage ? "text-background" : "text-foreground"}`}>
-                          {getMessageLabel(item, payload.viewer.email)}
+                          {getMessageLabel(item)}
                         </p>
                         <p className={`text-xs ${ownMessage ? "text-background/70" : "text-muted-foreground"}`}>
                           {formatDateTime(item.created_at)}
@@ -420,7 +435,7 @@ export default function PortalPage() {
               <p className="text-sm text-red-400">{messageError}</p>
             )}
             {messageState === "sent" && (
-              <p className="text-sm text-green-400">Message sent.</p>
+              <p className="text-sm text-green-400">Message saved. This does not confirm email or notification delivery.</p>
             )}
             <button
               type="submit"
@@ -456,39 +471,43 @@ function PaymentPanel({ project }: { project: PortalProject }) {
   const hasManualPayment = manualMethods.length > 0
   const amount = formatMoney(project.invoice_amount)
 
-  if (project.payment_status === "paid") {
+  if (project.receipt_summary.fully_paid) {
     return (
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-300 ring-1 ring-green-500/20">
           <CheckCircle2 className="h-4 w-4" />
-          Paid
+          Verified receipts cover the invoice
         </div>
         <p className="text-sm text-muted-foreground">
-          {project.invoice_label || "This project invoice"} has been marked paid.
+          {project.invoice_label || "This project invoice"} is supported by recorded receipt evidence.
         </p>
       </div>
     )
   }
 
-  if (project.payment_status === "manual_received") {
+  if (project.receipt_summary.totals.length > 0) {
     return (
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-300 ring-1 ring-blue-500/20">
           <CheckCircle2 className="h-4 w-4" />
-          Manual payment received
+          {project.receipt_summary.partially_paid ? "Partial receipt recorded" : "Receipt recorded"}
         </div>
         <p className="text-sm text-muted-foreground">
-          Mountline has received this payment manually.
+          {project.receipt_summary.totals.map((total) => formatMoneyMinor(total.amount_minor, total.currency)).join(" · ")}
         </p>
       </div>
     )
   }
 
-  if (project.payment_status === "waived") {
+  if (project.billing_state === "legacy_unverified") {
+    return <p className="text-sm text-muted-foreground">A legacy payment status needs receipt reconciliation before it can be shown as paid.</p>
+  }
+
+  if (project.billing_state === "waived") {
     return <p className="text-sm text-muted-foreground">No payment due right now.</p>
   }
 
-  if (project.payment_status === "not_sent" && !hasCardPayment && !hasManualPayment && !amount) {
+  if (project.billing_state === "not_sent" && !hasCardPayment && !hasManualPayment && !amount) {
     return <p className="text-sm text-muted-foreground">No payment due right now.</p>
   }
 
@@ -496,7 +515,7 @@ function PaymentPanel({ project }: { project: PortalProject }) {
     <div className="space-y-4">
       <div className="rounded-lg border border-border bg-background p-4">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
-          {project.payment_status === "pending" ? "Payment pending" : "Payment"}
+          {project.billing_state === "pending" ? "Payment pending" : "Payment"}
         </p>
         <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <p className="font-medium">{project.invoice_label || "Project invoice"}</p>

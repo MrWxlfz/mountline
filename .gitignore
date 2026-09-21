@@ -32,3 +32,7 @@ next-env.d.ts
 .env.sentry-build-plugin
 
 .DS_Store
+
+# Public configuration template; values must stay empty.
+!.env.example
+/supabase/.temp/

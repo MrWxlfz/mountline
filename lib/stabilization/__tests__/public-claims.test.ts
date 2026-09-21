@@ -6,19 +6,21 @@ import { fileURLToPath } from "node:url"
 const root = fileURLToPath(new URL("../../../", import.meta.url))
 const read = (path: string) => readFile(new URL(path, `file://${root}/`), "utf8")
 
-test("homepage and metadata state the bounded cleaning-inquiry promise", async () => {
+test("homepage and metadata describe a bounded receptionist pilot", async () => {
   const [homepage, page, layout, openGraph] = await Promise.all([
     read("components/mountline-homepage.tsx"),
     read("app/page.tsx"),
     read("app/layout.tsx"),
     read("app/opengraph-image.tsx"),
   ])
-  assert.match(homepage, /Mountline collects cleaning inquiries when your team cannot answer and prepares the details for follow-up/)
+  assert.match(homepage, /North Texas Air &amp; Heat/)
+  assert.match(homepage, /fictional HVAC business/i)
+  assert.match(homepage, /Demo calls do not book real visits or dispatch a technician/)
   assert.match(homepage, /Your team confirms pricing and scheduling/)
-  assert.match(homepage, /external owner handoff and delivery are not yet verified/i)
-  assert.match(page, /Cleaning Inquiry Capture Pilot/)
-  assert.match(layout, /cleaning inquiries/i)
-  assert.match(openGraph, /Cleaning inquiries/)
+  assert.match(homepage, /Calendar booking, text messages, and live transfers are not verified here/)
+  assert.match(page, /AI Receptionists for Service Businesses/)
+  assert.match(layout, /AI receptionist pilots/i)
+  assert.match(openGraph, /AI receptionists/)
 })
 
 test("simulations are labeled and unsupported completion claims are absent", async () => {

@@ -3,10 +3,10 @@ import { MountlineHomepage } from "@/components/mountline-homepage"
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Mountline | Cleaning Inquiry Capture Pilot",
+    absolute: "Mountline | AI Receptionists for Service Businesses",
   },
   description:
-    "Mountline collects cleaning inquiries when your team cannot answer and prepares the details for team follow-up.",
+    "AI receptionist pilots for service businesses. Try the fictional HVAC demo, then discuss a setup for missed calls, service requests, and human follow-up.",
   alternates: {
     canonical: "/",
   },
@@ -14,14 +14,14 @@ export const metadata: Metadata = {
     "AI receptionist",
     "business call handling",
     "missed call recovery",
-    "cleaning inquiry capture",
-    "cleaning business call intake",
+    "service request capture",
+    "HVAC receptionist demo",
     "owner handoff",
   ],
   openGraph: {
-    title: "Mountline | Cleaning Inquiry Capture Pilot",
+    title: "Mountline | AI Receptionists for Service Businesses",
     description:
-      "A configured cleaning-inquiry pilot that records caller details for team-owned pricing, scheduling, and follow-up.",
+      "Try the North Texas Air & Heat demo and explore a focused receptionist pilot for your business. Your team confirms pricing and scheduling.",
     url: "https://mountline.dev",
     siteName: "Mountline",
     locale: "en_US",
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mountline | Cleaning Inquiry Capture Pilot",
+    title: "Mountline | AI Receptionists for Service Businesses",
     description:
-      "Collect cleaning inquiries and prepare the details for team follow-up.",
+      "AI receptionists for the calls your team cannot take.",
   },
 }
 
@@ -42,7 +42,7 @@ const organizationJsonLd = {
   url: "https://mountline.dev",
   email: "hello@mountline.dev",
   description:
-    "Mountline provides configured cleaning-inquiry capture pilots with team-owned pricing, scheduling, and follow-up.",
+    "Mountline builds focused AI receptionist pilots for service businesses, with approved business information and team-owned pricing, scheduling, and follow-up.",
   founder: {
     "@type": "Person",
     name: "Luke Nordin",
@@ -64,7 +64,7 @@ const organizationJsonLd = {
   knowsAbout: [
     "AI receptionist systems",
     "Inbound call handling",
-    "Cleaning inquiry capture",
+    "Service request intake",
     "Structured call intake",
     "Owner handoff records",
   ],

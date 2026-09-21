@@ -165,4 +165,6 @@ NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/auth/redirect
 
 All public-schema tables have RLS enabled and direct `anon`/`authenticated` grants revoked. Clerk identities are not Supabase Auth identities. Authorized reads and writes, including the validated public lead action, use the server-only service role after the application enforces the appropriate boundary. Never expose `SUPABASE_SERVICE_ROLE_KEY` in a browser bundle.
 
-Apply `20260906232259_pilot_stabilization.sql` before deploying application code that reads the new columns or tables. Verify the upgrade in a separate staging project before production. Do not edit old migrations to repair an existing project.
+Apply `20260906232259_pilot_stabilization.sql` and `20260921230404_fix_pilot_client_assignment.sql` in order before deploying this application. The second migration repairs assigned-client project creation without rewriting the earlier migration. Verify the upgrade in a separate staging project before production. Do not edit old migrations to repair an existing project.
+
+Run [the isolated SQL verification](docs/pilot-database-verification.md) before rollout. It checks repository SQL behavior without touching production, but does not replace testing against a separate hosted staging project.

@@ -613,3 +613,16 @@
   .hero-aurora i,.hero-message,.hero-call-state li { animation:none!important;transform:none!important;opacity:1!important; }
   .mountline-homepage [data-mtl-reveal="copy"] h2 { clip-path:none!important;transform:none!important; }
 }
+
+/* Receptionist pilot conversion: uses the existing homepage palette and spacing. */
+.demo-boundary { max-width: 780px; margin: 0 0 28px; color: var(--ops-muted); font-size: 13px; line-height: 1.8; }
+.demo-next-step { margin-top: 28px; }
+.pilot-faq { padding: 90px 0; border-top: 1px solid var(--ops-line); }
+.pilot-faq h2 { margin: 18px 0 36px; color: var(--ops-paper); font-size: clamp(28px, 4vw, 48px); letter-spacing: -.04em; }
+.pilot-faq details { max-width: 860px; border-top: 1px solid var(--ops-line); padding: 22px 0; }
+.pilot-faq details:last-child { border-bottom: 1px solid var(--ops-line); }
+.pilot-faq summary { cursor: pointer; color: var(--ops-paper); font-size: 17px; line-height: 1.5; }
+.pilot-faq details p { max-width: 740px; margin: 18px 0 0; color: var(--ops-muted); font-size: 15px; line-height: 1.8; }
+.pilot-faq summary:focus-visible { outline: 2px solid var(--ops-brass); outline-offset: 6px; }
+@media (max-width: 640px) { .pilot-faq { padding: 60px 0; } }
+@media (min-width: 1101px) { .ops-hero h1 { font-size: clamp(3.35rem, 5vw, 6rem); line-height: .95; } }

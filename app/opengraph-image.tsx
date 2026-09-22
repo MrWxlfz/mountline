@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og"
 
-export const alt = "Mountline — Make your business easier to choose and easier to run"
+export const alt = "Mountline — AI receptionists for the calls your team cannot take"
 export const size = {
   width: 1200,
   height: 630,
@@ -80,7 +80,7 @@ export default function OpenGraphImage() {
                   background: "#e0a563",
                 }}
               />
-              Selected Mountline work
+              Mountline AI reception
             </div>
             <div
               style={{
@@ -123,9 +123,9 @@ export default function OpenGraphImage() {
                 fontSize: 14,
               }}
             >
-              <span style={{ display: "flex" }}>Website</span>
+              <span style={{ display: "flex" }}>Service request</span>
               <span style={{ display: "flex", color: "#e0a563" }}>→</span>
-              <span style={{ display: "flex" }}>Clear next action</span>
+              <span style={{ display: "flex" }}>Team follow-up</span>
             </div>
           </div>
         </div>
@@ -165,11 +165,11 @@ export default function OpenGraphImage() {
                 lineHeight: 0.96,
               }}
             >
-              <span style={{ display: "flex" }}>Make your business</span>
+              <span style={{ display: "flex" }}>AI receptionists</span>
               <span style={{ display: "flex", color: "#e6b074" }}>
-                easier to choose—
+                for the calls
               </span>
-              <span style={{ display: "flex" }}>and easier to run.</span>
+              <span style={{ display: "flex" }}>you can’t take.</span>
             </div>
             <div
               style={{
@@ -179,7 +179,7 @@ export default function OpenGraphImage() {
                 fontSize: 24,
               }}
             >
-              Exceptional websites and practical systems for businesses.
+              Try the HVAC demo. Build a focused pilot.
             </div>
           </div>
 

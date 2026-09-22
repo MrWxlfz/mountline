@@ -86,6 +86,12 @@ export async function PATCH(
   }
 
   const prospect = existing as SignalProspect
+  if (parsed.data.outreach_status === "won" && prospect.outreach_status !== "won") {
+    return NextResponse.json(
+      { error: "Record accepted scope evidence on the linked project, then mark Won from the pipeline." },
+      { status: 409 },
+    )
+  }
   const update: Record<string, unknown> = {}
 
   const textFields = [

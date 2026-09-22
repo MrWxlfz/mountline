@@ -1,6 +1,6 @@
-import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { getNorthlineTeamAccess } from "@/lib/auth/team"
+import { getServerIdentity } from "@/lib/auth/identity"
 import {
   getAccessiblePortalDestinations,
   getPortalIdFromRedirect,
@@ -14,24 +14,28 @@ type AuthRedirectPageProps = {
 export default async function AuthRedirectPage({ searchParams }: AuthRedirectPageProps) {
   const params = searchParams ? await searchParams : {}
   const requestedPortalPath = getSafePortalRedirect(params.redirect_url)
-  const { userId } = await auth()
+  const identity = await getServerIdentity()
 
-  if (!userId) {
+  if (!identity) {
     const loginPath = requestedPortalPath
       ? `/id?redirect_url=${encodeURIComponent(requestedPortalPath)}`
       : "/id"
     redirect(loginPath)
   }
 
-  const teamAccess = await getNorthlineTeamAccess()
+  const teamAccess = await getNorthlineTeamAccess(identity)
+  if (teamAccess.status === "error") {
+    throw new Error("Mountline ID authorization could not be verified.")
+  }
   if (teamAccess.isTeamMember) {
     redirect("/dashboard")
   }
 
-  const portals = await getAccessiblePortalDestinations({
-    userId,
-    emails: teamAccess.emails,
-  })
+  const portalResult = await getAccessiblePortalDestinations({ identity })
+  if (portalResult.status === "error") {
+    throw new Error("Portal assignments could not be verified.")
+  }
+  const portals = portalResult.destinations
   const requestedPortalId = getPortalIdFromRedirect(requestedPortalPath)
 
   if (requestedPortalId && portals.some((portal) => portal.portalId === requestedPortalId)) {

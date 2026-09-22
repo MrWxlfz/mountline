@@ -18,6 +18,7 @@ import {
   RotateCcw,
   CirclePower,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
 export function UIPanelSidebar() {
   return (
@@ -99,7 +100,7 @@ function NavItem({
   hasSubmenu,
   color,
 }: {
-  icon: React.ElementType
+  icon: LucideIcon
   label: string
   badge?: number
   active?: boolean

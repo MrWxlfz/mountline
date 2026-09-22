@@ -14,52 +14,54 @@ import {
   UserRoundCheck,
 } from "lucide-react"
 import { HomepageMotion } from "@/components/homepage/homepage-motion"
+import { PilotRequestForm } from "@/components/receptionist/pilot-request-form"
+import { receptionistDemo } from "@/lib/receptionist/demo"
 
-const demoNumber = "817-632-6909"
-const demoHref = "tel:+18176326909"
+const demoNumber = receptionistDemo.displayPhone
+const demoHref = receptionistDemo.phoneHref
 
 const flowSteps = [
-  { number: "01", verb: "Customer calls", detail: "The call reaches your Mountline receptionist." },
-  { number: "02", verb: "AI answers", detail: "It answers using your services, hours, and rules." },
-  { number: "03", verb: "Need understood", detail: "It identifies what the customer is asking for." },
-  { number: "04", verb: "Details collected", detail: "It asks for the information your team needs." },
-  { number: "05", verb: "Availability checked", detail: "It checks the times you have approved." },
-  { number: "06", verb: "Next step handled", detail: "It books, routes, transfers, or escalates." },
-  { number: "07", verb: "Customer confirmed", detail: "The customer receives the appointment or next step." },
-  { number: "08", verb: "Business updated", detail: "Your team receives the call details and outcome." },
+  { number: "01", verb: "Customer calls", detail: "Start with the calls your team cannot take." },
+  { number: "02", verb: "Receptionist answers", detail: "A short greeting explains who is answering." },
+  { number: "03", verb: "Request understood", detail: "One useful question at a time, in plain language." },
+  { number: "04", verb: "Details collected", detail: "Name, callback number, location, and the reason for calling." },
+  { number: "05", verb: "Next step explained", detail: "A callback request stays a request until your team confirms it." },
+  { number: "06", verb: "Team takes over", detail: "Your staff handles pricing, availability, and unusual requests." },
+  { number: "07", verb: "Follow-up recorded", detail: "Keep track of which requests still need attention." },
+  { number: "08", verb: "Setup improved", detail: "Use reviewed calls to refine the questions and answers." },
 ] as const
 
 const productChapters = [
   {
     index: "01",
-    label: "AI reception",
-    title: "Answers every call using your business information.",
-    body: "Your receptionist answers questions about services, hours, locations, pricing rules, and availability. If the caller needs a person, it can transfer the call or collect the details for a callback.",
-    points: ["Inbound call handling", "Business-specific answers", "Live transfer or callback"],
+    label: "Answering",
+    title: "A useful first conversation.",
+    body: "Start with your services, hours, and service area. The receptionist answers from information you approve and asks for help when the answer is unclear.",
+    points: ["Approved business information", "Short, natural conversations", "A clear fallback for unknowns"],
     visual: "reception",
   },
   {
     index: "02",
-    label: "Scheduling + intake",
-    title: "Books real appointments.",
-    body: "Mountline checks availability, collects the information your team needs, books the appointment, and sends the details to both the customer and your business.",
-    points: ["Qualification logic", "Calendar coordination", "Structured intake"],
+    label: "Service requests",
+    title: "The details your team needs to call back.",
+    body: "Capture the problem, location, callback number, and preferred timing. Your team confirms pricing and scheduling; a requested time is never presented as a booked visit.",
+    points: ["Contact and service details", "Urgency and preferred timing", "No invented availability"],
     visual: "schedule",
   },
   {
     index: "03",
-    label: "Customer communication",
-    title: "Sends follow-up automatically.",
-    body: "Customers can receive confirmations, reminders, missed-call replies, and follow-up messages without someone on your team sending them manually.",
-    points: ["Missed-call text back", "Confirmations and reminders", "Two-way SMS"],
+    label: "Human follow-up",
+    title: "Know when a person should take over.",
+    body: "Decide how urgent calls, existing appointments, and requests for a person should be handled. Start with a callback path; add live transfers only after the destination is tested.",
+    points: ["Clear escalation rules", "An after-hours fallback", "No promised response time without approval"],
     visual: "messages",
   },
   {
     index: "04",
-    label: "Websites + operations",
-    title: "Handles more than the phone call.",
-    body: "The receptionist can trigger scheduling, messaging, lead intake, internal notifications, and human handoffs. Mountline can also build the website, portal, or workflow tool that supports the same process.",
-    points: ["Websites and lead intake", "Human handoffs", "Internal workflow tools"],
+    label: "A focused pilot",
+    title: "Prove one call flow before adding more.",
+    body: "Begin with one useful job: collect a service request when your team cannot answer. Calendar booking, texts, and other connections are scoped and tested separately before they are offered to callers.",
+    points: ["A small, agreed scope", "Realistic test calls", "Review before routing customer calls"],
     visual: "operations",
   },
 ] as const
@@ -85,12 +87,12 @@ function Header() {
           <BrandLogo />
         </Link>
         <nav className="ops-nav" aria-label="Primary navigation">
-          <a href="#system">Systems</a>
+          <a href="#demo">Demo</a>
           <a href="#how-it-works">How it works</a>
           <a href="#company">Company</a>
         </nav>
         <div className="ops-header__actions">
-          <a href="#contact" className="ops-id-link">Contact</a>
+          <a href="#contact" className="ops-id-link">Discuss a pilot</a>
           <a href={demoHref} className="ops-header__call">
             <Phone className="size-3.5" aria-hidden="true" />
             Call the demo
@@ -105,10 +107,10 @@ function HeroSystem() {
   return (
     <div className="hero-product-stage" data-mtl-hero="system">
       <div className="hero-aurora" aria-hidden="true"><i /><i /><i /></div>
-      <div className="hero-system" role="img" aria-label="Example Mountline call showing a customer request, availability check, appointment booking, confirmation, and owner notification">
+      <div className="hero-system" role="img" aria-label="Illustrative HVAC service request; not live customer data">
         <div className="hero-system__topbar">
-          <span><i /> Live call · answered</span>
-          <span>Example conversation</span>
+          <span><i /> Illustrative example</span>
+          <span>Not live customer data</span>
         </div>
 
         <div className="hero-callbar">
@@ -119,14 +121,14 @@ function HeroSystem() {
 
         <div className="hero-live-grid">
           <div className="hero-conversation">
-            <div className="hero-conversation__label"><span>Conversation</span><span>Transcript live</span></div>
+            <div className="hero-conversation__label"><span>Sample conversation</span><span>Illustrative only</span></div>
             <div className="hero-message hero-message--customer">
               <span>Customer · 00:04</span>
-              <p>Hi, I need someone to look at my AC tomorrow.</p>
+              <p>The AC is running, but the house is not cooling.</p>
             </div>
             <div className="hero-message hero-message--receptionist">
               <span>Mountline · 00:08</span>
-              <p>I can help with that. What ZIP code are you in?</p>
+              <p>What ZIP code is the property in?</p>
             </div>
             <div className="hero-message hero-message--customer hero-message--short">
               <span>Customer · 00:12</span>
@@ -135,19 +137,19 @@ function HeroSystem() {
           </div>
 
           <div className="hero-call-state">
-            <div className="hero-call-state__label"><span>Call activity</span><span>Complete</span></div>
+            <div className="hero-call-state__label"><span>Sample capture</span><span>Recorded</span></div>
             <ol>
-              <li><span>Intent</span><strong>Service request</strong><i /></li>
-              <li><span>Availability</span><strong>Tomorrow · 10:30 AM</strong><i /></li>
-              <li><span>Appointment</span><strong>Created</strong><i /></li>
-              <li><span>Confirmation</span><strong>Sent by SMS</strong><i /></li>
+              <li><span>Issue</span><strong>AC not cooling</strong><i /></li>
+              <li><span>Location</span><strong>ZIP 76244</strong><i /></li>
+              <li><span>Service request</span><strong>Recorded</strong><i /></li>
+              <li><span>Handoff</span><strong>Pending team follow-up</strong><i /></li>
             </ol>
           </div>
         </div>
 
         <div className="hero-system__status">
-          <span><Image src="/brand/mountline-icon.svg" alt="" width={24} height={24} /> Owner notified</span>
-          <strong>Call summary and appointment details delivered</strong>
+          <span><Image src="/brand/mountline-icon.svg" alt="" width={24} height={24} /> Inquiry saved</span>
+          <strong>Details prepared for team follow-up</strong>
           <span>00:22</span>
         </div>
       </div>
@@ -159,18 +161,18 @@ function LiveDemoConsole() {
   const demoEvents = [
     ["00:00", "Incoming call", "New customer connected"],
     ["00:04", "Question received", "Asking about service"],
-    ["00:07", "Intent identified", "Appointment request"],
-    ["00:11", "Availability checked", "Approved calendar searched"],
-    ["00:14", "Appointment found", "Tomorrow · 10:30 AM"],
-    ["00:19", "Appointment created", "Calendar + intake updated"],
-    ["00:22", "Confirmation sent", "Customer and business notified"],
+    ["00:07", "Intent identified", "AC service request"],
+    ["00:11", "Location and urgency", "Service area and job details"],
+    ["00:14", "Contact captured", "Callback information recorded"],
+    ["00:19", "Inquiry saved", "Request ready for review"],
+    ["00:22", "Handoff pending", "Team follow-up required"],
   ] as const
 
   return (
     <div className="demo-console" data-mtl-reveal="scene">
       <div className="demo-console__header">
-        <div><i /><span>System state · online</span></div>
-        <span>Example sequence · simulated</span>
+        <div><i /><span>Illustrative example</span></div>
+        <span>Not live customer data</span>
       </div>
       <div className="demo-console__body">
         <ol className="demo-events" aria-label="Example AI receptionist call sequence">
@@ -182,18 +184,18 @@ function LiveDemoConsole() {
         </ol>
         <div className="demo-prompts">
           <span>Things to ask</span>
-          <p>Call as if you were a customer. The line is configured to demonstrate how a real request moves.</p>
+          <p>Try a realistic service call. Use fictional details; this is a demonstration, not an HVAC service line.</p>
           <ol>
-            <li><span>01</span>“Can I book an appointment?”</li>
-            <li><span>02</span>“What services do you offer?”</li>
-            <li><span>03</span>“I need someone tomorrow.”</li>
-            <li><span>04</span>“Can I speak to a person?”</li>
+            <li><span>01</span>“The AC is running but not cooling.”</li>
+            <li><span>02</span>“Do you service homes in Keller?”</li>
+            <li><span>03</span>“Could someone come tomorrow afternoon?”</li>
+            <li><span>04</span>“Could a person call back?”</li>
           </ol>
         </div>
       </div>
       <div className="demo-console__footer">
         <span>Product demonstration</span>
-        <span>The phone line is live. The sequence above is illustrative.</span>
+        <span>Demo only · No real appointments or dispatch.</span>
         <a href={demoHref}>Call {demoNumber} <ArrowRight /></a>
       </div>
     </div>
@@ -204,29 +206,29 @@ function OperationalProof() {
   return (
     <div className="proof-interface" data-mtl-reveal="scene">
       <div className="proof-interface__bar">
-        <span><i /> Call record</span>
-        <span>Today · 10:18 AM</span>
+        <span><i /> Illustrative inquiry record</span>
+        <span>Not live customer data</span>
       </div>
       <div className="proof-interface__grid">
         <div className="proof-transcript">
           <div className="proof-panel-label"><span>Conversation · source</span><span>01:47</span></div>
           <div className="transcript-line transcript-line--caller">
             <span>C</span>
-            <p>Hi, I need someone tomorrow afternoon. My AC stopped cooling.</p>
+            <p>The AC is running, but the house is not cooling.</p>
           </div>
           <div className="transcript-line transcript-line--agent">
             <span>M</span>
-            <p>I can help with that. What ZIP code are you in?</p>
+            <p>What ZIP code is the property in?</p>
           </div>
           <div className="transcript-line transcript-line--caller">
             <span>C</span>
-            <p>76244. This is John.</p>
+            <p>76244. This is John. Could someone come tomorrow afternoon?</p>
           </div>
           <div className="transcript-line transcript-line--agent">
             <span>M</span>
-            <p>Thanks, John. I have 2:30 PM available tomorrow.</p>
+            <p>Thanks, John. Your details are ready for the team to review.</p>
           </div>
-          <div className="transcript-cursor"><i /> Signal captured</div>
+          <div className="transcript-cursor"><i /> Inquiry captured</div>
         </div>
         <div className="proof-transform" aria-hidden="true">
           <span>Extract</span>
@@ -235,21 +237,21 @@ function OperationalProof() {
           <small>Route</small>
         </div>
         <aside className="proof-summary">
-          <div className="proof-panel-label"><span>Business state · structured</span><span className="proof-status">Complete</span></div>
+          <div className="proof-panel-label"><span>Sample intake · structured</span><span className="proof-status">Captured</span></div>
           <dl>
-            <div><dt>Service</dt><dd>AC repair</dd></div>
-            <div><dt>Priority</dt><dd>Standard</dd></div>
+            <div><dt>Service</dt><dd>AC not cooling</dd></div>
+            <div><dt>Priority</dt><dd>Needs review</dd></div>
             <div><dt>Preferred time</dt><dd>Tomorrow afternoon</dd></div>
             <div><dt>Customer</dt><dd>John · 76244</dd></div>
           </dl>
           <div className="proof-appointment">
             <CalendarDays aria-hidden="true" />
-            <div><span>Appointment created</span><strong>Tomorrow · 2:30 PM</strong></div>
+            <div><span>Service request recorded</span><strong>Team review required</strong></div>
             <Check aria-hidden="true" />
           </div>
           <div className="proof-sms">
             <MessageSquareText aria-hidden="true" />
-            <div><span>Confirmation sent</span><strong>Customer and business notified</strong></div>
+            <div><span>Handoff state</span><strong>Awaiting team review</strong></div>
           </div>
         </aside>
       </div>
@@ -260,8 +262,8 @@ function OperationalProof() {
 function ProductVisual({ type }: { type: string }) {
   if (type === "reception") {
     return (
-      <div className="product-visual product-visual--reception" role="img" aria-label="AI reception call interface">
-        <div className="visual-topline"><span>Inbound · Answered</span><span>00:38</span></div>
+      <div className="product-visual product-visual--reception" role="img" aria-label="Illustrative inquiry capture interface; not live customer data">
+        <div className="visual-topline"><span>Illustrative example</span><span>Not live data</span></div>
         <div className="reception-caller"><PhoneCall /><div><span>New caller</span><strong>Service inquiry</strong></div></div>
         <div className="reception-wave" aria-hidden="true">{Array.from({ length: 18 }, (_, i) => <i key={i} />)}</div>
         <div className="reception-intent"><span>Caller intent</span><strong>Estimate request</strong><i>Captured</i></div>
@@ -272,43 +274,43 @@ function ProductVisual({ type }: { type: string }) {
 
   if (type === "schedule") {
     return (
-      <div className="product-visual product-visual--schedule" role="img" aria-label="Scheduling and intake interface">
-        <div className="visual-topline"><span>Appointment intake · Sep 8</span><span>Step 3 of 3</span></div>
+      <div className="product-visual product-visual--schedule" role="img" aria-label="Illustrative HVAC service intake; not live customer data">
+        <div className="visual-topline"><span>Illustrative service request</span><span>Not live data</span></div>
         <dl className="intake-data">
-          <div><dt>Service</dt><dd>Diagnostic visit</dd></div>
+          <div><dt>Service</dt><dd>AC not cooling</dd></div>
           <div><dt>Location</dt><dd>Within service area</dd></div>
           <div><dt>Access</dt><dd>Customer on site</dd></div>
         </dl>
         <div className="schedule-slots">
-          <span>Available Sep 8</span>
-          <div><i>9:00</i><i className="is-selected">10:30</i><i>1:15</i></div>
+          <span>Preferred timing</span>
+          <div><i>Mon</i><i className="is-selected">Tue</i><i>Wed</i></div>
         </div>
-        <div className="visual-action"><CalendarDays /><strong>Appointment ready</strong><Check /></div>
+        <div className="visual-action"><CalendarDays /><strong>Ready for team review</strong><Check /></div>
       </div>
     )
   }
 
   if (type === "messages") {
     return (
-      <div className="product-visual product-visual--messages" role="img" aria-label="Customer SMS follow-up interface">
-        <div className="visual-topline"><span>Customer thread</span><span>SMS</span></div>
-        <div className="message-bubble message-bubble--system">Hi Jordan—your diagnostic visit is confirmed for Sep 8 at 10:30 AM. Reply here if anything changes.</div>
-        <div className="message-bubble message-bubble--customer">Perfect, thank you.</div>
-        <div className="message-event"><Check /><div><span>Customer confirmed</span><strong>Owner and calendar updated</strong></div><span>10:22</span></div>
-        <div className="message-compose"><span>Follow-up is complete</span><Check /></div>
+      <div className="product-visual product-visual--messages" role="img" aria-label="Illustrative owner handoff states; not live customer data">
+        <div className="visual-topline"><span>Illustrative handoff</span><span>Not live data</span></div>
+        <div className="message-bubble message-bubble--system">Caller requested AC service in 76244. Preferred time: tomorrow afternoon.</div>
+        <div className="message-bubble message-bubble--customer">Team follow-up is still required.</div>
+        <div className="message-event"><Check /><div><span>Attempt recorded</span><strong>Follow-up needed</strong></div><span>10:22</span></div>
+        <div className="message-compose"><span>Handoff pending</span><Check /></div>
       </div>
     )
   }
 
   return (
-    <div className="product-visual product-visual--operations" role="img" aria-label="Operational overview interface">
-      <div className="visual-topline"><span>Operations</span><span>Today</span></div>
+    <div className="product-visual product-visual--operations" role="img" aria-label="Illustrative inquiry evidence interface; not live customer data">
+      <div className="visual-topline"><span>Illustrative records</span><span>Not live data</span></div>
       <div className="operations-queue">
-        <div><span><i className="is-brass" /> Appointment</span><strong>Jordan M.</strong><small>Sep 8 · 10:30 AM</small></div>
-        <div><span><i /> Human handoff</span><strong>Casey R.</strong><small>Alex notified · 10:24</small></div>
+        <div><span><i className="is-brass" /> Quote request</span><strong>Jordan M.</strong><small>Team review pending</small></div>
+        <div><span><i /> Handoff attempt</span><strong>Casey R.</strong><small>Delivery unknown · 10:24</small></div>
         <div><span><i /> Website intake</span><strong>Morgan T.</strong><small>Estimate details captured</small></div>
       </div>
-      <div className="operations-footer"><Route /><span>Every customer event has an owner and a next step.</span></div>
+      <div className="operations-footer"><Route /><span>Requests and confirmed outcomes stay separate.</span></div>
     </div>
   )
 }
@@ -317,8 +319,8 @@ function OperationsOverview() {
   return (
     <div className="overview-system" data-mtl-reveal="overview">
       <div className="overview-system__bar">
-        <span>Mountline operations trace</span>
-        <span>Example state · Tuesday, Sep 8</span>
+        <span>Illustrative inquiry trace</span>
+        <span>Not live customer data</span>
       </div>
       <div className="overview-system__canvas">
         <svg className="overview-traces" viewBox="0 0 1200 560" preserveAspectRatio="none" aria-hidden="true">
@@ -329,10 +331,10 @@ function OperationsOverview() {
         </svg>
 
         <div className="overview-source overview-source--call">
-          <span>09:41 · Phone</span><strong>Appointment request</strong><small>Jordan M. · diagnostic visit</small>
+          <span>09:41 · Phone</span><strong>AC service request</strong><small>Jordan M. · AC not cooling</small>
         </div>
         <div className="overview-source overview-source--sms">
-          <span>09:43 · SMS</span><strong>Callback time confirmed</strong><small>Casey R. · after 2:00 PM</small>
+          <span>09:43 · Phone</span><strong>Callback requested</strong><small>Casey R. · after 2:00 PM</small>
         </div>
         <div className="overview-source overview-source--web">
           <span>10:02 · Website</span><strong>Estimate intake</strong><small>Morgan T. · details complete</small>
@@ -346,9 +348,9 @@ function OperationsOverview() {
         <div className="overview-timeline">
           <div className="overview-timeline__label"><span>Business timeline</span><span>Owner view</span></div>
           <ol>
-            <li><time>09:44</time><i /><div><strong>Callback assigned</strong><span>Casey R. · Alex notified</span></div><small>Open</small></li>
+            <li><time>09:44</time><i /><div><strong>Handoff attempted</strong><span>Casey R. · delivery unknown</span></div><small>Pending</small></li>
             <li><time>10:03</time><i /><div><strong>Estimate ready for review</strong><span>Morgan T. · website intake</span></div><small>Review</small></li>
-            <li><time>10:20</time><i /><div><strong>Appointment confirmed</strong><span>Jordan M. · Sep 8, 10:30 AM</span></div><small>Done</small></li>
+            <li><time>10:20</time><i /><div><strong>Customer contacted</strong><span>Jordan M. · phone evidence</span></div><small>Recorded</small></li>
           </ol>
         </div>
       </div>
@@ -356,7 +358,7 @@ function OperationsOverview() {
         <span>Phone</span><i />
         <span>Message</span><i />
         <span>Website</span>
-        <strong>One operational record</strong>
+        <strong>Separate evidence events</strong>
       </div>
     </div>
   )
@@ -373,45 +375,47 @@ export function MountlineHomepage() {
         <section className="ops-hero">
           <div className="ops-shell ops-hero__grid">
             <div className="ops-hero__copy" data-mtl-hero="copy">
-              <p className="ops-eyebrow"><span>Mountline AI reception</span> Built for service businesses.</p>
-              <h1>AI receptionists that<br /><em>answer, book,</em><br />and follow up.</h1>
-              <p className="ops-hero__lede">Mountline handles incoming calls, customer questions, scheduling, follow-up, and human handoffs so your team doesn’t have to stop working every time the phone rings.</p>
+              <p className="ops-eyebrow"><span>Mountline AI reception</span> For service businesses.</p>
+              <h1>AI receptionists<br /><em>for the calls</em><br />you can’t take.</h1>
+              <p className="ops-hero__lede">AI receptionists for the calls your team cannot take. Mountline helps collect service requests, answer common questions, and prepare the next step for your team.</p>
               <div className="ops-actions">
-                <a href={demoHref} className="ops-button ops-button--primary"><Phone className="size-4" /> Call the live demo</a>
-                <a href="#system" className="ops-button ops-button--quiet">See how it works <ArrowDown className="size-4" /></a>
+                <a href={demoHref} className="ops-button ops-button--primary"><Phone className="size-4" /> Call the demo line</a>
+                <a href="#contact" className="ops-button ops-button--quiet">Discuss a pilot <ArrowDown className="size-4" /></a>
               </div>
             </div>
             <HeroSystem />
           </div>
           <div className="ops-shell ops-hero__foot" data-mtl-hero="foot">
             <span>Try it now · {demoNumber}</span>
-            <span>Answers · Books · Texts · Transfers · Notifies</span>
+            <span>Fictional HVAC demo · No real appointments</span>
           </div>
         </section>
 
         <section className="demo-section" id="demo">
           <div className="ops-shell">
             <div className="demo-section__heading" data-mtl-reveal="copy">
-              <p className="ops-kicker">01 / Call the live demo</p>
+              <p className="ops-kicker">01 / Call the demo line</p>
               <div>
-                <h2>Hear exactly what a Mountline receptionist sounds like.</h2>
-                <p>Call the number, ask a real question, try to book an appointment, or ask to speak with a person. The demo is live.</p>
+                <h2>Meet North Texas Air &amp; Heat.</h2>
+                <p>A fictional HVAC business, a familiar kind of call. Try a service question, describe an AC problem, or ask for a callback. Demo calls do not book real visits or dispatch a technician.</p>
               </div>
             </div>
-            <a href={demoHref} className="demo-number" data-mtl-reveal="number" aria-label={`Call the Mountline live demo at ${demoNumber}`}>
+            <a href={demoHref} className="demo-number" data-mtl-reveal="number" aria-label={`Call the Mountline demo line at ${demoNumber}`}>
               <span>{demoNumber}</span>
               <span className="demo-number__action"><PhoneCall /> Call now</span>
             </a>
+            <p className="demo-boundary">The phone demo runs separately from this website. Calendar booking, text messages, and live transfers are not verified here. Please use made-up contact details.</p>
             <LiveDemoConsole />
+            <a href="#contact" className="ops-text-link demo-next-step">Want a version for your business? Discuss a pilot <ArrowRight /></a>
           </div>
         </section>
 
         <section className="system-section" id="system">
           <div className="ops-shell">
             <div className="system-intro" data-mtl-reveal="copy">
-              <p className="ops-kicker">02 / From call to completed action</p>
-              <h2>One call, handled from start to finish.</h2>
-              <p>Mountline answers the call, understands the request, collects the right details, and completes the next step based on the rules you set.</p>
+              <p className="ops-kicker">02 / From call to recorded inquiry</p>
+              <h2>A better starting point for the next call.</h2>
+              <p>This is the call flow we build toward in a pilot. Your team confirms pricing and scheduling. Connections to your phone system and any other tools are tested before launch.</p>
             </div>
             <ol className="system-rail" data-mtl-reveal="rail">
               {flowSteps.map((step) => (
@@ -425,7 +429,7 @@ export function MountlineHomepage() {
             </ol>
             <div className="system-statement" data-mtl-reveal="copy">
               <span>The result</span>
-              <p><strong>Customer helped</strong><i />Appointment booked<i />Team updated</p>
+              <p><strong>Inquiry captured</strong><i />Details recorded<i />Team follow-up pending</p>
             </div>
           </div>
         </section>
@@ -434,8 +438,8 @@ export function MountlineHomepage() {
           <div className="ops-shell">
             <div className="products-heading" data-mtl-reveal="copy">
               <p className="ops-kicker">03 / What Mountline handles</p>
-              <h2>Calls, appointments, texts, and handoffs.</h2>
-              <p>Each system is configured around your services, availability, service area, staff, and rules.</p>
+              <h2>Start with the calls you are missing.</h2>
+              <p>A receptionist should know your business and its limits. We agree on both before setup.</p>
             </div>
             <div className="product-list">
               {productChapters.map((product) => (
@@ -461,12 +465,12 @@ export function MountlineHomepage() {
             <div className="proof-heading" data-mtl-reveal="copy">
               <p className="ops-kicker">04 / After the call</p>
               <div>
-                <h2>Every call turns into usable information.</h2>
-                <p>See who called, what they needed, what was booked, and what your team needs to do next.</p>
+                <h2>A useful request, ready for a person.</h2>
+                <p>The goal is a clear handoff: who called, what went wrong, and what needs attention. The example below shows the information a pilot is designed to collect.</p>
               </div>
             </div>
             <OperationalProof />
-            <p className="proof-disclaimer">Illustrative interface · Actual systems are configured around each business and its approved workflows.</p>
+            <p className="proof-disclaimer">Illustrative interface · Sample records only; the phone demo is not connected to this display.</p>
           </div>
         </section>
 
@@ -474,18 +478,16 @@ export function MountlineHomepage() {
           <div className="ops-shell lifecycle-grid">
             <div className="lifecycle-copy" data-mtl-reveal="copy">
               <p className="ops-kicker">05 / Step by step</p>
-              <h2>How a Mountline call works.</h2>
-              <p>Every call follows a clear process based on your business rules.</p>
-              <a href="mailto:hello@mountline.dev?subject=Mountline%20system%20inquiry" className="ops-text-link">Talk to us about your phone line <ArrowRight /></a>
+              <h2>From first conversation to a tested pilot.</h2>
+              <p>A narrow setup is easier to test and easier for your team to trust. We work through these steps together before routing real customer calls.</p>
+              <a href="#contact" className="ops-text-link">Tell us about your calls <ArrowRight /></a>
             </div>
             <ol className="lifecycle-list" data-mtl-reveal="lifecycle">
-              <li><span>01</span><div><PhoneCall /><h3>Someone calls your business.</h3><p>Your existing number can route to the Mountline receptionist.</p></div></li>
-              <li><span>02</span><div><PhoneCall /><h3>Mountline answers.</h3><p>The caller gets a clear response using your business information.</p></div></li>
-              <li><span>03</span><div><UserRoundCheck /><h3>It understands what they need.</h3><p>The receptionist identifies the service, question, or reason for calling.</p></div></li>
-              <li><span>04</span><div><UserRoundCheck /><h3>It collects the right information.</h3><p>Contact details, location, urgency, and job information are captured.</p></div></li>
-              <li><span>05</span><div><Route /><h3>It books, routes, or escalates.</h3><p>The next step follows the rules you approved.</p></div></li>
-              <li><span>06</span><div><MessageSquareText /><h3>The customer gets confirmation.</h3><p>Appointment or follow-up details are sent by text.</p></div></li>
-              <li><span>07</span><div><CalendarDays /><h3>Your team gets the details.</h3><p>The call summary, customer information, and outcome stay together.</p></div></li>
+              <li><span>01</span><div><PhoneCall /><h3>Choose the first call flow.</h3><p>Missed calls, after-hours requests, or common service questions. Start where a better response would help most.</p></div></li>
+              <li><span>02</span><div><UserRoundCheck /><h3>Approve the business details.</h3><p>Services, coverage, hours, pricing boundaries, and who should handle each kind of request.</p></div></li>
+              <li><span>03</span><div><MessageSquareText /><h3>Listen and test together.</h3><p>Try ordinary calls, interruptions, urgent requests, and questions the receptionist cannot answer.</p></div></li>
+              <li><span>04</span><div><Route /><h3>Confirm the handoff.</h3><p>Test where requests go and what happens when a person or connected tool is unavailable.</p></div></li>
+              <li><span>05</span><div><CalendarDays /><h3>Launch a limited pilot.</h3><p>Agree on scope and cost before launch. Review calls and improve the setup before expanding it.</p></div></li>
             </ol>
           </div>
         </section>
@@ -493,8 +495,8 @@ export function MountlineHomepage() {
         <section className="overview-section" id="visibility">
           <div className="ops-shell overview-heading" data-mtl-reveal="copy">
             <p className="ops-kicker">06 / Calls, messages, and next steps</p>
-            <h2>Your team always knows what happened.</h2>
-            <p>Calls, appointments, messages, and follow-up actions stay connected instead of disappearing across separate tools.</p>
+            <h2>Keep the next step in view.</h2>
+            <p>A captured request is only the beginning. Your team still needs to review it, call back, and confirm the work. This example shows those steps separately.</p>
           </div>
           <div className="overview-edge"><OperationsOverview /></div>
         </section>
@@ -514,13 +516,24 @@ export function MountlineHomepage() {
             <div className="company-copy" data-mtl-reveal="copy">
               <p className="ops-kicker">07 / Built responsibly</p>
               <h2>Software should make a business feel more human, not less.</h2>
-              <p>Automation should remove repetitive work without making customers feel like they’re talking to a machine. Mountline is built around clear conversations, useful handoffs, and giving callers a real person when they need one.</p>
+              <p>Automation should remove repetitive work without making customers feel like they’re talking to a machine. Mountline is built around clear conversations, useful handoffs, and giving callers a clear way to request a person.</p>
               <div className="company-principles">
                 <span><i>01</i> Clear answers based on approved information.</span>
-                <span><i>02</i> A human handoff when the caller needs one.</span>
+                <span><i>02</i> A clear path to request a person.</span>
                 <span><i>03</i> Direct support from the person building the system.</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="pilot-faq" aria-labelledby="pilot-faq-heading">
+          <div className="ops-shell">
+            <p className="ops-kicker">Before the pilot</p>
+            <h2 id="pilot-faq-heading">A few practical questions.</h2>
+            <details><summary>Can the business keep its current number?</summary><p>That is the starting point. We check your phone provider’s forwarding options and test a limited route, such as unanswered calls, before changing how customers reach you.</p></details>
+            <details><summary>Does the demo book real appointments?</summary><p>No. North Texas Air &amp; Heat is fictional. The demo is for trying a conversation. In a pilot, your team confirms appointments unless a real calendar connection has been separately configured and tested.</p></details>
+            <details><summary>What happens when a caller needs a person?</summary><p>We agree on a callback or transfer path and an after-hours fallback. Urgent or unsafe situations have separate instructions. The receptionist should never pretend that a technician has been dispatched.</p></details>
+            <details><summary>What does a pilot cost?</summary><p>We confirm setup, ongoing costs, and any call-usage charges after reviewing your call flow. You receive the scope and price before deciding to proceed.</p></details>
           </div>
         </section>
 
@@ -529,10 +542,11 @@ export function MountlineHomepage() {
             <div className="final-section__label"><span>Mountline</span><span>Keller, Texas · Working with service businesses</span></div>
             <div className="final-section__copy" data-mtl-reveal="copy">
               <h2>Put your phone line<br /><em>to work.</em></h2>
-              <p>Try the live receptionist or talk to us about how Mountline could fit your business.</p>
+              <p>Tell us what happens when nobody can answer. We’ll review the call flow and reply by email with a practical starting point.</p>
             </div>
+            <PilotRequestForm />
             <div className="final-section__actions" data-mtl-reveal="actions">
-              <a href={demoHref} className="final-action final-action--call"><span><PhoneCall /> Live demo</span><strong>{demoNumber}</strong><ArrowRight /></a>
+              <a href={demoHref} className="final-action final-action--call"><span><PhoneCall /> Demo line</span><strong>{demoNumber}</strong><ArrowRight /></a>
               <a href="mailto:hello@mountline.dev?subject=Mountline%20system%20inquiry" className="final-action"><span><Mail /> Start a conversation</span><strong>hello@mountline.dev</strong><ArrowRight /></a>
             </div>
           </div>
@@ -541,9 +555,9 @@ export function MountlineHomepage() {
 
       <footer className="ops-footer">
         <div className="ops-shell ops-footer__grid">
-          <div><BrandLogo footer /><p>AI reception, scheduling, follow-up, and customer communication for service businesses.</p></div>
-          <nav aria-label="Footer navigation"><a href="#system">Systems</a><a href="#how-it-works">How it works</a><a href="#company">Company</a><a href={demoHref}>Live demo</a></nav>
-          <div><a href={`tel:+18176326909`}>{demoNumber}</a><a href="mailto:hello@mountline.dev">hello@mountline.dev</a><Link href="/id">Mountline ID</Link></div>
+          <div><BrandLogo footer /><p>AI receptionist pilots for service businesses. Clear conversations. Useful follow-up.</p></div>
+          <nav aria-label="Footer navigation"><a href="#demo">Demo</a><a href="#how-it-works">How it works</a><a href="#company">Company</a><a href={demoHref}>Demo line</a></nav>
+          <div><a href={demoHref}>{demoNumber}</a><a href="mailto:hello@mountline.dev">hello@mountline.dev</a><Link href="/id">Mountline ID</Link></div>
         </div>
         <div className="ops-shell ops-footer__bottom"><span>© {new Date().getFullYear()} Mountline</span><span>Built for service businesses.</span></div>
       </footer>

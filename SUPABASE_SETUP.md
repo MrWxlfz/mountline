@@ -4,11 +4,13 @@ Use this guide to set up a Supabase project for testing the Mountline dashboard 
 
 ## 1. Run Schema SQL
 
-In the Supabase SQL editor, run:
+For a fresh test project, run the base schema and then every migration in timestamp order (the Supabase CLI is preferred):
 
 ```sql
 supabase/northline_schema.sql
 ```
+
+Then apply the files under `supabase/migrations/` in timestamp order with the Supabase CLI or by running each file's contents in the SQL editor. A filename wildcard is not SQL.
 
 This creates the tables the current app expects:
 
@@ -22,10 +24,13 @@ This creates the tables the current app expects:
 - `potential_clients`
 - `lead_insights`
 
-The `projects` table includes payment foundations used by the portal:
+The stabilization migration also creates:
 
 - `payment_link`
-- `payment_status`
+- project sale-confirmation evidence
+- append-only `project_receipts`
+- project-scoped `inquiries` and `inquiry_events`
+- atomic, idempotent project and inquiry creation functions
 - `accepted_payment_methods`
 - `manual_payment_instructions`
 - `invoice_amount`
@@ -76,7 +81,7 @@ where email = 'team@mountline.dev';
 
 The dashboard team guard accepts either:
 
-- active `team_members.email` matching the Clerk email
+- active `team_members.email` matching a verified Clerk email when the row is not bound to a different Clerk ID
 - active `team_members.clerk_user_id` matching the Clerk user ID
 
 ## 4. Create Client Portal Access
@@ -106,7 +111,7 @@ on conflict (project_id, client_email) do update
 set access_status = 'active';
 ```
 
-Optional: set `clerk_user_id` once the client has a Clerk account.
+Optional: set `clerk_user_id` once the client has a Clerk account. Once bound, Clerk ID is authoritative and email fallback no longer applies to that row.
 
 ## 5. Test `/dashboard`
 
@@ -131,7 +136,7 @@ Expected behavior:
 - Any other signed-in non-team user should see access denied.
 - Signed-out users should be sent to `/id`.
 - The portal should show project overview, status, timeline, next step, preview/live links, payment section, and support messages.
-- The payment section should show card/manual payment options when configured and paid/no-payment states when applicable.
+- The payment section should show card/manual payment options when configured. It shows paid coverage only from recorded receipts; legacy paid labels without receipts appear as unverified.
 - Submitting a support message should insert a row into `support_messages`.
 
 ## 7. Test Mountline ID
@@ -156,14 +161,10 @@ NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/auth/redirect
 - Public signup should not be promoted.
 - Realtime support chat and Stripe checkout are intentionally not implemented yet.
 
-## Lead Submission and RLS
+## Data API boundary
 
-The current public lead form inserts into `leads` through a server action using the Supabase anon client. For production, choose one of these safe options before enabling strict RLS:
+All public-schema tables have RLS enabled and direct `anon`/`authenticated` grants revoked. Clerk identities are not Supabase Auth identities. Authorized reads and writes, including the validated public lead action, use the server-only service role after the application enforces the appropriate boundary. Never expose `SUPABASE_SERVICE_ROLE_KEY` in a browser bundle.
 
-**Option A: anon insert policy for leads only**
+Apply `20260906232259_pilot_stabilization.sql` and `20260921230404_fix_pilot_client_assignment.sql` in order before deploying this application. The second migration repairs assigned-client project creation without rewriting the earlier migration. Verify the upgrade in a separate staging project before production. Do not edit old migrations to repair an existing project.
 
-Keep the current anon-client insert path and add a restrictive `insert` policy for `leads` only. Do not grant anon read, update, or delete access to lead data.
-
-**Option B: server-only lead submission**
-
-Move public lead submission behind a server route/action that uses the Supabase service-role key on the server only, then add spam/rate limiting before writing. This is the recommended production path once Mountline adds abuse protection.
+Run [the isolated SQL verification](docs/pilot-database-verification.md) before rollout. It checks repository SQL behavior without touching production, but does not replace testing against a separate hosted staging project.

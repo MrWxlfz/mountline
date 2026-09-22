@@ -1,7 +1,7 @@
 "use server"
 
 import { z } from "zod"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 export type LeadFormData = {
   name: string
@@ -65,7 +65,7 @@ export async function submitLead(data: LeadFormData): Promise<SubmitLeadResult> 
       return { success: true }
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const source = parsed.data.source === "luke_qr_page" ? "luke_qr_page" : "website"
 
     const { error } = await supabase.from("leads").insert({
@@ -82,7 +82,7 @@ export async function submitLead(data: LeadFormData): Promise<SubmitLeadResult> 
     })
 
     if (error) {
-      console.error("[mountline] Supabase error:", error)
+      console.error("[mountline] Public lead insert failed", { code: error.code, message: error.message })
       return {
         success: false,
         error: "The request could not be saved right now. Please try again.",

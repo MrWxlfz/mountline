@@ -144,6 +144,7 @@ create table if not exists public.support_messages (
   project_id uuid not null references public.projects(id) on delete cascade,
   sender_type text not null check (sender_type in ('client', 'team', 'system')),
   sender_email text not null,
+  sender_clerk_user_id text,
   sender_name text,
   read_at timestamp with time zone,
   message text not null
@@ -151,6 +152,10 @@ create table if not exists public.support_messages (
 
 alter table public.support_messages add column if not exists sender_name text;
 alter table public.support_messages add column if not exists read_at timestamp with time zone;
+alter table public.support_messages add column if not exists sender_clerk_user_id text;
+
+create index if not exists support_messages_sender_clerk_user_id_idx
+  on public.support_messages (sender_clerk_user_id);
 
 alter table public.support_messages
   drop constraint if exists support_messages_sender_type_check;
@@ -283,7 +288,32 @@ create index if not exists lead_insights_created_at_idx
 create index if not exists lead_insights_lead_id_idx
   on public.lead_insights (lead_id);
 
--- RLS note:
--- The current app reads and writes these tables through server routes using
--- the Supabase service-role key. If direct browser Supabase access is added
--- later, enable RLS and write table-specific policies before shipping.
+-- Mountline uses Clerk rather than Supabase Auth. Browser and authenticated
+-- Data API roles receive no table access; authorized application requests use
+-- the server-only service role after route-level authorization.
+do $$
+declare
+  target record;
+begin
+  for target in
+    select c.relname
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relkind in ('r', 'p')
+  loop
+    execute format('alter table public.%I enable row level security', target.relname);
+  end loop;
+end;
+$$;
+
+revoke all privileges on all tables in schema public from public, anon, authenticated;
+revoke all privileges on all sequences in schema public from public, anon, authenticated;
+grant all privileges on all tables in schema public to service_role;
+grant all privileges on all sequences in schema public to service_role;
+
+alter default privileges for role postgres in schema public revoke all on tables from public, anon, authenticated;
+alter default privileges for role postgres in schema public revoke all on sequences from public, anon, authenticated;
+alter default privileges for role postgres in schema public revoke execute on functions from public, anon, authenticated;
+alter default privileges for role postgres in schema public grant all on tables to service_role;
+alter default privileges for role postgres in schema public grant all on sequences to service_role;
+alter default privileges for role postgres in schema public grant execute on functions to service_role;

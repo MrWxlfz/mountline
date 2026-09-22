@@ -9,6 +9,8 @@ interface ParticleFieldProps {
   interactive?: boolean
 }
 
+const densityMap = { sparse: 40, normal: 60, dense: 100 } as const
+
 export function ParticleField({ 
   className = "", 
   density = "normal",
@@ -17,14 +19,8 @@ export function ParticleField({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef({ x: 0, y: 0 })
   const particlesRef = useRef<Particle[]>([])
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number | undefined>(undefined)
   const prefersReducedMotion = useReducedMotion()
-  
-  const densityMap = {
-    sparse: 40,
-    normal: 60,
-    dense: 100
-  }
   
   interface Particle {
     x: number
@@ -99,8 +95,6 @@ export function ParticleField({
       const rect = canvas.getBoundingClientRect()
       ctx.clearRect(0, 0, rect.width, rect.height)
       
-      // Get computed style for theme-aware color
-      const computedStyle = getComputedStyle(document.documentElement)
       const isDark = document.documentElement.classList.contains("dark")
       
       particlesRef.current.forEach((particle) => {
@@ -202,9 +196,10 @@ export function ParticleField({
 export function VerticalFragments({ className = "" }: { className?: string }) {
   const lines = Array.from({ length: 12 }, (_, i) => ({
     left: `${8 + i * 8}%`,
-    height: `${Math.random() * 30 + 20}%`,
+    height: `${20 + (i * 17) % 30}%`,
     delay: i * 0.1,
-    opacity: Math.random() * 0.15 + 0.05
+    opacity: 0.05 + ((i * 7) % 15) / 100,
+    duration: 8 + (i % 4),
   }))
   
   return (
@@ -221,7 +216,7 @@ export function VerticalFragments({ className = "" }: { className?: string }) {
           initial={{ y: "-100%" }}
           animate={{ y: "200%" }}
           transition={{
-            duration: 8 + Math.random() * 4,
+            duration: line.duration,
             delay: line.delay,
             repeat: Infinity,
             ease: "linear"

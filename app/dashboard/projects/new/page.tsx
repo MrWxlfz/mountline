@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
 import { ArrowLeft, Loader2, Save } from "lucide-react"
@@ -16,6 +16,7 @@ export default function NewProjectPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const signalId = searchParams.get("signalId")
+  const idempotencyKey = useRef(crypto.randomUUID())
   const [saving, setSaving] = useState(false)
   const [loadingClients, setLoadingClients] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -90,6 +91,7 @@ export default function NewProjectPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          idempotency_key: idempotencyKey.current,
           client_id: form.client_id || null,
           signal_id: signalId,
         }),

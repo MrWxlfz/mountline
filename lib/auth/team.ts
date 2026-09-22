@@ -1,9 +1,10 @@
 import "server-only"
 
-import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { getServerIdentity, type AuthenticatedIdentity } from "@/lib/auth/identity"
+import { normalizeEmail } from "@/lib/auth/identity-rules"
 
 export type NorthlineTeamAccess =
   | {
@@ -28,22 +29,22 @@ export type NorthlineTeamAccess =
       userId: string
       emails: string[]
     }
+  | {
+      status: "error"
+      isSignedIn: true
+      isTeamMember: false
+      userId: string
+      emails: string[]
+    }
 
-function normalizeEmails(emails: Array<string | undefined | null>) {
-  return Array.from(
-    new Set(
-      emails
-        .filter((email): email is string => Boolean(email))
-        .map((email) => email.trim().toLowerCase())
-        .filter(Boolean),
-    ),
-  )
-}
+export async function getNorthlineTeamAccess(
+  providedIdentity?: AuthenticatedIdentity | null,
+): Promise<NorthlineTeamAccess> {
+  const identity = providedIdentity === undefined
+    ? await getServerIdentity()
+    : providedIdentity
 
-export async function getNorthlineTeamAccess(): Promise<NorthlineTeamAccess> {
-  const { userId } = await auth()
-
-  if (!userId) {
+  if (!identity) {
     return {
       status: "unauthenticated",
       isSignedIn: false,
@@ -53,10 +54,7 @@ export async function getNorthlineTeamAccess(): Promise<NorthlineTeamAccess> {
     }
   }
 
-  const user = await currentUser()
-  const emails = normalizeEmails(
-    user?.emailAddresses?.map((email) => email.emailAddress) ?? [],
-  )
+  const { userId, verifiedEmails: emails } = identity
 
   const supabase = createAdminClient()
 
@@ -69,6 +67,13 @@ export async function getNorthlineTeamAccess(): Promise<NorthlineTeamAccess> {
 
   if (clerkError) {
     console.error("[auth] Team member Clerk ID lookup failed:", clerkError.message)
+    return {
+      status: "error",
+      isSignedIn: true,
+      isTeamMember: false,
+      userId,
+      emails,
+    }
   }
 
   const clerkMatch = clerkMatches?.[0]
@@ -86,16 +91,25 @@ export async function getNorthlineTeamAccess(): Promise<NorthlineTeamAccess> {
   if (emails.length > 0) {
     const { data: emailMatches, error: emailError } = await supabase
       .from("team_members")
-      .select("id")
+      .select("id, email")
       .eq("status", "active")
-      .in("email", emails)
-      .limit(1)
+      .is("clerk_user_id", null)
 
     if (emailError) {
       console.error("[auth] Team member email lookup failed:", emailError.message)
+      return {
+        status: "error",
+        isSignedIn: true,
+        isTeamMember: false,
+        userId,
+        emails,
+      }
     }
 
-    const emailMatch = emailMatches?.[0]
+    const emailMatch = emailMatches?.find((item) => {
+      const email = normalizeEmail(item.email)
+      return Boolean(email && emails.includes(email))
+    })
     if (emailMatch) {
       return {
         status: "authorized",
@@ -129,7 +143,7 @@ export async function requireNorthlineTeamMember() {
     redirect("/id")
   }
 
-  if (access.status === "forbidden") {
+  if (access.status === "forbidden" || access.status === "error") {
     redirect("/access-restricted")
   }
 
@@ -143,6 +157,16 @@ export async function requireNorthlineTeamMemberApi() {
     return {
       access,
       response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    }
+  }
+
+  if (access.status === "error") {
+    return {
+      access,
+      response: NextResponse.json(
+        { error: "Authorization could not be verified" },
+        { status: 503 },
+      ),
     }
   }
 

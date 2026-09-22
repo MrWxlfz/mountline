@@ -10,7 +10,11 @@
     "repair:signal-identities": "node --experimental-strip-types scripts/repair-signal-identities.ts",
     "lint": "eslint .",
     "start": "next start",
-    "test:signal": "node --experimental-strip-types --test lib/signal/__tests__/*.test.ts"
+    "test:signal": "node --experimental-strip-types --test lib/signal/__tests__/*.test.ts",
+    "test:stabilization": "node --experimental-strip-types --test lib/stabilization/__tests__/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "test:receptionist": "node --experimental-strip-types --test lib/receptionist/__tests__/*.test.ts lib/leads/__tests__/*.test.ts",
+    "receptionist:config": "node --experimental-strip-types scripts/receptionist-config.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.17",

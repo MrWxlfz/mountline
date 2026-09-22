@@ -24,6 +24,7 @@ import {
   BarChart3,
   GitBranch,
   Send,
+  PhoneCall,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NorthlineLogo } from "@/components/northline-logo"
@@ -40,6 +41,7 @@ const navGroups = [
     items: [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
       { href: "/dashboard/leads", label: "Leads", icon: Inbox },
+      { href: "/dashboard/receptionist", label: "Receptionist setup", icon: PhoneCall },
       { href: "/dashboard/pipeline", label: "Pipeline", icon: GitBranch },
     ],
   },

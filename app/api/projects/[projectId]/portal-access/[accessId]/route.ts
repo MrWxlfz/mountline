@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { uuidSchema } from "@/lib/projects/validation"
 
 const allowedAccessStatuses = new Set(["invited", "active", "revoked"])
 
@@ -14,8 +15,9 @@ export async function PATCH(
   }
 
   const { projectId, accessId } = await params
-  const body = await request.json()
-  const accessStatus = typeof body.access_status === "string" ? body.access_status : ""
+  if (!uuidSchema.safeParse(projectId).success || !uuidSchema.safeParse(accessId).success) return NextResponse.json({ error: "Invalid portal access identifier." }, { status: 400 })
+  const body = await request.json().catch(() => null)
+  const accessStatus = body && typeof body.access_status === "string" ? body.access_status : ""
 
   if (!allowedAccessStatuses.has(accessStatus)) {
     return NextResponse.json({ error: "Invalid portal access status" }, { status: 400 })
@@ -28,11 +30,14 @@ export async function PATCH(
     .eq("id", accessId)
     .eq("project_id", projectId)
     .select("id, created_at, project_id, client_email, clerk_user_id, access_status")
-    .single()
+    .maybeSingle()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("[mountline] Portal assignment update failed", { code: error.code, message: error.message })
+    return NextResponse.json({ error: "Portal access could not be updated." }, { status: 500 })
   }
+
+  if (!data) return NextResponse.json({ error: "Portal access record not found." }, { status: 404 })
 
   return NextResponse.json({ access: data })
 }

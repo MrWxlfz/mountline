@@ -1,27 +1,29 @@
-import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import type { ReactNode } from "react"
-import { isNorthlineTeamMember } from "@/lib/auth/team"
+import { getNorthlineTeamAccess } from "@/lib/auth/team"
+import { getServerIdentity } from "@/lib/auth/identity"
 import { getAccessiblePortalDestinations } from "@/lib/auth/mountline-id"
 import Link from "next/link"
 import { NorthlineLogo } from "@/components/northline-logo"
 import { FolderKanban } from "lucide-react"
 
 export default async function PortalIndexPage() {
-  const { userId } = await auth()
-  if (!userId) redirect("/id")
+  const identity = await getServerIdentity()
+  if (!identity) redirect("/id")
 
-  if (await isNorthlineTeamMember()) {
+  const teamAccess = await getNorthlineTeamAccess(identity)
+  if (teamAccess.status === "error") {
+    throw new Error("Portal authorization could not be verified.")
+  }
+  if (teamAccess.isTeamMember) {
     redirect("/dashboard")
   }
 
-  const user = await currentUser()
-  const email = user?.emailAddresses?.[0]?.emailAddress?.trim().toLowerCase()
-
-  const access = await getAccessiblePortalDestinations({
-    userId,
-    emails: user?.emailAddresses?.map((item) => item.emailAddress) || [],
-  })
+  const portalResult = await getAccessiblePortalDestinations({ identity })
+  if (portalResult.status === "error") {
+    throw new Error("Portal assignments could not be loaded.")
+  }
+  const access = portalResult.destinations
 
   // If only one project, redirect directly
   if (access && access.length === 1) {
@@ -53,7 +55,7 @@ export default async function PortalIndexPage() {
         <div className="text-center space-y-3">
           <FolderKanban className="w-10 h-10 mx-auto text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">
-            No active projects found for <span className="font-medium text-foreground">{email || "this account"}</span>.
+            No active projects found for <span className="font-medium text-foreground">{identity.primaryEmail || "this account"}</span>.
           </p>
           <p className="text-xs text-muted-foreground">
             If you believe this is an error, please contact your project manager.

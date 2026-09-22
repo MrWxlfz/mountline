@@ -54,6 +54,66 @@ export type Project = {
   invoice_label: string | null
   next_step: string | null
   notes: string | null
+  creation_idempotency_key: string | null
+  sale_confirmed_at: string | null
+  sale_confirmed_by: string | null
+  sale_evidence_reference: string | null
+}
+
+export type ProjectReceipt = {
+  id: string
+  created_at: string
+  project_id: string
+  amount_minor: number
+  currency: string
+  received_at: string
+  payment_method: PaymentMethod
+  reference: string
+  recorded_by: string
+}
+
+export type InquirySource = "manual" | "phone" | "website" | "email" | "referral" | "provider"
+
+export type InquiryEventType =
+  | "inquiry_received"
+  | "handoff_pending"
+  | "handoff_attempted"
+  | "handoff_accepted_by_provider"
+  | "handoff_successful"
+  | "handoff_failed"
+  | "customer_contacted"
+  | "quote_produced"
+  | "job_won"
+  | "payment_received"
+
+export type Inquiry = {
+  id: string
+  created_at: string
+  project_id: string
+  source: InquirySource
+  external_reference: string | null
+  received_at: string
+  contact_name: string | null
+  contact_phone: string | null
+  contact_email: string | null
+  service_requested: string | null
+  intake_details: string | null
+  is_test: boolean
+  recorded_by: string
+}
+
+export type InquiryEvent = {
+  id: string
+  created_at: string
+  inquiry_id: string
+  event_type: InquiryEventType
+  occurred_at: string
+  actor_source: "manual_team" | "provider" | "customer" | "business_owner" | "system"
+  recorded_by: string
+  source_event_key: string | null
+  attempt_id: string | null
+  evidence: Record<string, unknown>
+  supersedes_event_id: string | null
 }
 
 export type ClientPortalAccess = {
@@ -79,6 +139,7 @@ export type SupportMessage = {
   project_id: string
   sender_type: "client" | "team" | "system"
   sender_email: string
+  sender_clerk_user_id: string | null
   sender_name: string | null
   read_at: string | null
   message: string

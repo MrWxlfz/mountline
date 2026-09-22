@@ -65,9 +65,7 @@ const accessStatuses = ["invited", "active", "revoked"]
 const paymentStatuses = [
   { value: "not_sent", label: "Not sent" },
   { value: "pending", label: "Pending" },
-  { value: "paid", label: "Paid" },
   { value: "waived", label: "Waived" },
-  { value: "manual_received", label: "Manual received" },
 ]
 const paymentMethods: { value: PaymentMethod; label: string }[] = [
   { value: "stripe_card", label: "Stripe/card" },
@@ -128,10 +126,14 @@ export function ProjectEditForm({
     setSuccess(false)
 
     try {
+      const { payment_status, ...projectFields } = form
+      const payload = payment_status === "paid" || payment_status === "manual_received"
+        ? projectFields
+        : { ...projectFields, payment_status }
       const res = await fetch(`/api/projects/${project.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
 
@@ -272,7 +274,7 @@ export function ProjectEditForm({
           <div>
             <h2 className="text-base font-semibold">Payment</h2>
             <p className="text-sm text-muted-foreground">
-              Set payment options and status shown in the client portal.
+              Configure payment options. Received money is recorded in the receipt ledger below.
             </p>
           </div>
 
@@ -309,6 +311,11 @@ export function ProjectEditForm({
                 onChange={(e) => setForm({ ...form, payment_status: e.target.value })}
                 className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
               >
+                {(form.payment_status === "paid" || form.payment_status === "manual_received") && (
+                  <option value={form.payment_status} disabled>
+                    Legacy {form.payment_status.replace(/_/g, " ")} · unverified
+                  </option>
+                )}
                 {paymentStatuses.map((status) => (
                   <option key={status.value} value={status.value}>
                     {status.label}
@@ -363,7 +370,7 @@ export function ProjectEditForm({
         </label>
 
         <label className="space-y-2 block">
-          <span className="text-sm font-medium">Notes</span>
+          <span className="text-sm font-medium">Internal notes — team only</span>
           <textarea
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}

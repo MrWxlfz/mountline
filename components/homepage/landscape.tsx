@@ -65,26 +65,30 @@ function ridgeline(random: () => number, layer: Layer) {
   return `M0,${H} L${points.join(" L")} L${W},${H} Z`
 }
 
-const cache = new Map<Variant, { ridges: string[]; stars: Array<[number, number, number, number]> }>()
+const cache = new Map<string, { ridges: string[]; stars: Array<[number, number, number, number]> }>()
 
-function geometry(variant: Variant) {
-  const cached = cache.get(variant)
+function geometry(variant: Variant, horizon: number) {
+  const key = `${variant}:${horizon}`
+  const cached = cache.get(key)
   if (cached) return cached
   const random = mulberry32(palettes[variant].seed)
-  const ridges = layers.map((layer) => ridgeline(random, layer))
+  const ridges = layers.map((layer) => ridgeline(random, { ...layer, base: layer.base + horizon }))
   const stars: Array<[number, number, number, number]> =
     variant === "night"
       ? Array.from({ length: 70 }, () => [random() * W, random() * H * 0.42, 0.5 + random() * 0.9, 0.15 + random() * 0.55])
       : []
   const result = { ridges, stars }
-  cache.set(variant, result)
+  cache.set(key, result)
   return result
 }
 
-/** A layered ridgeline scene used behind product views, in place of stock photography. */
-export function Landscape({ variant, id, className }: { variant: Variant; id: string; className?: string }) {
+/**
+ * A layered ridgeline scene used behind product views, in place of stock photography.
+ * `horizon` lowers the ranges (as a share of the height) to leave more open sky.
+ */
+export function Landscape({ variant, id, className, horizon = 0 }: { variant: Variant; id: string; className?: string; horizon?: number }) {
   const palette = palettes[variant]
-  const { ridges, stars } = geometry(variant)
+  const { ridges, stars } = geometry(variant, horizon)
 
   return (
     <svg className={className} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true">

@@ -1,4 +1,0 @@
-Query chain:
- →Find: Target Application 'dev.mountline.qa'
-  ↪︎Find: Descendants matching type StaticText
-    ↪︎Find: Elements matching predicate '"client@example.test" IN identifiers'

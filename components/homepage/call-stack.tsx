@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 
-export type StackStep = { label: string; title: string; body: ReactNode }
+export type StackStep = { readonly label: string; readonly title: string; readonly body: ReactNode }
 
 // Isometric plate geometry (top vertex at the origin of each plate group).
 const CX = 240
@@ -82,9 +82,9 @@ function plateY(index: number, active: number) {
   return y
 }
 
-function Stack({ active, uid }: { active: number; uid: string }) {
+function Stack({ active, uid, labels }: { active: number; uid: string; labels?: readonly string[] }) {
   return (
-    <svg className="ml-stack__svg" viewBox="0 0 480 520" role="img" aria-label="Four layers: your number, the receptionist, your approved details, and your team.">
+    <svg className="ml-stack__svg" viewBox="0 0 480 520" aria-hidden="true">
       <defs>
         <pattern id={`${uid}-hatch`} width="5" height="5" patternUnits="userSpaceOnUse">
           <path d="M0 0V5" className="ml-stack__hatch" />
@@ -107,6 +107,15 @@ function Stack({ active, uid }: { active: number; uid: string }) {
             <g transform={ISO} className="ml-stack__detail">
               <Detail />
             </g>
+            {labels ? (
+              <g className="ml-stack__label">
+                <path d={`M${CX + A + 8},${B} H${CX + A + 36}`} />
+                <text x={CX + A + 44} y={B + 4}>
+                  <tspan className="ml-stack__label-index">{String(index + 1).padStart(2, "0")}</tspan>
+                  <tspan dx="8">{labels[index]}</tspan>
+                </text>
+              </g>
+            ) : null}
           </g>
         )
       })}
@@ -114,7 +123,7 @@ function Stack({ active, uid }: { active: number; uid: string }) {
   )
 }
 
-export function CallStack({ steps, intro }: { steps: StackStep[]; intro: ReactNode }) {
+export function CallStack({ steps, intro }: { steps: readonly StackStep[]; intro: ReactNode }) {
   const [active, setActive] = useState(0)
   const stepRefs = useRef<Array<HTMLElement | null>>([])
   const railRef = useRef<HTMLDivElement>(null)
@@ -155,24 +164,10 @@ export function CallStack({ steps, intro }: { steps: StackStep[]; intro: ReactNo
     }
   }, [])
 
-  const goTo = (index: number) => {
-    stepRefs.current[index]?.scrollIntoView({ behavior: "smooth", block: "center" })
-  }
-
   return (
     <div className="ml-stack">
       <div className="ml-stack__copy">
         {intro}
-        <ol className="ml-stack__index" aria-label="Layers">
-          {steps.map((step, index) => (
-            <li key={step.label}>
-              <button type="button" data-active={index === active} onClick={() => goTo(index)}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                {step.label}
-              </button>
-            </li>
-          ))}
-        </ol>
         <div className="ml-stack__mobile-visual" aria-hidden="true">
           <Stack active={active} uid="stack-m" />
         </div>
@@ -181,6 +176,7 @@ export function CallStack({ steps, intro }: { steps: StackStep[]; intro: ReactNo
           {steps.map((step, index) => (
             <article
               key={step.label}
+              aria-current={index === active ? "step" : undefined}
               ref={(node) => {
                 stepRefs.current[index] = node
               }}
@@ -188,7 +184,7 @@ export function CallStack({ steps, intro }: { steps: StackStep[]; intro: ReactNo
               data-active={index === active}
             >
               <span className="ml-stack__dot" aria-hidden="true" />
-              <p className="ml-mono">{String(index + 1).padStart(2, "0")} · {step.label}</p>
+              <p className="ml-stack__kicker"><span>{String(index + 1).padStart(2, "0")}</span>{step.label}</p>
               <h3>{step.title}</h3>
               <p>{step.body}</p>
             </article>
@@ -197,7 +193,7 @@ export function CallStack({ steps, intro }: { steps: StackStep[]; intro: ReactNo
       </div>
       <div className="ml-stack__visual">
         <div className="ml-stack__sticky">
-          <Stack active={active} uid="stack-d" />
+          <Stack active={active} uid="stack-d" labels={steps.map((step) => step.label)} />
         </div>
       </div>
     </div>

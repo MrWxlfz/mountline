@@ -161,6 +161,18 @@ function parsePayload(value: unknown): RunPayload {
   }
 }
 
+// No React state here, so the mount effect can apply the result in a callback.
+async function fetchRunsOverview(): Promise<{ payload: RunPayload } | { error: string }> {
+  try {
+    const response = await fetch("/api/signal/runs", { cache: "no-store" })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) return { error: typeof data?.error === "string" ? data.error : "Scout could not refresh the discovery runs." }
+    return { payload: parsePayload(data) }
+  } catch (cause) {
+    return { error: cause instanceof Error ? cause.message : "Scout could not refresh the discovery runs." }
+  }
+}
+
 function stageLabel(value: string | null | undefined) {
   return formatRunStage(value)
 }
@@ -279,21 +291,13 @@ export function SignalLeadEngine({
     if (payload.activeEvents || payload.events) setCurrentEvents(payload.activeEvents || payload.events || [])
   }, [])
 
-  const refreshOverview = useCallback(async (silent = false) => {
-    if (!silent) {
-      setRefreshing(true)
-      setError(null)
-    }
-    try {
-      const response = await fetch("/api/signal/runs", { cache: "no-store" })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Scout could not refresh the discovery runs.")
-      applyPayload(parsePayload(data))
-    } catch (cause) {
-      if (!silent) setError(cause instanceof Error ? cause.message : "Scout could not refresh the discovery runs.")
-    } finally {
-      if (!silent) setRefreshing(false)
-    }
+  const refreshOverview = useCallback(async () => {
+    setRefreshing(true)
+    setError(null)
+    const result = await fetchRunsOverview()
+    if ("payload" in result) applyPayload(result.payload)
+    else setError(result.error)
+    setRefreshing(false)
   }, [applyPayload])
 
   const refreshCurrentRun = useCallback(async (silent = false) => {
@@ -323,9 +327,16 @@ export function SignalLeadEngine({
     }
   }, [applyPayload, currentRun])
 
+  // Load recent runs once on mount, quietly: a failure here leaves the server-rendered list in place.
   useEffect(() => {
-    void refreshOverview(true)
-  }, [refreshOverview])
+    let current = true
+    void fetchRunsOverview().then((result) => {
+      if (current && "payload" in result) applyPayload(result.payload)
+    })
+    return () => {
+      current = false
+    }
+  }, [applyPayload])
 
   useEffect(() => {
     if (!currentRun || !activeRun(currentRun)) return

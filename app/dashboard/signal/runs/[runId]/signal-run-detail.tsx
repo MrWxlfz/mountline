@@ -160,6 +160,20 @@ function parsePayload(value: unknown): RunApiPayload {
   }
 }
 
+type LeadDetailsResult = { payload: RunApiPayload } | { error: string }
+
+// No React state here: callers apply the result in a callback, after the request settles.
+async function fetchLeadDetails(runId: string, leadId: string): Promise<LeadDetailsResult> {
+  try {
+    const response = await fetch(`/api/signal/runs/${runId}/leads/${leadId}`, { cache: "no-store" })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) return { error: typeof data?.error === "string" ? data.error : "Lead details could not be loaded." }
+    return { payload: parsePayload(data) }
+  } catch (cause) {
+    return { error: cause instanceof Error ? cause.message : "Lead details could not be loaded." }
+  }
+}
+
 function displayStage(stage: string | null | undefined) {
   return formatRunStage(stage)
 }
@@ -347,7 +361,7 @@ export function SignalRunDetail({
   const [leadError, setLeadError] = useState<string | null>(null)
   const [leadWorking, setLeadWorking] = useState<"saved" | "ignored" | "scripts" | "lovable" | null>(null)
   const [feedbackWorking, setFeedbackWorking] = useState<"correction" | "observation" | null>(null)
-  const openedFromQuery = useRef<string | null>(null)
+  const [queryLead, setQueryLead] = useState<SignalRunLead | null>(null)
 
   const applyPayload = useCallback((payload: RunApiPayload) => {
     if (payload.run) setRun(payload.run)
@@ -415,7 +429,8 @@ export function SignalRunDetail({
     }
   }, [advanceRun, refreshRun, run.status])
 
-  const openLead = useCallback(async (lead: SignalRunLead) => {
+  // Opening a lead shows the drawer right away; its details arrive from the API after.
+  const showLead = (lead: SignalRunLead) => {
     setDrawerOpen(true)
     setSelectedLead(lead)
     setSelectedEvidence([])
@@ -423,12 +438,13 @@ export function SignalRunDetail({
     setSelectedCorrections([])
     setLeadError(null)
     setLoadingLead(true)
+  }
 
-    try {
-      const response = await fetch(`/api/signal/runs/${run.id}/leads/${lead.id}`, { cache: "no-store" })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Lead details could not be loaded.")
-      const payload = parsePayload(data)
+  const applyLeadDetails = useCallback((result: LeadDetailsResult) => {
+    if ("error" in result) {
+      setLeadError(result.error)
+    } else {
+      const { payload } = result
       if (payload.lead) {
         setSelectedLead(payload.lead)
         setLeads((current) => current.map((item) => item.id === payload.lead?.id ? payload.lead : item))
@@ -436,21 +452,36 @@ export function SignalRunDetail({
       setSelectedEvidence(payload.evidence || [])
       setSelectedObservations(payload.observations || [])
       setSelectedCorrections(payload.corrections || [])
-    } catch (cause) {
-      setLeadError(cause instanceof Error ? cause.message : "Lead details could not be loaded.")
-    } finally {
-      setLoadingLead(false)
     }
-  }, [run.id])
+    setLoadingLead(false)
+  }, [])
+
+  const openLead = (lead: SignalRunLead) => {
+    showLead(lead)
+    void fetchLeadDetails(run.id, lead.id).then(applyLeadDetails)
+  }
+
+  // A ?lead= link opens that lead once, as soon as it is in the list. The drawer is set while
+  // rendering so it appears in the same paint; the effect below only fetches its details.
+  const requestedLeadId = searchParams.get("lead")
+  if (requestedLeadId && queryLead?.id !== requestedLeadId) {
+    const requestedLead = leads.find((lead) => lead.id === requestedLeadId)
+    if (requestedLead) {
+      setQueryLead(requestedLead)
+      showLead(requestedLead)
+    }
+  }
 
   useEffect(() => {
-    const requestedLeadId = searchParams.get("lead")
-    if (!requestedLeadId || openedFromQuery.current === requestedLeadId) return
-    const requestedLead = leads.find((lead) => lead.id === requestedLeadId)
-    if (!requestedLead) return
-    openedFromQuery.current = requestedLeadId
-    void openLead(requestedLead)
-  }, [leads, openLead, searchParams])
+    if (!queryLead) return
+    let current = true
+    void fetchLeadDetails(run.id, queryLead.id).then((result) => {
+      if (current) applyLeadDetails(result)
+    })
+    return () => {
+      current = false
+    }
+  }, [queryLead, run.id, applyLeadDetails])
 
   const updateLeadStatus = async (lead: SignalRunLead, status: "saved" | "ignored") => {
     setLeadWorking(status)
@@ -695,7 +726,7 @@ export function SignalRunDetail({
                   key={lead.id}
                   lead={lead}
                   rank={lead.rank || index + 1}
-                  onOpen={() => void openLead(lead)}
+                  onOpen={() => openLead(lead)}
                   onGenerate={(kind) => void generateLeadAsset(lead, kind)}
                   onStatus={(status) => void updateLeadStatus(lead, status)}
                   working={leadWorking}
@@ -718,7 +749,7 @@ export function SignalRunDetail({
               </div>
               <div className="mt-4 grid gap-3 lg:grid-cols-2">
                 {watchlistLeads.map((lead) => (
-                  <WatchlistLeadCard key={lead.id} lead={lead} onOpen={() => void openLead(lead)} />
+                  <WatchlistLeadCard key={lead.id} lead={lead} onOpen={() => openLead(lead)} />
                 ))}
               </div>
             </div>

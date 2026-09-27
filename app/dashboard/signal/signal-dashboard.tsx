@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   AlertTriangle,
   BarChart3,
@@ -189,6 +190,7 @@ export function SignalDashboard({
   markets: SignalMarketRow[]
   initialRows: SignalProspectRow[]
 }) {
+  const router = useRouter()
   const [rows, setRows] = useState(initialRows)
   const [filters, setFilters] = useState(emptyFilters)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -378,7 +380,7 @@ export function SignalDashboard({
         setError(data.error || "Call session could not be created.")
         return
       }
-      window.location.href = `/dashboard/signal/call-session/${data.session.id}`
+      router.push(`/dashboard/signal/call-session/${data.session.id}`)
     } catch {
       setError("Call session could not be created.")
     } finally {
@@ -404,7 +406,7 @@ export function SignalDashboard({
           ? "Quick score complete. AI unavailable; rule-based score shown."
           : "Quick score complete.",
       )
-      window.location.href = `/dashboard/signal/${prospectId}`
+      router.push(`/dashboard/signal/${prospectId}`)
     } catch {
       setError("Quick score could not complete.")
     } finally {

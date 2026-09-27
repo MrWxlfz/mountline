@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { ArrowLeft, MessageSquare } from "lucide-react"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
+import type { SupportMessage, SupportThreadWithProject } from "@/lib/supabase/types"
 import { SupportReplyForm } from "./support-reply-form"
 
 function formatDateTime(date: string | null) {
@@ -25,7 +26,7 @@ export default async function SupportThreadPage({
   const { threadId } = await params
   const supabase = createAdminClient()
 
-  const { data: thread, error } = await supabase
+  const { data: threadData, error } = await supabase
     .from("support_threads")
     .select(`
       id,
@@ -46,16 +47,18 @@ export default async function SupportThreadPage({
     `)
     .eq("id", threadId)
     .maybeSingle()
+  const thread = threadData as SupportThreadWithProject | null
 
   if (error || !thread) {
     notFound()
   }
 
-  const { data: messages } = await supabase
+  const { data: messageData } = await supabase
     .from("support_messages")
     .select("id, created_at, thread_id, project_id, sender_type, sender_email, sender_name, read_at, message")
     .eq("thread_id", thread.id)
     .order("created_at", { ascending: true })
+  const messages = messageData as Pick<SupportMessage, "id" | "created_at" | "thread_id" | "project_id" | "sender_type" | "sender_email" | "sender_name" | "read_at" | "message">[] | null
 
   await supabase
     .from("support_messages")
@@ -104,7 +107,7 @@ export default async function SupportThreadPage({
 
         <div className="space-y-4 p-5">
           {messages && messages.length > 0 ? (
-            messages.map((message: any) => {
+            messages.map((message) => {
               const isTeam = message.sender_type === "team"
               const isSystem = message.sender_type === "system"
 

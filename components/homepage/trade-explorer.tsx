@@ -1,135 +1,96 @@
 "use client"
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
-import { ArrowRight, Check } from "lucide-react"
-import { Landscape } from "@/components/homepage/landscape"
+import { useRef, useState, type KeyboardEvent, type ReactNode } from "react"
+import type { Trade } from "@/lib/homepage/content"
 
-export type Trade = {
-  name: string
-  summary: string
-  points: string[]
-  cta: { label: string; href: string }
-  example: {
-    caller: string
-    reply: string
-    issue: string
-    location: string
-    urgency: string
-    timing: string
-  }
-}
-
-const ADVANCE_MS = 7000
-
-export function TradeExplorer({ trades, intro }: { trades: Trade[]; intro?: ReactNode }) {
+export function TradeExplorer({ trades, intro }: { trades: readonly Trade[]; intro?: ReactNode }) {
   const [active, setActive] = useState(0)
-  const [view, setView] = useState<"request" | "call">("request")
-  const [autoplay, setAutoplay] = useState(true)
-  const [paused, setPaused] = useState(false)
-  const [inView, setInView] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    // Reduced motion needs no check here: the progress animation is disabled in CSS, so it never advances.
-    const node = rootRef.current
-    if (!node) return
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 })
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [])
-
-  const running = autoplay && inView && !paused
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const trade = trades[active]
 
-  const choose = (index: number) => {
-    setAutoplay(false)
-    setActive(index)
+  const select = (index: number, focus = false) => {
+    const next = (index + trades.length) % trades.length
+    setActive(next)
+    if (focus) tabRefs.current[next]?.focus()
+  }
+
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const keys: Record<string, number> = { ArrowDown: active + 1, ArrowRight: active + 1, ArrowUp: active - 1, ArrowLeft: active - 1, Home: 0, End: trades.length - 1 }
+    if (!(event.key in keys)) return
+    event.preventDefault()
+    select(keys[event.key], true)
   }
 
   return (
-    <div
-      ref={rootRef}
-      className="ml-trades"
-      onPointerEnter={() => setPaused(true)}
-      onPointerLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
-      <div className="ml-trades__list">
+    <div className="ml-trades">
+      <div className="ml-trades__side">
         {intro}
-        {trades.map((item, index) => {
-          const open = index === active
-          return (
-            <div key={item.name} className="ml-trade" data-open={open}>
-              <h3>
-                <button
-                  type="button"
-                  id={`trade-${index}`}
-                  aria-expanded={open}
-                  aria-controls={`trade-panel-${index}`}
-                  onClick={() => choose(index)}
-                >
-                  {item.name}
-                </button>
-              </h3>
-              <div id={`trade-panel-${index}`} role="region" aria-labelledby={`trade-${index}`} className="ml-trade__panel" inert={!open}>
-                <div>
-                  <p>{item.summary}</p>
-                  <ul>
-                    {item.points.map((point) => (
-                      <li key={point}><Check aria-hidden="true" />{point}</li>
-                    ))}
-                  </ul>
-                  <a href={item.cta.href} className="ml-btn ml-btn--line ml-btn--sm">
-                    {item.cta.label}
-                    <ArrowRight aria-hidden="true" />
-                  </a>
-                </div>
-              </div>
-              {open && autoplay ? (
-                <span
-                  key={active}
-                  className="ml-trade__progress"
-                  style={{ animationDuration: `${ADVANCE_MS}ms`, animationPlayState: running ? "running" : "paused" }}
-                  onAnimationEnd={() => setActive((value) => (value + 1) % trades.length)}
-                  aria-hidden="true"
-                />
-              ) : null}
-            </div>
-          )
-        })}
+        <div className="ml-trades__tabs" role="tablist" aria-label="Type of business" aria-orientation="vertical">
+          {trades.map((item, index) => {
+            const selected = index === active
+            return (
+              <button
+                key={item.name}
+                ref={(node) => {
+                  tabRefs.current[index] = node
+                }}
+                type="button"
+                role="tab"
+                id={`trade-tab-${index}`}
+                aria-selected={selected}
+                aria-controls="trade-panel"
+                tabIndex={selected ? 0 : -1}
+                onClick={() => select(index)}
+                onKeyDown={onKeyDown}
+                className="ml-trades__tab"
+              >
+                <span className="ml-trades__name">{item.name}</span>
+                <span className="ml-trades__moment" aria-hidden="true">
+                  <span>{item.moment}</span>
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      <div className="ml-trades__visual">
-        <Landscape variant="dusk" id="trades-scene" className="ml-scene" />
-        <div className="ml-trades__card-wrap">
-          <figure className="ml-card" data-illustrative aria-label={`Example ${trade.name} call. Not live customer data.`}>
-            <div className="ml-card__head">
-              <span className="ml-mono">{trade.name} · Service request</span>
-              <span className="ml-mono ml-card__muted">Example</span>
+      <div className="ml-trades__panel" role="tabpanel" id="trade-panel" aria-labelledby={`trade-tab-${active}`}>
+        <div className="ml-trades__scene" key={trade.name}>
+          <p className="ml-trades__panel-moment">{trade.moment}</p>
+          <div className="ml-trades__call">
+            <p className="ml-trades__label">A caller says</p>
+            <blockquote>“{trade.caller}”</blockquote>
+          </div>
+          <div className="ml-trades__grid">
+            <div className="ml-trades__asks">
+              <p className="ml-trades__label">Mountline asks</p>
+              <ol>
+                {trade.asks.map((ask, index) => (
+                  <li key={ask} style={{ "--i": index } as React.CSSProperties}>
+                    <span aria-hidden="true">{index + 1}</span>
+                    {ask}
+                  </li>
+                ))}
+              </ol>
             </div>
-            <div className="ml-card__body" key={`${active}-${view}`}>
-              {view === "request" ? (
-                <dl className="ml-card__fields">
-                  <div><dt>Issue</dt><dd>{trade.example.issue}</dd></div>
-                  <div><dt>Service location</dt><dd>{trade.example.location}</dd></div>
-                  <div><dt>Urgency</dt><dd>{trade.example.urgency}</dd></div>
-                  <div><dt>Preferred time</dt><dd>{trade.example.timing}</dd></div>
-                  <div><dt>Status</dt><dd><span className="ml-status"><i />Handoff pending</span></dd></div>
-                </dl>
-              ) : (
-                <ol className="ml-card__call">
-                  <li><span className="ml-mono">Caller</span><p>“{trade.example.caller}”</p></li>
-                  <li data-self><span className="ml-mono">Mountline</span><p>{trade.example.reply}</p></li>
-                </ol>
-              )}
+            <div className="ml-slip" role="group" aria-label={`Example ${trade.name} request`}>
+              <div className="ml-slip__head">
+                <span>{trade.name} request</span>
+                <span className="ml-slip__tag">Example</span>
+              </div>
+              <dl>
+                {trade.request.map(([label, value], index) => (
+                  <div key={label} style={{ "--i": index } as React.CSSProperties}>
+                    <dt>{label}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="ml-slip__status">
+                <i aria-hidden="true" />
+                {trade.status}
+              </p>
             </div>
-            <figcaption className="ml-card__foot ml-mono">Not live customer data</figcaption>
-          </figure>
-          <div className="ml-toggle" role="group" aria-label="Example view">
-            <button type="button" aria-pressed={view === "call"} onClick={() => setView("call")}>Call</button>
-            <button type="button" aria-pressed={view === "request"} onClick={() => setView("request")}>Request</button>
-            <span className="ml-toggle__thumb" data-view={view} aria-hidden="true" />
           </div>
         </div>
       </div>

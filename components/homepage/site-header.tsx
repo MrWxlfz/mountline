@@ -7,7 +7,8 @@ import { Wordmark } from "@/components/brand/wordmark"
 
 type NavItem = { href: string; label: string }
 
-export function SiteHeader({ nav, demoHref }: { nav: readonly NavItem[]; demoHref: string }) {
+// The bar label stays short enough to share a 360px phone bar with the logo and menu button.
+export function SiteHeader({ nav, ctaHref, ctaLabel, menuCtaLabel = ctaLabel }: { nav: readonly NavItem[]; ctaHref: string; ctaLabel: string; menuCtaLabel?: string }) {
   const [raised, setRaised] = useState(false)
   const [open, setOpen] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
@@ -61,14 +62,14 @@ export function SiteHeader({ nav, demoHref }: { nav: readonly NavItem[]; demoHre
 
         <nav className="ml-header__nav" aria-label="Primary">
           {nav.map((item) => (
-            <a key={item.href} href={item.href} className="ml-mono">{item.label}</a>
+            <a key={item.href} href={item.href}>{item.label}</a>
           ))}
         </nav>
 
         <div className="ml-header__actions">
-          <Link href="/id" className="ml-header__login ml-mono">Log in</Link>
-          <a href={demoHref} className="ml-btn ml-btn--solid ml-btn--sm ml-header__cta">
-            Call the demo
+          <Link href="/id" className="ml-header__login">Log in</Link>
+          <a href={ctaHref} className="ml-btn ml-btn--solid ml-btn--sm ml-header__cta">
+            {ctaLabel}
           </a>
           <button
             ref={toggleRef}
@@ -89,14 +90,14 @@ export function SiteHeader({ nav, demoHref }: { nav: readonly NavItem[]; demoHre
         <nav className="ml-container ml-menu__nav" aria-label="Menu">
           {nav.map((item, index) => (
             <a key={item.href} href={item.href} onClick={close} style={{ transitionDelay: open ? `${60 + index * 40}ms` : "0ms" }}>
-              <span className="ml-mono">{String(index + 1).padStart(2, "0")}</span>
+              <span className="ml-menu__index">{String(index + 1).padStart(2, "0")}</span>
               {item.label}
             </a>
           ))}
         </nav>
         <div className="ml-container ml-menu__actions">
-          <a href={demoHref} className="ml-btn ml-btn--solid" onClick={close}>
-            Call the demo <ArrowRight aria-hidden="true" />
+          <a href={ctaHref} className="ml-btn ml-btn--solid" onClick={close}>
+            {menuCtaLabel} <ArrowRight aria-hidden="true" />
           </a>
           <Link href="/id" className="ml-btn ml-btn--line" onClick={close}>Log in</Link>
         </div>

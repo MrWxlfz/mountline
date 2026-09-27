@@ -6,6 +6,9 @@ export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
   globalIgnores([
+    // Other sessions' git worktrees and Xcode output are not this checkout's source.
+    ".claude/**",
+    "ios/DerivedData/**",
     ".next/**",
     "node_modules/**",
     "public/**",

@@ -2,8 +2,9 @@
 
 import { Laptop, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
+import { useHydrated } from "@/hooks/use-hydrated"
 import { cn } from "@/lib/utils"
 
 const options = [
@@ -22,10 +23,8 @@ export function AppearanceSelector({
   syncServer?: boolean
 }) {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const mounted = useHydrated()
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => setMounted(true), [])
 
   async function selectAppearance(value: (typeof options)[number]["value"]) {
     setTheme(value)

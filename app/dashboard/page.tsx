@@ -22,6 +22,10 @@ import {
 } from "@/components/dashboard/dashboard-ui"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
+import type { Client, Project, SupportThread } from "@/lib/supabase/types"
+import type { InquiryLead } from "./leads/inquiry-inbox"
+
+type RecentProject = Project & { clients: Pick<Client, "business_name"> | null }
 
 async function getStats() {
   const supabase = createAdminClient()
@@ -88,9 +92,9 @@ async function getStats() {
     newLeadsCount: newLeadsCount || 0,
     portalsCount: portalsCount || 0,
     projectsCount: projectsCount || 0,
-    recentLeads: recentLeads || [],
-    recentProjects: recentProjects || [],
-    recentSupport: recentSupport || [],
+    recentLeads: (recentLeads || []) as InquiryLead[],
+    recentProjects: (recentProjects || []) as RecentProject[],
+    recentSupport: (recentSupport || []) as SupportThread[],
     signalFollowUpsDue: signalFollowUpsDue || 0,
     signalProspectsCount: signalProspectsCount || 0,
     signalReadyCount: signalReadyCount || 0,
@@ -241,7 +245,7 @@ export default async function DashboardPage() {
         >
           <div className="space-y-2">
             {stats.recentProjects.length > 0 ? (
-              stats.recentProjects.map((project: any) => (
+              stats.recentProjects.map((project) => (
                 <ActionRow
                   key={project.id}
                   href={`/dashboard/projects/${project.id}/edit`}
@@ -275,7 +279,7 @@ export default async function DashboardPage() {
         >
           <div className="space-y-2">
             {stats.recentLeads.length > 0 ? (
-              stats.recentLeads.map((lead: any) => (
+              stats.recentLeads.map((lead) => (
                 <ActionRow
                   key={lead.id}
                   href="/dashboard/leads"
@@ -323,7 +327,7 @@ export default async function DashboardPage() {
         >
           {stats.recentSupport.length > 0 ? (
             <div className="space-y-2">
-              {stats.recentSupport.map((thread: any) => (
+              {stats.recentSupport.map((thread) => (
                 <ActionRow
                   key={thread.id}
                   href={`/dashboard/support/${thread.id}`}

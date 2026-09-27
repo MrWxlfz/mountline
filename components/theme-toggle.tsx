@@ -3,15 +3,12 @@
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
 import { Laptop, Sun, Moon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useHydrated } from "@/hooks/use-hydrated"
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // The saved theme is only known on the client.
+  const mounted = useHydrated()
 
   if (!mounted) {
     return (

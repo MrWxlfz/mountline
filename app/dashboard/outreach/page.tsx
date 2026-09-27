@@ -11,6 +11,15 @@ function label(value: string | null | undefined) {
   return (value || "unknown").replace(/_/g, " ")
 }
 
+// Read once per request; this page is dynamic, so "now" is the time of the request.
+function countFollowUpsDue(rows: SignalProspect[]) {
+  const now = Date.now()
+  return rows.filter((item) => {
+    const value = item.next_action_due_at || item.follow_up_date
+    return value && new Date(value).getTime() <= now && !["won", "lost"].includes(item.pipeline_stage || "found")
+  }).length
+}
+
 export default async function OutreachPage() {
   await requireNorthlineTeamMember()
   const supabase = createAdminClient()
@@ -22,10 +31,7 @@ export default async function OutreachPage() {
   const outreachEvents = (events || []) as SignalOutreachEvent[]
   const latestByProspect = new Map<string, SignalOutreachEvent>()
   outreachEvents.forEach((item) => { if (!latestByProspect.has(item.prospect_id)) latestByProspect.set(item.prospect_id, item) })
-  const due = rows.filter((item) => {
-    const value = item.next_action_due_at || item.follow_up_date
-    return value && new Date(value).getTime() <= Date.now() && !["won", "lost"].includes(item.pipeline_stage || "found")
-  }).length
+  const due = countFollowUpsDue(rows)
 
   return (
     <div className="space-y-7">

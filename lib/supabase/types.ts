@@ -132,6 +132,14 @@ export type SupportThread = {
   status: string
 }
 
+// A thread as the support pages select it; Supabase may return a joined row as an object or a one-item array.
+type SupportThreadProject = Pick<Project, "id" | "project_name" | "status" | "portal_id"> & {
+  clients: Pick<Client, "business_name" | "contact_name" | "email"> | Pick<Client, "business_name" | "contact_name" | "email">[] | null
+}
+export type SupportThreadWithProject = SupportThread & {
+  projects: SupportThreadProject | SupportThreadProject[] | null
+}
+
 export type SupportMessage = {
   id: string
   created_at: string

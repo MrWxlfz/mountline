@@ -141,12 +141,10 @@ function ScriptBlock({
   value: string | null | undefined
   variants?: Record<string, string>
 }) {
-  const [activeVariant, setActiveVariant] = useState("original")
-  const [currentValue, setCurrentValue] = useState(value || "")
-  useEffect(() => {
-    setCurrentValue(value || "")
-    setActiveVariant("original")
-  }, [value])
+  // A chosen variant belongs to the script it was picked for; a new script starts from the original.
+  const [choice, setChoice] = useState({ variant: "original", forValue: value })
+  const activeVariant = choice.forValue === value ? choice.variant : "original"
+  const currentValue = (activeVariant !== "original" && variants?.[activeVariant]) || value || ""
   if (!value) return null
   const controls = [
     ["shorter", "Tighten"],
@@ -169,10 +167,7 @@ function ScriptBlock({
             <button
               key={key}
               type="button"
-              onClick={() => {
-                setActiveVariant(key)
-                setCurrentValue(variants[key])
-              }}
+              onClick={() => setChoice({ variant: key, forValue: value })}
               className={cn(
                 "rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
                 activeVariant === key
@@ -183,7 +178,7 @@ function ScriptBlock({
               {controlLabel}
             </button>
           ))}
-          {activeVariant !== "original" && <button type="button" onClick={() => { setActiveVariant("original"); setCurrentValue(value) }} className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground">Reset</button>}
+          {activeVariant !== "original" && <button type="button" onClick={() => setChoice({ variant: "original", forValue: value })} className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground">Reset</button>}
         </div>
       )}
     </div>

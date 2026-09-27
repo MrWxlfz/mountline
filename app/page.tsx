@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     absolute: "Mountline | AI Receptionists for Service Businesses",
   },
   description:
-    "AI receptionist pilots for service businesses. Try the fictional HVAC demo, then discuss a setup for missed calls, service requests, and human follow-up.",
+    "Mountline answers missed and after-hours calls for service businesses, asks the questions you choose, and leaves your team a clear request to follow up on. Call the fictional HVAC demo to hear it.",
   alternates: {
     canonical: "/",
   },
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mountline | AI Receptionists for Service Businesses",
     description:
-      "Try the North Texas Air & Heat demo and explore a focused receptionist pilot for your business. Your team confirms pricing and scheduling.",
+      "Mountline answers missed and after-hours calls, asks the questions you choose, and leaves your team a clear request to follow up on. Call the fictional HVAC demo line to hear it.",
     url: "https://mountline.dev",
     siteName: "Mountline",
     locale: "en_US",

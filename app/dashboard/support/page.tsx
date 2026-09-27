@@ -3,6 +3,9 @@ import { MessageSquare, ArrowUpRight, Circle } from "lucide-react"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { EmptyState, PageHeader, SectionPanel, StatusBadge } from "@/components/dashboard/dashboard-ui"
+import type { SupportMessage, SupportThreadWithProject } from "@/lib/supabase/types"
+
+type MessagePreview = Pick<SupportMessage, "id" | "created_at" | "thread_id" | "sender_type" | "sender_email" | "sender_name" | "read_at" | "message">
 
 function formatDateTime(date: string | null) {
   if (!date) return "No messages yet"
@@ -18,7 +21,7 @@ export default async function SupportInboxPage() {
   await requireNorthlineTeamMember()
 
   const supabase = createAdminClient()
-  const { data: threads, error } = await supabase
+  const { data: threadData, error } = await supabase
     .from("support_threads")
     .select(`
       id,
@@ -39,8 +42,9 @@ export default async function SupportInboxPage() {
     `)
     .eq("status", "open")
     .order("created_at", { ascending: false })
+  const threads = threadData as SupportThreadWithProject[] | null
 
-  const threadIds = threads?.map((thread: any) => thread.id) || []
+  const threadIds = threads?.map((thread) => thread.id) || []
   const { data: messages } = threadIds.length
     ? await supabase
         .from("support_messages")
@@ -49,10 +53,10 @@ export default async function SupportInboxPage() {
         .order("created_at", { ascending: false })
     : { data: [] }
 
-  const latestByThread = new Map<string, any>()
+  const latestByThread = new Map<string, MessagePreview>()
   const unreadByThread = new Map<string, number>()
 
-  ;(messages || []).forEach((message: any) => {
+  ;((messages || []) as MessagePreview[]).forEach((message) => {
     if (!latestByThread.has(message.thread_id)) {
       latestByThread.set(message.thread_id, message)
     }
@@ -72,7 +76,7 @@ export default async function SupportInboxPage() {
         </div>
       ) : threads && threads.length > 0 ? (
         <SectionPanel title="Open threads" description="Unread counts include client messages that have not been opened by the Mountline team."><div className="grid gap-3">
-          {threads.map((thread: any) => {
+          {threads.map((thread) => {
             const project = Array.isArray(thread.projects) ? thread.projects[0] : thread.projects
             const client = Array.isArray(project?.clients) ? project.clients[0] : project?.clients
             const latest = latestByThread.get(thread.id)

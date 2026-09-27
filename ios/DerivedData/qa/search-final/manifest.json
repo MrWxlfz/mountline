@@ -1,0 +1,26 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "DE573D8C-C674-4F61-A663-92F0BA89E9A0",
+        "deviceName" : "iPhone 17 Pro",
+        "exportedFileName" : "B750CE35-367E-471B-99AA-49F1C42A0E4B.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Search summary match_0_5E2219BB-09ED-43E5-A99A-ACA3F1CAA6C7.png",
+        "timestamp" : 1790041393.962
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "DE573D8C-C674-4F61-A663-92F0BA89E9A0",
+        "deviceName" : "iPhone 17 Pro",
+        "exportedFileName" : "CAF5A1C3-F8CE-4342-9BC5-F489542A04E4.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Search no results_0_C416B5D5-0533-4076-BD75-090F615C5989.png",
+        "timestamp" : 1790041391.87
+      }
+    ],
+    "testIdentifier" : "MountlineUITests/testCallSearchMatchesSummaryAndShowsEmptyResults()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mountline/MountlineUITests/MountlineUITests/testCallSearchMatchesSummaryAndShowsEmptyResults"
+  }
+]

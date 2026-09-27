@@ -1,0 +1,170 @@
+{
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/BiometricCredential/BiometricCredentialChallenge.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialChallenge.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialChallenge.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialChallenge.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialChallenge.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialChallenge.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/BiometricCredential/BiometricCredentialKeyManager.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialKeyManager.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialKeyManager.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialKeyManager.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialKeyManager.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialKeyManager.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/BiometricCredential/BiometricCredentialLocalStore.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialLocalStore.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialLocalStore.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialLocalStore.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialLocalStore.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialLocalStore.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/BiometricCredential/BiometricCredentialPolicy.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialPolicy.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialPolicy.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialPolicy.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialPolicy.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialPolicy.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/BiometricCredential/BiometricCredentialService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/BiometricCredential/BiometricCredentialValidation.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidation.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidation.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidation.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidation.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidation.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/BiometricCredential/BiometricCredentialValidationResult.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidationResult.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidationResult.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidationResult.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidationResult.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/BiometricCredentialValidationResult.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Factor.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Factor.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Factor.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Factor.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Factor.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Factor.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/FactorStrategy.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/FactorStrategy.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/FactorStrategy.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/FactorStrategy.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/FactorStrategy.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/FactorStrategy.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/HostedAuth.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuth.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuth.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuth.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuth.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuth.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/HostedAuthService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuthService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuthService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuthService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuthService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/HostedAuthService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/IDTokenProvider.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/IDTokenProvider.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/IDTokenProvider.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/IDTokenProvider.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/IDTokenProvider.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/IDTokenProvider.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/MagicLink.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLink.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLink.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLink.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLink.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLink.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/MagicLinkService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLinkService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLinkService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLinkService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLinkService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/MagicLinkService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/OAuthProvider.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OAuthProvider.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OAuthProvider.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OAuthProvider.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OAuthProvider.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OAuthProvider.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/OIDCPrompt.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OIDCPrompt.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OIDCPrompt.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OIDCPrompt.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OIDCPrompt.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OIDCPrompt.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Passkey/Passkey.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Passkey.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Passkey.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Passkey.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Passkey.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Passkey.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Passkey/PasskeyService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PasskeyService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PasskeyService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PasskeyService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PasskeyService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PasskeyService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Session/Session+ServiceParams.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+ServiceParams.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+ServiceParams.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+ServiceParams.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+ServiceParams.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+ServiceParams.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Session/Session+Verification.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+Verification.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+Verification.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+Verification.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+Verification.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session+Verification.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Session/Session.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Session.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Session/SessionAuthorization.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionAuthorization.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionAuthorization.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionAuthorization.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionAuthorization.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionAuthorization.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Session/SessionService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Session/SessionTokenFetcher.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionTokenFetcher.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionTokenFetcher.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionTokenFetcher.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionTokenFetcher.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/SessionTokenFetcher.swiftdeps"
+  }
+}

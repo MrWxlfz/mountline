@@ -1,0 +1,64 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/GetHelpView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Get help",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 31
+        }
+      },
+      {
+        "comment": "",
+        "key": "You must belong to an organization",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 33
+        }
+      },
+      {
+        "comment": "",
+        "key": "If you have trouble signing into your account, email us and we will work with you to restore access as soon as possible.",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 40
+        }
+      },
+      {
+        "comment": "",
+        "key": "If you have trouble creating your account, email us and we will work with you to complete your registration as soon as possible.",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 42
+        }
+      },
+      {
+        "comment": "",
+        "key": "If you have trouble completing required account setup, email us and we will help you finish as soon as possible.",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 44
+        }
+      },
+      {
+        "comment": "",
+        "key": "Contact your organization admin for an invitation.",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 46
+        }
+      },
+      {
+        "comment": "",
+        "key": "Email support",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 64
+        }
+      }
+    ]
+  },
+  "version": 1
+}

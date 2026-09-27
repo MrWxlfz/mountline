@@ -1,0 +1,37 @@
+{
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/AppLogoView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AppLogoView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AppLogoView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AppLogoView.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AppLogoView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AppLogoView.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/AsyncButton.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AsyncButton.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AsyncButton.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AsyncButton.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AsyncButton.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AsyncButton.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/Badge.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/Badge.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/Badge.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/Badge.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/Badge.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/Badge.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/ClerkFocusedBorder.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkFocusedBorder.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkFocusedBorder.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkFocusedBorder.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkFocusedBorder.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkFocusedBorder.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/ClerkPhoneNumberField.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkPhoneNumberField.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkPhoneNumberField.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkPhoneNumberField.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkPhoneNumberField.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/ClerkPhoneNumberField.swiftdeps"
+  }
+}

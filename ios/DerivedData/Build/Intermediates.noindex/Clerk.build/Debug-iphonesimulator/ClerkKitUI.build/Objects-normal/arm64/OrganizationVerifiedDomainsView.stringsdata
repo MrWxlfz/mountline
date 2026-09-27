@@ -1,0 +1,96 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationVerifiedDomainsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "No verified domains",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "Verified domains",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 104
+        }
+      },
+      {
+        "comment": "",
+        "key": "Manage",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 184
+        }
+      },
+      {
+        "comment": "",
+        "key": "Verify",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 190
+        }
+      },
+      {
+        "comment": "",
+        "key": "Delete",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 197
+        }
+      },
+      {
+        "comment": "",
+        "key": "No automatic enrollment",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 214
+        }
+      },
+      {
+        "comment": "",
+        "key": "Automatic invitations",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 216
+        }
+      },
+      {
+        "comment": "",
+        "key": "Automatic suggestions",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 218
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unverified",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 223
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add domain",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 238
+        }
+      },
+      {
+        "comment": "",
+        "key": "Allow users to join the organization automatically or request to join based on a verified email domain.",
+        "location": {
+          "startingColumn": 11,
+          "startingLine": 244
+        }
+      }
+    ]
+  },
+  "version": 1
+}

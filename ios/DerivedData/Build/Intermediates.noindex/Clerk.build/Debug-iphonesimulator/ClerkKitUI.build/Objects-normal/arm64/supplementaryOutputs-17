@@ -1,0 +1,37 @@
+{
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignIn/SignInFactorAlternativeMethodsView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorAlternativeMethodsView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorAlternativeMethodsView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorAlternativeMethodsView.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorAlternativeMethodsView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorAlternativeMethodsView.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignIn/SignInFactorCodeView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorCodeView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorCodeView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorCodeView.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorCodeView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorCodeView.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignIn/SignInFactorOneEmailLinkView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneEmailLinkView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneEmailLinkView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneEmailLinkView.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneEmailLinkView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneEmailLinkView.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignIn/SignInFactorOneForgotPasswordView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneForgotPasswordView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneForgotPasswordView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneForgotPasswordView.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneForgotPasswordView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOneForgotPasswordView.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignIn/SignInFactorOnePasswordView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOnePasswordView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOnePasswordView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOnePasswordView.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOnePasswordView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/SignInFactorOnePasswordView.swiftdeps"
+  }
+}

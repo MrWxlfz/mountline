@@ -25,7 +25,9 @@ test("homepage and metadata describe a bounded receptionist pilot", async () => 
 
 test("simulations are labeled and unsupported completion claims are absent", async () => {
   const homepage = await read("components/mountline-homepage.tsx")
-  assert.ok(homepage.split("Not live customer data").length >= 4)
+  const illustrations = homepage.split("data-illustrative").length - 1
+  assert.ok(illustrations >= 1)
+  assert.ok(homepage.split("Not live customer data").length - 1 >= illustrations)
   for (const unsupported of [
     /answers every call/i,
     /books real appointments/i,

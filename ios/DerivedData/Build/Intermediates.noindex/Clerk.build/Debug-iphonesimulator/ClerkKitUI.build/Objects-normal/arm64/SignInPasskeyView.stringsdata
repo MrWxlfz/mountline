@@ -1,0 +1,32 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignIn/SignInPasskeyView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Use your passkey",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Using your passkey confirms it's you. Your device may ask for your fingerprint, face or screen lock.",
+        "location": {
+          "startingColumn": 46,
+          "startingLine": 35
+        }
+      },
+      {
+        "comment": "",
+        "key": "Use another method",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 78
+        }
+      }
+    ]
+  },
+  "version": 1
+}

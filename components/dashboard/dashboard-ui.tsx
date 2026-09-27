@@ -21,12 +21,10 @@ export function PageHeader({
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
         <div className="mb-2 flex flex-wrap items-center gap-3">
-          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            {eyebrow}
-          </p>
+          <p className="ml-eyebrow">{eyebrow}</p>
           {meta}
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">{title}</h1>
+        <h1 className="font-display text-[2.1rem] leading-[1.08] text-foreground sm:text-[2.4rem]">{title}</h1>
         {subtitle && (
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{subtitle}</p>
         )}

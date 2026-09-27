@@ -1,0 +1,96 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Utils/RemoveResource.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Remove email address",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 23
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove phone number",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 25
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove connected account",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 27
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove passkey",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove two-step verification",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 31
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ will be removed from this account. You will no longer be able to sign in using this email address.",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 39
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ will be removed from this account. You will no longer be able to sign in using this phone number.",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 41
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ will be removed from this account. You will no longer be able to sign in using this connected account.",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 43
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ will be removed from this account. You will no longer be able to sign in using this passkey.",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 45
+        }
+      },
+      {
+        "comment": "",
+        "key": "Verification codes from this authenticator will no longer be required when signing in.",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ will no longer be receiving verification codes when signing in.",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 49
+        }
+      }
+    ]
+  },
+  "version": 1
+}

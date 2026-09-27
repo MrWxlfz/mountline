@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/HostedAuthService.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Hosted auth completion response was missing identity synchronization metadata.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 53
+        }
+      }
+    ]
+  },
+  "version": 1
+}

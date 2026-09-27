@@ -1,0 +1,163 @@
+{
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Environment/Environment.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Environment.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Environment.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Environment.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Environment.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Environment.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Environment/EnvironmentService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnvironmentService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnvironmentService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnvironmentService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnvironmentService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnvironmentService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Environment/InstanceEnvironmentType.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/InstanceEnvironmentType.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/InstanceEnvironmentType.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/InstanceEnvironmentType.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/InstanceEnvironmentType.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/InstanceEnvironmentType.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Environment/OrganizationSettings.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSettings.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSettings.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSettings.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSettings.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSettings.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Environment/UserSettings.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserSettings.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserSettings.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserSettings.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserSettings.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserSettings.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/Organization.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Organization.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Organization.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Organization.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Organization.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/Organization.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/OrganizationCreationDefaults.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationCreationDefaults.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationCreationDefaults.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationCreationDefaults.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationCreationDefaults.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationCreationDefaults.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/OrganizationDomain.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationDomain.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationDomain.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationDomain.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationDomain.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationDomain.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/OrganizationInvitation.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationInvitation.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationInvitation.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationInvitation.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationInvitation.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationInvitation.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/OrganizationMembership.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembership.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembership.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembership.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembership.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembership.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/OrganizationMembershipRequest.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembershipRequest.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembershipRequest.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembershipRequest.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembershipRequest.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationMembershipRequest.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/OrganizationService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/OrganizationSuggestion.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSuggestion.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSuggestion.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSuggestion.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSuggestion.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/OrganizationSuggestion.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/PermissionResource.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PermissionResource.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PermissionResource.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PermissionResource.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PermissionResource.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/PermissionResource.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/RoleResource.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/RoleResource.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/RoleResource.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/RoleResource.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/RoleResource.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/RoleResource.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Organization/UserOrganizationInvitation.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserOrganizationInvitation.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserOrganizationInvitation.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserOrganizationInvitation.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserOrganizationInvitation.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/UserOrganizationInvitation.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/EmailAddress/EmailAddress.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddress.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddress.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddress.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddress.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddress.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/EmailAddress/EmailAddressAttemptVerificationParams.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressAttemptVerificationParams.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressAttemptVerificationParams.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressAttemptVerificationParams.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressAttemptVerificationParams.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressAttemptVerificationParams.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/EmailAddress/EmailAddressPrepareVerificationParams.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressPrepareVerificationParams.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressPrepareVerificationParams.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressPrepareVerificationParams.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressPrepareVerificationParams.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressPrepareVerificationParams.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/EmailAddress/EmailAddressService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EmailAddressService.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/EnterpriseAccount/EnterpriseAccount.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnterpriseAccount.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnterpriseAccount.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnterpriseAccount.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnterpriseAccount.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/EnterpriseAccount.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/ExternalAccount/ExternalAccount.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccount.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccount.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccount.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccount.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccount.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/ExternalAccount/ExternalAccountService.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccountService.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccountService.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccountService.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccountService.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKit.build/Objects-normal/arm64/ExternalAccountService.swiftdeps"
+  }
+}

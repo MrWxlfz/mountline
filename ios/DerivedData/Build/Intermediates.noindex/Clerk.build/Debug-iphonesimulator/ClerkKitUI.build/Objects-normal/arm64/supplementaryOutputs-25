@@ -1,0 +1,51 @@
+{
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/AuthFooter.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthFooter.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthFooter.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthFooter.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthFooter.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthFooter.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/AuthNavigation+PostAuth.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation+PostAuth.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation+PostAuth.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation+PostAuth.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation+PostAuth.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation+PostAuth.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/AuthNavigation.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthNavigation.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/AuthState.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthState.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthState.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthState.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthState.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthState.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/AuthView+AuthFlow.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+AuthFlow.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+AuthFlow.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+AuthFlow.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+AuthFlow.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+AuthFlow.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/AuthView+Destination.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+Destination.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+Destination.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+Destination.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+Destination.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/AuthView+Destination.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/BiometricCredential/BiometricCredentialEnrollmentPrompt.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/BiometricCredentialEnrollmentPrompt.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/BiometricCredentialEnrollmentPrompt.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/BiometricCredentialEnrollmentPrompt.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/BiometricCredentialEnrollmentPrompt.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Clerk.build/Debug-iphonesimulator/ClerkKitUI.build/Objects-normal/arm64/BiometricCredentialEnrollmentPrompt.swiftdeps"
+  }
+}

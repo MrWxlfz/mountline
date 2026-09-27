@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Helpers/SignInWithAppleHelper.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Unable to get your Apple ID credential.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 84
+        }
+      }
+    ]
+  },
+  "version": 1
+}

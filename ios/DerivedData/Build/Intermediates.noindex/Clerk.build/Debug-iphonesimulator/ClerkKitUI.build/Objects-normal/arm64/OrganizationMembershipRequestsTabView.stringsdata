@@ -1,0 +1,24 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationMembershipRequestsTabView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "No membership requests",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 42
+        }
+      },
+      {
+        "comment": "",
+        "key": "Users who request to join your organization will appear here for review",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 43
+        }
+      }
+    ]
+  },
+  "version": 1
+}

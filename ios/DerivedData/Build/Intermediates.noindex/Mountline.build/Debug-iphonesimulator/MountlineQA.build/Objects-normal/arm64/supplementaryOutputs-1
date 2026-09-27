@@ -1,0 +1,23 @@
+{
+  "/Users/lukenordin/mountline/ios/Mountline/Components/AppTabsView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Core/AppStore.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Core/Networking/APIClient.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.swiftdeps"
+  }
+}

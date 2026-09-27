@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Newsreader } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -18,14 +18,21 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   display: "swap",
 })
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+  display: "swap",
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fbf8f2' },
-    { media: '(prefers-color-scheme: dark)', color: '#090908' },
+    { media: '(prefers-color-scheme: light)', color: '#f6f4ef' },
+    { media: '(prefers-color-scheme: dark)', color: '#0d0d0c' },
   ],
   viewportFit: 'cover',
 }
@@ -80,7 +87,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geist.variable} ${geistMono.variable} bg-background`}
+      className={`${geist.variable} ${geistMono.variable} ${newsreader.variable} bg-background`}
     >
       <body className="font-sans antialiased bg-background text-foreground">
         <ClerkProvider afterSignOutUrl="/">

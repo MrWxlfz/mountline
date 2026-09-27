@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>A Watch identity metadata transition is still pending.</key>
+	<string>Uma transição de metadados de identidade do Watch ainda está pendente.</string>
+	<key>A hosted authentication session is already in progress.</key>
+	<string>Uma sessão de autenticação hospedada já está em andamento.</string>
+	<key>A web authentication session is already in progress.</key>
+	<string>Uma sessão de autenticação web já está em andamento.</string>
+	<key>An unknown error occurred.</key>
+	<string>Ocorreu um erro desconhecido.</string>
+	<key>Biometric reverification challenge has expired.</key>
+	<string>O desafio da nova verificação biométrica expirou.</string>
+	<key>Biometric reverification did not return a matching challenge.</key>
+	<string>A nova verificação biométrica não retornou um desafio correspondente.</string>
+	<key>Biometric reverification is unavailable for this session.</key>
+	<string>A nova verificação biométrica não está disponível para esta sessão.</string>
+	<key>Biometric reverification requires an active or pending session with a user.</key>
+	<string>A nova verificação biométrica requer uma sessão ativa ou pendente associada a um usuário.</string>
+	<key>Biometric sign-in did not return a challenge.</key>
+	<string>O login biométrico não retornou um desafio.</string>
+	<key>Biometric sign-in is unavailable.</key>
+	<string>O login biométrico não está disponível.</string>
+	<key>Cannot publish unresolved Watch identity metadata.</key>
+	<string>Não é possível publicar metadados de identidade do Watch não resolvidos.</string>
+	<key>Clerk is already reconfiguring. Wait for the current reconfiguration to finish before starting another one.</key>
+	<string>O Clerk já está sendo reconfigurado. Aguarde a conclusão da reconfiguração atual antes de iniciar outra.</string>
+	<key>Clerk must be configured before getting a session token.</key>
+	<string>O Clerk deve ser configurado antes de obter um token de sessão.</string>
+	<key>Client ID is unavailable.</key>
+	<string>O ID do cliente não está disponível.</string>
+	<key>Conflicting Watch auth payload reused a pending version.</key>
+	<string>A carga de autenticação conflitante do Watch reutilizou uma versão pendente.</string>
+	<key>Conflicting Watch token payload reused a pending version.</key>
+	<string>A carga de token conflitante do Watch reutilizou uma versão pendente.</string>
+	<key>Email address is required.</key>
+	<string>É necessário informar um endereço de e-mail.</string>
+	<key>Email link sign-in is not available for this sign-in.</key>
+	<string>O login por link de e-mail não está disponível para este login.</string>
+	<key>Hosted auth callback URL did not match the initiated redirect URL.</key>
+	<string>A URL de retorno da autenticação hospedada não correspondeu à URL de redirecionamento iniciada.</string>
+	<key>Hosted auth callback did not include a rotating token nonce.</key>
+	<string>O retorno da autenticação hospedada não incluiu um nonce de token rotativo.</string>
+	<key>Hosted auth callback did not include the created session.</key>
+	<string>O retorno da autenticação hospedada não incluiu a sessão criada.</string>
+	<key>Hosted auth callback state was missing or did not match the initiated state.</key>
+	<string>O estado do retorno da autenticação hospedada estava ausente ou não correspondia ao estado iniciado.</string>
+	<key>Hosted auth completion could not activate the created session.</key>
+	<string>A autenticação hospedada não conseguiu ativar a sessão criada.</string>
+	<key>Hosted auth completion could not update the current client.</key>
+	<string>A autenticação hospedada não conseguiu atualizar o cliente atual.</string>
+	<key>Hosted auth completion did not include the created session.</key>
+	<string>A conclusão da autenticação hospedada não incluiu a sessão criada.</string>
+	<key>Hosted auth completion response was missing identity synchronization metadata.</key>
+	<string>A resposta de conclusão da autenticação hospedada não continha os metadados de sincronização de identidade.</string>
+	<key>Hosted auth creation returned an invalid response.</key>
+	<string>A criação da autenticação hospedada retornou uma resposta inválida.</string>
+	<key>Hosted auth requires a valid custom-scheme redirect URL.</key>
+	<string>A autenticação hospedada requer uma URL de redirecionamento válida com esquema personalizado.</string>
+	<key>Injected Keychain storage cannot be used with persistent shared-session adoption.</key>
+	<string>O armazenamento Keychain injetado não pode ser usado com a adoção persistente de sessão compartilhada.</string>
+	<key>Invalid credential type.</key>
+	<string>Tipo de credencial inválido.</string>
+	<key>Isolated Clerk configuration is only available while running tests.</key>
+	<string>A configuração isolada do Clerk só está disponível durante a execução de testes.</string>
+	<key>Magic link callback does not match the pending flow.</key>
+	<string>O retorno do link mágico não corresponde ao fluxo pendente.</string>
+	<key>Magic link callback is missing approval_token.</key>
+	<string>O retorno do link mágico não contém approval_token.</string>
+	<key>Magic link callback is missing flow_id.</key>
+	<string>O retorno do link mágico não contém flow_id.</string>
+	<key>Magic link callback returned a sign-up for a sign-in flow.</key>
+	<string>O retorno do link mágico retornou um cadastro para um fluxo de login.</string>
+	<key>Magic link callback returned a ticket for a sign-up flow.</key>
+	<string>O retorno do link mágico retornou um ticket para um fluxo de cadastro.</string>
+	<key>Missing callback URL</key>
+	<string>URL de retorno ausente</string>
+	<key>No pending magic link flow was found.</key>
+	<string>Nenhum fluxo de link mágico pendente foi encontrado.</string>
+	<key>Redirect URI is missing. Unable to start email link sign-in.</key>
+	<string>O URI de redirecionamento está ausente. Não foi possível iniciar o login por link de e-mail.</string>
+	<key>Redirect URI is missing. Unable to start email link sign-up verification.</key>
+	<string>O URI de redirecionamento está ausente. Não foi possível iniciar a verificação de cadastro por link de e-mail.</string>
+	<key>Redirect URL is missing or invalid. Unable to start external authentication flow.</key>
+	<string>URL de redirecionamento está ausente ou inválida. Não foi possível iniciar o fluxo de autenticação externa.</string>
+	<key>Session activation response was missing identity synchronization metadata.</key>
+	<string>A resposta de ativação da sessão não continha os metadados de sincronização de identidade.</string>
+	<key>Shared session sync requires a nonempty Keychain access group.</key>
+	<string>A sincronização de sessão compartilhada requer um grupo de acesso Keychain não vazio.</string>
+	<key>Shared session sync requires a nonempty application bundle identifier.</key>
+	<string>A sincronização de sessão compartilhada requer um identificador de pacote do aplicativo não vazio.</string>
+	<key>Something went wrong. Please try again.</key>
+	<string>Algo deu errado. Tente novamente.</string>
+	<key>This device is no longer trusted. Sign in another way to enroll it again.</key>
+	<string>Este dispositivo não é mais confiável. Faça login de outra forma para registrá-lo novamente.</string>
+	<key>Unable to clear Clerk keychain items during reconfiguration.</key>
+	<string>Não foi possível limpar os itens do Clerk no Keychain durante a reconfiguração.</string>
+	<key>Unable to delete membership: missing userId</key>
+	<string>Não foi possível excluir a associação: userId ausente</string>
+	<key>Unable to enroll a biometric credential without a bundle identifier.</key>
+	<string>Não é possível registrar uma credencial biométrica sem um identificador de pacote.</string>
+	<key>Unable to enroll a biometric credential without a user for the current session.</key>
+	<string>Não é possível registrar uma credencial biométrica sem um usuário para a sessão atual.</string>
+	<key>Unable to enroll a biometric credential without an active or pending Clerk session.</key>
+	<string>Não é possível registrar uma credencial biométrica sem uma sessão Clerk ativa ou pendente.</string>
+	<key>Unable to generate secure random data.</key>
+	<string>Não foi possível gerar dados aleatórios seguros.</string>
+	<key>Unable to get the challenge for the passkey.</key>
+	<string>Não foi possível obter o desafio para a chave de acesso.</string>
+	<key>Unable to get the user ID for the passkey.</key>
+	<string>Não foi possível obter o ID do usuário para a chave de acesso.</string>
+	<key>Unable to get the username for the passkey.</key>
+	<string>Não foi possível obter o nome de usuário para a chave de acesso.</string>
+	<key>Unable to get your Apple ID credential.</key>
+	<string>Não foi possível obter sua credencial do Apple ID.</string>
+	<key>Unable to retrieve the Apple identity token.</key>
+	<string>Não foi possível recuperar o token de identidade da Apple.</string>
+	<key>Unable to revoke a biometric credential without an active or pending Clerk session.</key>
+	<string>Não é possível revogar uma credencial biométrica sem uma sessão Clerk ativa ou pendente.</string>
+	<key>Unable to start web authentication session.</key>
+	<string>Não foi possível iniciar a sessão de autenticação web.</string>
+	<key>Unable to update membership: missing userId</key>
+	<string>Não foi possível atualizar a associação: userId ausente</string>
+	<key>Unable to use biometric sign-in because Native API is disabled.</key>
+	<string>Não é possível usar o login biométrico porque a Native API está desativada.</string>
+	<key>Unable to use biometric sign-in because it is disabled.</key>
+	<string>Não é possível usar o login biométrico porque ele está desativado.</string>
+	<key>Unable to use biometric sign-in before the Clerk environment is loaded.</key>
+	<string>Não é possível usar o login biométrico antes que o ambiente do Clerk seja carregado.</string>
+	<key>Unable to verify code because no first factor strategy is set.</key>
+	<string>Não foi possível verificar o código porque nenhuma estratégia de primeiro fator foi definida.</string>
+	<key>Unable to verify code for strategy '%@'.</key>
+	<string>Não foi possível verificar o código para a estratégia '%@'.</string>
+	<key>Watch identity metadata version is exhausted.</key>
+	<string>A versão dos metadados de identidade do Watch foi esgotada.</string>
+</dict>
+</plist>

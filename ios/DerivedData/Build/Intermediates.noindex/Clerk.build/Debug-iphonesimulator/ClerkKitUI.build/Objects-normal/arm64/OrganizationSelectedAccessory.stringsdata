@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationSelectedAccessory.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Selected",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 16
+        }
+      }
+    ]
+  },
+  "version": 1
+}

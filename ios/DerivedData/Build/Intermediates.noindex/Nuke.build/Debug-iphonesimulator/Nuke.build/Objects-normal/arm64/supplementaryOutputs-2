@@ -1,0 +1,44 @@
+{
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Decoding/ImageDecoderRegistry.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoderRegistry.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoderRegistry.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoderRegistry.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoderRegistry.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoderRegistry.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Decoding/ImageDecoders+Default.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Default.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Default.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Default.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Default.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Default.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Decoding/ImageDecoders+Empty.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Empty.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Empty.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Empty.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Empty.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoders+Empty.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Decoding/ImageDecoding.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoding.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoding.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoding.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoding.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecoding.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Encoding/ImageEncoders+Default.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+Default.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+Default.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+Default.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+Default.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+Default.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Encoding/ImageEncoders+ImageIO.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+ImageIO.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+ImageIO.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+ImageIO.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+ImageIO.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageEncoders+ImageIO.swiftdeps"
+  }
+}

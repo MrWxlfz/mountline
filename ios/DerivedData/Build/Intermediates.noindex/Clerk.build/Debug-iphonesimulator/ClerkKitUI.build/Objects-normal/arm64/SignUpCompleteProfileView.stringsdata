@@ -1,0 +1,48 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignUp/SignUpCompleteProfileView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Profile details",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 61
+        }
+      },
+      {
+        "comment": "",
+        "key": "Complete your profile",
+        "location": {
+          "startingColumn": 46,
+          "startingLine": 62
+        }
+      },
+      {
+        "comment": "",
+        "key": "First name",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "Last name",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 84
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sign up",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 138
+        }
+      }
+    ]
+  },
+  "version": 1
+}

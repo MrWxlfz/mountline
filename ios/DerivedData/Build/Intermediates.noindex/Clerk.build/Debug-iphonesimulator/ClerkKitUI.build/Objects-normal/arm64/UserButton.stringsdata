@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserButton/UserButton.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Open account",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 151
+        }
+      }
+    ]
+  },
+  "version": 1
+}

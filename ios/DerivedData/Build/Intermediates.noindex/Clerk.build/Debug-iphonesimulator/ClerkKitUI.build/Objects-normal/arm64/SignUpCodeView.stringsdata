@@ -1,0 +1,64 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignUp/SignUpCodeView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Check your email",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 41
+        }
+      },
+      {
+        "comment": "",
+        "key": "Check your phone",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 43
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resend (%lld)",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resend",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "Didn't receive a code?",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 119
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sign up",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 155
+        }
+      },
+      {
+        "comment": "",
+        "key": "Continue",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 168
+        }
+      }
+    ]
+  },
+  "version": 1
+}

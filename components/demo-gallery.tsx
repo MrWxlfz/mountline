@@ -53,58 +53,26 @@ export const demoSites = [
   },
 ]
 
-export function DemoGallery({
-  layout = "wide",
-}: {
-  layout?: "compact" | "wide"
-}) {
+export function DemoGallery() {
   return (
-    <div
-      className={
-        layout === "compact"
-          ? "grid gap-3 sm:grid-cols-2"
-          : "grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      }
-    >
+    <ul className="ml-gallery">
       {demoSites.map((site) => (
-        <a
-          key={site.href}
-          href={site.href}
-          target="_blank"
-          rel="noreferrer"
-          className="group overflow-hidden border border-white/10 bg-zinc-950 transition-all duration-300 hover:-translate-y-1 hover:border-white/25"
-        >
-          <div className="relative aspect-video overflow-hidden bg-zinc-900">
-            <Image
-              src={site.image}
-              alt={site.alt}
-              fill
-              className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.025]"
-              sizes={
-                layout === "compact"
-                  ? "(max-width: 639px) 100vw, 340px"
-                  : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-              }
-            />
-            {!site.available ? (
-              <div className="absolute inset-0 grid place-items-center bg-black/55 px-4 text-center backdrop-blur-[2px]">
-                <span className="border border-white/15 bg-black/75 px-3 py-2 text-xs font-medium text-zinc-200">
-                  Build not published yet
-                </span>
-              </div>
-            ) : null}
-          </div>
-          <div className="flex items-center justify-between gap-3 border-t border-white/10 px-4 py-3.5">
-            <div>
-              <p className="text-sm font-semibold text-white">{site.title}</p>
-              <p className="mt-1 text-xs text-zinc-500">
-                {site.available ? "Open live demo" : "Check demo status"}
-              </p>
+        <li key={site.href}>
+          <a href={site.href} target="_blank" rel="noreferrer" className="ml-gallery__item">
+            <div className="ml-gallery__image">
+              <Image src={site.image} alt={site.alt} fill sizes="(max-width: 640px) 100vw, 360px" />
+              {!site.available ? <span className="ml-gallery__badge ml-mono">Not published yet</span> : null}
             </div>
-            <ArrowUpRight className="size-4 shrink-0 text-zinc-400 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
-          </div>
-        </a>
+            <div className="ml-gallery__meta">
+              <span>{site.title}</span>
+              <span className="ml-mono">
+                {site.available ? "Open demo" : "Check status"}
+                <ArrowUpRight aria-hidden="true" />
+              </span>
+            </div>
+          </a>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

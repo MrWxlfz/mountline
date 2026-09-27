@@ -1,0 +1,40 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationProfileCustomRow.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Members",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 147
+        }
+      },
+      {
+        "comment": "",
+        "key": "Verified domains",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 149
+        }
+      },
+      {
+        "comment": "",
+        "key": "Leave organization",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 151
+        }
+      },
+      {
+        "comment": "",
+        "key": "Delete organization",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 153
+        }
+      }
+    ]
+  },
+  "version": 1
+}

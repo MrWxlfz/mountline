@@ -1,0 +1,24 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserProfile/UserProfileMfaSection.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Add two-step verification",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "TWO-STEP VERIFICATION",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 76
+        }
+      }
+    ]
+  },
+  "version": 1
+}

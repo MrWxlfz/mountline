@@ -1,0 +1,40 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/ErrorView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Whoops, something is wrong",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Close",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 65
+        }
+      },
+      {
+        "comment": "",
+        "key": "Similique qui enim placeat tempore. Labore voluptates aliquam est quaerat aut perferendis similique.",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 76
+        }
+      },
+      {
+        "comment": "",
+        "key": "Call to action",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 76
+        }
+      }
+    ]
+  },
+  "version": 1
+}

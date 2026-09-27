@@ -1,0 +1,40 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignUp/LegalConsentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "I agree to the [Terms of Service](LegalConsentView://terms) and [Privacy Policy](LegalConsentView://privacy)",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "I agree to the [Terms of Service](LegalConsentView://terms)",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 39
+        }
+      },
+      {
+        "comment": "",
+        "key": "I agree to the [Privacy Policy](LegalConsentView://privacy)",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 44
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 73
+        }
+      }
+    ]
+  },
+  "version": 1
+}

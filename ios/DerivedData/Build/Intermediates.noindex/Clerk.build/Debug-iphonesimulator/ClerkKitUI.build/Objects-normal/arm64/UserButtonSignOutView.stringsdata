@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserButton/UserButtonSignOutView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Sign out",
+        "location": {
+          "startingColumn": 57,
+          "startingLine": 44
+        }
+      }
+    ]
+  },
+  "version": 1
+}

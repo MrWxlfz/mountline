@@ -1,0 +1,24 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/Badge.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Badge Label",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 109
+        }
+      },
+      {
+        "comment": "",
+        "key": "Last used",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 121
+        }
+      }
+    ]
+  },
+  "version": 1
+}

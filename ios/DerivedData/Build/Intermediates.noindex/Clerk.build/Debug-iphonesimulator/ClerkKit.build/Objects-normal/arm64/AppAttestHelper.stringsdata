@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Helpers/AppAttestHelper.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Client ID is unavailable.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 129
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SignIn/SignInClientTrustWarningView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "You're signing in from a new device. We're asking for verification to keep your account secure.",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 13
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -6,7 +6,7 @@ const revealSelector = "[data-mtl-reveal]"
 
 export function HomepageMotion() {
   useLayoutEffect(() => {
-    const root = document.querySelector<HTMLElement>(".mountline-homepage")
+    const root = document.querySelector<HTMLElement>(".ml-site")
     if (!root) return
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -16,6 +16,10 @@ export function HomepageMotion() {
       })
     }
 
+    // Anything already on screen stays put; only content below the fold waits to reveal.
+    root.querySelectorAll<HTMLElement>(revealSelector).forEach((element) => {
+      if (element.getBoundingClientRect().top < window.innerHeight) element.classList.add("is-visible")
+    })
     root.classList.add("is-motion-ready")
 
     if (motionQuery.matches || !("IntersectionObserver" in window)) {

@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/Session/SessionService.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Session activation response was missing identity synchronization metadata.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 134
+        }
+      }
+    ]
+  },
+  "version": 1
+}

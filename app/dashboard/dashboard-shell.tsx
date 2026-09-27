@@ -27,7 +27,7 @@ import {
   PhoneCall,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { NorthlineLogo } from "@/components/northline-logo"
+import { Wordmark } from "@/components/brand/wordmark"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AppearanceSelector } from "@/components/dashboard/appearance-selector"
 import {
@@ -111,7 +111,7 @@ export function DashboardShell({
     .toUpperCase()
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="ml-dashboard min-h-screen bg-background">
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -134,9 +134,11 @@ export function DashboardShell({
         <div className="flex flex-col h-full">
           <div className={cn("flex h-16 items-center justify-between border-b border-border px-4", collapsed && "lg:px-3")}>
             <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
-              <NorthlineLogo size="sm" showWordmark />
-              <span className={cn("text-[10px] font-mono uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 rounded", collapsed && "lg:hidden")}>
-                OS
+              <span className={cn("text-foreground", collapsed && "lg:[&>span>span]:hidden")}>
+                <Wordmark size={17} />
+              </span>
+              <span className={cn("ml-eyebrow rounded border border-border px-1.5 py-0.5 text-[10px]", collapsed && "lg:hidden")}>
+                Team
               </span>
             </Link>
             <button
@@ -160,7 +162,7 @@ export function DashboardShell({
           <nav className={cn("flex-1 overflow-y-auto px-3 py-5 space-y-7", collapsed && "lg:px-2")}>
             {navGroups.map((group) => (
               <div key={group.label}>
-                <p className={cn("px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70", collapsed && "lg:px-0 lg:text-center lg:text-[9px]")}>
+                <p className={cn("ml-eyebrow mb-2 px-3 text-[10px]", collapsed && "lg:px-0 lg:text-center lg:text-[9px]")}>
                   {group.label}
                 </p>
                 <div className="space-y-0.5">
@@ -172,8 +174,8 @@ export function DashboardShell({
                       className={cn(
                         "relative flex items-center gap-3 rounded-md px-3 py-2.5 text-[13px] font-medium transition-all",
                         isActive(item.href)
-                          ? "bg-muted text-foreground shadow-[inset_2px_0_0_var(--foreground)]"
-                          : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                          ? "bg-hover text-foreground shadow-[inset_2px_0_0_var(--mountline-amber)]"
+                          : "text-muted-foreground hover:bg-hover hover:text-foreground",
                         collapsed && "lg:justify-center lg:px-0",
                       )}
                       title={collapsed ? item.label : undefined}
@@ -226,8 +228,8 @@ export function DashboardShell({
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2.5 text-[13px] font-medium transition-all",
                   isActive(item.href)
-                    ? "bg-muted text-foreground shadow-[inset_2px_0_0_var(--foreground)]"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-hover text-foreground shadow-[inset_2px_0_0_var(--mountline-amber)]"
+                    : "text-muted-foreground hover:bg-hover hover:text-foreground",
                   collapsed && "lg:justify-center lg:px-0",
                 )}
                 title={collapsed ? item.label : undefined}
@@ -271,22 +273,22 @@ export function DashboardShell({
             <Menu className="w-5 h-5" />
           </button>
           <div className="min-w-0 flex-1 px-3 lg:px-0">
-            <p className="truncate text-xs text-muted-foreground">
-              Mountline OS <span className="px-1 opacity-40">/</span> {pathname === "/dashboard" ? "Overview" : pathname.split("/").filter(Boolean).slice(1).map((part) => part.replace(/-/g, " ")).join(" / ")}
+            <p className="ml-eyebrow truncate text-[10.5px]">
+              Mountline <span className="px-1 opacity-40">/</span> {pathname === "/dashboard" ? "Overview" : pathname.split("/").filter(Boolean).slice(1).map((part) => part.replace(/-/g, " ")).join(" / ")}
             </p>
           </div>
           <div className="mr-2 flex items-center gap-2">
             <DashboardCommandPalette leads={commandLeads} />
             <AppearanceSelector compact className="hidden lg:inline-grid" />
           </div>
-          <Link href="/dashboard/signal/new" className="mr-3 hidden h-8 items-center rounded-md bg-foreground px-3 text-xs font-medium text-background hover:bg-foreground/90 sm:inline-flex">
+          <Link href="/dashboard/signal/new" className="ml-pill ml-pill-solid mr-3 hidden !min-h-8 !px-3.5 !text-[10.5px] sm:inline-flex">
             Analyze business
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="ml-eyebrow flex items-center gap-1.5 text-[10.5px] transition-colors hover:text-foreground"
           >
-            View Site
+            View site
             <ArrowUpRight className="w-3 h-3" />
           </Link>
         </header>

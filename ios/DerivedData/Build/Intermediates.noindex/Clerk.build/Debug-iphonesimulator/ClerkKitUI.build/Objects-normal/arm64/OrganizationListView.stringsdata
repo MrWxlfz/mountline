@@ -1,0 +1,32 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationListView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Choose an account",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 118
+        }
+      },
+      {
+        "comment": "",
+        "key": "Select the account with which you wish to continue.",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 119
+        }
+      },
+      {
+        "comment": "",
+        "key": "You are no longer a member of this organization. Please choose another one.",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 331
+        }
+      }
+    ]
+  },
+  "version": 1
+}

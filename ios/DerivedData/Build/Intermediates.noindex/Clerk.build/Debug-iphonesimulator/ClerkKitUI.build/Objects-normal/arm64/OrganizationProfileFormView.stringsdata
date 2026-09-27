@@ -1,0 +1,144 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationProfileFormView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Change logo",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 48
+        }
+      },
+      {
+        "comment": "",
+        "key": "Upload logo",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 48
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create organization",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 104
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter your organization details to continue",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 105
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create organization",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 126
+        }
+      },
+      {
+        "comment": "",
+        "key": "Organization name",
+        "location": {
+          "startingColumn": 11,
+          "startingLine": 175
+        }
+      },
+      {
+        "comment": "",
+        "key": "Slug",
+        "location": {
+          "startingColumn": 15,
+          "startingLine": 183
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter a slug using lowercase letters, numbers, and hyphens.",
+        "location": {
+          "startingColumn": 55,
+          "startingLine": 380
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 204
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create organization",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 204
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove current logo",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 240
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove current logo",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 274
+        }
+      },
+      {
+        "comment": "",
+        "key": "Photo library",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 351
+        }
+      },
+      {
+        "comment": "",
+        "key": "Choose file",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 361
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unable to update organization without an active organization.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 425
+        }
+      },
+      {
+        "comment": "",
+        "key": "There was an error loading the image from the photos library.",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 459
+        }
+      },
+      {
+        "comment": "",
+        "key": "There was an error loading the selected image file.",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 491
+        }
+      }
+    ]
+  },
+  "version": 1
+}

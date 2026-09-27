@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key></key>
+	<string></string>
+	<key> </key>
+	<string> </string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this connected account.</key>
+	<string>%@ буде видалено з цього облікового запису. Ви більше не зможете входити за допомогою цього підключеного облікового запису.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this email address.</key>
+	<string>%@ буде видалено з цього облікового запису. Ви більше не зможете входити за допомогою цієї адреси електронної пошти.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this passkey.</key>
+	<string>%@ буде видалено з цього облікового запису. Ви більше не зможете входити за допомогою цього ключа доступу.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this phone number.</key>
+	<string>%@ буде видалено з цього облікового запису. Ви більше не зможете входити за допомогою цього номера телефону.</string>
+	<key>%@ will no longer be receiving verification codes when signing in.</key>
+	<string>%@ більше не отримуватиме коди підтвердження під час входу.</string>
+	<key>%@ · Joined %@</key>
+	<string>%@ · Дата приєднання: %@</string>
+	<key>A text message containing a verification code will be sent to this phone number. Message and data rates may apply.</key>
+	<string>На цей номер телефону буде надіслано текстове повідомлення з кодом підтвердження. Може стягуватися плата за повідомлення та передачу даних.</string>
+	<key>A verification code was sent to %@. Enter the code to continue.</key>
+	<string>Код підтвердження надіслано на %@. Введіть код, щоб продовжити.</string>
+	<key>ACTIVE DEVICES</key>
+	<string>АКТИВНІ ПРИСТРОЇ</string>
+	<key>Accept request</key>
+	<string>Прийняти запит</string>
+	<key>Account</key>
+	<string>Обліковий запис</string>
+	<key>Add SMS code verification</key>
+	<string>Додати перевірку за допомогою SMS-коду</string>
+	<key>Add a passkey</key>
+	<string>Додати ключ доступу</string>
+	<key>Add account</key>
+	<string>Додати обліковий запис</string>
+	<key>Add authenticator application</key>
+	<string>Додати застосунок автентифікації</string>
+	<key>Add domain</key>
+	<string>Додати домен</string>
+	<key>Add email address</key>
+	<string>Додати адресу електронної пошти</string>
+	<key>Add password</key>
+	<string>Додати пароль</string>
+	<key>Add phone number</key>
+	<string>Додати номер телефону</string>
+	<key>Add the domain to verify. Users with email addresses at this domain can join the organization automatically or request to join.</key>
+	<string>Додайте домен для підтвердження. Користувачі з адресами електронної пошти в цьому домені зможуть приєднуватися до організації автоматично або надсилати запит на приєднання.</string>
+	<key>Add two-step verification</key>
+	<string>Додати двоетапну перевірку</string>
+	<key>Admin</key>
+	<string>Адміністратор</string>
+	<key>Allow</key>
+	<string>Дозволити</string>
+	<key>Allow %@</key>
+	<string>Дозволити %@</string>
+	<key>Allow users to join the organization automatically or request to join based on a verified email domain.</key>
+	<string>Дозвольте користувачам приєднуватися до організації автоматично або надсилати запит на приєднання на основі підтвердженого домену електронної пошти.</string>
+	<key>Alternatively, if your authenticator supports TOTP URIs, you can also copy the full URI.</key>
+	<string>Крім того, якщо ваш застосунок автентифікації підтримує URI TOTP, ви також можете скопіювати повний URI.</string>
+	<key>Application</key>
+	<string>Застосунок</string>
+	<key>Are you sure you want to delete this organization?</key>
+	<string>Ви впевнені, що хочете видалити цю організацію?</string>
+	<key>Are you sure you want to delete your account? This action is permanent and irreversible.</key>
+	<string>Ви впевнені, що хочете видалити свій обліковий запис? Ця дія є остаточною та незворотною.</string>
+	<key>Are you sure you want to leave this organization? You will lose access to this organization and its applications.</key>
+	<string>Ви впевнені, що хочете покинути цю організацію? Ви втратите доступ до цієї організації та її застосунків.</string>
+	<key>Authenticator app</key>
+	<string>Застосунок автентифікації</string>
+	<key>Authenticator application</key>
+	<string>Застосунок автентифікації</string>
+	<key>Authenticator application verification enabled</key>
+	<string>Перевірку через застосунок автентифікації ввімкнено</string>
+	<key>Automatic invitations</key>
+	<string>Автоматичні запрошення</string>
+	<key>Automatic suggestions</key>
+	<string>Автоматичні пропозиції</string>
+	<key>Back</key>
+	<string>Назад</string>
+	<key>Backup code</key>
+	<string>Резервний код</string>
+	<key>Backup codes</key>
+	<string>Резервні коди</string>
+	<key>Backup codes are now enabled. You can use one of these to sign in to your account, if you lose access to your authentication device. Each code can only be used once.</key>
+	<string>Резервні коди ввімкнено. Ви можете використати один із них для входу до свого облікового запису, якщо втратите доступ до свого пристрою автентифікації. Кожен код можна використати лише один раз.</string>
+	<key>CONNECTED ACCOUNTS</key>
+	<string>ПІДКЛЮЧЕНІ ОБЛІКОВІ ЗАПИСИ</string>
+	<key>Cancel</key>
+	<string>Скасувати</string>
+	<key>Change logo</key>
+	<string>Змінити логотип</string>
+	<key>Change password</key>
+	<string>Змінити пароль</string>
+	<key>Change role</key>
+	<string>Змінити роль</string>
+	<key>Check your email</key>
+	<string>Перевірте свою електронну пошту</string>
+	<key>Check your phone</key>
+	<string>Перевірте свій телефон</string>
+	<key>Choose a username.</key>
+	<string>Виберіть ім'я користувача.</string>
+	<key>Choose an account</key>
+	<string>Виберіть обліковий запис</string>
+	<key>Choose an organization</key>
+	<string>Виберіть організацію</string>
+	<key>Choose file</key>
+	<string>Вибрати файл</string>
+	<key>Choose from photo library</key>
+	<string>Вибрати з медіатеки</string>
+	<key>Choose how users from this domain can join the organization.</key>
+	<string>Виберіть, як користувачі з цього домену можуть приєднуватися до організації.</string>
+	<key>Choose how you'd like to receive your two-step verification code.</key>
+	<string>Виберіть, як ви хочете отримувати код двоетапної перевірки.</string>
+	<key>Choose the phone number you want to use for SMS code two-step verification</key>
+	<string>Виберіть номер телефону, який ви хочете використовувати для двоетапної перевірки за допомогою SMS-коду</string>
+	<key>Choose which method you prefer to protect your account with an extra layer of security</key>
+	<string>Виберіть метод, яким ви бажаєте захистити свій обліковий запис додатковим рівнем безпеки</string>
+	<key>Choose your password</key>
+	<string>Виберіть пароль</string>
+	<key>Choose your username</key>
+	<string>Виберіть ім'я користувача</string>
+	<key>Close</key>
+	<string>Закрити</string>
+	<key>Complete your profile</key>
+	<string>Заповніть свій профіль</string>
+	<key>Confirm password</key>
+	<string>Підтвердьте пароль</string>
+	<key>Connect account</key>
+	<string>Підключити обліковий запис</string>
+	<key>Contact your organization admin for an invitation.</key>
+	<string>Зверніться до адміністратора вашої організації для отримання запрошення.</string>
+	<key>Continue</key>
+	<string>Продовжити</string>
+	<key>Continue to %@</key>
+	<string>Продовжити до %@</string>
+	<key>Continue with %@</key>
+	<string>Продовжити за допомогою %@</string>
+	<key>Copy to clipboard</key>
+	<string>Копіювати в буфер обміну</string>
+	<key>Create a unique password.</key>
+	<string>Створіть унікальний пароль.</string>
+	<key>Create organization</key>
+	<string>Створити організацію</string>
+	<key>Create your account</key>
+	<string>Створіть свій обліковий запис</string>
+	<key>Created: %@</key>
+	<string>Створено: %@</string>
+	<key>Current password</key>
+	<string>Поточний пароль</string>
+	<key>DELETE</key>
+	<string>ВИДАЛИТИ</string>
+	<key>DELETE ACCOUNT</key>
+	<string>ВИДАЛИТИ ОБЛІКОВИЙ ЗАПИС</string>
+	<key>Default</key>
+	<string>За замовчуванням</string>
+	<key>Delete</key>
+	<string>Видалити</string>
+	<key>Delete account</key>
+	<string>Видалити обліковий запис</string>
+	<key>Delete organization</key>
+	<string>Видалити організацію</string>
+	<key>Delete pending invitations and suggestions</key>
+	<string>Видалити очікувані запрошення та пропозиції</string>
+	<key>Desktop device</key>
+	<string>Настільний пристрій</string>
+	<key>Development mode</key>
+	<string>Режим розробки</string>
+	<key>Didn't receive a code?</key>
+	<string>Не отримали код?</string>
+	<key>Didn't receive an email?</key>
+	<string>Не отримали лист?</string>
+	<key>Domain</key>
+	<string>Домен</string>
+	<key>Done</key>
+	<string>Готово</string>
+	<key>Download</key>
+	<string>Завантажити</string>
+	<key>EMAIL ADDRESSES</key>
+	<string>АДРЕСИ ЕЛЕКТРОННОЇ ПОШТИ</string>
+	<key>Edit profile</key>
+	<string>Редагувати профіль</string>
+	<key>Email address</key>
+	<string>Адреса електронної пошти</string>
+	<key>Email code to %@</key>
+	<string>Надіслати код на %@</string>
+	<key>Email link to %@</key>
+	<string>Надіслати посилання на %@</string>
+	<key>Email support</key>
+	<string>Написати в підтримку</string>
+	<key>Enable %@ for faster access</key>
+	<string>Увімкніть %@ для швидшого доступу</string>
+	<key>Enable %@ for faster access to %@</key>
+	<string>Увімкніть %@ для швидшого доступу до %@</string>
+	<key>Enter a backup code</key>
+	<string>Введіть резервний код</string>
+	<key>Enter a slug using lowercase letters, numbers, and hyphens.</key>
+	<string>Введіть slug, використовуючи малі літери, цифри та дефіси.</string>
+	<key>Enter email addresses</key>
+	<string>Введіть адреси електронної пошти</string>
+	<key>Enter or paste one or more email addresses, separated by spaces or commas.</key>
+	<string>Введіть або вставте одну чи більше адрес електронної пошти, розділених пробілами або комами.</string>
+	<key>Enter password</key>
+	<string>Введіть пароль</string>
+	<key>Enter the email address you'd like to use.</key>
+	<string>Введіть адресу електронної пошти, яку ви хочете використовувати.</string>
+	<key>Enter the password for your account</key>
+	<string>Введіть пароль від свого облікового запису</string>
+	<key>Enter the phone number you'd like to use.</key>
+	<string>Введіть номер телефону, який ви хочете використовувати.</string>
+	<key>Enter the verification code from authenticator application</key>
+	<string>Введіть код підтвердження із застосунку автентифікації</string>
+	<key>Enter the verification code from your authenticator app.</key>
+	<string>Введіть код підтвердження з вашого застосунку автентифікації.</string>
+	<key>Enter the verification code sent to</key>
+	<string>Введіть код підтвердження, надісланий на</string>
+	<key>Enter the verification code sent to %@</key>
+	<string>Введіть код підтвердження, надісланий на %@</string>
+	<key>Enter your current password to set a new one.</key>
+	<string>Введіть свій поточний пароль, щоб встановити новий.</string>
+	<key>Enter your email</key>
+	<string>Введіть свою електронну пошту</string>
+	<key>Enter your email or username</key>
+	<string>Введіть свою електронну пошту або ім'я користувача</string>
+	<key>Enter your organization details to continue</key>
+	<string>Введіть дані вашої організації для продовження</string>
+	<key>Enter your password</key>
+	<string>Введіть свій пароль</string>
+	<key>Enter your phone number</key>
+	<string>Введіть свій номер телефону</string>
+	<key>Enter your username</key>
+	<string>Введіть своє ім'я користувача</string>
+	<key>Facing issues? You can use any of these methods to sign in.</key>
+	<string>Виникли проблеми? Ви можете використати будь-який із цих методів для входу.</string>
+	<key>First name</key>
+	<string>Ім'я</string>
+	<key>First, enter the code sent to your email address</key>
+	<string>Спочатку введіть код, надісланий на вашу адресу електронної пошти</string>
+	<key>First, enter the code sent to your phone</key>
+	<string>Спочатку введіть код, надісланий на ваш телефон</string>
+	<key>Forgot password?</key>
+	<string>Забули пароль?</string>
+	<key>Get help</key>
+	<string>Допомога</string>
+	<key>Get started by inviting someone to join your organization</key>
+	<string>Почніть із запрошення когось приєднатися до вашої організації</string>
+	<key>Go back</key>
+	<string>Назад</string>
+	<key>Hide password</key>
+	<string>Приховати пароль</string>
+	<key>I agree to the [Privacy Policy](LegalConsentView://privacy)</key>
+	<string>Я погоджуюся з [Політикою конфіденційності](LegalConsentView://privacy)</string>
+	<key>I agree to the [Terms of Service](LegalConsentView://terms)</key>
+	<string>Я погоджуюся з [Умовами використання](LegalConsentView://terms)</string>
+	<key>I agree to the [Terms of Service](LegalConsentView://terms) and [Privacy Policy](LegalConsentView://privacy)</key>
+	<string>Я погоджуюся з [Умовами використання](LegalConsentView://terms) та [Політикою конфіденційності](LegalConsentView://privacy)</string>
+	<key>If you have trouble completing required account setup, email us and we will help you finish as soon as possible.</key>
+	<string>Якщо у вас виникли труднощі із завершенням обов'язкового налаштування облікового запису, напишіть нам, і ми допоможемо завершити його якнайшвидше.</string>
+	<key>If you have trouble creating your account, email us and we will work with you to complete your registration as soon as possible.</key>
+	<string>Якщо у вас виникли труднощі зі створенням облікового запису, напишіть нам, і ми попрацюємо з вами, щоб завершити реєстрацію якнайшвидше.</string>
+	<key>If you have trouble signing into your account, email us and we will work with you to restore access as soon as possible.</key>
+	<string>Якщо у вас виникли труднощі з входом у ваш обліковий запис, напишіть нам, і ми попрацюємо з вами, щоб відновити доступ якнайшвидше.</string>
+	<key>International</key>
+	<string>Міжнародний</string>
+	<key>Invitations</key>
+	<string>Запрошення</string>
+	<key>Invite</key>
+	<string>Запросити</string>
+	<key>Invite new members</key>
+	<string>Запросити нових учасників</string>
+	<key>Invited %@</key>
+	<string>Дата запрошення: %@</string>
+	<key>It is recommended to sign out of all other devices which may have used your old password.</key>
+	<string>Рекомендуємо вийти з усіх інших пристроїв, на яких міг використовуватися ваш старий пароль.</string>
+	<key>Join</key>
+	<string>Приєднатися</string>
+	<key>Join an existing organization</key>
+	<string>Приєднатися до існуючої організації</string>
+	<key>Join an existing organization or create a new one</key>
+	<string>Приєднайтеся до існуючої організації або створіть нову</string>
+	<key>Joined %@</key>
+	<string>Дата приєднання: %@</string>
+	<key>Last name</key>
+	<string>Прізвище</string>
+	<key>Last used</key>
+	<string>Останнє використання</string>
+	<key>Last used: %@</key>
+	<string>Останнє використання: %@</string>
+	<key>Leave organization</key>
+	<string>Покинути організацію</string>
+	<key>Link another login option to your account. You’ll need to verify it before it can be used.</key>
+	<string>Прив'яжіть до свого облікового запису інший спосіб входу. Його потрібно буде підтвердити, перш ніж ним можна буде користуватися.</string>
+	<key>Linked</key>
+	<string>Прив'язано</string>
+	<key>MFA reserved</key>
+	<string>MFA зарезервовано</string>
+	<key>Make sure Time-based or One-time passwords is enabled, then finish linking your account.</key>
+	<string>Переконайтеся, що ввімкнено одноразові паролі на основі часу, потім завершіть зв'язування свого облікового запису.</string>
+	<key>Manage</key>
+	<string>Керувати</string>
+	<key>Manage account</key>
+	<string>Керувати обліковим записом</string>
+	<key>Manual setup key</key>
+	<string>Ключ для ручного налаштування</string>
+	<key>Member</key>
+	<string>Учасник</string>
+	<key>Members</key>
+	<string>Учасники</string>
+	<key>Mobile device</key>
+	<string>Мобільний пристрій</string>
+	<key>Name of passkey</key>
+	<string>Назва ключа доступу</string>
+	<key>New password</key>
+	<string>Новий пароль</string>
+	<key>Next</key>
+	<string>Далі</string>
+	<key>No automatic enrollment</key>
+	<string>Без автоматичного приєднання</string>
+	<key>No email app is available on this device.</key>
+	<string>На цьому пристрої немає доступного поштового застосунку.</string>
+	<key>No invitations sent</key>
+	<string>Запрошення не надіслано</string>
+	<key>No members found</key>
+	<string>Учасників не знайдено</string>
+	<key>No members match your search. Try a different name or email address.</key>
+	<string>Жоден учасник не відповідає вашому запиту. Спробуйте інше ім'я або адресу електронної пошти.</string>
+	<key>No membership requests</key>
+	<string>Немає запитів на приєднання</string>
+	<key>No roles available</key>
+	<string>Немає доступних ролей</string>
+	<key>No verified domains</key>
+	<string>Немає підтверджених доменів</string>
+	<key>Not now</key>
+	<string>Не зараз</string>
+	<key>Open account</key>
+	<string>Відкрити обліковий запис</string>
+	<key>Open email app</key>
+	<string>Відкрити поштовий застосунок</string>
+	<key>Or, sign in with another method</key>
+	<string>Або увійдіть іншим способом</string>
+	<key>Organization</key>
+	<string>Організація</string>
+	<key>Organization name</key>
+	<string>Назва організації</string>
+	<key>PASSKEYS</key>
+	<string>КЛЮЧІ ДОСТУПУ</string>
+	<key>PASSWORD</key>
+	<string>ПАРОЛЬ</string>
+	<key>PHONE NUMBERS</key>
+	<string>НОМЕРИ ТЕЛЕФОНІВ</string>
+	<key>Password</key>
+	<string>Пароль</string>
+	<key>Passwords don't match.</key>
+	<string>Паролі не збігаються.</string>
+	<key>Pending approval</key>
+	<string>Очікує схвалення</string>
+	<key>Personal account</key>
+	<string>Особистий обліковий запис</string>
+	<key>Phone number</key>
+	<string>Номер телефону</string>
+	<key>Photo library</key>
+	<string>Медіатека</string>
+	<key>Primary</key>
+	<string>Основний</string>
+	<key>Profile details</key>
+	<string>Дані профілю</string>
+	<key>Reconnect</key>
+	<string>Підключити знову</string>
+	<key>Regenerate</key>
+	<string>Згенерувати заново</string>
+	<key>Reject request</key>
+	<string>Відхилити запит</string>
+	<key>Remove</key>
+	<string>Видалити</string>
+	<key>Remove connected account</key>
+	<string>Видалити підключений обліковий запис</string>
+	<key>Remove connection</key>
+	<string>Видалити з'єднання</string>
+	<key>Remove current logo</key>
+	<string>Видалити поточний логотип</string>
+	<key>Remove domain</key>
+	<string>Видалити домен</string>
+	<key>Remove email</key>
+	<string>Видалити пошту</string>
+	<key>Remove email address</key>
+	<string>Видалити адресу електронної пошти</string>
+	<key>Remove member</key>
+	<string>Видалити учасника</string>
+	<key>Remove passkey</key>
+	<string>Видалити ключ доступу</string>
+	<key>Remove phone</key>
+	<string>Видалити телефон</string>
+	<key>Remove phone number</key>
+	<string>Видалити номер телефону</string>
+	<key>Remove photo</key>
+	<string>Видалити фото</string>
+	<key>Remove two-step verification</key>
+	<string>Видалити двоетапну перевірку</string>
+	<key>Rename</key>
+	<string>Перейменувати</string>
+	<key>Rename passkey</key>
+	<string>Перейменувати ключ доступу</string>
+	<key>Request to join</key>
+	<string>Запросити приєднання</string>
+	<key>Requested %@</key>
+	<string>Дата запиту: %@</string>
+	<key>Requests</key>
+	<string>Запити</string>
+	<key>Resend</key>
+	<string>Повторно відправити</string>
+	<key>Resend (%lld)</key>
+	<string>Повторно відправити (%lld)</string>
+	<key>Reset password</key>
+	<string>Скинути пароль</string>
+	<key>Reset your password</key>
+	<string>Скиньте ваш пароль</string>
+	<key>Revoke invitation</key>
+	<string>Відкликати запрошення</string>
+	<key>Role</key>
+	<string>Роль</string>
+	<key>SMS code</key>
+	<string>SMS-код</string>
+	<key>SMS code verification enabled</key>
+	<string>Перевірку за допомогою SMS-коду ввімкнено</string>
+	<key>Save</key>
+	<string>Зберегти</string>
+	<key>Save these codes somewhere safe. If you lose access to your authentication device, you can use a backup code to sign in.</key>
+	<string>Збережіть ці коди в надійному місці. Якщо ви втратите доступ до свого пристрою автентифікації, ви зможете увійти за допомогою резервного коду.</string>
+	<key>Search</key>
+	<string>Пошук</string>
+	<key>Secured by</key>
+	<string>Захищено</string>
+	<key>Security</key>
+	<string>Безпека</string>
+	<key>Select an existing phone number to register for SMS code two-step verification or add a new one.</key>
+	<string>Виберіть наявний номер телефону для реєстрації у двоетапній перевірці за допомогою SMS-коду або додайте новий.</string>
+	<key>Select organization</key>
+	<string>Виберіть організацію</string>
+	<key>Select the account with which you wish to continue.</key>
+	<string>Виберіть обліковий запис, з яким ви бажаєте продовжити.</string>
+	<key>Selected</key>
+	<string>Вибрано</string>
+	<key>Send SMS code to %@</key>
+	<string>Надіслати SMS-код на %@</string>
+	<key>Send invitations</key>
+	<string>Надіслати запрошення</string>
+	<key>Set as default</key>
+	<string>Встановити за замовчуванням</string>
+	<key>Set as primary</key>
+	<string>Встановити як основний</string>
+	<key>Set new password</key>
+	<string>Встановити новий пароль</string>
+	<key>Set up a new sign-in method in your authenticator and enter the Key provided below.
+
+Make sure Time-based or One-time passwords is enabled, then finish linking your account.</key>
+	<string>Налаштуйте новий метод входу у вашому застосунку автентифікації та введіть нижче наданий ключ.
+
+Переконайтеся, що ввімкнено одноразові паролі на основі часу, потім завершіть зв'язування свого облікового запису.</string>
+	<key>Set up a new sign-in method in your authenticator app using the manual setup key below to link it to your account.</key>
+	<string>Налаштуйте новий метод входу у вашому застосунку автентифікації за допомогою наведеного нижче ключа для ручного налаштування, щоб зв'язати його з вашим обліковим записом.</string>
+	<key>Set up two-step verification</key>
+	<string>Налаштуйте двоетапну перевірку</string>
+	<key>Show password</key>
+	<string>Показати пароль</string>
+	<key>Sign in with %@</key>
+	<string>Увійти за допомогою %@</string>
+	<key>Sign in with your passkey</key>
+	<string>Увійти за допомогою ключа доступу</string>
+	<key>Sign in with your password</key>
+	<string>Увійти за допомогою пароля</string>
+	<key>Sign out</key>
+	<string>Вийти</string>
+	<key>Sign out of all accounts</key>
+	<string>Вийти з усіх облікових записів</string>
+	<key>Sign out of all other devices</key>
+	<string>Вийти з усіх інших пристроїв</string>
+	<key>Sign out of device</key>
+	<string>Вийти з пристрою</string>
+	<key>Sign up</key>
+	<string>Зареєструватися</string>
+	<key>Skip</key>
+	<string>Пропустити</string>
+	<key>Slug</key>
+	<string>Slug</string>
+	<key>Success</key>
+	<string>Успішно</string>
+	<key>Switch account</key>
+	<string>Змінити обліковий запис</string>
+	<key>TWO-STEP VERIFICATION</key>
+	<string>ДВОЕТАПНА ПЕРЕВІРКА</string>
+	<key>The app %@ uses %@ to sign you in.</key>
+	<string>Застосунок %@ використовує %@, щоб ви могли ввійти.</string>
+	<key>The domain %@ needs to be verified via email.</key>
+	<string>Домен %@ потрібно підтвердити електронною поштою.</string>
+	<key>The email domain %@ will be removed.</key>
+	<string>Домен електронної пошти %@ буде видалено.</string>
+	<key>There was an error loading the image from the photos library.</key>
+	<string>Під час завантаження зображення з медіатеки сталася помилка.</string>
+	<key>There was an error loading the selected image file.</key>
+	<string>Під час завантаження вибраного файлу зображення сталася помилка.</string>
+	<key>This account has been disconnected.</key>
+	<string>Цей обліковий запис було від'єднано.</string>
+	<key>This action is permanent and irreversible.</key>
+	<string>Ця дія є остаточною та незворотною.</string>
+	<key>This device</key>
+	<string>Цей пристрій</string>
+	<key>To continue, please enter the verification code generated by your authenticator app</key>
+	<string>Щоб продовжити, введіть код підтвердження, згенерований вашим застосунком автентифікації</string>
+	<key>Two-step verification</key>
+	<string>Двоетапна перевірка</string>
+	<key>Two-step verification is now enabled. When signing in, you will need to enter a verification code from this authenticator app as an additional step.
+
+Save these backup codes and store them somewhere safe. If you lose access to your authentication device, you can use backup codes to sign in.</key>
+	<string>Двоетапну перевірку ввімкнено. Під час входу вам потрібно буде ввести код підтвердження з цього застосунку автентифікації як додатковий крок.
+
+Збережіть ці резервні коди в надійному місці. Якщо ви втратите доступ до свого пристрою автентифікації, ви зможете увійти за допомогою резервних кодів.</string>
+	<key>Two-step verification setup</key>
+	<string>Налаштування двоетапної перевірки</string>
+	<key>Type "%@" below to continue.</key>
+	<string>Введіть "%@" нижче, щоб продовжити.</string>
+	<key>Type "DELETE" to continue</key>
+	<string>Введіть "ВИДАЛИТИ", щоб продовжити</string>
+	<key>Unable to send invitations without an active organization.</key>
+	<string>Неможливо надіслати запрошення без активної організації.</string>
+	<key>Unable to update organization without an active organization.</key>
+	<string>Неможливо оновити організацію без активної організації.</string>
+	<key>Unknown code verification method. Please use another method.</key>
+	<string>Невідомий метод перевірки коду. Скористайтеся іншим методом.</string>
+	<key>Unknown device</key>
+	<string>Невідомий пристрій</string>
+	<key>Unverified</key>
+	<string>Не підтверджено</string>
+	<key>Update %@</key>
+	<string>Оновити %@</string>
+	<key>Update password</key>
+	<string>Оновити пароль</string>
+	<key>Update profile</key>
+	<string>Оновити профіль</string>
+	<key>Upload logo</key>
+	<string>Завантажити логотип</string>
+	<key>Use %@ to sign in.</key>
+	<string>Використайте %@, щоб увійти.</string>
+	<key>Use a backup code</key>
+	<string>Використати резервний код</string>
+	<key>Use another method</key>
+	<string>Використати інший метод</string>
+	<key>Use email address</key>
+	<string>Використовувати адресу електронної пошти</string>
+	<key>Use email address or username</key>
+	<string>Використовувати адресу електронної пошти або ім'я користувача</string>
+	<key>Use phone number</key>
+	<string>Використовувати номер телефону</string>
+	<key>Use username</key>
+	<string>Використовувати ім'я користувача</string>
+	<key>Use your authenticator app</key>
+	<string>Скористайтеся застосунком автентифікації</string>
+	<key>Use your passkey</key>
+	<string>Використайте ключ доступу</string>
+	<key>Username</key>
+	<string>Ім'я користувача</string>
+	<key>Users are automatically invited to join the organization when they sign up and can join anytime.</key>
+	<string>Користувачі автоматично отримують запрошення приєднатися до організації під час реєстрації та можуть приєднатися будь-коли.</string>
+	<key>Users can only be invited manually to the organization.</key>
+	<string>Користувачів можна запросити до організації лише вручну.</string>
+	<key>Users receive a suggestion to request to join, but must be approved by an admin before they are able to join the organization.</key>
+	<string>Користувачі отримують пропозицію надіслати запит на приєднання, але адміністратор має схвалити його, перш ніж вони зможуть приєднатися до організації.</string>
+	<key>Users who request to join your organization will appear here for review</key>
+	<string>Користувачі, які надішлють запит на приєднання до вашої організації, з'являться тут для розгляду</string>
+	<key>Users won't be able to join the organization automatically after this.</key>
+	<string>Після цього користувачі не зможуть приєднуватися до організації автоматично.</string>
+	<key>Using your passkey confirms it's you. Your device may ask for your fingerprint, face or screen lock.</key>
+	<string>Використання ключа доступу підтверджує, що це ви. Ваш пристрій може запитати відбиток пальця, обличчя або код блокування екрана.</string>
+	<key>Verification codes from this authenticator will no longer be required when signing in.</key>
+	<string>Коди підтвердження з цього застосунку автентифікації більше не будуть потрібні під час входу.</string>
+	<key>Verification email address</key>
+	<string>Адреса електронної пошти для підтвердження</string>
+	<key>Verified domains</key>
+	<string>Підтверджені домени</string>
+	<key>Verify</key>
+	<string>Підтвердити</string>
+	<key>Verify authenticator app</key>
+	<string>Підтвердити застосунок автентифікації</string>
+	<key>Verify domain</key>
+	<string>Підтвердити домен</string>
+	<key>Verify email address</key>
+	<string>Підтвердити адресу електронної пошти</string>
+	<key>Verify phone number</key>
+	<string>Підтвердити номер телефону</string>
+	<key>Verify your phone number</key>
+	<string>Підтвердьте ваш номер телефону</string>
+	<key>Verifying...</key>
+	<string>Перевірка...</string>
+	<key>We are updating the available roles. Once that's done, you'll be able to invite members again.</key>
+	<string>Ми оновлюємо доступні ролі. Коли це буде зроблено, ви зможете знову запрошувати учасників.</string>
+	<key>We are updating the available roles. Once that's done, you'll be able to update roles again.</key>
+	<string>Ми оновлюємо доступні ролі. Коли це буде зроблено, ви зможете знову оновлювати ролі.</string>
+	<key>Welcome! Please fill in the details to get started.</key>
+	<string>Ласкаво просимо! Заповніть дані, щоб почати.</string>
+	<key>Welcome! Sign in to continue</key>
+	<string>Ласкаво просимо! Увійдіть, щоб продовжити</string>
+	<key>When signing in, you will need to enter a verification code sent to this phone number as an additional step.
+
+Save these backup codes and store them somewhere safe. If you lose access to your authentication device, you can use backup codes to sign in.</key>
+	<string>Під час входу вам потрібно буде ввести код підтвердження, надісланий на цей номер телефону, як додатковий крок.
+
+Збережіть ці резервні коди в надійному місці. Якщо ви втратите доступ до свого пристрою автентифікації, ви зможете увійти за допомогою резервних кодів.</string>
+	<key>When you sign in, you'll be asked for a verification code sent to this phone number.</key>
+	<string>Під час входу вам буде запропоновано ввести код підтвердження, надісланий на цей номер телефону.</string>
+	<key>When you sign in, you'll need to enter a verification code from this authenticator app.</key>
+	<string>Під час входу вам потрібно буде ввести код підтвердження з цього застосунку автентифікації.</string>
+	<key>Whoops, something is wrong</key>
+	<string>Ой, щось пішло не так</string>
+	<key>You</key>
+	<string>Ви</string>
+	<key>You are no longer a member of this organization. Please choose another one.</key>
+	<string>Ви більше не є учасником цієї організації. Виберіть іншу.</string>
+	<key>You are no longer a member of this organization. Please choose or create another one.</key>
+	<string>Ви більше не є учасником цієї організації. Виберіть або створіть іншу.</string>
+	<key>You can change the passkey name to make it easier to find.</key>
+	<string>Ви можете змінити назву ключа доступу, щоб його було легше знайти.</string>
+	<key>You must belong to an organization</key>
+	<string>Ви повинні належати до організації</string>
+	<key>You'll need to verify this email address before it can be added to your account.</key>
+	<string>Вам потрібно підтвердити цю адресу електронної пошти, перш ніж її можна буде додати до вашого облікового запису.</string>
+	<key>You're signing in from a new device. We're asking for verification to keep your account secure.</key>
+	<string>Ви входите з нового пристрою. Ми просимо підтвердження для забезпечення безпеки вашого облікового запису.</string>
+	<key>Your account requires a new password before you can continue</key>
+	<string>Ваш обліковий запис потребує нового пароля, перш ніж ви зможете продовжити</string>
+	<key>Your backup code is the one you got when setting up two-step verification.</key>
+	<string>Резервний код — це код, який ви отримали під час налаштування двоетапної перевірки.</string>
+	<key>or</key>
+	<string>або</string>
+	<key>to continue</key>
+	<string>щоб продовжити</string>
+	<key>to continue to %@</key>
+	<string>щоб продовжити до %@</string>
+</dict>
+</plist>

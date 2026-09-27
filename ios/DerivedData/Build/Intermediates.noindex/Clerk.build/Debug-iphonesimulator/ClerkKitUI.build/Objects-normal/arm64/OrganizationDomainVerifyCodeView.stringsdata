@@ -1,0 +1,48 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationDomainVerifyCodeView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Resend (%lld)",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 40
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resend",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 42
+        }
+      },
+      {
+        "comment": "",
+        "key": "A verification code was sent to %@. Enter the code to continue.",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "Didn't receive a code?",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 74
+        }
+      },
+      {
+        "comment": "",
+        "key": "Verify domain",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 111
+        }
+      }
+    ]
+  },
+  "version": 1
+}

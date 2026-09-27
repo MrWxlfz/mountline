@@ -1,0 +1,219 @@
+{
+  "" : {
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQA-primary.dia",
+    "emit-module-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQA-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQA-primary-emit-module.dia",
+    "pch" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQA-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQA-primary.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Components/AppTabsView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppTabsView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Components/ContentStates.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ContentStates~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Core/AppStore.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/AppStore~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Core/Models/MobileModels.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MobileModels~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Core/Networking/APIClient.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/APIClient~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Core/Utilities/LoadState.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/LoadState~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/DesignSystem/MountlineTheme.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineTheme~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Calls/CallDetailView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallDetailView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Calls/CallsView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/CallsView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Calls/TranscriptView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/TranscriptView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Home/HomeView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/HomeView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Inquiries/InquiriesView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiriesView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Inquiries/InquiryDetailView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/InquiryDetailView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Projects/ProjectDetailView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectDetailView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Projects/ProjectsView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/ProjectsView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Settings/SettingsView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SettingsView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Support/SupportComposer.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportComposer~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Support/SupportMessageRow.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportMessageRow~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/Mountline/Features/Support/SupportView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/SupportView~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/QAHost/MountlineQAApp.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp.dia",
+    "index-unit-output-path" : "/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Mountline.build/Debug-iphonesimulator/MountlineQA.build/Objects-normal/arm64/MountlineQAApp~partial.swiftmodule"
+  }
+}

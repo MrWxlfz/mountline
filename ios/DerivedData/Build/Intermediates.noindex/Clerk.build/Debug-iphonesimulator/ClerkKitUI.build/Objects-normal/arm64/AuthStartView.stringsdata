@@ -1,0 +1,128 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/AuthStartView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Continue to %@",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 190
+        }
+      },
+      {
+        "comment": "",
+        "key": "Continue",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 192
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create your account",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 195
+        }
+      },
+      {
+        "comment": "",
+        "key": "Welcome! Sign in to continue",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 202
+        }
+      },
+      {
+        "comment": "",
+        "key": "Welcome! Please fill in the details to get started.",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 204
+        }
+      },
+      {
+        "comment": "",
+        "key": "Use email address or username",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 211
+        }
+      },
+      {
+        "comment": "",
+        "key": "Use email address",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 213
+        }
+      },
+      {
+        "comment": "",
+        "key": "Use username",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 215
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 217
+        }
+      },
+      {
+        "comment": "",
+        "key": "Use phone number",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 220
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter your email",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 227
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter your username",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 229
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter your email or username",
+        "location": {
+          "startingColumn": 7,
+          "startingLine": 231
+        }
+      },
+      {
+        "comment": "",
+        "key": "or",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 258
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter your phone number",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 391
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/ThreeDotsMenuLabel.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Manage",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 18
+        }
+      }
+    ]
+  },
+  "version": 1
+}

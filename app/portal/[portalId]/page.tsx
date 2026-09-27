@@ -1,148 +1,13 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import type { FormEvent, ReactNode } from "react"
+import { useEffect, useState } from "react"
+import type { FormEvent } from "react"
+import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import { motion } from "framer-motion"
-import {
-  ArrowRight,
-  CheckCircle2,
-  Circle,
-  CreditCard,
-  ExternalLink,
-  Eye,
-  FileText,
-  Loader2,
-  Lock,
-  MessageSquare,
-  Send,
-} from "lucide-react"
-import { NorthlineLogo } from "@/components/northline-logo"
-
-type ProjectStatus =
-  | "discovery"
-  | "design"
-  | "build"
-  | "review"
-  | "launch"
-  | "support"
-  | "completed"
-
-interface PortalProject {
-  project_name: string
-  package_type: string | null
-  status: ProjectStatus
-  start_date: string | null
-  target_launch_date: string | null
-  live_url: string | null
-  preview_url: string | null
-  payment_link: string | null
-  billing_state: "not_sent" | "pending" | "waived" | "legacy_unverified"
-  receipt_summary: {
-    totals: Array<{ currency: string; amount_minor: number }>
-    fully_paid: boolean
-    partially_paid: boolean
-  }
-  accepted_payment_methods: string[] | null
-  manual_payment_instructions: string | null
-  invoice_amount: number | null
-  invoice_label: string | null
-  next_step: string | null
-  client: {
-    business_name: string
-    contact_name: string
-  } | null
-}
-
-type PortalSupportMessage = {
-  id: string
-  created_at: string
-  sender_type: "client" | "team" | "system"
-  sender_name: string | null
-  is_own: boolean
-  message: string
-}
-
-type PortalPayload = {
-  project: PortalProject
-  supportMessages: PortalSupportMessage[]
-  viewer: {
-    email: string | null
-    isTeamMember: boolean
-  }
-}
-
-const STAGES: { key: ProjectStatus; label: string }[] = [
-  { key: "discovery", label: "Discovery" },
-  { key: "design", label: "Design" },
-  { key: "build", label: "Build" },
-  { key: "review", label: "Review" },
-  { key: "launch", label: "Launch" },
-  { key: "support", label: "Support" },
-]
-
-function getStageIndex(status: ProjectStatus) {
-  if (status === "completed") return STAGES.length - 1
-  const index = STAGES.findIndex((stage) => stage.key === status)
-  return index >= 0 ? index : 0
-}
-
-function formatDate(date: string | null) {
-  if (!date) return null
-  return new Date(date).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
-
-function formatDateTime(date: string | null) {
-  if (!date) return null
-  return new Date(date).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
-
-function formatMoney(amount: number | null) {
-  if (amount === null || amount === undefined) return null
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(amount)
-}
-
-function formatMoneyMinor(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 2,
-  }).format(amountMinor / 100)
-}
-
-function getPaymentMethodLabel(method: string) {
-  const labels: Record<string, string> = {
-    stripe_card: "Stripe/card",
-    crypto: "Crypto",
-    cash: "Cash",
-    check: "Check",
-    bank_transfer: "Bank transfer",
-    other: "Other",
-  }
-
-  return labels[method] || method
-}
-
-function getMessageLabel(item: PortalSupportMessage) {
-  if (item.sender_type === "team") return "Mountline"
-  if (item.sender_type === "system") return "System"
-  if (item.is_own) return "You"
-  return item.sender_name || "Client"
-}
+import { Loader2 } from "lucide-react"
+import { AccountMessage, AccountShell } from "@/components/brand/account-shell"
+import { PortalView, type PortalPayload } from "./portal-view"
 
 export default function PortalPage() {
   const { portalId } = useParams<{ portalId: string }>()
@@ -182,10 +47,6 @@ export default function PortalPage() {
   }, [isLoaded, portalId])
 
   const project = payload?.project
-  const currentStage = useMemo(
-    () => (project ? getStageIndex(project.status) : 0),
-    [project],
-  )
 
   async function handleSendMessage(e: FormEvent) {
     e.preventDefault()
@@ -225,419 +86,51 @@ export default function PortalPage() {
   }
 
   if (!isLoaded || loading) {
-    return <PortalState icon={<Loader2 className="w-6 h-6 animate-spin" />} title="Loading portal" />
+    return (
+      <AccountShell>
+        <div className="flex flex-col items-center gap-4 text-center" role="status">
+          <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden="true" />
+          <p className="ml-eyebrow">Loading your portal</p>
+        </div>
+      </AccountShell>
+    )
   }
 
   if (error || !project) {
     return (
-      <PortalState
-        icon={<Lock className="w-6 h-6" />}
-        title={error?.includes("access") ? "Access denied" : "Portal unavailable"}
-        body={error || "This portal link may be invalid or expired."}
-      />
+      <AccountShell>
+        <AccountMessage
+          eyebrow="Client portal"
+          title={error?.includes("access") ? "You don’t have access to this portal" : "This portal isn’t available"}
+          actions={
+            <>
+              <Link href="/portal" className="ml-pill ml-pill-solid">Your projects</Link>
+              <Link href="/" className="ml-pill ml-pill-line">Back to Mountline</Link>
+            </>
+          }
+        >
+          {error || "This portal link may be invalid or expired."}
+        </AccountMessage>
+      </AccountShell>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
-          <NorthlineLogo size="sm" showWordmark />
-          <div className="text-right min-w-0">
-            <p className="text-sm font-medium truncate">
-              {project.client?.business_name || project.project_name}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {user?.firstName || payload.viewer.email || "Client portal"}
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-        <motion.section
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]"
-        >
-          <div className="space-y-4">
-            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              Client portal
-            </p>
-            <div>
-              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
-                {project.project_name}
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground mt-3 max-w-2xl">
-                A private project view for progress, key links, payments, and support.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-            <StatusBadge status={project.status} />
-            <InfoRow label="Package" value={project.package_type || "Custom"} />
-            <InfoRow label="Started" value={formatDate(project.start_date) || "Not set"} />
-            <InfoRow label="Target launch" value={formatDate(project.target_launch_date) || "Not set"} />
-          </div>
-        </motion.section>
-
-        <section className="rounded-xl border border-border bg-card p-5 sm:p-7">
-          <div className="flex items-center justify-between gap-4 mb-7">
-            <div>
-              <h2 className="text-lg font-semibold">Timeline</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Current project phase and launch path.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-6">
-            {STAGES.map((stage, index) => {
-              const active = index === currentStage && project.status !== "completed"
-              const complete = index < currentStage || project.status === "completed"
-
-              return (
-                <div
-                  key={stage.key}
-                  className={`rounded-lg border p-4 ${
-                    active
-                      ? "border-blue-500/50 bg-blue-500/10"
-                      : complete
-                        ? "border-border bg-foreground/5"
-                        : "border-border bg-background"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    {complete ? (
-                      <CheckCircle2 className="w-4 h-4 text-blue-400" />
-                    ) : active ? (
-                      <Circle className="w-4 h-4 fill-blue-400 text-blue-400" />
-                    ) : (
-                      <Circle className="w-4 h-4 text-muted-foreground" />
-                    )}
-                    <span className="text-xs text-muted-foreground">{index + 1}</span>
-                  </div>
-                  <p className="text-sm font-medium">{stage.label}</p>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-xl border border-border bg-card p-5 sm:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <FileText className="w-5 h-5 text-muted-foreground" />
-              <h2 className="font-semibold">Next step</h2>
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {project.next_step || "No client action is needed right now. Mountline will post the next confirmed step here."}
-            </p>
-          </section>
-
-          <section className="rounded-xl border border-border bg-card p-5 sm:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <CreditCard className="w-5 h-5 text-muted-foreground" />
-              <h2 className="font-semibold">Payment</h2>
-            </div>
-            <PaymentPanel project={project} />
-          </section>
-        </div>
-
-        <section className="grid gap-4 sm:grid-cols-2">
-          <ProjectLinkCard
-            icon={<Eye className="w-5 h-5" />}
-            title="Preview"
-            href={project.preview_url}
-            emptyText="No preview link yet"
-          />
-          <ProjectLinkCard
-            icon={<ExternalLink className="w-5 h-5" />}
-            title="Live site"
-            href={project.live_url}
-            emptyText="No live site yet"
-          />
-        </section>
-
-        <section className="rounded-xl border border-border bg-card p-5 sm:p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <MessageSquare className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <h2 className="font-semibold">Support messages</h2>
-              <p className="text-sm text-muted-foreground">
-                Send a simple note to Mountline about this project.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3 mb-5">
-            {payload.supportMessages.length > 0 ? (
-              payload.supportMessages.map((item) => {
-                const ownMessage =
-                  item.sender_type === "client" &&
-                  item.is_own
-                const teamMessage = item.sender_type === "team"
-
-                return (
-                  <div
-                    key={item.id}
-                    className={`flex ${ownMessage ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[88%] rounded-2xl border p-4 ${
-                        teamMessage
-                          ? "border-blue-500/25 bg-blue-500/10"
-                          : ownMessage
-                            ? "border-foreground/20 bg-foreground text-background"
-                            : "border-border bg-background"
-                      }`}
-                    >
-                      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-                        <p className={`text-sm font-medium ${ownMessage ? "text-background" : "text-foreground"}`}>
-                          {getMessageLabel(item)}
-                        </p>
-                        <p className={`text-xs ${ownMessage ? "text-background/70" : "text-muted-foreground"}`}>
-                          {formatDateTime(item.created_at)}
-                        </p>
-                      </div>
-                      <p className={`whitespace-pre-wrap text-sm leading-relaxed ${ownMessage ? "text-background/85" : "text-muted-foreground"}`}>
-                        {item.message}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  No support messages yet.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <form onSubmit={handleSendMessage} className="space-y-3">
-            <textarea
-              value={message}
-              onChange={(e) => {
-                setMessage(e.target.value)
-                if (messageState !== "sending") {
-                  setMessageState("idle")
-                  setMessageError(null)
-                }
-              }}
-              rows={4}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-              placeholder="Write a project question or support request..."
-            />
-            {messageState === "error" && messageError && (
-              <p className="text-sm text-red-400">{messageError}</p>
-            )}
-            {messageState === "sent" && (
-              <p className="text-sm text-green-400">Message saved. This does not confirm email or notification delivery.</p>
-            )}
-            <button
-              type="submit"
-              disabled={messageState === "sending" || !message.trim()}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:bg-foreground/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-            >
-              {messageState === "sending" ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-              Send message
-            </button>
-          </form>
-        </section>
-
-        <footer className="pt-2 text-center">
-          <p className="text-xs text-muted-foreground">
-            Powered by Mountline Studio
-          </p>
-        </footer>
-      </main>
-    </div>
+    <PortalView
+      payload={payload}
+      displayName={user?.firstName || payload.viewer.email || "Client"}
+      message={message}
+      messageState={messageState}
+      messageError={messageError}
+      onMessageChange={(value) => {
+        setMessage(value)
+        if (messageState !== "sending") {
+          setMessageState("idle")
+          setMessageError(null)
+        }
+      }}
+      onSubmit={handleSendMessage}
+    />
   )
 }
 
-function PaymentPanel({ project }: { project: PortalProject }) {
-  const methods = Array.isArray(project.accepted_payment_methods)
-    ? project.accepted_payment_methods
-    : []
-  const manualMethods = methods.filter((method) => method !== "stripe_card")
-  const hasCardPayment = methods.includes("stripe_card") && Boolean(project.payment_link)
-  const hasManualPayment = manualMethods.length > 0
-  const amount = formatMoney(project.invoice_amount)
-
-  if (project.receipt_summary.fully_paid) {
-    return (
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-300 ring-1 ring-green-500/20">
-          <CheckCircle2 className="h-4 w-4" />
-          Verified receipts cover the invoice
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {project.invoice_label || "This project invoice"} is supported by recorded receipt evidence.
-        </p>
-      </div>
-    )
-  }
-
-  if (project.receipt_summary.totals.length > 0) {
-    return (
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-300 ring-1 ring-blue-500/20">
-          <CheckCircle2 className="h-4 w-4" />
-          {project.receipt_summary.partially_paid ? "Partial receipt recorded" : "Receipt recorded"}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {project.receipt_summary.totals.map((total) => formatMoneyMinor(total.amount_minor, total.currency)).join(" · ")}
-        </p>
-      </div>
-    )
-  }
-
-  if (project.billing_state === "legacy_unverified") {
-    return <p className="text-sm text-muted-foreground">A legacy payment status needs receipt reconciliation before it can be shown as paid.</p>
-  }
-
-  if (project.billing_state === "waived") {
-    return <p className="text-sm text-muted-foreground">No payment due right now.</p>
-  }
-
-  if (project.billing_state === "not_sent" && !hasCardPayment && !hasManualPayment && !amount) {
-    return <p className="text-sm text-muted-foreground">No payment due right now.</p>
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="rounded-lg border border-border bg-background p-4">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">
-          {project.billing_state === "pending" ? "Payment pending" : "Payment"}
-        </p>
-        <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <p className="font-medium">{project.invoice_label || "Project invoice"}</p>
-          {amount && <p className="text-2xl font-semibold tracking-tight">{amount}</p>}
-        </div>
-      </div>
-
-      {hasCardPayment && (
-        <a
-          href={project.payment_link!}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:bg-foreground/90 transition-colors"
-        >
-          Pay by card
-          <ArrowRight className="w-4 h-4" />
-        </a>
-      )}
-
-      {hasManualPayment && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Manual payment methods</p>
-          <div className="flex flex-wrap gap-2">
-            {manualMethods.map((method) => (
-              <span
-                key={method}
-                className="rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground"
-              >
-                {getPaymentMethodLabel(method)}
-              </span>
-            ))}
-          </div>
-          {project.manual_payment_instructions && (
-            <p className="whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">
-              {project.manual_payment_instructions}
-            </p>
-          )}
-        </div>
-      )}
-
-      {!hasCardPayment && !hasManualPayment && (
-        <p className="text-sm text-muted-foreground">No payment due right now.</p>
-      )}
-    </div>
-  )
-}
-
-function PortalState({
-  icon,
-  title,
-  body,
-}: {
-  icon: ReactNode
-  title: string
-  body?: string
-}) {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md text-center space-y-5">
-        <NorthlineLogo size="md" showWordmark className="justify-center" />
-        <div className="mx-auto w-12 h-12 rounded-full border border-border bg-card flex items-center justify-center text-muted-foreground">
-          {icon}
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          {body && <p className="text-sm text-muted-foreground mt-2">{body}</p>}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function StatusBadge({ status }: { status: ProjectStatus }) {
-  return (
-    <div>
-      <p className="text-xs text-muted-foreground mb-1">Current status</p>
-      <span className="inline-flex rounded-full bg-blue-500/10 px-3 py-1 text-sm font-medium capitalize text-blue-300 ring-1 ring-blue-500/20">
-        {status}
-      </span>
-    </div>
-  )
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-t border-border pt-3">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium text-right">{value}</span>
-    </div>
-  )
-}
-
-function ProjectLinkCard({
-  icon,
-  title,
-  href,
-  emptyText,
-}: {
-  icon: ReactNode
-  title: string
-  href: string | null
-  emptyText: string
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center gap-3 mb-3 text-muted-foreground">
-        {icon}
-        <h2 className="font-semibold text-foreground">{title}</h2>
-      </div>
-      {href ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline underline-offset-4"
-        >
-          Open link
-          <ExternalLink className="w-4 h-4" />
-        </a>
-      ) : (
-        <p className="text-sm text-muted-foreground">{emptyText}</p>
-      )}
-    </div>
-  )
-}

@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/ProfileHeaderView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Update profile",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 93
+        }
+      }
+    ]
+  },
+  "version": 1
+}

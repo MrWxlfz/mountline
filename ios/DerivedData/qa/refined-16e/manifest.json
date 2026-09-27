@@ -1,0 +1,53 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "72E9AAB6-572D-4DFC-8CF7-3A0E7C978BF5",
+        "deviceName" : "iPhone 16e",
+        "exportedFileName" : "30342DD4-D678-4947-822E-00606C3F132B.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Settings_0_4792CB79-BE4D-4F40-9A7F-FF08929380F5.png",
+        "timestamp" : 1790041280.942
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "72E9AAB6-572D-4DFC-8CF7-3A0E7C978BF5",
+        "deviceName" : "iPhone 16e",
+        "exportedFileName" : "E2BE3DDD-F75D-48C5-B4BF-237D54450D08.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Support_0_34075469-B355-4E32-AD4D-4C30F58ACAF4.png",
+        "timestamp" : 1790041278.065
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "72E9AAB6-572D-4DFC-8CF7-3A0E7C978BF5",
+        "deviceName" : "iPhone 16e",
+        "exportedFileName" : "6EAE89BF-3E90-4D6C-A5FD-ED2EFF4116A2.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Calls_0_F81190BB-0096-4D3C-89AE-31CE54BBF3F3.png",
+        "timestamp" : 1790041275.149
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "72E9AAB6-572D-4DFC-8CF7-3A0E7C978BF5",
+        "deviceName" : "iPhone 16e",
+        "exportedFileName" : "156E6560-41A0-4813-9D4C-22C3B44BBB96.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Projects_0_B6082BE2-731D-4E7F-944D-53861AD46F84.png",
+        "timestamp" : 1790041272.205
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "72E9AAB6-572D-4DFC-8CF7-3A0E7C978BF5",
+        "deviceName" : "iPhone 16e",
+        "exportedFileName" : "811EEA15-2801-4BE8-AAF8-834B7A17DCA9.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Home_0_65040971-4AA0-4C7C-B4AB-C7E237B79A64.png",
+        "timestamp" : 1790041269.316
+      }
+    ],
+    "testIdentifier" : "MountlineUITests/testLargeDynamicTypeNavigation()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mountline/MountlineUITests/MountlineUITests/testLargeDynamicTypeNavigation"
+  }
+]

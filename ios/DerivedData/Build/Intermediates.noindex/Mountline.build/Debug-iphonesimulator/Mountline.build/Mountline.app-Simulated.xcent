@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>application-identifier</key>
+	<string>24F6HC25H2.dev.mountline.ios</string>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>webcredentials:clerk.mountline.dev</string>
+	</array>
+</dict>
+</plist>

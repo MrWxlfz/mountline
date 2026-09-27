@@ -1,0 +1,32 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Common/TextDivider.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "or",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Or, sign in with another method",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Or, sign in with another method. This is some really long text.",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 34
+        }
+      }
+    ]
+  },
+  "version": 1
+}

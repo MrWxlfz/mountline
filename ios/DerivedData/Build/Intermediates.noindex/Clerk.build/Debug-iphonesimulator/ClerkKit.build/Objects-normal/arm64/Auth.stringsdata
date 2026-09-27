@@ -1,0 +1,80 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Core/Auth.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Email address is required.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 134
+        }
+      },
+      {
+        "comment": "",
+        "key": "Redirect URL is missing or invalid. Unable to start external authentication flow.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 457
+        }
+      },
+      {
+        "comment": "",
+        "key": "Redirect URL is missing or invalid. Unable to start external authentication flow.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 558
+        }
+      },
+      {
+        "comment": "",
+        "key": "Magic link callback does not match the pending flow.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 759
+        }
+      },
+      {
+        "comment": "",
+        "key": "No pending magic link flow was found.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 755
+        }
+      },
+      {
+        "comment": "",
+        "key": "Magic link callback is missing approval_token.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 751
+        }
+      },
+      {
+        "comment": "",
+        "key": "Magic link callback is missing flow_id.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 747
+        }
+      },
+      {
+        "comment": "",
+        "key": "Magic link callback returned a sign-up for a sign-in flow.",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 806
+        }
+      },
+      {
+        "comment": "",
+        "key": "Magic link callback returned a ticket for a sign-up flow.",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 828
+        }
+      }
+    ]
+  },
+  "version": 1
+}

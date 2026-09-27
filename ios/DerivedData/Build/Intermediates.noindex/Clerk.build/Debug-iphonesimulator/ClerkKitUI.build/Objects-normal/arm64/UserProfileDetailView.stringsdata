@@ -1,0 +1,64 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserProfile/UserProfileDetailView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Add email address",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 89
+        }
+      },
+      {
+        "comment": "",
+        "key": "EMAIL ADDRESSES",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 97
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add phone number",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 109
+        }
+      },
+      {
+        "comment": "",
+        "key": "PHONE NUMBERS",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 116
+        }
+      },
+      {
+        "comment": "",
+        "key": "Connect account",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 128
+        }
+      },
+      {
+        "comment": "",
+        "key": "CONNECTED ACCOUNTS",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 135
+        }
+      },
+      {
+        "comment": "",
+        "key": "Manage account",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 149
+        }
+      }
+    ]
+  },
+  "version": 1
+}

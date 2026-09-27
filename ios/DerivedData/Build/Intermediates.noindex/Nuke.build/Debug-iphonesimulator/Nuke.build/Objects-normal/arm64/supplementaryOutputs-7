@@ -1,0 +1,37 @@
+{
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Pipeline/ImagePipeline.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipeline.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipeline.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipeline.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipeline.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipeline.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Pipeline/ImagePipelineActor.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipelineActor.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipelineActor.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipelineActor.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipelineActor.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePipelineActor.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Prefetching/ImagePrefetcher.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePrefetcher.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePrefetcher.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePrefetcher.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePrefetcher.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImagePrefetcher.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Processing/ImageDecompression.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecompression.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecompression.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecompression.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecompression.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageDecompression.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/Nuke/Processing/ImageProcessing.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageProcessing.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageProcessing.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageProcessing.dia",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageProcessing.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/Nuke.build/Objects-normal/arm64/ImageProcessing.swiftdeps"
+  }
+}

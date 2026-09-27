@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key></key>
+	<string></string>
+	<key> </key>
+	<string> </string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this connected account.</key>
+	<string>Połączone konto %@ zostanie usunięte z tego konta. Nie będzie już można logować się przy użyciu tego połączonego konta.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this email address.</key>
+	<string>Adres e-mail %@ zostanie usunięty z tego konta. Nie będzie już można logować się przy użyciu tego adresu e-mail.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this passkey.</key>
+	<string>Klucz dostępu %@ zostanie usunięty z tego konta. Nie będzie już można logować się przy użyciu tego klucza dostępu.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this phone number.</key>
+	<string>%@ zostanie usunięty z tego konta. Nie będzie już można logować się przy użyciu tego numeru telefonu.</string>
+	<key>%@ will no longer be receiving verification codes when signing in.</key>
+	<string>%@ nie będzie już otrzymywać kodów weryfikacyjnych podczas logowania.</string>
+	<key>%@ · Joined %@</key>
+	<string>%@ · Data dołączenia: %@</string>
+	<key>A text message containing a verification code will be sent to this phone number. Message and data rates may apply.</key>
+	<string>Na ten numer telefonu zostanie wysłana wiadomość tekstowa z kodem weryfikacyjnym. Mogą obowiązywać opłaty za wiadomości i transmisję danych.</string>
+	<key>A verification code was sent to %@. Enter the code to continue.</key>
+	<string>Kod weryfikacyjny wysłano do %@. Wprowadź kod, aby kontynuować.</string>
+	<key>ACTIVE DEVICES</key>
+	<string>AKTYWNE URZĄDZENIA</string>
+	<key>Accept request</key>
+	<string>Zaakceptuj prośbę</string>
+	<key>Account</key>
+	<string>Konto</string>
+	<key>Add SMS code verification</key>
+	<string>Dodaj weryfikację kodem SMS</string>
+	<key>Add a passkey</key>
+	<string>Dodaj klucz dostępu</string>
+	<key>Add account</key>
+	<string>Dodaj konto</string>
+	<key>Add authenticator application</key>
+	<string>Dodaj aplikację uwierzytelniającą</string>
+	<key>Add domain</key>
+	<string>Dodaj domenę</string>
+	<key>Add email address</key>
+	<string>Dodaj adres e-mail</string>
+	<key>Add password</key>
+	<string>Dodaj hasło</string>
+	<key>Add phone number</key>
+	<string>Dodaj numer telefonu</string>
+	<key>Add the domain to verify. Users with email addresses at this domain can join the organization automatically or request to join.</key>
+	<string>Dodaj domenę do weryfikacji. Użytkownicy z adresami e-mail w tej domenie mogą automatycznie dołączyć do organizacji lub poprosić o dołączenie.</string>
+	<key>Add two-step verification</key>
+	<string>Dodaj weryfikację dwuetapową</string>
+	<key>Admin</key>
+	<string>Administrator</string>
+	<key>Allow</key>
+	<string>Zezwól</string>
+	<key>Allow %@</key>
+	<string>Zezwól na %@</string>
+	<key>Allow users to join the organization automatically or request to join based on a verified email domain.</key>
+	<string>Zezwalaj użytkownikom na automatyczne dołączanie do organizacji lub proszenie o dołączenie na podstawie zweryfikowanej domeny e-mail.</string>
+	<key>Alternatively, if your authenticator supports TOTP URIs, you can also copy the full URI.</key>
+	<string>Jeśli aplikacja uwierzytelniająca obsługuje identyfikatory URI TOTP, możesz też skopiować pełny URI.</string>
+	<key>Application</key>
+	<string>Aplikacja</string>
+	<key>Are you sure you want to delete this organization?</key>
+	<string>Czy na pewno chcesz usunąć tę organizację?</string>
+	<key>Are you sure you want to delete your account? This action is permanent and irreversible.</key>
+	<string>Czy na pewno chcesz usunąć swoje konto? To działanie jest trwałe i nieodwracalne.</string>
+	<key>Are you sure you want to leave this organization? You will lose access to this organization and its applications.</key>
+	<string>Czy na pewno chcesz opuścić tę organizację? Utracisz dostęp do tej organizacji i jej aplikacji.</string>
+	<key>Authenticator app</key>
+	<string>Aplikacja uwierzytelniająca</string>
+	<key>Authenticator application</key>
+	<string>Aplikacja uwierzytelniająca</string>
+	<key>Authenticator application verification enabled</key>
+	<string>Weryfikacja przez aplikację uwierzytelniającą jest włączona</string>
+	<key>Automatic invitations</key>
+	<string>Automatyczne zaproszenia</string>
+	<key>Automatic suggestions</key>
+	<string>Automatyczne sugestie</string>
+	<key>Back</key>
+	<string>Wstecz</string>
+	<key>Backup code</key>
+	<string>Kod zapasowy</string>
+	<key>Backup codes</key>
+	<string>Kody zapasowe</string>
+	<key>Backup codes are now enabled. You can use one of these to sign in to your account, if you lose access to your authentication device. Each code can only be used once.</key>
+	<string>Kody zapasowe są teraz włączone. Możesz użyć jednego z nich, aby zalogować się na konto, jeśli utracisz dostęp do urządzenia uwierzytelniającego. Każdego kodu można użyć tylko raz.</string>
+	<key>CONNECTED ACCOUNTS</key>
+	<string>POŁĄCZONE KONTA</string>
+	<key>Cancel</key>
+	<string>Anuluj</string>
+	<key>Change logo</key>
+	<string>Zmień logo</string>
+	<key>Change password</key>
+	<string>Zmień hasło</string>
+	<key>Change role</key>
+	<string>Zmień rolę</string>
+	<key>Check your email</key>
+	<string>Sprawdź e-mail</string>
+	<key>Check your phone</key>
+	<string>Sprawdź telefon</string>
+	<key>Choose a username.</key>
+	<string>Wybierz nazwę użytkownika.</string>
+	<key>Choose an account</key>
+	<string>Wybierz konto</string>
+	<key>Choose an organization</key>
+	<string>Wybierz organizację</string>
+	<key>Choose file</key>
+	<string>Wybierz plik</string>
+	<key>Choose from photo library</key>
+	<string>Wybierz z biblioteki zdjęć</string>
+	<key>Choose how users from this domain can join the organization.</key>
+	<string>Wybierz, jak użytkownicy z tej domeny mogą dołączać do organizacji.</string>
+	<key>Choose how you'd like to receive your two-step verification code.</key>
+	<string>Wybierz, jak chcesz otrzymywać kod weryfikacji dwuetapowej.</string>
+	<key>Choose the phone number you want to use for SMS code two-step verification</key>
+	<string>Wybierz numer telefonu, którego chcesz używać do weryfikacji dwuetapowej kodem SMS</string>
+	<key>Choose which method you prefer to protect your account with an extra layer of security</key>
+	<string>Wybierz preferowaną metodę ochrony konta dodatkową warstwą zabezpieczeń</string>
+	<key>Choose your password</key>
+	<string>Wybierz hasło</string>
+	<key>Choose your username</key>
+	<string>Wybierz nazwę użytkownika</string>
+	<key>Close</key>
+	<string>Zamknij</string>
+	<key>Complete your profile</key>
+	<string>Uzupełnij profil</string>
+	<key>Confirm password</key>
+	<string>Potwierdź hasło</string>
+	<key>Connect account</key>
+	<string>Połącz konto</string>
+	<key>Contact your organization admin for an invitation.</key>
+	<string>Skontaktuj się z administratorem organizacji, aby otrzymać zaproszenie.</string>
+	<key>Continue</key>
+	<string>Kontynuuj</string>
+	<key>Continue to %@</key>
+	<string>Kontynuuj do %@</string>
+	<key>Continue with %@</key>
+	<string>Kontynuuj z %@</string>
+	<key>Copy to clipboard</key>
+	<string>Kopiuj do schowka</string>
+	<key>Create a unique password.</key>
+	<string>Utwórz unikalne hasło.</string>
+	<key>Create organization</key>
+	<string>Utwórz organizację</string>
+	<key>Create your account</key>
+	<string>Utwórz konto</string>
+	<key>Created: %@</key>
+	<string>Utworzono: %@</string>
+	<key>Current password</key>
+	<string>Obecne hasło</string>
+	<key>DELETE</key>
+	<string>USUŃ</string>
+	<key>DELETE ACCOUNT</key>
+	<string>USUŃ KONTO</string>
+	<key>Default</key>
+	<string>Domyślne</string>
+	<key>Delete</key>
+	<string>Usuń</string>
+	<key>Delete account</key>
+	<string>Usuń konto</string>
+	<key>Delete organization</key>
+	<string>Usuń organizację</string>
+	<key>Delete pending invitations and suggestions</key>
+	<string>Usuń oczekujące zaproszenia i sugestie</string>
+	<key>Desktop device</key>
+	<string>Urządzenie stacjonarne</string>
+	<key>Development mode</key>
+	<string>Tryb deweloperski</string>
+	<key>Didn't receive a code?</key>
+	<string>Nie otrzymałeś kodu?</string>
+	<key>Didn't receive an email?</key>
+	<string>Nie otrzymano wiadomości e-mail?</string>
+	<key>Domain</key>
+	<string>Domena</string>
+	<key>Done</key>
+	<string>Gotowe</string>
+	<key>Download</key>
+	<string>Pobierz</string>
+	<key>EMAIL ADDRESSES</key>
+	<string>ADRESY E-MAIL</string>
+	<key>Edit profile</key>
+	<string>Edytuj profil</string>
+	<key>Email address</key>
+	<string>Adres e-mail</string>
+	<key>Email code to %@</key>
+	<string>Kod e-mail do %@</string>
+	<key>Email link to %@</key>
+	<string>Wyślij link e-mailem do %@</string>
+	<key>Email support</key>
+	<string>Napisz do pomocy</string>
+	<key>Enable %@ for faster access</key>
+	<string>Włącz %@, aby szybciej uzyskać dostęp</string>
+	<key>Enable %@ for faster access to %@</key>
+	<string>Włącz %@, aby szybciej uzyskać dostęp do %@</string>
+	<key>Enter a backup code</key>
+	<string>Wprowadź kod zapasowy</string>
+	<key>Enter a slug using lowercase letters, numbers, and hyphens.</key>
+	<string>Wprowadź slug, używając małych liter, cyfr i myślników.</string>
+	<key>Enter email addresses</key>
+	<string>Wprowadź adresy e-mail</string>
+	<key>Enter or paste one or more email addresses, separated by spaces or commas.</key>
+	<string>Wprowadź lub wklej jeden lub więcej adresów e-mail, oddzielonych spacjami lub przecinkami.</string>
+	<key>Enter password</key>
+	<string>Wprowadź hasło</string>
+	<key>Enter the email address you'd like to use.</key>
+	<string>Wprowadź adres e-mail, którego chcesz użyć.</string>
+	<key>Enter the password for your account</key>
+	<string>Wprowadź hasło do swojego konta</string>
+	<key>Enter the phone number you'd like to use.</key>
+	<string>Wprowadź numer telefonu, którego chcesz użyć.</string>
+	<key>Enter the verification code from authenticator application</key>
+	<string>Wprowadź kod weryfikacyjny z aplikacji uwierzytelniającej</string>
+	<key>Enter the verification code from your authenticator app.</key>
+	<string>Wprowadź kod weryfikacyjny z aplikacji uwierzytelniającej.</string>
+	<key>Enter the verification code sent to</key>
+	<string>Wprowadź kod weryfikacyjny wysłany do</string>
+	<key>Enter the verification code sent to %@</key>
+	<string>Wprowadź kod weryfikacyjny wysłany do %@</string>
+	<key>Enter your current password to set a new one.</key>
+	<string>Wprowadź obecne hasło, aby ustawić nowe.</string>
+	<key>Enter your email</key>
+	<string>Wprowadź adres e-mail</string>
+	<key>Enter your email or username</key>
+	<string>Wprowadź adres e-mail lub nazwę użytkownika</string>
+	<key>Enter your organization details to continue</key>
+	<string>Wprowadź dane organizacji, aby kontynuować</string>
+	<key>Enter your password</key>
+	<string>Wprowadź swoje hasło</string>
+	<key>Enter your phone number</key>
+	<string>Wprowadź numer telefonu</string>
+	<key>Enter your username</key>
+	<string>Wprowadź nazwę użytkownika</string>
+	<key>Facing issues? You can use any of these methods to sign in.</key>
+	<string>Masz problemy? Możesz zalogować się dowolną z tych metod.</string>
+	<key>First name</key>
+	<string>Imię</string>
+	<key>First, enter the code sent to your email address</key>
+	<string>Najpierw wprowadź kod wysłany na Twój adres e-mail</string>
+	<key>First, enter the code sent to your phone</key>
+	<string>Najpierw wprowadź kod wysłany na Twój telefon</string>
+	<key>Forgot password?</key>
+	<string>Nie pamiętasz hasła?</string>
+	<key>Get help</key>
+	<string>Uzyskaj pomoc</string>
+	<key>Get started by inviting someone to join your organization</key>
+	<string>Zacznij od zaproszenia kogoś do organizacji</string>
+	<key>Go back</key>
+	<string>Wróć</string>
+	<key>Hide password</key>
+	<string>Ukryj hasło</string>
+	<key>I agree to the [Privacy Policy](LegalConsentView://privacy)</key>
+	<string>Akceptuję [Politykę prywatności](LegalConsentView://privacy)</string>
+	<key>I agree to the [Terms of Service](LegalConsentView://terms)</key>
+	<string>Akceptuję [Regulamin](LegalConsentView://terms)</string>
+	<key>I agree to the [Terms of Service](LegalConsentView://terms) and [Privacy Policy](LegalConsentView://privacy)</key>
+	<string>Akceptuję [Regulamin](LegalConsentView://terms) i [Politykę prywatności](LegalConsentView://privacy)</string>
+	<key>If you have trouble completing required account setup, email us and we will help you finish as soon as possible.</key>
+	<string>Jeśli masz problem z ukończeniem wymaganej konfiguracji konta, napisz do nas, a pomożemy Ci ją dokończyć tak szybko, jak to możliwe.</string>
+	<key>If you have trouble creating your account, email us and we will work with you to complete your registration as soon as possible.</key>
+	<string>Jeśli masz problem z utworzeniem konta, napisz do nas, a pomożemy dokończyć rejestrację tak szybko, jak to możliwe.</string>
+	<key>If you have trouble signing into your account, email us and we will work with you to restore access as soon as possible.</key>
+	<string>Jeśli masz problem z zalogowaniem się na konto, napisz do nas, a pomożemy przywrócić dostęp tak szybko, jak to możliwe.</string>
+	<key>International</key>
+	<string>Międzynarodowe</string>
+	<key>Invitations</key>
+	<string>Zaproszenia</string>
+	<key>Invite</key>
+	<string>Zaproś</string>
+	<key>Invite new members</key>
+	<string>Zaproś nowych członków</string>
+	<key>Invited %@</key>
+	<string>Data zaproszenia: %@</string>
+	<key>It is recommended to sign out of all other devices which may have used your old password.</key>
+	<string>Zaleca się wylogowanie ze wszystkich innych urządzeń, które mogły używać starego hasła.</string>
+	<key>Join</key>
+	<string>Dołącz</string>
+	<key>Join an existing organization</key>
+	<string>Dołącz do istniejącej organizacji</string>
+	<key>Join an existing organization or create a new one</key>
+	<string>Dołącz do istniejącej organizacji lub utwórz nową</string>
+	<key>Joined %@</key>
+	<string>Data dołączenia: %@</string>
+	<key>Last name</key>
+	<string>Nazwisko</string>
+	<key>Last used</key>
+	<string>Ostatnio używany</string>
+	<key>Last used: %@</key>
+	<string>Ostatnio użyto: %@</string>
+	<key>Leave organization</key>
+	<string>Opuść organizację</string>
+	<key>Link another login option to your account. You’ll need to verify it before it can be used.</key>
+	<string>Połącz z kontem inną opcję logowania. Trzeba ją zweryfikować, zanim będzie można jej używać.</string>
+	<key>Linked</key>
+	<string>Połączone</string>
+	<key>MFA reserved</key>
+	<string>MFA zarezerwowane</string>
+	<key>Make sure Time-based or One-time passwords is enabled, then finish linking your account.</key>
+	<string>Upewnij się, że hasła czasowe lub jednorazowe są włączone, a następnie dokończ łączenie konta.</string>
+	<key>Manage</key>
+	<string>Zarządzaj</string>
+	<key>Manage account</key>
+	<string>Zarządzaj kontem</string>
+	<key>Manual setup key</key>
+	<string>Klucz konfiguracji ręcznej</string>
+	<key>Member</key>
+	<string>Członek</string>
+	<key>Members</key>
+	<string>Członkowie</string>
+	<key>Mobile device</key>
+	<string>Urządzenie mobilne</string>
+	<key>Name of passkey</key>
+	<string>Nazwa klucza dostępu</string>
+	<key>New password</key>
+	<string>Nowe hasło</string>
+	<key>Next</key>
+	<string>Dalej</string>
+	<key>No automatic enrollment</key>
+	<string>Brak automatycznego zapisu</string>
+	<key>No email app is available on this device.</key>
+	<string>Na tym urządzeniu nie jest dostępna żadna aplikacja e-mail.</string>
+	<key>No invitations sent</key>
+	<string>Nie wysłano zaproszeń</string>
+	<key>No members found</key>
+	<string>Nie znaleziono członków</string>
+	<key>No members match your search. Try a different name or email address.</key>
+	<string>Żaden członek nie pasuje do wyszukiwania. Spróbuj użyć innego imienia, nazwiska lub adresu e-mail.</string>
+	<key>No membership requests</key>
+	<string>Brak próśb o członkostwo</string>
+	<key>No roles available</key>
+	<string>Brak dostępnych ról</string>
+	<key>No verified domains</key>
+	<string>Brak zweryfikowanych domen</string>
+	<key>Not now</key>
+	<string>Nie teraz</string>
+	<key>Open account</key>
+	<string>Otwórz konto</string>
+	<key>Open email app</key>
+	<string>Otwórz aplikację e-mail</string>
+	<key>Or, sign in with another method</key>
+	<string>Lub zaloguj się inną metodą</string>
+	<key>Organization</key>
+	<string>Organizacja</string>
+	<key>Organization name</key>
+	<string>Nazwa organizacji</string>
+	<key>PASSKEYS</key>
+	<string>KLUCZE DOSTĘPU</string>
+	<key>PASSWORD</key>
+	<string>HASŁO</string>
+	<key>PHONE NUMBERS</key>
+	<string>NUMERY TELEFONÓW</string>
+	<key>Password</key>
+	<string>Hasło</string>
+	<key>Passwords don't match.</key>
+	<string>Hasła nie pasują.</string>
+	<key>Pending approval</key>
+	<string>Oczekuje na zatwierdzenie</string>
+	<key>Personal account</key>
+	<string>Konto osobiste</string>
+	<key>Phone number</key>
+	<string>Numer telefonu</string>
+	<key>Photo library</key>
+	<string>Biblioteka zdjęć</string>
+	<key>Primary</key>
+	<string>Główne</string>
+	<key>Profile details</key>
+	<string>Dane profilu</string>
+	<key>Reconnect</key>
+	<string>Połącz ponownie</string>
+	<key>Regenerate</key>
+	<string>Wygeneruj ponownie</string>
+	<key>Reject request</key>
+	<string>Odrzuć prośbę</string>
+	<key>Remove</key>
+	<string>Usuń</string>
+	<key>Remove connected account</key>
+	<string>Usuń połączone konto</string>
+	<key>Remove connection</key>
+	<string>Usuń połączenie</string>
+	<key>Remove current logo</key>
+	<string>Usuń obecne logo</string>
+	<key>Remove domain</key>
+	<string>Usuń domenę</string>
+	<key>Remove email</key>
+	<string>Usuń e-mail</string>
+	<key>Remove email address</key>
+	<string>Usuń adres e-mail</string>
+	<key>Remove member</key>
+	<string>Usuń członka</string>
+	<key>Remove passkey</key>
+	<string>Usuń klucz dostępu</string>
+	<key>Remove phone</key>
+	<string>Usuń telefon</string>
+	<key>Remove phone number</key>
+	<string>Usuń numer telefonu</string>
+	<key>Remove photo</key>
+	<string>Usuń zdjęcie</string>
+	<key>Remove two-step verification</key>
+	<string>Usuń weryfikację dwuetapową</string>
+	<key>Rename</key>
+	<string>Zmień nazwę</string>
+	<key>Rename passkey</key>
+	<string>Zmień nazwę klucza dostępu</string>
+	<key>Request to join</key>
+	<string>Poproś o dołączenie</string>
+	<key>Requested %@</key>
+	<string>Data wysłania prośby: %@</string>
+	<key>Requests</key>
+	<string>Prośby</string>
+	<key>Resend</key>
+	<string>Wyślij ponownie</string>
+	<key>Resend (%lld)</key>
+	<string>Wyślij ponownie (%lld)</string>
+	<key>Reset password</key>
+	<string>Zresetuj hasło</string>
+	<key>Reset your password</key>
+	<string>Zresetuj hasło</string>
+	<key>Revoke invitation</key>
+	<string>Odwołaj zaproszenie</string>
+	<key>Role</key>
+	<string>Rola</string>
+	<key>SMS code</key>
+	<string>Kod SMS</string>
+	<key>SMS code verification enabled</key>
+	<string>Weryfikacja kodem SMS jest włączona</string>
+	<key>Save</key>
+	<string>Zapisz</string>
+	<key>Save these codes somewhere safe. If you lose access to your authentication device, you can use a backup code to sign in.</key>
+	<string>Zapisz te kody w bezpiecznym miejscu. Jeśli utracisz dostęp do urządzenia uwierzytelniającego, możesz użyć kodu zapasowego, aby się zalogować.</string>
+	<key>Search</key>
+	<string>Szukaj</string>
+	<key>Secured by</key>
+	<string>Zabezpieczone przez</string>
+	<key>Security</key>
+	<string>Bezpieczeństwo</string>
+	<key>Select an existing phone number to register for SMS code two-step verification or add a new one.</key>
+	<string>Wybierz istniejący numer telefonu, aby zarejestrować go do dwuetapowej weryfikacji kodem SMS, albo dodaj nowy.</string>
+	<key>Select organization</key>
+	<string>Wybierz organizację</string>
+	<key>Select the account with which you wish to continue.</key>
+	<string>Wybierz konto, z którym chcesz kontynuować.</string>
+	<key>Selected</key>
+	<string>Wybrano</string>
+	<key>Send SMS code to %@</key>
+	<string>Wyślij kod SMS do %@</string>
+	<key>Send invitations</key>
+	<string>Wyślij zaproszenia</string>
+	<key>Set as default</key>
+	<string>Ustaw jako domyślne</string>
+	<key>Set as primary</key>
+	<string>Ustaw jako główne</string>
+	<key>Set new password</key>
+	<string>Ustaw nowe hasło</string>
+	<key>Set up a new sign-in method in your authenticator and enter the Key provided below.
+
+Make sure Time-based or One-time passwords is enabled, then finish linking your account.</key>
+	<string>Skonfiguruj nową metodę logowania w aplikacji uwierzytelniającej i wprowadź podany niżej klucz.
+
+Upewnij się, że hasła czasowe lub jednorazowe są włączone, a następnie dokończ łączenie konta.</string>
+	<key>Set up a new sign-in method in your authenticator app using the manual setup key below to link it to your account.</key>
+	<string>Skonfiguruj nową metodę logowania w aplikacji uwierzytelniającej, używając poniższego klucza konfiguracji ręcznej, aby połączyć ją z kontem.</string>
+	<key>Set up two-step verification</key>
+	<string>Skonfiguruj weryfikację dwuetapową</string>
+	<key>Show password</key>
+	<string>Pokaż hasło</string>
+	<key>Sign in with %@</key>
+	<string>Zaloguj się za pomocą %@</string>
+	<key>Sign in with your passkey</key>
+	<string>Zaloguj się kluczem dostępu</string>
+	<key>Sign in with your password</key>
+	<string>Zaloguj się hasłem</string>
+	<key>Sign out</key>
+	<string>Wyloguj się</string>
+	<key>Sign out of all accounts</key>
+	<string>Wyloguj się ze wszystkich kont</string>
+	<key>Sign out of all other devices</key>
+	<string>Wyloguj się ze wszystkich innych urządzeń</string>
+	<key>Sign out of device</key>
+	<string>Wyloguj z urządzenia</string>
+	<key>Sign up</key>
+	<string>Zarejestruj się</string>
+	<key>Skip</key>
+	<string>Pomiń</string>
+	<key>Slug</key>
+	<string>Slug</string>
+	<key>Success</key>
+	<string>Sukces</string>
+	<key>Switch account</key>
+	<string>Przełącz konto</string>
+	<key>TWO-STEP VERIFICATION</key>
+	<string>WERYFIKACJA DWUETAPOWA</string>
+	<key>The app %@ uses %@ to sign you in.</key>
+	<string>Aplikacja %@ używa %@, aby Cię zalogować.</string>
+	<key>The domain %@ needs to be verified via email.</key>
+	<string>Domena %@ musi zostać zweryfikowana przez e-mail.</string>
+	<key>The email domain %@ will be removed.</key>
+	<string>Domena e-mail %@ zostanie usunięta.</string>
+	<key>There was an error loading the image from the photos library.</key>
+	<string>Wystąpił błąd podczas ładowania obrazu z biblioteki zdjęć.</string>
+	<key>There was an error loading the selected image file.</key>
+	<string>Wystąpił błąd podczas ładowania wybranego pliku obrazu.</string>
+	<key>This account has been disconnected.</key>
+	<string>To konto zostało odłączone.</string>
+	<key>This action is permanent and irreversible.</key>
+	<string>To działanie jest trwałe i nieodwracalne.</string>
+	<key>This device</key>
+	<string>To urządzenie</string>
+	<key>To continue, please enter the verification code generated by your authenticator app</key>
+	<string>Aby kontynuować, wprowadź kod weryfikacyjny wygenerowany przez aplikację uwierzytelniającą</string>
+	<key>Two-step verification</key>
+	<string>Weryfikacja dwuetapowa</string>
+	<key>Two-step verification is now enabled. When signing in, you will need to enter a verification code from this authenticator app as an additional step.
+
+Save these backup codes and store them somewhere safe. If you lose access to your authentication device, you can use backup codes to sign in.</key>
+	<string>Weryfikacja dwuetapowa jest teraz włączona. Podczas logowania trzeba będzie wprowadzić kod weryfikacyjny z tej aplikacji uwierzytelniającej jako dodatkowy krok.
+
+Zapisz te kody zapasowe i przechowuj je w bezpiecznym miejscu. Jeśli utracisz dostęp do urządzenia uwierzytelniającego, możesz użyć kodów zapasowych do zalogowania się.</string>
+	<key>Two-step verification setup</key>
+	<string>Konfiguracja weryfikacji dwuetapowej</string>
+	<key>Type "%@" below to continue.</key>
+	<string>Wpisz "%@" poniżej, aby kontynuować.</string>
+	<key>Type "DELETE" to continue</key>
+	<string>Wpisz "USUŃ", aby kontynuować</string>
+	<key>Unable to send invitations without an active organization.</key>
+	<string>Nie można wysłać zaproszeń bez aktywnej organizacji.</string>
+	<key>Unable to update organization without an active organization.</key>
+	<string>Nie można zaktualizować organizacji bez aktywnej organizacji.</string>
+	<key>Unknown code verification method. Please use another method.</key>
+	<string>Nieznana metoda weryfikacji kodu. Użyj innej metody.</string>
+	<key>Unknown device</key>
+	<string>Nieznane urządzenie</string>
+	<key>Unverified</key>
+	<string>Niezweryfikowane</string>
+	<key>Update %@</key>
+	<string>Zaktualizuj %@</string>
+	<key>Update password</key>
+	<string>Zaktualizuj hasło</string>
+	<key>Update profile</key>
+	<string>Zaktualizuj profil</string>
+	<key>Upload logo</key>
+	<string>Prześlij logo</string>
+	<key>Use %@ to sign in.</key>
+	<string>Użyj %@, aby się zalogować.</string>
+	<key>Use a backup code</key>
+	<string>Użyj kodu zapasowego</string>
+	<key>Use another method</key>
+	<string>Użyj innej metody</string>
+	<key>Use email address</key>
+	<string>Użyj adresu e-mail</string>
+	<key>Use email address or username</key>
+	<string>Użyj adresu e-mail lub nazwy użytkownika</string>
+	<key>Use phone number</key>
+	<string>Użyj numeru telefonu</string>
+	<key>Use username</key>
+	<string>Użyj nazwy użytkownika</string>
+	<key>Use your authenticator app</key>
+	<string>Użyj aplikacji uwierzytelniającej</string>
+	<key>Use your passkey</key>
+	<string>Użyj klucza dostępu</string>
+	<key>Username</key>
+	<string>Nazwa użytkownika</string>
+	<key>Users are automatically invited to join the organization when they sign up and can join anytime.</key>
+	<string>Użytkownicy są automatycznie zapraszani do organizacji podczas rejestracji i mogą dołączyć w dowolnym momencie.</string>
+	<key>Users can only be invited manually to the organization.</key>
+	<string>Użytkowników można zapraszać do organizacji tylko ręcznie.</string>
+	<key>Users receive a suggestion to request to join, but must be approved by an admin before they are able to join the organization.</key>
+	<string>Użytkownicy otrzymują sugestię, aby poprosić o dołączenie, ale zanim będą mogli dołączyć do organizacji, muszą zostać zatwierdzeni przez administratora.</string>
+	<key>Users who request to join your organization will appear here for review</key>
+	<string>Użytkownicy, którzy poproszą o dołączenie do organizacji, pojawią się tutaj do sprawdzenia</string>
+	<key>Users won't be able to join the organization automatically after this.</key>
+	<string>Po tym użytkownicy nie będą mogli automatycznie dołączać do organizacji.</string>
+	<key>Using your passkey confirms it's you. Your device may ask for your fingerprint, face or screen lock.</key>
+	<string>Użycie klucza dostępu potwierdza, że to Ty. Urządzenie może poprosić o odcisk palca, twarz lub blokadę ekranu.</string>
+	<key>Verification codes from this authenticator will no longer be required when signing in.</key>
+	<string>Kody weryfikacyjne z tej aplikacji uwierzytelniającej nie będą już wymagane podczas logowania.</string>
+	<key>Verification email address</key>
+	<string>Adres e-mail do weryfikacji</string>
+	<key>Verified domains</key>
+	<string>Zweryfikowane domeny</string>
+	<key>Verify</key>
+	<string>Zweryfikuj</string>
+	<key>Verify authenticator app</key>
+	<string>Zweryfikuj aplikację uwierzytelniającą</string>
+	<key>Verify domain</key>
+	<string>Zweryfikuj domenę</string>
+	<key>Verify email address</key>
+	<string>Zweryfikuj adres e-mail</string>
+	<key>Verify phone number</key>
+	<string>Zweryfikuj numer telefonu</string>
+	<key>Verify your phone number</key>
+	<string>Zweryfikuj swój numer telefonu</string>
+	<key>Verifying...</key>
+	<string>Weryfikowanie...</string>
+	<key>We are updating the available roles. Once that's done, you'll be able to invite members again.</key>
+	<string>Aktualizujemy dostępne role. Gdy skończymy, będzie można ponownie zapraszać członków.</string>
+	<key>We are updating the available roles. Once that's done, you'll be able to update roles again.</key>
+	<string>Aktualizujemy dostępne role. Gdy skończymy, będzie można ponownie aktualizować role.</string>
+	<key>Welcome! Please fill in the details to get started.</key>
+	<string>Witaj! Uzupełnij dane, aby rozpocząć.</string>
+	<key>Welcome! Sign in to continue</key>
+	<string>Witaj! Zaloguj się, aby kontynuować</string>
+	<key>When signing in, you will need to enter a verification code sent to this phone number as an additional step.
+
+Save these backup codes and store them somewhere safe. If you lose access to your authentication device, you can use backup codes to sign in.</key>
+	<string>Podczas logowania trzeba będzie wprowadzić kod weryfikacyjny wysłany na ten numer telefonu jako dodatkowy krok.
+
+Zapisz te kody zapasowe i przechowuj je w bezpiecznym miejscu. Jeśli utracisz dostęp do urządzenia uwierzytelniającego, możesz użyć kodów zapasowych do zalogowania się.</string>
+	<key>When you sign in, you'll be asked for a verification code sent to this phone number.</key>
+	<string>Podczas logowania poprosimy Cię o kod weryfikacyjny wysłany na ten numer telefonu.</string>
+	<key>When you sign in, you'll need to enter a verification code from this authenticator app.</key>
+	<string>Podczas logowania trzeba będzie wprowadzić kod weryfikacyjny z tej aplikacji uwierzytelniającej.</string>
+	<key>Whoops, something is wrong</key>
+	<string>Ups, coś jest nie tak</string>
+	<key>You</key>
+	<string>Ty</string>
+	<key>You are no longer a member of this organization. Please choose another one.</key>
+	<string>Nie jesteś już członkiem tej organizacji. Wybierz inną.</string>
+	<key>You are no longer a member of this organization. Please choose or create another one.</key>
+	<string>Nie jesteś już członkiem tej organizacji. Wybierz lub utwórz inną.</string>
+	<key>You can change the passkey name to make it easier to find.</key>
+	<string>Możesz zmienić nazwę klucza dostępu, aby łatwiej go znaleźć.</string>
+	<key>You must belong to an organization</key>
+	<string>Musisz należeć do organizacji</string>
+	<key>You'll need to verify this email address before it can be added to your account.</key>
+	<string>Musisz zweryfikować ten adres e-mail, zanim będzie można dodać go do konta.</string>
+	<key>You're signing in from a new device. We're asking for verification to keep your account secure.</key>
+	<string>Logujesz się z nowego urządzenia. Prosimy o weryfikację, aby chronić Twoje konto.</string>
+	<key>Your account requires a new password before you can continue</key>
+	<string>Konto wymaga ustawienia nowego hasła, zanim będzie można kontynuować</string>
+	<key>Your backup code is the one you got when setting up two-step verification.</key>
+	<string>Kod zapasowy to ten otrzymany podczas konfigurowania uwierzytelniania dwuetapowego.</string>
+	<key>or</key>
+	<string>lub</string>
+	<key>to continue</key>
+	<string>Aby kontynuować</string>
+	<key>to continue to %@</key>
+	<string>Aby kontynuować do %@</string>
+</dict>
+</plist>

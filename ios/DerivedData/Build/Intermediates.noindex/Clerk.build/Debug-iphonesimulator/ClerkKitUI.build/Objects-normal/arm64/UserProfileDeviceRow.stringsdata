@@ -1,0 +1,24 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserProfile/UserProfileDeviceRow.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "This device",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 35
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sign out of device",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 66
+        }
+      }
+    ]
+  },
+  "version": 1
+}

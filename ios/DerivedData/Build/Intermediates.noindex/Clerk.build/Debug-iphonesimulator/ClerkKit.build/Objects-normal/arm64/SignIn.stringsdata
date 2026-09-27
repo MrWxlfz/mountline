@@ -1,0 +1,80 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/Auth/SignIn/SignIn.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Redirect URI is missing. Unable to start email link sign-in.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 139
+        }
+      },
+      {
+        "comment": "",
+        "key": "Email link sign-in is not available for this sign-in.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 134
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unable to verify code for strategy '%@'.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 192
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unable to verify code because no first factor strategy is set.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 188
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unable to retrieve the Apple identity token.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 288
+        }
+      },
+      {
+        "comment": "",
+        "key": "Redirect URL is missing or invalid. Unable to start external authentication flow.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 433
+        }
+      },
+      {
+        "comment": "",
+        "key": "Redirect URL is missing or invalid. Unable to start external authentication flow.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 481
+        }
+      },
+      {
+        "comment": "",
+        "key": "Invalid credential type.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 668
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unable to get the challenge for the passkey.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 632
+        }
+      }
+    ]
+  },
+  "version": 1
+}

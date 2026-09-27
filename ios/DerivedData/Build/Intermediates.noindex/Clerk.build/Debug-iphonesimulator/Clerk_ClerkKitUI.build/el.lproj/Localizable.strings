@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key></key>
+	<string></string>
+	<key> </key>
+	<string> </string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this connected account.</key>
+	<string>Το %@ θα αφαιρεθεί από αυτόν τον λογαριασμό. Δεν θα μπορείτε πλέον να συνδεθείτε χρησιμοποιώντας αυτόν τον συνδεδεμένο λογαριασμό.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this email address.</key>
+	<string>Το %@ θα αφαιρεθεί από αυτόν τον λογαριασμό. Δεν θα μπορείτε πλέον να συνδεθείτε χρησιμοποιώντας αυτή τη διεύθυνση email.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this passkey.</key>
+	<string>Το %@ θα αφαιρεθεί από αυτόν τον λογαριασμό. Δεν θα μπορείτε πλέον να συνδεθείτε χρησιμοποιώντας αυτό το κλειδί πρόσβασης.</string>
+	<key>%@ will be removed from this account. You will no longer be able to sign in using this phone number.</key>
+	<string>Το %@ θα αφαιρεθεί από αυτόν τον λογαριασμό. Δεν θα μπορείτε πλέον να συνδεθείτε χρησιμοποιώντας αυτόν τον αριθμό τηλεφώνου.</string>
+	<key>%@ will no longer be receiving verification codes when signing in.</key>
+	<string>Το %@ δεν θα λαμβάνει πλέον κωδικούς επαλήθευσης κατά τη σύνδεση.</string>
+	<key>%@ · Joined %@</key>
+	<string>%@ · Έγινε μέλος στις %@</string>
+	<key>A text message containing a verification code will be sent to this phone number. Message and data rates may apply.</key>
+	<string>Θα αποσταλεί ένα μήνυμα κειμένου που περιέχει κωδικό επαλήθευσης σε αυτόν τον αριθμό τηλεφώνου. Μπορεί να ισχύουν χρεώσεις για μηνύματα και δεδομένα.</string>
+	<key>A verification code was sent to %@. Enter the code to continue.</key>
+	<string>Ένας κωδικός επαλήθευσης στάλθηκε στο %@. Εισάγετε τον κωδικό για να συνεχίσετε.</string>
+	<key>ACTIVE DEVICES</key>
+	<string>ΕΝΕΡΓΕΣ ΣΥΣΚΕΥΕΣ</string>
+	<key>Accept request</key>
+	<string>Αποδοχή αιτήματος</string>
+	<key>Account</key>
+	<string>Λογαριασμός</string>
+	<key>Add SMS code verification</key>
+	<string>Προσθήκη επαλήθευσης κωδικού SMS</string>
+	<key>Add a passkey</key>
+	<string>Προσθήκη κλειδιού πρόσβασης</string>
+	<key>Add account</key>
+	<string>Προσθήκη λογαριασμού</string>
+	<key>Add authenticator application</key>
+	<string>Προσθήκη εφαρμογής επαλήθευσης</string>
+	<key>Add domain</key>
+	<string>Προσθήκη τομέα</string>
+	<key>Add email address</key>
+	<string>Προσθήκη διεύθυνσης email</string>
+	<key>Add password</key>
+	<string>Προσθήκη κωδικού πρόσβασης</string>
+	<key>Add phone number</key>
+	<string>Προσθήκη αριθμού τηλεφώνου</string>
+	<key>Add the domain to verify. Users with email addresses at this domain can join the organization automatically or request to join.</key>
+	<string>Προσθέστε τον τομέα για επαλήθευση. Χρήστες με διευθύνσεις email σε αυτόν τον τομέα μπορούν να συμμετάσχουν στον οργανισμό αυτόματα ή να αιτηθούν συμμετοχή.</string>
+	<key>Add two-step verification</key>
+	<string>Προσθήκη επαλήθευσης δύο βημάτων</string>
+	<key>Admin</key>
+	<string>Διαχειριστής</string>
+	<key>Allow</key>
+	<string>Να επιτρέπεται</string>
+	<key>Allow %@</key>
+	<string>Να επιτρέπεται το %@</string>
+	<key>Allow users to join the organization automatically or request to join based on a verified email domain.</key>
+	<string>Επιτρέψτε στους χρήστες να συμμετάσχουν στον οργανισμό αυτόματα ή να ζητήσουν συμμετοχή με βάση έναν επαληθευμένο τομέα email.</string>
+	<key>Alternatively, if your authenticator supports TOTP URIs, you can also copy the full URI.</key>
+	<string>Εναλλακτικά, εάν ο επαληθευτής σας υποστηρίζει TOTP URIs, μπορείτε επίσης να αντιγράψετε το πλήρες URI.</string>
+	<key>Application</key>
+	<string>Εφαρμογή</string>
+	<key>Are you sure you want to delete this organization?</key>
+	<string>Είστε σίγουρος ότι θέλετε να διαγράψετε αυτόν τον οργανισμό;</string>
+	<key>Are you sure you want to delete your account? This action is permanent and irreversible.</key>
+	<string>Είστε σίγουροι ότι θέλετε να διαγράψετε τον λογαριασμό σας; Αυτή η ενέργεια είναι μόνιμη και μη αναστρέψιμη.</string>
+	<key>Are you sure you want to leave this organization? You will lose access to this organization and its applications.</key>
+	<string>Είστε σίγουρος ότι θέλετε να αποχωρήσετε από αυτόν τον οργανισμό; Θα χάσετε την πρόσβαση σε αυτόν τον οργανισμό και τις εφαρμογές του.</string>
+	<key>Authenticator app</key>
+	<string>Εφαρμογή ελέγχου ταυτότητας</string>
+	<key>Authenticator application</key>
+	<string>Εφαρμογή επαλήθευσης</string>
+	<key>Authenticator application verification enabled</key>
+	<string>Η επαλήθευση εφαρμογής Authenticator ενεργοποιήθηκε</string>
+	<key>Automatic invitations</key>
+	<string>Αυτόματες προσκλήσεις</string>
+	<key>Automatic suggestions</key>
+	<string>Αυτόματες προτάσεις</string>
+	<key>Back</key>
+	<string>Πίσω</string>
+	<key>Backup code</key>
+	<string>Εφεδρικός κωδικός</string>
+	<key>Backup codes</key>
+	<string>Εφεδρικοί κωδικοί</string>
+	<key>Backup codes are now enabled. You can use one of these to sign in to your account, if you lose access to your authentication device. Each code can only be used once.</key>
+	<string>Οι εφεδρικοί κωδικοί είναι τώρα ενεργοποιημένοι. Μπορείτε να χρησιμοποιήσετε έναν από αυτούς για να συνδεθείτε στον λογαριασμό σας, αν χάσετε την πρόσβαση στη συσκευή ελέγχου ταυτότητας. Κάθε κωδικός μπορεί να χρησιμοποιηθεί μόνο μία φορά.</string>
+	<key>CONNECTED ACCOUNTS</key>
+	<string>ΣΥΝΔΕΔΕΜΕΝΟΙ ΛΟΓΑΡΙΑΣΜΟΙ</string>
+	<key>Cancel</key>
+	<string>Ακύρωση</string>
+	<key>Change logo</key>
+	<string>Αλλαγή λογότυπου</string>
+	<key>Change password</key>
+	<string>Αλλαγή κωδικού πρόσβασης</string>
+	<key>Change role</key>
+	<string>Αλλαγή ρόλου</string>
+	<key>Check your email</key>
+	<string>Ελέγξτε το email σας</string>
+	<key>Check your phone</key>
+	<string>Ελέγξτε το τηλέφωνό σας</string>
+	<key>Choose a username.</key>
+	<string>Επιλέξτε όνομα χρήστη.</string>
+	<key>Choose an account</key>
+	<string>Επιλέξτε λογαριασμό</string>
+	<key>Choose an organization</key>
+	<string>Επιλέξτε οργανισμό</string>
+	<key>Choose file</key>
+	<string>Επιλογή αρχείου</string>
+	<key>Choose from photo library</key>
+	<string>Επιλογή από τη βιβλιοθήκη φωτογραφιών</string>
+	<key>Choose how users from this domain can join the organization.</key>
+	<string>Επιλέξτε πώς οι χρήστες από αυτόν τον τομέα μπορούν να συμμετάσχουν στον οργανισμό.</string>
+	<key>Choose how you'd like to receive your two-step verification code.</key>
+	<string>Επιλέξτε πώς θέλετε να λάβετε τον κωδικό επαλήθευσης δύο βημάτων.</string>
+	<key>Choose the phone number you want to use for SMS code two-step verification</key>
+	<string>Επιλέξτε τον αριθμό τηλεφώνου που θέλετε να χρησιμοποιήσετε για την επαλήθευση κωδικού SMS σε δύο βήματα</string>
+	<key>Choose which method you prefer to protect your account with an extra layer of security</key>
+	<string>Επιλέξτε ποια μέθοδο προτιμάτε για την προστασία του λογαριασμού σας με ένα επιπλέον επίπεδο ασφάλειας</string>
+	<key>Choose your password</key>
+	<string>Επιλέξτε τον κωδικό πρόσβασής σας</string>
+	<key>Choose your username</key>
+	<string>Επιλέξτε το όνομα χρήστη σας</string>
+	<key>Close</key>
+	<string>Κλείσιμο</string>
+	<key>Complete your profile</key>
+	<string>Συμπληρώστε το προφίλ σας</string>
+	<key>Confirm password</key>
+	<string>Επιβεβαίωση κωδικού</string>
+	<key>Connect account</key>
+	<string>Σύνδεση λογαριασμού</string>
+	<key>Contact your organization admin for an invitation.</key>
+	<string>Επικοινωνήστε με τον διαχειριστή του οργανισμού σας για πρόσκληση.</string>
+	<key>Continue</key>
+	<string>Συνέχεια</string>
+	<key>Continue to %@</key>
+	<string>για να συνεχίσετε στο %@</string>
+	<key>Continue with %@</key>
+	<string>Συνέχεια με %@</string>
+	<key>Copy to clipboard</key>
+	<string>Αντιγραφή στο πρόχειρο</string>
+	<key>Create a unique password.</key>
+	<string>Δημιουργήστε έναν μοναδικό κωδικό πρόσβασης.</string>
+	<key>Create organization</key>
+	<string>Δημιουργία οργανισμού</string>
+	<key>Create your account</key>
+	<string>Δημιουργήστε τον λογαριασμό σας</string>
+	<key>Created: %@</key>
+	<string>Δημιουργήθηκε: %@</string>
+	<key>Current password</key>
+	<string>Τρέχων κωδικός πρόσβασης</string>
+	<key>DELETE</key>
+	<string>ΔΙΑΓΡΑΦΗ</string>
+	<key>DELETE ACCOUNT</key>
+	<string>ΔΙΑΓΡΑΦΗ ΛΟΓΑΡΙΑΣΜΟΥ</string>
+	<key>Default</key>
+	<string>Προεπιλογή</string>
+	<key>Delete</key>
+	<string>Διαγραφή</string>
+	<key>Delete account</key>
+	<string>Διαγραφή λογαριασμού</string>
+	<key>Delete organization</key>
+	<string>Διαγραφή οργανισμού</string>
+	<key>Delete pending invitations and suggestions</key>
+	<string>Διαγραφή εκκρεμών προσκλήσεων και προτάσεων</string>
+	<key>Desktop device</key>
+	<string>Συσκευή υπολογιστή</string>
+	<key>Development mode</key>
+	<string>Λειτουργία ανάπτυξης</string>
+	<key>Didn't receive a code?</key>
+	<string>Δεν λάβατε κωδικό;</string>
+	<key>Didn't receive an email?</key>
+	<string>Δεν λάβατε email;</string>
+	<key>Domain</key>
+	<string>Domain</string>
+	<key>Done</key>
+	<string>Ολοκληρώθηκε</string>
+	<key>Download</key>
+	<string>Λήψη</string>
+	<key>EMAIL ADDRESSES</key>
+	<string>ΔΙΕΥΘΥΝΣΕΙΣ EMAIL</string>
+	<key>Edit profile</key>
+	<string>Επεξεργασία προφίλ</string>
+	<key>Email address</key>
+	<string>Διεύθυνση email</string>
+	<key>Email code to %@</key>
+	<string>Αποστολή κωδικού στο %@</string>
+	<key>Email link to %@</key>
+	<string>Στείλτε σύνδεσμο μέσω email στο %@</string>
+	<key>Email support</key>
+	<string>Υποστήριξη μέσω email</string>
+	<key>Enable %@ for faster access</key>
+	<string>Ενεργοποιήστε το %@ για ταχύτερη πρόσβαση</string>
+	<key>Enable %@ for faster access to %@</key>
+	<string>Ενεργοποιήστε το %@ για ταχύτερη πρόσβαση στο %@</string>
+	<key>Enter a backup code</key>
+	<string>Εισαγάγετε εφεδρικό κωδικό</string>
+	<key>Enter a slug using lowercase letters, numbers, and hyphens.</key>
+	<string>Εισαγάγετε ένα slug με πεζά γράμματα, αριθμούς και παύλες.</string>
+	<key>Enter email addresses</key>
+	<string>Εισαγάγετε διευθύνσεις email</string>
+	<key>Enter or paste one or more email addresses, separated by spaces or commas.</key>
+	<string>Εισαγάγετε ή επικολλήστε μία ή περισσότερες διευθύνσεις email, χωρισμένες με κενά ή κόμματα.</string>
+	<key>Enter password</key>
+	<string>Εισάγετε τον κωδικό σας</string>
+	<key>Enter the email address you'd like to use.</key>
+	<string>Εισαγάγετε τη διεύθυνση email που θα θέλατε να χρησιμοποιήσετε.</string>
+	<key>Enter the password for your account</key>
+	<string>Εισάγετε τον κωδικό του λογαριασμού σας</string>
+	<key>Enter the phone number you'd like to use.</key>
+	<string>Εισαγάγετε τον αριθμό τηλεφώνου που θα θέλατε να χρησιμοποιήσετε.</string>
+	<key>Enter the verification code from authenticator application</key>
+	<string>Εισαγάγετε τον κωδικό επαλήθευσης από την εφαρμογή ελέγχου ταυτότητας</string>
+	<key>Enter the verification code from your authenticator app.</key>
+	<string>Εισαγάγετε τον κωδικό επαλήθευσης από την εφαρμογή επαλήθευσής σας.</string>
+	<key>Enter the verification code sent to</key>
+	<string>Εισαγάγετε τον κωδικό επαλήθευσης που στάλθηκε στο</string>
+	<key>Enter the verification code sent to %@</key>
+	<string>Εισαγάγετε τον κωδικό επαλήθευσης που στάλθηκε στο %@</string>
+	<key>Enter your current password to set a new one.</key>
+	<string>Εισαγάγετε τον τρέχοντα κωδικό πρόσβασής σας για να ορίσετε έναν νέο.</string>
+	<key>Enter your email</key>
+	<string>Εισάγετε το email σας</string>
+	<key>Enter your email or username</key>
+	<string>Εισάγετε το email ή το όνομα χρήστη σας</string>
+	<key>Enter your organization details to continue</key>
+	<string>Εισάγετε τα στοιχεία του οργανισμού σας για να συνεχίσετε</string>
+	<key>Enter your password</key>
+	<string>Εισάγετε τον κωδικό σας</string>
+	<key>Enter your phone number</key>
+	<string>Εισάγετε τον αριθμό τηλεφώνου σας</string>
+	<key>Enter your username</key>
+	<string>Εισάγετε το όνομα χρήστη σας</string>
+	<key>Facing issues? You can use any of these methods to sign in.</key>
+	<string>Αντιμετωπίζετε προβλήματα; Μπορείτε να χρησιμοποιήσετε οποιαδήποτε από αυτές τις μεθόδους για να συνδεθείτε.</string>
+	<key>First name</key>
+	<string>Όνομα</string>
+	<key>First, enter the code sent to your email address</key>
+	<string>Πρώτα, εισάγετε τον κωδικό που στάλθηκε στη διεύθυνση email σας</string>
+	<key>First, enter the code sent to your phone</key>
+	<string>Πρώτα, εισάγετε τον κωδικό που στάλθηκε στο τηλέφωνό σας</string>
+	<key>Forgot password?</key>
+	<string>Ξεχάσατε τον κωδικό;</string>
+	<key>Get help</key>
+	<string>Λάβετε βοήθεια</string>
+	<key>Get started by inviting someone to join your organization</key>
+	<string>Ξεκινήστε προσκαλώντας κάποιον να συμμετάσχει στον οργανισμό σας</string>
+	<key>Go back</key>
+	<string>Επιστροφή</string>
+	<key>Hide password</key>
+	<string>Απόκρυψη κωδικού πρόσβασης</string>
+	<key>I agree to the [Privacy Policy](LegalConsentView://privacy)</key>
+	<string>Συμφωνώ με την [Πολιτική Απορρήτου](LegalConsentView://privacy)</string>
+	<key>I agree to the [Terms of Service](LegalConsentView://terms)</key>
+	<string>Συμφωνώ με τους [Όρους Χρήσης](LegalConsentView://terms)</string>
+	<key>I agree to the [Terms of Service](LegalConsentView://terms) and [Privacy Policy](LegalConsentView://privacy)</key>
+	<string>Συμφωνώ με τους [Όρους Χρήσης](LegalConsentView://terms) και την [Πολιτική Απορρήτου](LegalConsentView://privacy)</string>
+	<key>If you have trouble completing required account setup, email us and we will help you finish as soon as possible.</key>
+	<string>Εάν αντιμετωπίζετε προβλήματα με την ολοκλήρωση της απαιτούμενης ρύθμισης λογαριασμού, στείλτε μας email και θα σας βοηθήσουμε να ολοκληρώσετε το συντομότερο δυνατό.</string>
+	<key>If you have trouble creating your account, email us and we will work with you to complete your registration as soon as possible.</key>
+	<string>Αν έχετε πρόβλημα με τη δημιουργία του λογαριασμού σας, στείλτε μας email και θα συνεργαστούμε μαζί σας για να ολοκληρώσουμε την εγγραφή σας το συντομότερο δυνατό.</string>
+	<key>If you have trouble signing into your account, email us and we will work with you to restore access as soon as possible.</key>
+	<string>Αν έχετε πρόβλημα με την είσοδό σας στον λογαριασμό σας, στείλτε μας email και θα συνεργαστούμε μαζί σας για την αποκατάσταση της πρόσβασης το συντομότερο δυνατό.</string>
+	<key>International</key>
+	<string>Διεθνές</string>
+	<key>Invitations</key>
+	<string>Προσκλήσεις</string>
+	<key>Invite</key>
+	<string>Πρόσκληση</string>
+	<key>Invite new members</key>
+	<string>Πρόσκληση νέων μελών</string>
+	<key>Invited %@</key>
+	<string>Προσκλήθηκε στις %@</string>
+	<key>It is recommended to sign out of all other devices which may have used your old password.</key>
+	<string>Συνιστάται να αποσυνδεθείτε από όλες τις άλλες συσκευές που μπορεί να έχουν χρησιμοποιήσει τον παλιό σας κωδικό πρόσβασης.</string>
+	<key>Join</key>
+	<string>Συμμετοχή</string>
+	<key>Join an existing organization</key>
+	<string>Συμμετάσχετε σε έναν υπάρχοντα οργανισμό</string>
+	<key>Join an existing organization or create a new one</key>
+	<string>Συμμετάσχετε σε έναν υπάρχοντα οργανισμό ή δημιουργήστε νέο</string>
+	<key>Joined %@</key>
+	<string>Έγινε μέλος στις %@</string>
+	<key>Last name</key>
+	<string>Επώνυμο</string>
+	<key>Last used</key>
+	<string>Τελευταία χρήση</string>
+	<key>Last used: %@</key>
+	<string>Τελευταία χρήση: %@</string>
+	<key>Leave organization</key>
+	<string>Αποχώρηση από οργανισμό</string>
+	<key>Link another login option to your account. You’ll need to verify it before it can be used.</key>
+	<string>Σύνδεση μιας άλλης επιλογής σύνδεσης με τον λογαριασμό σας. Θα χρειαστεί να την επαληθεύσετε πριν μπορεί να χρησιμοποιηθεί.</string>
+	<key>Linked</key>
+	<string>Συνδεδεμένο</string>
+	<key>MFA reserved</key>
+	<string>Κρατημένο για MFA</string>
+	<key>Make sure Time-based or One-time passwords is enabled, then finish linking your account.</key>
+	<string>Βεβαιωθείτε ότι είναι ενεργοποιημένοι οι κωδικοί πρόσβασης βάσει χρόνου ή μιας χρήσης και, στη συνέχεια, ολοκληρώστε τη σύνδεση του λογαριασμού σας.</string>
+	<key>Manage</key>
+	<string>Διαχείριση</string>
+	<key>Manage account</key>
+	<string>Διαχείριση λογαριασμού</string>
+	<key>Manual setup key</key>
+	<string>Χειροκίνητο κλειδί ρύθμισης</string>
+	<key>Member</key>
+	<string>Μέλος</string>
+	<key>Members</key>
+	<string>Μέλη</string>
+	<key>Mobile device</key>
+	<string>Κινητή συσκευή</string>
+	<key>Name of passkey</key>
+	<string>Όνομα passkey</string>
+	<key>New password</key>
+	<string>Νέος κωδικός</string>
+	<key>Next</key>
+	<string>Επόμενο</string>
+	<key>No automatic enrollment</key>
+	<string>Χωρίς αυτόματη εγγραφή</string>
+	<key>No email app is available on this device.</key>
+	<string>Δεν υπάρχει διαθέσιμη εφαρμογή email σε αυτή τη συσκευή.</string>
+	<key>No invitations sent</key>
+	<string>Δεν έχουν σταλεί προσκλήσεις</string>
+	<key>No members found</key>
+	<string>Δεν βρέθηκαν μέλη</string>
+	<key>No members match your search. Try a different name or email address.</key>
+	<string>Κανένα μέλος δεν ταιριάζει με την αναζήτησή σας. Δοκιμάστε διαφορετικό όνομα ή διεύθυνση email.</string>
+	<key>No membership requests</key>
+	<string>Δεν υπάρχουν αιτήματα συμμετοχής</string>
+	<key>No roles available</key>
+	<string>Δεν υπάρχουν διαθέσιμοι ρόλοι</string>
+	<key>No verified domains</key>
+	<string>Δεν υπάρχουν επαληθευμένοι τομείς</string>
+	<key>Not now</key>
+	<string>Όχι τώρα</string>
+	<key>Open account</key>
+	<string>Άνοιγμα λογαριασμού</string>
+	<key>Open email app</key>
+	<string>Άνοιγμα εφαρμογής email</string>
+	<key>Or, sign in with another method</key>
+	<string>Ή, συνδεθείτε με άλλη μέθοδο</string>
+	<key>Organization</key>
+	<string>Οργανισμός</string>
+	<key>Organization name</key>
+	<string>Όνομα οργανισμού</string>
+	<key>PASSKEYS</key>
+	<string>ΚΛΕΙΔΙΑ ΠΡΟΣΒΑΣΗΣ</string>
+	<key>PASSWORD</key>
+	<string>ΚΩΔΙΚΟΣ ΠΡΟΣΒΑΣΗΣ</string>
+	<key>PHONE NUMBERS</key>
+	<string>ΑΡΙΘΜΟΙ ΤΗΛΕΦΩΝΟΥ</string>
+	<key>Password</key>
+	<string>Κωδικός πρόσβασης</string>
+	<key>Passwords don't match.</key>
+	<string>Οι κωδικοί δεν ταιριάζουν.</string>
+	<key>Pending approval</key>
+	<string>Σε αναμονή έγκρισης</string>
+	<key>Personal account</key>
+	<string>Προσωπικός λογαριασμός</string>
+	<key>Phone number</key>
+	<string>Αριθμός τηλεφώνου</string>
+	<key>Photo library</key>
+	<string>Βιβλιοθήκη φωτογραφιών</string>
+	<key>Primary</key>
+	<string>Κύριο</string>
+	<key>Profile details</key>
+	<string>Λεπτομέρειες προφίλ</string>
+	<key>Reconnect</key>
+	<string>Επανασύνδεση</string>
+	<key>Regenerate</key>
+	<string>Αναγέννηση</string>
+	<key>Reject request</key>
+	<string>Απόρριψη αιτήματος</string>
+	<key>Remove</key>
+	<string>Αφαίρεση</string>
+	<key>Remove connected account</key>
+	<string>Αφαίρεση συνδεδεμένου λογαριασμού</string>
+	<key>Remove connection</key>
+	<string>Αφαίρεση σύνδεσης</string>
+	<key>Remove current logo</key>
+	<string>Αφαίρεση τρέχοντος λογότυπου</string>
+	<key>Remove domain</key>
+	<string>Αφαίρεση τομέα</string>
+	<key>Remove email</key>
+	<string>Αφαίρεση email</string>
+	<key>Remove email address</key>
+	<string>Αφαίρεση διεύθυνσης email</string>
+	<key>Remove member</key>
+	<string>Αφαίρεση μέλους</string>
+	<key>Remove passkey</key>
+	<string>Αφαίρεση passkey</string>
+	<key>Remove phone</key>
+	<string>Αφαίρεση τηλεφώνου</string>
+	<key>Remove phone number</key>
+	<string>Αφαίρεση αριθμού τηλεφώνου</string>
+	<key>Remove photo</key>
+	<string>Αφαίρεση φωτογραφίας</string>
+	<key>Remove two-step verification</key>
+	<string>Κατάργηση επαλήθευσης δύο βημάτων</string>
+	<key>Rename</key>
+	<string>Μετονομασία</string>
+	<key>Rename passkey</key>
+	<string>Μετονομασία passkey</string>
+	<key>Request to join</key>
+	<string>Αίτημα συμμετοχής</string>
+	<key>Requested %@</key>
+	<string>Υπέβαλε αίτημα στις %@</string>
+	<key>Requests</key>
+	<string>Αιτήματα</string>
+	<key>Resend</key>
+	<string>Επαναποστολή</string>
+	<key>Resend (%lld)</key>
+	<string>Επανάληψη αποστολής (%lld)</string>
+	<key>Reset password</key>
+	<string>Επαναφορά κωδικού</string>
+	<key>Reset your password</key>
+	<string>Επαναφορά του κωδικού σας</string>
+	<key>Revoke invitation</key>
+	<string>Ανάκληση πρόσκλησης</string>
+	<key>Role</key>
+	<string>Ρόλος</string>
+	<key>SMS code</key>
+	<string>Κωδικός SMS</string>
+	<key>SMS code verification enabled</key>
+	<string>Η επαλήθευση κωδικού SMS ενεργοποιήθηκε</string>
+	<key>Save</key>
+	<string>Αποθήκευση</string>
+	<key>Save these codes somewhere safe. If you lose access to your authentication device, you can use a backup code to sign in.</key>
+	<string>Αποθηκεύστε αυτούς τους κωδικούς σε ασφαλές μέρος. Εάν χάσετε την πρόσβαση στη συσκευή ελέγχου ταυτότητας, μπορείτε να χρησιμοποιήσετε έναν εφεδρικό κωδικό για να συνδεθείτε.</string>
+	<key>Search</key>
+	<string>Αναζήτηση</string>
+	<key>Secured by</key>
+	<string>Ασφαλισμένο από</string>
+	<key>Security</key>
+	<string>Ασφάλεια</string>
+	<key>Select an existing phone number to register for SMS code two-step verification or add a new one.</key>
+	<string>Επιλέξτε έναν υπάρχοντα αριθμό τηλεφώνου για εγγραφή στην επαλήθευση δύο βημάτων με κωδικό SMS ή προσθέστε έναν νέο.</string>
+	<key>Select organization</key>
+	<string>Επιλέξτε οργανισμό</string>
+	<key>Select the account with which you wish to continue.</key>
+	<string>Επιλέξτε τον λογαριασμό με τον οποίο θέλετε να συνεχίσετε.</string>
+	<key>Selected</key>
+	<string>Επιλεγμένο</string>
+	<key>Send SMS code to %@</key>
+	<string>Αποστολή κωδικού SMS στο %@</string>
+	<key>Send invitations</key>
+	<string>Αποστολή προσκλήσεων</string>
+	<key>Set as default</key>
+	<string>Ορισμός ως προεπιλογή</string>
+	<key>Set as primary</key>
+	<string>Ορισμός ως κύριο</string>
+	<key>Set new password</key>
+	<string>Ορισμός νέου κωδικού πρόσβασης</string>
+	<key>Set up a new sign-in method in your authenticator and enter the Key provided below.
+
+Make sure Time-based or One-time passwords is enabled, then finish linking your account.</key>
+	<string>Ρυθμίστε μια νέα μέθοδο σύνδεσης στον επαληθευτή σας και εισαγάγετε το Κλειδί που παρέχεται παρακάτω.
+
+Βεβαιωθείτε ότι οι κωδικοί πρόσβασης βασισμένοι στον χρόνο ή μίας χρήσης είναι ενεργοποιημένοι, στη συνέχεια ολοκληρώστε τη σύνδεση του λογαριασμού σας.</string>
+	<key>Set up a new sign-in method in your authenticator app using the manual setup key below to link it to your account.</key>
+	<string>Ρυθμίστε μια νέα μέθοδο σύνδεσης στην εφαρμογή ελέγχου ταυτότητας χρησιμοποιώντας το παρακάτω κλειδί μη αυτόματης ρύθμισης για να τη συνδέσετε με τον λογαριασμό σας.</string>
+	<key>Set up two-step verification</key>
+	<string>Ρυθμίστε την επαλήθευση σε δύο βήματα</string>
+	<key>Show password</key>
+	<string>Εμφάνιση κωδικού πρόσβασης</string>
+	<key>Sign in with %@</key>
+	<string>Σύνδεση με %@</string>
+	<key>Sign in with your passkey</key>
+	<string>Σύνδεση με το κλειδί πρόσβασης σας</string>
+	<key>Sign in with your password</key>
+	<string>Συνδεθείτε με τον κωδικό πρόσβασής σας</string>
+	<key>Sign out</key>
+	<string>Αποσύνδεση</string>
+	<key>Sign out of all accounts</key>
+	<string>Αποσύνδεση από όλους τους λογαριασμούς</string>
+	<key>Sign out of all other devices</key>
+	<string>Αποσύνδεση από όλες τις άλλες συσκευές</string>
+	<key>Sign out of device</key>
+	<string>Αποσύνδεση από συσκευή</string>
+	<key>Sign up</key>
+	<string>Εγγραφή</string>
+	<key>Skip</key>
+	<string>Παράλειψη</string>
+	<key>Slug</key>
+	<string>Συντόμευση URL</string>
+	<key>Success</key>
+	<string>Επιτυχία</string>
+	<key>Switch account</key>
+	<string>Εναλλαγή λογαριασμού</string>
+	<key>TWO-STEP VERIFICATION</key>
+	<string>ΕΠΑΛΗΘΕΥΣΗ ΔΥΟ ΒΗΜΑΤΩΝ</string>
+	<key>The app %@ uses %@ to sign you in.</key>
+	<string>Η εφαρμογή %@ χρησιμοποιεί %@ για να σας συνδέσει.</string>
+	<key>The domain %@ needs to be verified via email.</key>
+	<string>Ο τομέας %@ πρέπει να επαληθευτεί μέσω email.</string>
+	<key>The email domain %@ will be removed.</key>
+	<string>Ο τομέας email %@ θα αφαιρεθεί.</string>
+	<key>There was an error loading the image from the photos library.</key>
+	<string>Υπήρξε σφάλμα κατά τη φόρτωση της εικόνας από τη βιβλιοθήκη φωτογραφιών.</string>
+	<key>There was an error loading the selected image file.</key>
+	<string>Παρουσιάστηκε σφάλμα κατά τη φόρτωση του επιλεγμένου αρχείου εικόνας.</string>
+	<key>This account has been disconnected.</key>
+	<string>Αυτός ο λογαριασμός έχει αποσυνδεθεί.</string>
+	<key>This action is permanent and irreversible.</key>
+	<string>Αυτή η ενέργεια είναι μόνιμη και και μη αναστρέψιμη.</string>
+	<key>This device</key>
+	<string>Αυτή η συσκευή</string>
+	<key>To continue, please enter the verification code generated by your authenticator app</key>
+	<string>Για να συνεχίσετε, εισαγάγετε τον κωδικό επαλήθευσης που δημιουργήθηκε από την εφαρμογή ελέγχου ταυτότητας σας</string>
+	<key>Two-step verification</key>
+	<string>Επαλήθευση δύο βημάτων</string>
+	<key>Two-step verification is now enabled. When signing in, you will need to enter a verification code from this authenticator app as an additional step.
+
+Save these backup codes and store them somewhere safe. If you lose access to your authentication device, you can use backup codes to sign in.</key>
+	<string>Η επαλήθευση δύο βημάτων είναι πλέον ενεργοποιημένη. Κατά τη σύνδεση, θα χρειαστεί να εισαγάγετε έναν κωδικό επαλήθευσης από αυτήν την εφαρμογή επαλήθευσης ως επιπλέον βήμα.
+
+Αποθηκεύστε αυτούς τους κωδικούς αντιγράφων ασφαλείας και φυλάξτε τους σε ασφαλές μέρος. Εάν χάσετε την πρόσβαση στη συσκευή επαλήθευσής σας, μπορείτε να χρησιμοποιήσετε κωδικούς αντιγράφων ασφαλείας για σύνδεση.</string>
+	<key>Two-step verification setup</key>
+	<string>Ρύθμιση επαλήθευσης σε δύο βήματα</string>
+	<key>Type "%@" below to continue.</key>
+	<string>Πληκτρολογήστε το %@ παρακάτω για να συνεχίσετε.</string>
+	<key>Type "DELETE" to continue</key>
+	<string>Πληκτρολογήστε "ΔΙΑΓΡΑΦΗ" για να συνεχίσετε</string>
+	<key>Unable to send invitations without an active organization.</key>
+	<string>Δεν είναι δυνατή η αποστολή προσκλήσεων χωρίς ενεργό οργανισμό.</string>
+	<key>Unable to update organization without an active organization.</key>
+	<string>Δεν είναι δυνατή η ενημέρωση του οργανισμού χωρίς ενεργό οργανισμό.</string>
+	<key>Unknown code verification method. Please use another method.</key>
+	<string>Άγνωστη μέθοδος επαλήθευσης κωδικού. Παρακαλώ χρησιμοποιήστε άλλη μέθοδο.</string>
+	<key>Unknown device</key>
+	<string>Άγνωστη συσκευή</string>
+	<key>Unverified</key>
+	<string>Μη επαληθευμένο</string>
+	<key>Update %@</key>
+	<string>Ενημέρωση %@</string>
+	<key>Update password</key>
+	<string>Ενημέρωση κωδικού πρόσβασης</string>
+	<key>Update profile</key>
+	<string>Ενημέρωση προφίλ</string>
+	<key>Upload logo</key>
+	<string>Μεταφόρτωση λογότυπου</string>
+	<key>Use %@ to sign in.</key>
+	<string>Χρησιμοποιήστε το %@ για να συνδεθείτε.</string>
+	<key>Use a backup code</key>
+	<string>Χρήση εφεδρικού κωδικού</string>
+	<key>Use another method</key>
+	<string>Χρήση άλλης μεθόδου</string>
+	<key>Use email address</key>
+	<string>Χρήση διεύθυνσης email</string>
+	<key>Use email address or username</key>
+	<string>Χρήση διεύθυνσης email ή ονόματος χρήστη</string>
+	<key>Use phone number</key>
+	<string>Χρήση αριθμού τηλεφώνου</string>
+	<key>Use username</key>
+	<string>Χρήση ονόματος χρήστη</string>
+	<key>Use your authenticator app</key>
+	<string>Χρήση της εφαρμογής ελέγχου ταυτότητας</string>
+	<key>Use your passkey</key>
+	<string>Χρήση του passkey σας</string>
+	<key>Username</key>
+	<string>Όνομα χρήστη</string>
+	<key>Users are automatically invited to join the organization when they sign up and can join anytime.</key>
+	<string>Οι χρήστες προσκαλούνται αυτόματα να συμμετάσχουν στον οργανισμό όταν εγγραφούν και μπορούν να συμμετάσχουν ανά πάσα στιγμή.</string>
+	<key>Users can only be invited manually to the organization.</key>
+	<string>Οι χρήστες μπορούν να προσκληθούν μόνο χειροκίνητα στον οργανισμό.</string>
+	<key>Users receive a suggestion to request to join, but must be approved by an admin before they are able to join the organization.</key>
+	<string>Οι χρήστες λαμβάνουν μια πρόταση να ζητήσουν συμμετοχή, αλλά πρέπει να εγκριθούν από έναν διαχειριστή πριν μπορέσουν να συμμετάσχουν στον οργανισμό.</string>
+	<key>Users who request to join your organization will appear here for review</key>
+	<string>Οι χρήστες που ζητούν να συμμετάσχουν στον οργανισμό σας θα εμφανίζονται εδώ για έλεγχο</string>
+	<key>Users won't be able to join the organization automatically after this.</key>
+	<string>Οι χρήστες δεν θα μπορούν να συμμετάσχουν στον οργανισμό αυτόματα μετά από αυτό.</string>
+	<key>Using your passkey confirms it's you. Your device may ask for your fingerprint, face or screen lock.</key>
+	<string>Η χρήση του passkey σας επιβεβαιώνει ότι είστε εσείς. Η συσκευή σας μπορεί να ζητήσει το δακτυλικό σας αποτύπωμα, το πρόσωπό σας ή τον κωδικό κλειδώματος οθόνης.</string>
+	<key>Verification codes from this authenticator will no longer be required when signing in.</key>
+	<string>Οι κωδικοί επαλήθευσης από αυτόν τον επαληθευτή δεν θα απαιτούνται πλέον κατά τη σύνδεση.</string>
+	<key>Verification email address</key>
+	<string>Διεύθυνση email επαλήθευσης</string>
+	<key>Verified domains</key>
+	<string>Επαληθευμένοι τομείς</string>
+	<key>Verify</key>
+	<string>Επαληθεύστε</string>
+	<key>Verify authenticator app</key>
+	<string>Επαλήθευση εφαρμογής επαλήθευσης</string>
+	<key>Verify domain</key>
+	<string>Επαλήθευση τομέα</string>
+	<key>Verify email address</key>
+	<string>Επαληθεύστε τη διεύθυνση email</string>
+	<key>Verify phone number</key>
+	<string>Επαληθεύστε τον αριθμό τηλεφώνου</string>
+	<key>Verify your phone number</key>
+	<string>Επαληθεύστε τον αριθμό τηλεφώνου σας</string>
+	<key>Verifying...</key>
+	<string>Επαλήθευση...</string>
+	<key>We are updating the available roles. Once that's done, you'll be able to invite members again.</key>
+	<string>Ενημερώνουμε τους διαθέσιμους ρόλους. Μόλις ολοκληρωθεί, θα μπορείτε να προσκαλέσετε ξανά μέλη.</string>
+	<key>We are updating the available roles. Once that's done, you'll be able to update roles again.</key>
+	<string>Ενημερώνουμε τους διαθέσιμους ρόλους. Μόλις ολοκληρωθεί, θα μπορείτε να ενημερώσετε ξανά τους ρόλους.</string>
+	<key>Welcome! Please fill in the details to get started.</key>
+	<string>Καλώς ήρθατε! Παρακαλώ συμπληρώστε τα στοιχεία για να ξεκινήσετε.</string>
+	<key>Welcome! Sign in to continue</key>
+	<string>Καλώς ήρθατε! Συνδεθείτε για να συνεχίσετε</string>
+	<key>When signing in, you will need to enter a verification code sent to this phone number as an additional step.
+
+Save these backup codes and store them somewhere safe. If you lose access to your authentication device, you can use backup codes to sign in.</key>
+	<string>Κατά τη σύνδεση, θα χρειαστεί να εισαγάγετε έναν κωδικό επαλήθευσης που αποστέλλεται σε αυτόν τον αριθμό τηλεφώνου ως επιπλέον βήμα.
+
+Αποθηκεύστε αυτούς τους κωδικούς αντιγράφων ασφαλείας και φυλάξτε τους σε ασφαλές μέρος. Εάν χάσετε την πρόσβαση στη συσκευή επαλήθευσής σας, μπορείτε να χρησιμοποιήσετε κωδικούς αντιγράφων ασφαλείας για σύνδεση.</string>
+	<key>When you sign in, you'll be asked for a verification code sent to this phone number.</key>
+	<string>Όταν συνδεθείτε, θα σας ζητηθεί ένας κωδικός επαλήθευσης που θα σταλεί σε αυτόν τον αριθμό τηλεφώνου.</string>
+	<key>When you sign in, you'll need to enter a verification code from this authenticator app.</key>
+	<string>Όταν συνδέεστε, θα πρέπει να εισαγάγετε έναν κωδικό επαλήθευσης από αυτήν την εφαρμογή ελέγχου ταυτότητας.</string>
+	<key>Whoops, something is wrong</key>
+	<string>Ωχ, κάτι πήγε στραβά</string>
+	<key>You</key>
+	<string>Εσείς</string>
+	<key>You are no longer a member of this organization. Please choose another one.</key>
+	<string>Δεν είστε πλέον μέλος αυτού του οργανισμού. Επιλέξτε έναν άλλον.</string>
+	<key>You are no longer a member of this organization. Please choose or create another one.</key>
+	<string>Δεν είστε πλέον μέλος αυτού του οργανισμού. Επιλέξτε έναν άλλον ή δημιουργήστε έναν νέο.</string>
+	<key>You can change the passkey name to make it easier to find.</key>
+	<string>Μπορείτε να αλλάξετε το όνομα του passkey για να είναι πιο εύκολο να το βρείτε.</string>
+	<key>You must belong to an organization</key>
+	<string>Πρέπει να ανήκετε σε έναν οργανισμό</string>
+	<key>You'll need to verify this email address before it can be added to your account.</key>
+	<string>Θα χρειαστεί να επαληθεύσετε αυτή τη διεύθυνση email πριν προστεθεί στον λογαριασμό σας.</string>
+	<key>You're signing in from a new device. We're asking for verification to keep your account secure.</key>
+	<string>Συνδέεστε από μια νέα συσκευή. Ζητάμε επαλήθευση για να διατηρήσουμε τον λογαριασμό σας ασφαλή.</string>
+	<key>Your account requires a new password before you can continue</key>
+	<string>Ο λογαριασμός σας απαιτεί νέο κωδικό πρόσβασης πριν μπορέσετε να συνεχίσετε.</string>
+	<key>Your backup code is the one you got when setting up two-step verification.</key>
+	<string>Ο εφεδρικός σας κωδικός είναι αυτός που λάβατε κατά τη ρύθμιση του ελέγχου ταυτότητας δύο βημάτων.</string>
+	<key>or</key>
+	<string>ή</string>
+	<key>to continue</key>
+	<string>για να συνεχίσετε</string>
+	<key>to continue to %@</key>
+	<string>για να συνεχίσετε στο %@</string>
+</dict>
+</plist>

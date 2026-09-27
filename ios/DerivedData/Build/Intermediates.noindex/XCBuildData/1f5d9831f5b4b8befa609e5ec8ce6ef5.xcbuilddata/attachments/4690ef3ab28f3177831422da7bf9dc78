@@ -1,0 +1,59 @@
+{
+  "" : {
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/NukeUI-primary.dia",
+    "emit-module-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/NukeUI-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/NukeUI-primary-emit-module.dia",
+    "pch" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/NukeUI-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/NukeUI-primary.swiftdeps"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/NukeUI/FetchImage.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage.dia",
+    "index-unit-output-path" : "/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/FetchImage~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/NukeUI/Internal.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal.dia",
+    "index-unit-output-path" : "/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/Internal~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/NukeUI/LazyImage.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage.dia",
+    "index-unit-output-path" : "/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImage~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/NukeUI/LazyImageState.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState.dia",
+    "index-unit-output-path" : "/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageState~partial.swiftmodule"
+  },
+  "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/Nuke/Sources/NukeUI/LazyImageView.swift" : {
+    "const-values" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView.swiftconstvalues",
+    "dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView.d",
+    "diagnostics" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView.dia",
+    "index-unit-output-path" : "/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView.o",
+    "llvm-bc" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView.bc",
+    "object" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView.o",
+    "swift-dependencies" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView.swiftdeps",
+    "swiftmodule" : "/Users/lukenordin/mountline/ios/DerivedData/Build/Intermediates.noindex/Nuke.build/Debug-iphonesimulator/NukeUI.build/Objects-normal/arm64/LazyImageView~partial.swiftmodule"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Mocks/MockModels.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "An unknown error occurred.",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 1128
+        }
+      }
+    ]
+  },
+  "version": 1
+}

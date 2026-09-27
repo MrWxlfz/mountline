@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Storage/Keychain/Clerk+Keychain.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Unable to clear Clerk keychain items during reconfiguration.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 621
+        }
+      }
+    ]
+  },
+  "version": 1
+}

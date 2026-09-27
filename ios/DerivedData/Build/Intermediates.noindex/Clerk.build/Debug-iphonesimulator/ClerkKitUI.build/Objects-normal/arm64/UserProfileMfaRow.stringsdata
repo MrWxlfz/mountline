@@ -1,0 +1,80 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserProfile/UserProfileMfaRow.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Authenticator application",
+        "location": {
+          "startingColumn": 12,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "SMS code",
+        "location": {
+          "startingColumn": 12,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "Backup codes",
+        "location": {
+          "startingColumn": 12,
+          "startingLine": 51
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 62
+        }
+      },
+      {
+        "comment": "",
+        "key": "Set as default",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 69
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 77
+        }
+      },
+      {
+        "comment": "",
+        "key": "Regenerate",
+        "location": {
+          "startingColumn": 14,
+          "startingLine": 83
+        }
+      },
+      {
+        "comment": "",
+        "key": "Default",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 102
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 157
+        }
+      }
+    ]
+  },
+  "version": 1
+}

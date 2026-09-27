@@ -19,7 +19,8 @@ import {
   LockKeyhole,
   Mail,
 } from "lucide-react"
-import { MountlineLogo } from "@/components/mountline-logo"
+import { Wordmark } from "@/components/brand/wordmark"
+import { GlyphField } from "@/components/homepage/glyph-field"
 import { AppearanceSelector } from "@/components/dashboard/appearance-selector"
 
 type MountlineIdFormProps = {
@@ -46,95 +47,43 @@ const oauthLabels: Record<string, string> = {
 
 export function MountlineIdForm({ redirectUrl, useCustomFlow }: MountlineIdFormProps) {
   return (
-    <div className="mountline-id relative min-h-dvh overflow-hidden bg-black text-white">
-      <AuthBackground />
-      <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6 lg:right-8">
+    <div className="mountline-id relative flex min-h-dvh flex-col overflow-hidden bg-background text-foreground">
+      <header className="relative z-10 border-b border-border">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
+          <Link href="/" aria-label="Mountline home" className="text-foreground transition-opacity hover:opacity-75">
+            <Wordmark size={18} />
+          </Link>
           <AppearanceSelector compact syncServer={false} />
         </div>
-        <div className="grid flex-1 items-center gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
+      </header>
+      <main className="relative z-10 flex flex-1 items-center px-5 py-14 sm:px-8 sm:py-20">
+        <div className="mx-auto w-full max-w-[400px]">
           <AuthIntro />
-          <section className="motion-safe:animate-scale-in w-full max-w-[440px] justify-self-center lg:justify-self-end">
-            <div className="relative overflow-hidden rounded-lg border border-white/12 bg-zinc-950/88 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.62)] backdrop-blur-2xl sm:p-6">
-              <div
-                aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent"
-              />
-              <AuthPanelHeader />
-              {useCustomFlow ? (
-                <CustomMountlineSignIn redirectUrl={redirectUrl} />
-              ) : (
-                <StableClerkSignIn redirectUrl={redirectUrl} />
-              )}
-            </div>
+          <section className="mt-9 rounded-lg border border-border bg-card p-5 shadow-[0_24px_60px_-24px_var(--shadow-color)] sm:p-6 motion-safe:animate-[fade-up_700ms_cubic-bezier(0.16,1,0.3,1)_120ms_both]">
+            <AuthPanelHeader />
+            {useCustomFlow ? (
+              <CustomMountlineSignIn redirectUrl={redirectUrl} />
+            ) : (
+              <StableClerkSignIn redirectUrl={redirectUrl} />
+            )}
           </section>
         </div>
-        <AuthFooter />
       </main>
+      <div className="mountline-id__band relative h-24 border-t border-border sm:h-32" aria-hidden="true">
+        <GlyphField className="block h-full w-full font-mono" />
+      </div>
+      <AuthFooter />
     </div>
-  )
-}
-
-function AuthBackground() {
-  return (
-    <>
-      <div className="absolute inset-0 bg-background" />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 opacity-[0.17]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)",
-          backgroundSize: "42px 42px",
-          maskImage: "radial-gradient(circle at 52% 38%, black 0%, transparent 72%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 72% 18%, rgba(255,255,255,0.075), transparent 30%), radial-gradient(circle at 16% 82%, rgba(255,255,255,0.055), transparent 28%), linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.84) 86%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="auth-vignette pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_48%,rgba(0,0,0,0.72)_100%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="motion-safe:animate-glow-pulse absolute left-[-20%] right-[-20%] top-[22%] hidden h-px bg-gradient-to-r from-transparent via-white/16 to-transparent lg:block"
-      />
-    </>
   )
 }
 
 function AuthIntro() {
   return (
-    <section className="motion-safe:animate-fade-up mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
-      <div className="flex justify-center lg:justify-start">
-        <MountlineLogo
-          size="lg"
-          showWordmark
-          className="text-foreground"
-        />
-      </div>
-
-      <p className="mt-10 text-xs font-medium uppercase tracking-[0.28em] text-zinc-500">
-        MOUNTLINE ID
-      </p>
-      <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.45rem] lg:leading-[0.98]">
-        One account. Every Mountline workspace.
-      </h1>
-      <p className="mx-auto mt-5 max-w-lg text-pretty text-base leading-7 text-zinc-400 sm:text-lg lg:mx-0">
-        Sign in to continue to your team dashboard or client portal.
-      </p>
-
-      <div className="mx-auto mt-9 h-px max-w-md bg-gradient-to-r from-transparent via-white/18 to-transparent lg:mx-0 lg:bg-gradient-to-r lg:from-white/24 lg:via-white/8 lg:to-transparent" />
-
-      <p className="mt-5 inline-flex items-center gap-2 text-sm text-zinc-500">
-        <LockKeyhole className="size-4 text-zinc-400" />
-        Secure access powered by Clerk.
+    <section className="text-center motion-safe:animate-[fade-up_700ms_cubic-bezier(0.16,1,0.3,1)_both]">
+      <p className="ml-eyebrow">Mountline ID</p>
+      <h1 className="font-display mt-4 text-balance text-[2.6rem] leading-[1.05] sm:text-5xl">Sign in to Mountline</h1>
+      <p className="mx-auto mt-4 max-w-sm text-pretty text-[15px] leading-6 text-muted-foreground">
+        One account for your team dashboard and client portal.
       </p>
     </section>
   )
@@ -142,14 +91,9 @@ function AuthIntro() {
 
 function AuthPanelHeader() {
   return (
-    <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-      <div>
-        <p className="text-sm font-medium text-white">Mountline ID</p>
-        <p className="mt-1 text-xs text-zinc-500">Unified workspace access</p>
-      </div>
-      <div className="flex size-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.035]">
-        <LockKeyhole className="size-4 text-zinc-300" />
-      </div>
+    <div className="mb-5 flex items-center justify-between gap-4 border-b border-border pb-4">
+      <p className="ml-eyebrow text-foreground">Continue with email</p>
+      <LockKeyhole className="size-3.5 text-muted-foreground" aria-hidden="true" />
     </div>
   )
 }
@@ -387,7 +331,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
 
   if (!isLoaded) {
     return (
-      <div className="flex min-h-[268px] items-center justify-center text-sm text-zinc-500">
+      <div className="flex min-h-[200px] items-center justify-center text-sm text-muted-foreground">
         <Loader2 className="mr-2 size-4 animate-spin" />
         Loading Mountline ID
       </div>
@@ -400,7 +344,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
         <form onSubmit={handleIdentifierSubmit} className="space-y-4">
           <FieldLabel htmlFor="mountline-id-email">Email</FieldLabel>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
+            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               id="mountline-id-email"
               name="email"
@@ -441,7 +385,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       {step === "code" && (
         <form onSubmit={handleCodeSubmit} className="space-y-4">
           <StepBackButton onClick={goBackToIdentifier} disabled={isSubmitting} label={email} />
-          <p className="text-sm leading-6 text-zinc-400">
+          <p className="text-sm leading-6 text-muted-foreground">
             Enter the code sent to {safeIdentifier || email}.
           </p>
           <FieldLabel htmlFor="mountline-id-code">Verification code</FieldLabel>
@@ -464,7 +408,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       {step === "secondFactor" && (
         <form onSubmit={handleSecondFactorSubmit} className="space-y-4">
           <StepBackButton onClick={goBackToIdentifier} disabled={isSubmitting} label={email} />
-          <p className="text-sm leading-6 text-zinc-400">
+          <p className="text-sm leading-6 text-muted-foreground">
             Enter the additional verification code
             {safeIdentifier ? ` sent to ${safeIdentifier}` : ""}.
           </p>
@@ -488,9 +432,9 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       {step === "unsupported" && (
         <div className="space-y-4">
           <StepBackButton onClick={goBackToIdentifier} disabled={isSubmitting} label="Try another account" />
-          <div className="rounded-md border border-white/10 bg-white/[0.035] p-4">
-            <p className="text-sm font-medium text-white">Use the stable sign-in flow</p>
-            <p className="mt-2 text-sm leading-6 text-zinc-400">
+          <div className="rounded-md border border-border bg-surface-muted p-4">
+            <p className="text-sm font-medium text-foreground">Use the stable sign-in flow</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
               {handoffReason || "This account requires an additional Clerk-managed step."}
             </p>
           </div>
@@ -504,11 +448,9 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       {oauthFactors.length > 0 && step === "identifier" && (
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-600">
-              Or continue with
-            </span>
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-border" />
+            <span className="ml-eyebrow">Or continue with</span>
+            <div className="h-px flex-1 bg-border" />
           </div>
           <div className="grid gap-2">
             {oauthFactors.map((factor) => (
@@ -517,7 +459,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
                 type="button"
                 onClick={() => handleOauth(factor.strategy)}
                 disabled={isSubmitting}
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.035] px-4 text-sm font-medium text-white transition hover:border-white/20 hover:bg-white/[0.065] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 disabled:cursor-not-allowed disabled:opacity-55"
+                className="ml-pill ml-pill-line w-full min-h-11"
               >
                 {oauthLabels[factor.strategy] || factor.strategy.replace("oauth_", "")}
               </button>
@@ -526,9 +468,9 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
         </div>
       )}
 
-      <p className="text-xs leading-5 text-zinc-600">
-        Mountline ID uses the authentication methods configured for this workspace.
-        <Link href={fallbackHref} className="ml-1 text-zinc-400 underline-offset-4 hover:text-white hover:underline">
+      <p className="text-xs leading-5 text-muted-foreground">
+        Mountline ID uses the sign-in methods configured for this workspace.
+        <Link href={fallbackHref} className="ml-1 text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
           Use another sign-in method.
         </Link>
       </p>
@@ -560,24 +502,24 @@ function StableClerkSignIn({ redirectUrl }: { redirectUrl: string }) {
             headerTitle: "!hidden",
             headerSubtitle: "!hidden",
             socialButtonsBlockButton:
-              "!h-11 !rounded-md !border !border-white/10 !bg-white/[0.035] !text-white !shadow-none transition-all hover:!border-white/20 hover:!bg-white/[0.065] focus:!ring-2 focus:!ring-white/20",
-            socialButtonsBlockButtonText: "!text-sm !font-medium !text-zinc-100",
+              "!h-11 !rounded-full !border !border-border-strong !bg-transparent !text-foreground !shadow-none transition-colors hover:!bg-hover",
+            socialButtonsBlockButtonText: "!text-sm !font-medium !text-foreground",
             formFieldLabel:
-              "!mb-2 !text-xs !font-medium !uppercase !tracking-[0.14em] !text-zinc-400",
+              "!mb-2 !font-mono !text-[11px] !font-normal !uppercase !tracking-[0.08em] !text-muted-foreground",
             formFieldInput:
-              "!h-11 !rounded-md !border !border-white/10 !bg-black/35 !px-3 !text-base !text-white !shadow-none placeholder:!text-zinc-600 hover:!border-white/18 focus:!border-white/35 focus:!ring-2 focus:!ring-white/10",
+              "!h-11 !rounded-lg !border !border-input !bg-input-background !px-3.5 !text-base !text-foreground !shadow-none placeholder:!text-muted-foreground hover:!border-border-strong focus:!border-muted-foreground focus:!ring-[3px] focus:!ring-[rgb(228_168_83/0.2)]",
             formFieldInputGroup:
-              "!h-11 !rounded-md !border !border-white/10 !bg-black/35",
+              "!h-11 !rounded-lg !border !border-input !bg-input-background",
             formButtonPrimary:
-              "!h-11 !rounded-md !bg-white !text-sm !font-semibold !text-black !shadow-none transition-all hover:!-translate-y-0.5 hover:!bg-zinc-200 focus:!ring-2 focus:!ring-white/30 active:!translate-y-0",
+              "!h-11 !rounded-full !bg-foreground !font-mono !text-[11px] !font-medium !uppercase !tracking-[0.08em] !text-background !shadow-none transition-opacity hover:!opacity-90",
             footerAction: "!hidden",
-            footerActionLink: "!font-medium !text-white hover:!text-zinc-200",
+            footerActionLink: "!font-medium !text-foreground",
             identityPreview:
-              "!rounded-md !border !border-white/10 !bg-white/[0.035] !text-white",
+              "!rounded-lg !border !border-border !bg-surface-muted !text-foreground",
             alert:
-              "!rounded-md !border !border-red-400/25 !bg-red-500/10 !text-red-100",
-            dividerLine: "!bg-white/10",
-            dividerText: "!text-xs !font-medium !text-zinc-500",
+              "!rounded-lg !border !border-error-border !bg-error-soft !text-error-foreground",
+            dividerLine: "!bg-border",
+            dividerText: "!font-mono !text-[11px] !uppercase !tracking-[0.08em] !text-muted-foreground",
           },
         }}
       />
@@ -587,25 +529,24 @@ function StableClerkSignIn({ redirectUrl }: { redirectUrl: string }) {
 
 function AuthFooter() {
   return (
-    <footer className="flex flex-col gap-4 border-t border-white/10 pt-5 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-      <Link href="/" className="inline-flex items-center gap-2 transition-colors hover:text-white">
-        <ArrowLeft className="size-3.5" />
-        Back to Mountline Studio
-      </Link>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-        <a
-          href="mailto:hello@mountline.dev?subject=Privacy%20request"
-          className="transition-colors hover:text-white"
-        >
-          Privacy
-        </a>
-        <a
-          href="mailto:hello@mountline.dev?subject=Mountline%20ID%20support"
-          className="inline-flex items-center gap-1.5 transition-colors hover:text-white"
-        >
-          <HelpCircle className="size-3.5" />
-          Support
-        </a>
+    <footer className="relative z-10 border-t border-border">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-5 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <Link href="/" className="inline-flex items-center gap-2 transition-colors hover:text-foreground">
+          <ArrowLeft className="size-3.5" />
+          Back to mountline.dev
+        </Link>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <a href="mailto:hello@mountline.dev?subject=Privacy%20request" className="transition-colors hover:text-foreground">
+            Privacy
+          </a>
+          <a
+            href="mailto:hello@mountline.dev?subject=Mountline%20ID%20support"
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+          >
+            <HelpCircle className="size-3.5" />
+            Support
+          </a>
+        </div>
       </div>
     </footer>
   )
@@ -613,10 +554,7 @@ function AuthFooter() {
 
 function FieldLabel({ children, htmlFor }: { children: string; htmlFor: string }) {
   return (
-    <label
-      htmlFor={htmlFor}
-      className="block text-xs font-medium uppercase tracking-[0.14em] text-zinc-400"
-    >
+    <label htmlFor={htmlFor} className="ml-eyebrow block">
       {children}
     </label>
   )
@@ -651,7 +589,7 @@ function StepBackButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex min-h-9 max-w-full items-center gap-2 text-left text-sm text-zinc-400 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+      className="inline-flex min-h-9 max-w-full items-center gap-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-55"
     >
       <ChevronLeft className="size-4 shrink-0" />
       <span className="truncate">{label}</span>
@@ -663,7 +601,7 @@ function ErrorMessage({ message }: { message: string }) {
   if (!message) return null
 
   return (
-    <div role="alert" className="rounded-md border border-red-400/25 bg-red-500/10 px-3 py-2 text-sm text-red-100">
+    <div role="alert" className="rounded-lg border border-error-border bg-error-soft px-3.5 py-2.5 text-sm leading-5 text-error-foreground">
       {message}
     </div>
   )
@@ -697,11 +635,10 @@ function isOauthFactor(factor: SignInFirstFactor): factor is OauthFactor {
 }
 
 function inputClassName(extra = "") {
-  return `min-h-11 w-full rounded-md border border-white/10 bg-black/35 px-3 text-base text-white shadow-none transition placeholder:text-zinc-600 hover:border-white/18 focus:border-white/35 focus:outline-none focus:ring-2 focus:ring-white/10 disabled:cursor-not-allowed disabled:opacity-55 ${extra}`
+  return `ml-field-input disabled:cursor-not-allowed disabled:opacity-55 ${extra}`
 }
 
-const buttonClassName =
-  "inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-white px-4 text-sm font-semibold text-black transition hover:-translate-y-0.5 hover:bg-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0"
+const buttonClassName = "ml-pill ml-pill-solid w-full min-h-11"
 
 function getClerkErrorMessage(error: unknown) {
   if (typeof error === "object" && error !== null && "errors" in error) {

@@ -1,0 +1,24 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserProfile/UserProfileDeleteAccountSection.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Delete account",
+        "location": {
+          "startingColumn": 15,
+          "startingLine": 22
+        }
+      },
+      {
+        "comment": "",
+        "key": "DELETE ACCOUNT",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 30
+        }
+      }
+    ]
+  },
+  "version": 1
+}

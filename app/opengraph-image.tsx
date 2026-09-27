@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og"
+import { receptionistDemo } from "@/lib/receptionist/demo"
 
-export const alt = "Mountline — AI receptionists for the calls your team cannot take"
+export const alt = "Mountline — AI receptionists for service businesses"
 export const size = {
   width: 1200,
   height: 630,
@@ -12,189 +13,59 @@ export default function OpenGraphImage() {
     (
       <div
         style={{
-          position: "relative",
           display: "flex",
           width: "100%",
           height: "100%",
-          overflow: "hidden",
-          background: "#080706",
-          color: "#f7f1e7",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "72px 80px 64px",
+          background: "#0a0a09",
+          color: "#ece8e1",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: -220,
-            right: -120,
-            display: "flex",
-            width: 620,
-            height: 620,
-            borderRadius: 999,
-            background:
-              "radial-gradient(circle, rgba(197,107,61,.58), rgba(197,107,61,0) 68%)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            right: 76,
-            bottom: 56,
-            display: "flex",
-            width: 360,
-            height: 214,
-            border: "1px solid rgba(247,241,231,.2)",
-            background:
-              "linear-gradient(135deg, rgba(224,165,99,.28), rgba(20,18,15,.92) 48%, rgba(242,230,213,.14))",
-            boxShadow: "0 28px 80px rgba(0,0,0,.38)",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 30, letterSpacing: -1 }}>
+          <svg width="34" height="34" viewBox="0 0 180 180" fill="none">
+            <path d="M90 34 145 137H35L90 34Z" stroke="#ece8e1" strokeWidth="9" strokeLinejoin="round" />
+            <path d="M90 146V29" stroke="#ece8e1" strokeWidth="12" strokeLinecap="round" />
+            <path d="m70 57 20-28 20 28" stroke="#ece8e1" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span style={{ display: "flex" }}>mountline</span>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <div
             style={{
-              position: "absolute",
-              inset: 18,
               display: "flex",
               flexDirection: "column",
-              justifyContent: "space-between",
-              padding: 22,
-              border: "1px solid rgba(247,241,231,.16)",
+              fontSize: 76,
+              letterSpacing: -3,
+              lineHeight: 1.04,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                color: "rgba(247,241,231,.68)",
-                fontSize: 14,
-                letterSpacing: 2,
-                textTransform: "uppercase",
-              }}
-            >
-              <span
-                style={{
-                  display: "flex",
-                  width: 8,
-                  height: 8,
-                  borderRadius: 999,
-                  background: "#e0a563",
-                }}
-              />
-              Mountline AI reception
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-              }}
-            >
-              <span
-                style={{
-                  display: "flex",
-                  width: "88%",
-                  height: 1,
-                  background: "rgba(247,241,231,.34)",
-                }}
-              />
-              <span
-                style={{
-                  display: "flex",
-                  width: "66%",
-                  height: 1,
-                  background: "rgba(247,241,231,.22)",
-                }}
-              />
-              <span
-                style={{
-                  display: "flex",
-                  width: "76%",
-                  height: 1,
-                  background: "rgba(247,241,231,.22)",
-                }}
-              />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                color: "rgba(247,241,231,.68)",
-                fontSize: 14,
-              }}
-            >
-              <span style={{ display: "flex" }}>Service request</span>
-              <span style={{ display: "flex", color: "#e0a563" }}>→</span>
-              <span style={{ display: "flex" }}>Team follow-up</span>
-            </div>
+            <span style={{ display: "flex" }}>AI receptionists for</span>
+            <span style={{ display: "flex" }}>service businesses.</span>
+          </div>
+          <div style={{ display: "flex", marginTop: 28, color: "#a4a09a", fontSize: 28 }}>
+            Mountline answers the calls your team can’t get to.
           </div>
         </div>
 
         <div
           style={{
-            position: "relative",
             display: "flex",
-            width: "100%",
-            flexDirection: "column",
             justifyContent: "space-between",
-            padding: "64px 72px 58px",
+            paddingTop: 24,
+            borderTop: "1px solid rgba(236,232,225,.14)",
+            color: "#817e78",
+            fontSize: 22,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 15,
-              fontSize: 28,
-              fontWeight: 700,
-            }}
-          >
-            <span style={{ display: "flex", color: "#e0a563" }}>△</span>
-            <span style={{ display: "flex" }}>mountline</span>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div
-              style={{
-                display: "flex",
-                maxWidth: 830,
-                flexDirection: "column",
-                fontSize: 66,
-                fontWeight: 700,
-                letterSpacing: -4.2,
-                lineHeight: 0.96,
-              }}
-            >
-              <span style={{ display: "flex" }}>AI receptionists</span>
-              <span style={{ display: "flex", color: "#e6b074" }}>
-                for the calls
-              </span>
-              <span style={{ display: "flex" }}>you can’t take.</span>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                marginTop: 30,
-                color: "rgba(247,241,231,.64)",
-                fontSize: 24,
-              }}
-            >
-              Try the HVAC demo. Build a focused pilot.
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              color: "rgba(247,241,231,.58)",
-              fontSize: 18,
-              letterSpacing: 0.5,
-            }}
-          >
-            <span style={{ display: "flex" }}>Founder-led in Keller, Texas.</span>
-          </div>
+          <span style={{ display: "flex" }}>mountline.dev</span>
+          <span style={{ display: "flex", gap: 12 }}>
+            <span style={{ display: "flex", color: "#e2a24a" }}>●</span>
+            Demo line {receptionistDemo.displayPhone}
+          </span>
         </div>
       </div>
     ),

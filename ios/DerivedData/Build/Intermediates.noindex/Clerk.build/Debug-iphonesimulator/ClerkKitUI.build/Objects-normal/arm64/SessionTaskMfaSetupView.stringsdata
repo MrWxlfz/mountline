@@ -1,0 +1,40 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SessionTask/SessionTaskMfaSetupView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Set up two-step verification",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 57
+        }
+      },
+      {
+        "comment": "",
+        "key": "Choose which method you prefer to protect your account with an extra layer of security",
+        "location": {
+          "startingColumn": 46,
+          "startingLine": 58
+        }
+      },
+      {
+        "comment": "",
+        "key": "SMS code",
+        "location": {
+          "startingColumn": 66,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "Authenticator application",
+        "location": {
+          "startingColumn": 64,
+          "startingLine": 78
+        }
+      }
+    ]
+  },
+  "version": 1
+}

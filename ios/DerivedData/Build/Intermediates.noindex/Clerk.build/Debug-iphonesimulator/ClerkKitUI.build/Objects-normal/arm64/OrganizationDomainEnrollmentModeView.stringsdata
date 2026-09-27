@@ -1,0 +1,104 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Organization/OrganizationDomainEnrollmentModeView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Choose how users from this domain can join the organization.",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 45
+        }
+      },
+      {
+        "comment": "",
+        "key": "Delete pending invitations and suggestions",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 61
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Update %@",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 103
+        }
+      },
+      {
+        "comment": "",
+        "key": "Selected",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 179
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 79,
+          "startingLine": 179
+        }
+      },
+      {
+        "comment": "",
+        "key": "No automatic enrollment",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 225
+        }
+      },
+      {
+        "comment": "",
+        "key": "Users can only be invited manually to the organization.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 226
+        }
+      },
+      {
+        "comment": "",
+        "key": "Automatic invitations",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 230
+        }
+      },
+      {
+        "comment": "",
+        "key": "Users are automatically invited to join the organization when they sign up and can join anytime.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 231
+        }
+      },
+      {
+        "comment": "",
+        "key": "Automatic suggestions",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 235
+        }
+      },
+      {
+        "comment": "",
+        "key": "Users receive a suggestion to request to join, but must be approved by an admin before they are able to join the organization.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 236
+        }
+      }
+    ]
+  },
+  "version": 1
+}

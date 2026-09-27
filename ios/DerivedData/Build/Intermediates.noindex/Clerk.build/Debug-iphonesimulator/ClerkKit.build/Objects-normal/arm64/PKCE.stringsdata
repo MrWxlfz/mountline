@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Utils/PKCE.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Unable to generate secure random data.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 35
+        }
+      }
+    ]
+  },
+  "version": 1
+}

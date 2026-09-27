@@ -1,0 +1,40 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/UserProfile/UserProfileMfaAddSmsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Select an existing phone number to register for SMS code two-step verification or add a new one.",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 51
+        }
+      },
+      {
+        "comment": "",
+        "key": "Continue",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 77
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add phone number",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 94
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add SMS code verification",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 118
+        }
+      }
+    ]
+  },
+  "version": 1
+}

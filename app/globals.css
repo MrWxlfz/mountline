@@ -12,60 +12,46 @@
   }
 }
 
-/* 
-  NORTHLINE BRAND SYSTEM
-  A premium digital studio aesthetic
-  Clean, bold, motion-rich, high-taste
-*/
+/* Mountline design tokens. Public marketing pages carry their own fixed palette in homepage.css. */
 
 /* ============================================
-   LIGHT MODE - Editorial & Premium
+   MOUNTLINE — LIGHT (warm paper)
    ============================================ */
 :root {
-  /* Core backgrounds */
-  --background: oklch(0.985 0.003 85);
-  --background-secondary: oklch(0.98 0.002 85);
-  --foreground: oklch(0.18 0.02 265);
-  --foreground-subtle: oklch(0.43 0.012 265);
-  
-  /* Surfaces */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 265);
-  --card-elevated: oklch(1 0 0);
-  --surface: oklch(0.997 0.001 85);
-  --surface-elevated: oklch(1 0 0);
-  --surface-muted: oklch(0.965 0.004 85);
-  
-  /* Popover */
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 265);
-  
-  /* Primary - Deep charcoal/navy */
-  --primary: oklch(0.20 0.025 265);
-  --primary-foreground: oklch(0.98 0 0);
-  
-  /* Secondary */
-  --secondary: oklch(0.96 0.003 85);
-  --secondary-foreground: oklch(0.30 0.02 265);
-  
-  /* Muted */
-  --muted: oklch(0.94 0.004 85);
-  --muted-foreground: oklch(0.50 0.01 265);
-  
-  /* Accent - precise graphite rather than corporate blue */
-  --accent: oklch(0.24 0.018 265);
-  --accent-foreground: oklch(0.98 0 0);
-  --accent-glow: oklch(0.24 0.018 265 / 0.12);
-  
-  /* Borders */
-  --border: oklch(0.92 0.004 85);
-  --border-strong: oklch(0.88 0.006 85);
-  --input: oklch(0.94 0.004 85);
-  --input-background: oklch(1 0 0);
-  --hover: oklch(0.952 0.004 85);
-  --selected: oklch(0.925 0.006 85);
-  --ring: oklch(0.38 0.02 265);
-  --focus-ring: oklch(0.38 0.02 265);
+  --background: #f6f4ef;
+  --background-secondary: #efece5;
+  --foreground: #161614;
+  --foreground-subtle: #5f5d57;
+
+  --card: #fbfaf7;
+  --card-foreground: #161614;
+  --card-elevated: #ffffff;
+  --surface: #f9f7f3;
+  --surface-elevated: #ffffff;
+  --surface-muted: #edeae3;
+
+  --popover: #ffffff;
+  --popover-foreground: #161614;
+
+  --primary: #161614;
+  --primary-foreground: #f6f4ef;
+  --secondary: #edeae3;
+  --secondary-foreground: #2d2c29;
+  --muted: #ebe8e1;
+  --muted-foreground: #6b6963;
+
+  --accent: #1f1e1b;
+  --accent-foreground: #f6f4ef;
+  --accent-glow: rgb(22 22 20 / 0.08);
+
+  --border: #e2dfd7;
+  --border-strong: #d1cdc3;
+  --input: #dedad1;
+  --input-background: #fdfcfa;
+  --hover: #edeae3;
+  --selected: #e4e0d7;
+  --ring: #a8701f;
+  --focus-ring: #a8701f;
 
   /* Operational states */
   --success: oklch(0.48 0.14 145);
@@ -86,19 +72,19 @@
   --information-border: oklch(0.81 0.055 250);
 
   /* Utility surfaces */
-  --shadow-color: oklch(0.18 0.02 265 / 0.09);
-  --grid-line: oklch(0.88 0.005 85 / 0.58);
-  --code-background: oklch(0.955 0.004 85);
-  --overlay: oklch(0.12 0.012 265 / 0.62);
+  --shadow-color: rgb(22 22 20 / 0.08);
+  --grid-line: rgb(22 22 20 / 0.07);
+  --code-background: #efece5;
+  --overlay: rgb(22 22 20 / 0.5);
 
   --destructive: var(--error);
   --destructive-foreground: oklch(0.985 0 0);
-  --chart-1: oklch(0.31 0.02 265);
+  --chart-1: #2d2c29;
   --chart-2: oklch(0.52 0.12 145);
-  --chart-3: oklch(0.66 0.13 76);
+  --chart-3: #c58a33;
   --chart-4: oklch(0.52 0.09 250);
   --chart-5: oklch(0.58 0.12 25);
-  --sidebar: oklch(0.995 0.001 85);
+  --sidebar: #f1efe9;
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--foreground);
   --sidebar-primary-foreground: var(--background);
@@ -106,68 +92,58 @@
   --sidebar-accent-foreground: var(--foreground);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--focus-ring);
-  
-  /* Mountline Brand */
-  --mountline-dark: oklch(0.16 0.025 265);
-  --mountline-charcoal: oklch(0.28 0.02 265);
-  --mountline-blue: oklch(0.60 0.20 250);
-  --mountline-cream: oklch(0.985 0.003 85);
-  
-  /* Glass effect */
-  --glass-bg: oklch(1 0 0 / 0.85);
-  --glass-border: oklch(0.92 0.004 85 / 0.8);
-  
-  --radius: 0.625rem;
+
+  /* Mountline brand */
+  --mountline-dark: #161614;
+  --mountline-charcoal: #3a3935;
+  --mountline-blue: #c58a33;
+  --mountline-cream: #f6f4ef;
+  --mountline-amber: #b27a2a;
+
+  --glass-bg: rgb(246 244 239 / 0.86);
+  --glass-border: rgb(226 223 215 / 0.8);
+
+  --radius: 0.5rem;
 }
 
 /* ============================================
-   DARK MODE - True Black, Vercel-grade
+   MOUNTLINE — DARK (warm near-black)
    ============================================ */
 .dark {
-  /* Core backgrounds - true black */
-  --background: oklch(0 0 0);
-  --background-secondary: oklch(0.06 0.005 265);
-  --foreground: oklch(0.93 0 0);
-  --foreground-subtle: oklch(0.66 0.006 265);
-  
-  /* Surfaces - barely lifted from black */
-  --card: oklch(0.08 0.005 265);
-  --card-foreground: oklch(0.93 0 0);
-  --card-elevated: oklch(0.10 0.005 265);
-  --surface: oklch(0.065 0.004 265);
-  --surface-elevated: oklch(0.095 0.005 265);
-  --surface-muted: oklch(0.13 0.005 265);
-  
-  /* Popover */
-  --popover: oklch(0.10 0.005 265);
-  --popover-foreground: oklch(0.93 0 0);
-  
-  /* Primary - White on black */
-  --primary: oklch(0.93 0 0);
-  --primary-foreground: oklch(0 0 0);
-  
-  /* Secondary */
-  --secondary: oklch(0.12 0.005 265);
-  --secondary-foreground: oklch(0.80 0 0);
-  
-  /* Muted */
-  --muted: oklch(0.14 0.005 265);
-  --muted-foreground: oklch(0.50 0 0);
-  
-  /* Accent - Clean white (no blue) */
-  --accent: oklch(0.93 0 0);
-  --accent-foreground: oklch(0 0 0);
-  --accent-glow: oklch(1 0 0 / 0.06);
-  
-  /* Borders - very subtle */
-  --border: oklch(0.16 0.005 265);
-  --border-strong: oklch(0.22 0.005 265);
-  --input: oklch(0.10 0.005 265);
-  --input-background: oklch(0.075 0.004 265);
-  --hover: oklch(0.145 0.005 265);
-  --selected: oklch(0.19 0.006 265);
-  --ring: oklch(0.50 0 0);
-  --focus-ring: oklch(0.72 0.004 265);
+  --background: #0d0d0c;
+  --background-secondary: #111110;
+  --foreground: #edebe5;
+  --foreground-subtle: #a19f99;
+
+  --card: #121211;
+  --card-foreground: #edebe5;
+  --card-elevated: #161615;
+  --surface: #0f0f0e;
+  --surface-elevated: #151514;
+  --surface-muted: #1b1b19;
+
+  --popover: #161615;
+  --popover-foreground: #edebe5;
+
+  --primary: #edebe5;
+  --primary-foreground: #0d0d0c;
+  --secondary: #1a1a18;
+  --secondary-foreground: #cfcdc6;
+  --muted: #1a1a18;
+  --muted-foreground: #8b8983;
+
+  --accent: #edebe5;
+  --accent-foreground: #0d0d0c;
+  --accent-glow: rgb(237 235 229 / 0.05);
+
+  --border: #232321;
+  --border-strong: #31302d;
+  --input: #2a2927;
+  --input-background: #111110;
+  --hover: #1a1a18;
+  --selected: #22221f;
+  --ring: #e4a853;
+  --focus-ring: #e4a853;
 
   /* Operational states */
   --success: oklch(0.72 0.16 145);
@@ -188,19 +164,19 @@
   --information-border: oklch(0.39 0.07 250);
 
   /* Utility surfaces */
-  --shadow-color: oklch(0 0 0 / 0.42);
-  --grid-line: oklch(0.22 0.005 265 / 0.66);
-  --code-background: oklch(0.055 0.004 265);
-  --overlay: oklch(0 0 0 / 0.72);
+  --shadow-color: rgb(0 0 0 / 0.45);
+  --grid-line: rgb(237 235 229 / 0.06);
+  --code-background: #0a0a09;
+  --overlay: rgb(0 0 0 / 0.7);
 
   --destructive: var(--error);
   --destructive-foreground: oklch(0.985 0 0);
-  --chart-1: oklch(0.80 0.006 265);
+  --chart-1: #cfcdc6;
   --chart-2: oklch(0.70 0.14 145);
-  --chart-3: oklch(0.78 0.13 82);
+  --chart-3: #e4a853;
   --chart-4: oklch(0.70 0.10 250);
   --chart-5: oklch(0.72 0.14 25);
-  --sidebar: oklch(0.055 0.004 265);
+  --sidebar: #0f0f0e;
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--foreground);
   --sidebar-primary-foreground: var(--background);
@@ -208,45 +184,46 @@
   --sidebar-accent-foreground: var(--foreground);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--focus-ring);
-  
-  /* Mountline Brand - Dark mode */
-  --mountline-dark: oklch(0.93 0 0);
-  --mountline-charcoal: oklch(0.70 0 0);
-  --mountline-blue: oklch(0.93 0 0);
-  --mountline-cream: oklch(0.06 0.005 265);
-  
-  /* Glass effect */
-  --glass-bg: oklch(0.04 0.005 265 / 0.92);
-  --glass-border: oklch(0.16 0.005 265 / 0.8);
+
+  /* Mountline brand */
+  --mountline-dark: #edebe5;
+  --mountline-charcoal: #a19f99;
+  --mountline-blue: #e4a853;
+  --mountline-cream: #0d0d0c;
+  --mountline-amber: #e4a853;
+
+  --glass-bg: rgb(13 13 12 / 0.86);
+  --glass-border: rgb(35 35 33 / 0.8);
 }
 
 /* Dark mode scrollbar */
 .dark {
-  scrollbar-color: oklch(0.20 0.005 265) oklch(0 0 0);
+  scrollbar-color: var(--border-strong) var(--background);
 }
 
 .dark::-webkit-scrollbar-track {
-  background: oklch(0 0 0);
+  background: var(--background);
 }
 
 .dark::-webkit-scrollbar-thumb {
-  background: oklch(0.20 0.005 265);
+  background: var(--border-strong);
 }
 
 /* Selection */
 ::selection {
-  background-color: oklch(0.60 0.20 250 / 0.25);
-  color: oklch(0.18 0.02 265);
+  background-color: rgb(197 138 51 / 0.24);
+  color: var(--foreground);
 }
 
 .dark ::selection {
-  background-color: oklch(0.62 0.18 250 / 0.3);
-  color: oklch(0.96 0.003 85);
+  background-color: rgb(228 168 83 / 0.3);
+  color: #fff;
 }
 
 @theme inline {
   --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+  --font-serif: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
   
   --color-background: var(--background);
   --color-background-secondary: var(--background-secondary);
@@ -315,6 +292,7 @@
   --color-mountline-charcoal: var(--mountline-charcoal);
   --color-mountline-blue: var(--mountline-blue);
   --color-mountline-cream: var(--mountline-cream);
+  --color-mountline-amber: var(--mountline-amber);
   
   /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
@@ -827,5 +805,81 @@ html {
 
   .luke-cta-grid {
     animation: none;
+  }
+}
+
+/* ============================================
+   MOUNTLINE — shared app primitives
+   Used by Mountline ID, the client portal, and account states.
+   ============================================ */
+@layer components {
+  .font-display {
+    font-family: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+    font-weight: 360;
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
+  }
+
+  .ml-eyebrow {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .ml-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, opacity 180ms ease, transform 180ms ease;
+  }
+  .ml-pill:active { transform: translateY(1px); }
+  .ml-pill:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
+  .ml-pill svg { width: 14px; height: 14px; transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .ml-pill:hover svg:last-child { transform: translateX(2px); }
+  .ml-pill-solid { background: var(--foreground); color: var(--background); }
+  .ml-pill-solid:hover { opacity: 0.88; }
+  .ml-pill-line { border-color: var(--border-strong); color: var(--foreground); }
+  .ml-pill-line:hover { background: var(--hover); border-color: var(--muted-foreground); }
+
+  .ml-field-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid var(--input);
+    border-radius: 8px;
+    background: var(--input-background);
+    color: var(--foreground);
+    font-size: 16px;
+    line-height: 1.45;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .ml-field-input::placeholder { color: var(--muted-foreground); }
+  .ml-field-input:hover { border-color: var(--border-strong); }
+  .ml-field-input:focus { outline: none; border-color: var(--muted-foreground); box-shadow: 0 0 0 3px rgb(228 168 83 / 0.2); }
+
+  /* Glyph band colours on themed pages. */
+  .mountline-id__band { --glyph-rgb: 22, 22, 20; --glyph-accent-rgb: 168, 112, 31; background: var(--surface); }
+  .dark .mountline-id__band { --glyph-rgb: 237, 235, 229; --glyph-accent-rgb: 228, 168, 83; }
+
+  /* Employee dashboard: page titles share the serif display face. */
+  .ml-dashboard main h1 {
+    font-family: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+    font-weight: 360;
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
   }
 }

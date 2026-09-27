@@ -1,0 +1,104 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "74A0D1D9-922D-4429-B8B3-C0D08F4CC5B6.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Settings_0_4485958E-241A-4683-AB9E-47CBFF441A61.png",
+        "timestamp" : 1790041101.007
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "0E2555A4-3C6B-4418-8311-3CD03C865FD8.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Support_0_BEAB0018-09AE-456A-AFAF-702A5A1DA624.png",
+        "timestamp" : 1790041098.046
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "4610E62B-10E6-4DFA-A169-144D3332AD54.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Calls_0_9803D3DB-10C9-45A0-8624-BF6D56E8B7F0.png",
+        "timestamp" : 1790041095.042
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "06ABC00D-299D-4494-8D4D-90A956ECCEFE.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Projects_0_F0268CB3-AB57-4971-A55D-99764C91BF50.png",
+        "timestamp" : 1790041091.662
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "77A11C5E-620F-4CAC-BD3E-90C596A23F73.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Large type Home_0_86975C1D-9247-42B7-ABF3-E411A1CE74DD.png",
+        "timestamp" : 1790041088.436
+      }
+    ],
+    "testIdentifier" : "MountlineUITests/testLargeDynamicTypeNavigation()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mountline/MountlineUITests/MountlineUITests/testLargeDynamicTypeNavigation"
+  },
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "4C3D35DF-DF4C-4CBE-8FDA-8C8ADA17AA3C.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Transcript scrolled_0_A4E2ABF4-7E7D-4703-B35E-D5AC3B139E73.png",
+        "timestamp" : 1790041125.651
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "9CC75A40-C02E-44F7-9220-CF65DEC1A2DE.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Transcript_0_C740BEAF-7B62-4422-8684-9290D1106AD2.png",
+        "timestamp" : 1790041121.741
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "0551F8A6-2174-49DC-AA21-869C3EF50F01.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Call_0_9DB7ADA8-E20D-4624-B63D-F701E3024A85.png",
+        "timestamp" : 1790041117.021
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "3B8738BF-8CF8-43E5-8438-3B99B87C24F9.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Project_0_ED1BCF92-C06A-414A-912A-807FC92BD59B.png",
+        "timestamp" : 1790041111.757
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "338A81DA-BA13-4158-96AB-AF923D40E97C",
+        "deviceName" : "iPhone 17 Pro Max",
+        "exportedFileName" : "9B36579F-F2A0-4CCA-986C-D50F680E23CF.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Home_0_E380D95A-E894-4C04-8209-D7F3EE6A4539.png",
+        "timestamp" : 1790041106.534
+      }
+    ],
+    "testIdentifier" : "MountlineUITests/testProjectCallTranscriptAndInquiryNavigation()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mountline/MountlineUITests/MountlineUITests/testProjectCallTranscriptAndInquiryNavigation"
+  }
+]

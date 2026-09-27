@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKit/Domains/User/User.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Unable to retrieve the Apple identity token.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 351
+        }
+      }
+    ]
+  },
+  "version": 1
+}

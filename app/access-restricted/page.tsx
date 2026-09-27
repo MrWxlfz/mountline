@@ -1,43 +1,21 @@
 import Link from "next/link"
-import { ArrowLeft, LogIn } from "lucide-react"
-import { NorthlineLogo } from "@/components/northline-logo"
+import { AccountMessage, AccountShell } from "@/components/brand/account-shell"
 
 export default function AccessRestrictedPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md text-center space-y-8">
-        <NorthlineLogo size="md" showWordmark className="justify-center" />
-
-        <div className="space-y-3">
-          <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-            Access restricted
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight">
-            This area is for Mountline team members only.
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            If you are a client, sign in with Mountline ID to view assigned project
-            updates.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Mountline
-          </Link>
-          <Link
-            href="/id"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:bg-foreground/90 transition-colors"
-          >
-            <LogIn className="h-4 w-4" />
-            Mountline ID
-          </Link>
-        </div>
-      </div>
-    </main>
+    <AccountShell>
+      <AccountMessage
+        eyebrow="Access restricted"
+        title="This area is for the Mountline team"
+        actions={
+          <>
+            <Link href="/id" className="ml-pill ml-pill-solid">Sign in with Mountline ID</Link>
+            <Link href="/" className="ml-pill ml-pill-line">Back to Mountline</Link>
+          </>
+        }
+      >
+        If you’re a client, sign in with Mountline ID to see the projects assigned to you.
+      </AccountMessage>
+    </AccountShell>
   )
 }

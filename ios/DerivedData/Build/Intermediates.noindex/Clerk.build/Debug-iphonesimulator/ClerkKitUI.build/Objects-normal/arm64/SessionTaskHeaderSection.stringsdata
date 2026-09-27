@@ -1,0 +1,16 @@
+{
+  "source": "/Users/lukenordin/mountline/ios/DerivedData/SourcePackages/checkouts/clerk-ios/Sources/ClerkKitUI/Components/Auth/SessionTask/SessionTaskHeaderSection.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Two-step verification setup",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 15
+        }
+      }
+    ]
+  },
+  "version": 1
+}

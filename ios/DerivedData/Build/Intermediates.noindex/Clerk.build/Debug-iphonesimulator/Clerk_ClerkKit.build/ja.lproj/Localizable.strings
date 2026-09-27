@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>A Watch identity metadata transition is still pending.</key>
+	<string>WatchのIDメタデータの移行がまだ保留中です。</string>
+	<key>A hosted authentication session is already in progress.</key>
+	<string>ホスト型認証セッションがすでに進行中です。</string>
+	<key>A web authentication session is already in progress.</key>
+	<string>Web認証セッションがすでに進行中です。</string>
+	<key>An unknown error occurred.</key>
+	<string>不明なエラーが発生しました。</string>
+	<key>Biometric reverification challenge has expired.</key>
+	<string>生体認証による再認証のチャレンジの有効期限が切れました。</string>
+	<key>Biometric reverification did not return a matching challenge.</key>
+	<string>生体認証による再認証で、一致するチャレンジが返されませんでした。</string>
+	<key>Biometric reverification is unavailable for this session.</key>
+	<string>このセッションでは生体認証による再認証を利用できません。</string>
+	<key>Biometric reverification requires an active or pending session with a user.</key>
+	<string>生体認証による再認証には、ユーザーに紐づいたアクティブまたは保留中のセッションが必要です。</string>
+	<key>Biometric sign-in did not return a challenge.</key>
+	<string>生体認証サインインでチャレンジが返されませんでした。</string>
+	<key>Biometric sign-in is unavailable.</key>
+	<string>生体認証サインインは利用できません。</string>
+	<key>Cannot publish unresolved Watch identity metadata.</key>
+	<string>未解決のWatch IDメタデータを公開できません。</string>
+	<key>Clerk is already reconfiguring. Wait for the current reconfiguration to finish before starting another one.</key>
+	<string>Clerkはすでに再構成中です。現在の再構成が完了してから、別の再構成を開始してください。</string>
+	<key>Clerk must be configured before getting a session token.</key>
+	<string>セッショントークンを取得する前にClerkを構成する必要があります。</string>
+	<key>Client ID is unavailable.</key>
+	<string>クライアントIDを利用できません。</string>
+	<key>Conflicting Watch auth payload reused a pending version.</key>
+	<string>競合するWatch認証ペイロードが保留中のバージョンを再利用しました。</string>
+	<key>Conflicting Watch token payload reused a pending version.</key>
+	<string>競合するWatchトークンペイロードが保留中のバージョンを再利用しました。</string>
+	<key>Email address is required.</key>
+	<string>メールアドレスが必要です。</string>
+	<key>Email link sign-in is not available for this sign-in.</key>
+	<string>このサインインでは、メールリンクによるサインインを利用できません。</string>
+	<key>Hosted auth callback URL did not match the initiated redirect URL.</key>
+	<string>ホスト型認証のコールバックURLが、開始時のリダイレクトURLと一致しませんでした。</string>
+	<key>Hosted auth callback did not include a rotating token nonce.</key>
+	<string>ホスト型認証のコールバックにローテーショントークンのnonceが含まれていませんでした。</string>
+	<key>Hosted auth callback did not include the created session.</key>
+	<string>ホスト型認証のコールバックに作成されたセッションが含まれていませんでした。</string>
+	<key>Hosted auth callback state was missing or did not match the initiated state.</key>
+	<string>ホスト型認証のコールバック状態が存在しないか、開始時の状態と一致しませんでした。</string>
+	<key>Hosted auth completion could not activate the created session.</key>
+	<string>ホスト型認証の完了処理で作成されたセッションを有効化できませんでした。</string>
+	<key>Hosted auth completion could not update the current client.</key>
+	<string>ホスト型認証の完了処理で現在のクライアントを更新できませんでした。</string>
+	<key>Hosted auth completion did not include the created session.</key>
+	<string>ホスト型認証の完了処理に作成されたセッションが含まれていませんでした。</string>
+	<key>Hosted auth completion response was missing identity synchronization metadata.</key>
+	<string>ホスト型認証の完了レスポンスにID同期メタデータが含まれていませんでした。</string>
+	<key>Hosted auth creation returned an invalid response.</key>
+	<string>ホスト型認証の作成で無効なレスポンスが返されました。</string>
+	<key>Hosted auth requires a valid custom-scheme redirect URL.</key>
+	<string>ホスト型認証には、有効なカスタムスキームのリダイレクトURLが必要です。</string>
+	<key>Injected Keychain storage cannot be used with persistent shared-session adoption.</key>
+	<string>注入されたKeychainストレージは、永続的な共有セッションの採用には使用できません。</string>
+	<key>Invalid credential type.</key>
+	<string>資格情報の種類が無効です。</string>
+	<key>Isolated Clerk configuration is only available while running tests.</key>
+	<string>分離されたClerk構成は、テストの実行中のみ利用できます。</string>
+	<key>Magic link callback does not match the pending flow.</key>
+	<string>マジックリンクのコールバックが保留中のフローと一致しません。</string>
+	<key>Magic link callback is missing approval_token.</key>
+	<string>マジックリンクのコールバックにapproval_tokenがありません。</string>
+	<key>Magic link callback is missing flow_id.</key>
+	<string>マジックリンクのコールバックにflow_idがありません。</string>
+	<key>Magic link callback returned a sign-up for a sign-in flow.</key>
+	<string>マジックリンクのコールバックが、サインインフローに対するサインアップを返しました。</string>
+	<key>Magic link callback returned a ticket for a sign-up flow.</key>
+	<string>マジックリンクのコールバックが、サインアップフローに対するチケットを返しました。</string>
+	<key>Missing callback URL</key>
+	<string>コールバックURLがありません</string>
+	<key>No pending magic link flow was found.</key>
+	<string>保留中のマジックリンクフローが見つかりませんでした。</string>
+	<key>Redirect URI is missing. Unable to start email link sign-in.</key>
+	<string>リダイレクトURIがありません。メールリンクによるサインインを開始できません。</string>
+	<key>Redirect URI is missing. Unable to start email link sign-up verification.</key>
+	<string>リダイレクトURIがありません。メールリンクによるサインアップの検証を開始できません。</string>
+	<key>Redirect URL is missing or invalid. Unable to start external authentication flow.</key>
+	<string>リダイレクトURLが不足しているか無効です。外部認証フローを開始できません。</string>
+	<key>Session activation response was missing identity synchronization metadata.</key>
+	<string>セッションのアクティブ化レスポンスにID同期メタデータが含まれていませんでした。</string>
+	<key>Shared session sync requires a nonempty Keychain access group.</key>
+	<string>共有セッションの同期には、空でないKeychainアクセスグループが必要です。</string>
+	<key>Shared session sync requires a nonempty application bundle identifier.</key>
+	<string>共有セッションの同期には、空でないアプリケーションバンドル識別子が必要です。</string>
+	<key>Something went wrong. Please try again.</key>
+	<string>問題が発生しました。もう一度お試しください。</string>
+	<key>This device is no longer trusted. Sign in another way to enroll it again.</key>
+	<string>このデバイスは信頼されなくなりました。再登録するには、別の方法でサインインしてください。</string>
+	<key>Unable to clear Clerk keychain items during reconfiguration.</key>
+	<string>再構成中にClerkのKeychain項目を消去できませんでした。</string>
+	<key>Unable to delete membership: missing userId</key>
+	<string>メンバーシップを削除できません：userIdがありません</string>
+	<key>Unable to enroll a biometric credential without a bundle identifier.</key>
+	<string>バンドル識別子がないため、生体認証資格情報を登録できません。</string>
+	<key>Unable to enroll a biometric credential without a user for the current session.</key>
+	<string>現在のセッションにユーザーがいないため、生体認証資格情報を登録できません。</string>
+	<key>Unable to enroll a biometric credential without an active or pending Clerk session.</key>
+	<string>アクティブまたは保留中のClerkセッションがないため、生体認証資格情報を登録できません。</string>
+	<key>Unable to generate secure random data.</key>
+	<string>安全なランダムデータを生成できませんでした。</string>
+	<key>Unable to get the challenge for the passkey.</key>
+	<string>パスキーのチャレンジを取得できませんでした。</string>
+	<key>Unable to get the user ID for the passkey.</key>
+	<string>パスキーのユーザーIDを取得できませんでした。</string>
+	<key>Unable to get the username for the passkey.</key>
+	<string>パスキーのユーザー名を取得できませんでした。</string>
+	<key>Unable to get your Apple ID credential.</key>
+	<string>Apple IDの資格情報を取得できませんでした。</string>
+	<key>Unable to retrieve the Apple identity token.</key>
+	<string>AppleのIDトークンを取得できませんでした。</string>
+	<key>Unable to revoke a biometric credential without an active or pending Clerk session.</key>
+	<string>アクティブまたは保留中のClerkセッションがないため、生体認証資格情報を失効させることができません。</string>
+	<key>Unable to start web authentication session.</key>
+	<string>Web認証セッションを開始できませんでした。</string>
+	<key>Unable to update membership: missing userId</key>
+	<string>メンバーシップを更新できません：userIdがありません</string>
+	<key>Unable to use biometric sign-in because Native API is disabled.</key>
+	<string>Native APIが無効になっているため、生体認証サインインを利用できません。</string>
+	<key>Unable to use biometric sign-in because it is disabled.</key>
+	<string>生体認証サインインが無効になっているため、利用できません。</string>
+	<key>Unable to use biometric sign-in before the Clerk environment is loaded.</key>
+	<string>Clerk環境が読み込まれるまで、生体認証サインインを利用できません。</string>
+	<key>Unable to verify code because no first factor strategy is set.</key>
+	<string>第一要素の方式が設定されていないため、コードを検証できません。</string>
+	<key>Unable to verify code for strategy '%@'.</key>
+	<string>方式「%@」のコードを検証できません。</string>
+	<key>Watch identity metadata version is exhausted.</key>
+	<string>WatchのIDメタデータのバージョンを使い切りました。</string>
+</dict>
+</plist>

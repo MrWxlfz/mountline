@@ -3,6 +3,7 @@ import { requireNorthlineTeamMemberApi } from "@/lib/auth/team"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { leadIdSchema } from "@/lib/leads/validation"
 import { updateLeadReview } from "@/lib/leads/review"
+import { queueCheckinFor } from "@/lib/leads/email/server"
 
 export async function GET(
   request: Request,
@@ -49,5 +50,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ le
     }
     return data
   })
+  // Marking an inquiry Contacted starts the wait for the customer. The status is already saved,
+  // so a problem here only delays the check-in until the next scheduled run.
+  if (result.status === 200 && result.body.lead.status === "contacted") {
+    await queueCheckinFor(leadId).catch(() => console.error("[mountline] Check-in was not queued yet"))
+  }
   return NextResponse.json(result.body, { status: result.status })
 }

@@ -7,8 +7,8 @@ import { Wordmark } from "@/components/brand/wordmark"
 
 type NavItem = { href: string; label: string }
 
-// The bar label stays short enough to share a 360px phone bar with the logo and menu button.
-export function SiteHeader({ nav, ctaHref, ctaLabel, menuCtaLabel = ctaLabel }: { nav: readonly NavItem[]; ctaHref: string; ctaLabel: string; menuCtaLabel?: string }) {
+// On phones the bar shows `ctaShortLabel`, short enough to share a 360px bar with the logo and menu button.
+export function SiteHeader({ nav, ctaHref, ctaLabel, ctaShortLabel = ctaLabel, menuCtaLabel = ctaLabel }: { nav: readonly NavItem[]; ctaHref: string; ctaLabel: string; ctaShortLabel?: string; menuCtaLabel?: string }) {
   const [raised, setRaised] = useState(false)
   const [open, setOpen] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
@@ -61,15 +61,20 @@ export function SiteHeader({ nav, ctaHref, ctaLabel, menuCtaLabel = ctaLabel }: 
         </Link>
 
         <nav className="ml-header__nav" aria-label="Primary">
-          {nav.map((item) => (
-            <a key={item.href} href={item.href}>{item.label}</a>
-          ))}
+          {nav.map((item) =>
+            item.href.startsWith("/") && !item.href.startsWith("/#") ? <Link key={item.href} href={item.href}>{item.label}</Link> : <a key={item.href} href={item.href}>{item.label}</a>,
+          )}
         </nav>
 
         <div className="ml-header__actions">
           <Link href="/id" className="ml-header__login">Log in</Link>
           <a href={ctaHref} className="ml-btn ml-btn--solid ml-btn--sm ml-header__cta">
-            {ctaLabel}
+            {ctaShortLabel === ctaLabel ? ctaLabel : (
+              <>
+                <span className="ml-header__cta-full">{ctaLabel}</span>
+                <span className="ml-header__cta-short">{ctaShortLabel}</span>
+              </>
+            )}
           </a>
           <button
             ref={toggleRef}

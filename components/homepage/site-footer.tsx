@@ -4,19 +4,19 @@ import { receptionistDemo } from "@/lib/receptionist/demo"
 
 const columns = [
   {
-    title: "Product",
+    title: "Services",
     links: [
-      { label: "How it works", href: "/#product" },
-      { label: "Service businesses", href: "/#trades" },
-      { label: "Demo line", href: "/#demo" },
-      { label: "Testing", href: "/#testing" },
-      { label: "Pilot", href: "/#pilot" },
+      { label: "Websites", href: "/#websites" },
+      { label: "Mountline Capture", href: "/#capture" },
+      { label: "AI receptionist", href: "/receptionist" },
+      { label: "Receptionist demo line", href: "/receptionist#demo" },
     ],
   },
   {
     title: "Company",
     links: [
       { label: "About", href: "/#company" },
+      { label: "How a project works", href: "/#process" },
       { label: "Questions", href: "/#faq" },
       { label: "Contact", href: "/#contact" },
     ],
@@ -36,7 +36,10 @@ export function SiteFooter() {
       <div className="ml-container ml-footer__grid">
         <div className="ml-footer__brand">
           <Wordmark size={22} />
-          <p>AI receptionists for the calls service businesses can’t take. A small company in Keller, Texas.</p>
+          <p>
+            Websites for local businesses, with photo and video by arrangement and an AI receptionist for the calls your
+            team can’t answer. A small studio in Keller, Texas, run by Luke Nordin.
+          </p>
           <dl className="ml-footer__contact">
             <div>
               <dt>Email</dt>

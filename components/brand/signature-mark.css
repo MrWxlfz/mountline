@@ -1,0 +1,29 @@
+/*
+  The closing signature: the Mountline mark set in tiny words, in three depth layers.
+  --p runs 0 → 1 as it scrolls in; 1 is the finished logo, and the default.
+*/
+
+.ml-signature { --p: 1; position: relative; aspect-ratio: 128 / 138; container-type: inline-size; }
+.ml-signature::before { content: ""; position: absolute; inset: -35%; z-index: -1; background: radial-gradient(closest-side, rgba(239, 180, 97, 0.13), transparent); opacity: calc(0.3 + var(--p) * 0.7); pointer-events: none; }
+.ml-signature__stage { position: absolute; inset: 0; perspective: 1100px; }
+.ml-signature__variant { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(calc((1 - var(--p)) * 26deg)) rotateY(calc((1 - var(--p)) * -18deg)); }
+.ml-signature__coarse { display: none; }
+@container (max-width: 400px) {
+  .ml-signature__fine { display: none; }
+  .ml-signature__coarse { display: block; }
+}
+.ml-signature__layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ml-signature__layer text { fill: var(--fg); font-family: var(--mono); font-weight: 500; user-select: none; -webkit-user-select: none; }
+.ml-signature__layer--triangle { transform: translate3d(0, calc((1 - var(--p)) * 24px), calc((1 - var(--p)) * -240px)); }
+.ml-signature__layer--stem { transform: translate3d(0, calc((1 - var(--p)) * -16px), calc((1 - var(--p)) * 60px)); }
+.ml-signature__layer--chevron { transform: translate3d(0, calc((1 - var(--p)) * -56px), calc((1 - var(--p)) * 220px)); }
+.ml-signature__row {
+  --q: clamp(0, calc((var(--p) - var(--s)) / 0.65), 1);
+  --e: calc(var(--q) * var(--q) * (3 - 2 * var(--q)));
+  transform: translate(calc(var(--dx) * (1 - var(--e)) * 1px), calc(var(--dy) * (1 - var(--e)) * 1px));
+  opacity: calc(0.25 + var(--e) * 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-signature { --p: 1 !important; }
+}

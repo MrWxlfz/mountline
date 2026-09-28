@@ -6,7 +6,7 @@ import { ArrowRight, Search } from "lucide-react"
 import { CompactTable, EmptyState, PageHeader, PrimaryAction, SectionPanel, StatusBadge } from "@/components/dashboard/dashboard-ui"
 import type { SignalProspect } from "@/lib/supabase/types"
 
-import { InquiryInbox, type InquiryLead } from "./inquiry-inbox"
+import { InquiryInbox, type EmailSetupStatus, type InquiryEmailJob, type InquiryLead } from "./inquiry-inbox"
 export type { InquiryLead } from "./inquiry-inbox"
 
 function tone(value: string | null | undefined) {
@@ -21,7 +21,7 @@ function label(value: string | null | undefined) {
   return (value || "unknown").replace(/_/g, " ")
 }
 
-export function LeadsDashboard({ prospects, inquiries, storageError }: { prospects: SignalProspect[]; inquiries: InquiryLead[]; storageError: string | null }) {
+export function LeadsDashboard({ prospects, inquiries, emailJobs, emailStatus, focusId, storageError }: { prospects: SignalProspect[]; inquiries: InquiryLead[]; emailJobs: InquiryEmailJob[]; emailStatus: EmailSetupStatus; focusId?: string; storageError: string | null }) {
   const [search, setSearch] = useState("")
   const [stage, setStage] = useState("all")
   const visible = useMemo(() => {
@@ -37,7 +37,7 @@ export function LeadsDashboard({ prospects, inquiries, storageError }: { prospec
     <div className="space-y-7">
       <PageHeader eyebrow="Leads" title="Lead records" subtitle="Review incoming requests and follow up with businesses interested in Mountline. Signal research stays separate below." actions={<PrimaryAction href="/dashboard/signal" icon={ArrowRight}>Analyze business</PrimaryAction>} />
       {storageError && <div className="rounded-lg border border-error-border bg-error-soft px-3 py-2 text-sm text-error-foreground">Lead data could not be loaded: {storageError}</div>}
-      <InquiryInbox inquiries={inquiries} />
+      <InquiryInbox inquiries={inquiries} jobs={emailJobs} emailStatus={emailStatus} focusId={focusId} />
       <SectionPanel title="Operational leads" description="Focused Signal records with verdict, pipeline stage, and next action.">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row">
           <label className="relative block flex-1 sm:max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><span className="sr-only">Search operational leads</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search business, city, or opportunity" className="h-10 w-full rounded-md border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-foreground/30" /></label>

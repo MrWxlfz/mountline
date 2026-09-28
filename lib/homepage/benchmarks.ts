@@ -1,8 +1,8 @@
 /**
- * Third-party figures shown on the public homepage.
+ * Third-party figures shown on the receptionist page.
  *
- * These are industry numbers, not Mountline results. Keep each figure tied to the
- * page that published it, and re-check the wording whenever a figure changes.
+ * These are industry numbers, not Mountline results. Keep each figure tied to the page that
+ * published it, quote the claim as published, and re-check it whenever the wording changes.
  * Never add a Mountline customer outcome here without real, reviewable data behind it.
  */
 
@@ -16,34 +16,20 @@ export type BenchmarkSource = {
 }
 
 export const benchmarkSources = {
-  unanswered: {
-    id: "callrail-unanswered",
-    publisher: "CallRail",
-    title: "How missed calls are costing your business",
-    url: "https://www.callrail.com/blog/missed-calls-costing-your-business",
-    published: "2025-09-11",
-    // CallRail's footnote: beta-program participant data, compared with the six months before.
-    note: "The 28% average comes from CallRail customer data.",
-  },
   consumerSurvey: {
     id: "callrail-consumer-survey",
     publisher: "CallRail",
     title: "Why businesses can’t afford to miss calls",
     url: "https://www.callrail.com/blog/missed-calls-cost-businesses-more-than-ever",
     published: "2025-09-25",
-    // The article gives the sample, not the year the survey ran.
-    note: "Survey of 1,000 U.S. consumers.",
+    // Checked 2026-09-28: "based on a survey of 1,000 U.S. consumers"; "21% immediately call another business."
+    // CallRail sells call-tracking software. The article gives the sample, not the year the survey ran.
+    note: "Survey of 1,000 U.S. consumers, published by a call-tracking company.",
   },
 } as const satisfies Record<string, BenchmarkSource>
 
-/** The model is illustrative: 100 calls split by the published unanswered share. */
-export const callModel = {
-  total: 100,
-  unanswered: 28,
-  source: benchmarkSources.unanswered,
+export const callContext = {
+  value: 21,
+  claim: "said they immediately call another business when a call goes unanswered",
+  source: benchmarkSources.consumerSurvey,
 } as const
-
-export const consumerFindings = [
-  { value: 78, label: "have abandoned a business after an unanswered call", source: benchmarkSources.consumerSurvey },
-  { value: 21, label: "say they immediately call another business", source: benchmarkSources.consumerSurvey },
-] as const

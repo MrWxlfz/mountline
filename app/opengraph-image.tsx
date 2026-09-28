@@ -1,12 +1,21 @@
 import { ImageResponse } from "next/og"
-import { receptionistDemo } from "@/lib/receptionist/demo"
 
-export const alt = "Mountline — AI receptionists for service businesses"
+export const alt = "Mountline: websites for local businesses, with photo, video, and AI receptionists"
 export const size = {
   width: 1200,
   height: 630,
 }
 export const contentType = "image/png"
+
+function Mark({ size: side, color }: { size: number; color: string }) {
+  return (
+    <svg width={side} height={side} viewBox="0 0 180 180" fill="none">
+      <path d="M90 34 145 137H35L90 34Z" stroke={color} strokeWidth="9" strokeLinejoin="round" />
+      <path d="M90 146V29" stroke={color} strokeWidth="12" strokeLinecap="round" />
+      <path d="m70 57 20-28 20 28" stroke={color} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
 
 export default function OpenGraphImage() {
   return new ImageResponse(
@@ -19,35 +28,25 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px 64px",
-          background: "#0a0a09",
-          color: "#ece8e1",
+          background: "radial-gradient(circle at 72% 88%, rgba(239,180,97,0.22), rgba(11,11,10,0) 55%), #0b0b0a",
+          color: "#f3efe6",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 30, letterSpacing: -1 }}>
-          <svg width="34" height="34" viewBox="0 0 180 180" fill="none">
-            <path d="M90 34 145 137H35L90 34Z" stroke="#ece8e1" strokeWidth="9" strokeLinejoin="round" />
-            <path d="M90 146V29" stroke="#ece8e1" strokeWidth="12" strokeLinecap="round" />
-            <path d="m70 57 20-28 20 28" stroke="#ece8e1" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 30, letterSpacing: -1, fontFamily: "Arial, sans-serif" }}>
+          <Mark size={34} color="#f3efe6" />
           <span style={{ display: "flex" }}>mountline</span>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              fontSize: 76,
-              letterSpacing: -3,
-              lineHeight: 1.04,
-            }}
-          >
-            <span style={{ display: "flex" }}>AI receptionists for</span>
-            <span style={{ display: "flex" }}>service businesses.</span>
-          </div>
-          <div style={{ display: "flex", marginTop: 28, color: "#a4a09a", fontSize: 28 }}>
-            Mountline answers the calls your team can’t get to.
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "column", fontSize: 78, letterSpacing: -3, lineHeight: 1 }}>
+              <span style={{ display: "flex" }}>A better website for the</span>
+              <span style={{ display: "flex" }}>business you’ve built.</span>
+            </div>
+            <div style={{ display: "flex", marginTop: 28, color: "#bab5aa", fontSize: 28 }}>
+              Websites for local businesses · Photo and video · AI receptionists
+            </div>
           </div>
         </div>
 
@@ -56,16 +55,14 @@ export default function OpenGraphImage() {
             display: "flex",
             justifyContent: "space-between",
             paddingTop: 24,
-            borderTop: "1px solid rgba(236,232,225,.14)",
-            color: "#817e78",
+            borderTop: "1px solid rgba(243,239,230,.14)",
+            color: "#8e8a81",
             fontSize: 22,
+            fontFamily: "Arial, sans-serif",
           }}
         >
           <span style={{ display: "flex" }}>mountline.dev</span>
-          <span style={{ display: "flex", gap: 12 }}>
-            <span style={{ display: "flex", color: "#e2a24a" }}>●</span>
-            Demo line {receptionistDemo.displayPhone}
-          </span>
+          <span style={{ display: "flex" }}>Keller, Texas · Dallas–Fort Worth</span>
         </div>
       </div>
     ),

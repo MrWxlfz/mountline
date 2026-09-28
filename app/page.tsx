@@ -1,27 +1,19 @@
 import type { Metadata } from "next"
 import { MountlineHomepage } from "@/components/mountline-homepage"
 
+const title = "Mountline | Websites for Local Businesses"
+const description =
+  "Mountline designs and builds websites for local businesses in Keller and across Dallas–Fort Worth, with original photo and video by arrangement and an AI receptionist for the calls your team can’t take."
+
 export const metadata: Metadata = {
-  title: {
-    absolute: "Mountline | AI Receptionists for Service Businesses",
-  },
-  description:
-    "Mountline answers missed and after-hours calls for service businesses, asks the questions you choose, and leaves your team a clear request to follow up on. Call the fictional HVAC demo to hear it.",
+  title: { absolute: title },
+  description,
   alternates: {
     canonical: "/",
   },
-  keywords: [
-    "AI receptionist",
-    "business call handling",
-    "missed call recovery",
-    "service request capture",
-    "HVAC receptionist demo",
-    "owner handoff",
-  ],
   openGraph: {
-    title: "Mountline | AI Receptionists for Service Businesses",
-    description:
-      "Mountline answers missed and after-hours calls, asks the questions you choose, and leaves your team a clear request to follow up on. Call the fictional HVAC demo line to hear it.",
+    title,
+    description,
     url: "https://mountline.dev",
     siteName: "Mountline",
     locale: "en_US",
@@ -29,9 +21,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mountline | AI Receptionists for Service Businesses",
-    description:
-      "AI receptionists for the calls your team cannot take.",
+    title,
+    description: "Websites for local businesses, with original photo and video and an AI receptionist when you need them.",
   },
 }
 
@@ -42,7 +33,7 @@ const organizationJsonLd = {
   url: "https://mountline.dev",
   email: "hello@mountline.dev",
   description:
-    "Mountline builds focused AI receptionist pilots for service businesses, with approved business information and team-owned pricing, scheduling, and follow-up.",
+    "Mountline designs and builds websites for local businesses, offers original photo and video for those websites by arrangement, and sets up AI receptionists for calls a business’s team can’t take.",
   founder: {
     "@type": "Person",
     name: "Luke Nordin",
@@ -61,13 +52,7 @@ const organizationJsonLd = {
       name: "Dallas–Fort Worth",
     },
   ],
-  knowsAbout: [
-    "AI receptionist systems",
-    "Inbound call handling",
-    "Service request intake",
-    "Structured call intake",
-    "Owner handoff records",
-  ],
+  knowsAbout: ["Website design", "Website development", "Website copywriting", "Photography and video for websites", "AI receptionist systems"],
 }
 
 export default function Home() {

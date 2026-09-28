@@ -1,15 +1,66 @@
 /**
- * Copy and example data for the public homepage.
+ * Copy and example data for the public site: the homepage and the receptionist page.
  *
  * Every call, caller, and request below is an illustration built around the fictional
  * North Texas Air & Heat demo. Names use made-up details and 555-01xx numbers.
- * Nothing here is a customer record, a measured result, or a testimonial.
+ * Nothing here is a customer record, a measured result, a past project, or a testimonial.
  */
 
-export const flow = [
-  { title: "A call comes in", body: "After hours, on a busy line, or when nobody can get to the phone." },
-  { title: "Mountline answers", body: "As your business, with the questions you’d ask." },
-  { title: "Your team gets the request", body: "Who called, what they need, where, and when." },
+/* Homepage ---------------------------------------------------------------------- */
+
+// How a project goes, told in order, the way we'd explain it across a table.
+export const projectSteps = [
+  { title: "You send a few lines about the business.", body: "Use the form below, or email hello@mountline.dev. It goes straight to Luke." },
+  { title: "We talk it through.", body: "On a call, or in person around Dallas–Fort Worth. We look at what you have now and what your customers ask most." },
+  { title: "You get the plan and the price in writing.", body: "The pages, the words, the photos, and the dates, agreed before any work starts." },
+  { title: "You watch it come together.", body: "A private project page lets you check the site on your own phone as it’s built. It goes live when you say so." },
+] as const
+
+// Mountline Capture: what it is, and the limits that come with it.
+export const captureTerms = [
+  "Photos and short video, planned around your working day. Nobody is filmed without agreeing to it.",
+  "Scoped and priced separately from the website, and agreed in writing before anything is booked.",
+  "Aerial shots only where the location suits it, permissions allow it, and a licensed drone pilot is available.",
+] as const
+
+export const questions = [
+  {
+    q: "What does a website cost?",
+    a: "It depends on the number of pages, how much writing is involved, and whether you add photo or video. After a first conversation, you get scope and price in writing before you decide anything.",
+  },
+  {
+    q: "How long does it take?",
+    a: "That depends on the scope and how quickly the details come together. You’ll get a plan with dates before work starts.",
+  },
+  {
+    q: "Do I have to write the words?",
+    a: "No. We interview you and write a draft, then you check every line.",
+  },
+  {
+    q: "Can you work from my current website?",
+    a: "Yes. We can rebuild it, or start fresh and keep what’s working. Add the address to your message.",
+  },
+  {
+    q: "Do I need Capture or the receptionist?",
+    a: "No. Each one is separate and optional. A website doesn’t require either.",
+  },
+  {
+    q: "How does the AI receptionist work?",
+    a: "It answers the calls you forward to it, like after hours or when nobody picks up, asks the questions you choose, and sends your team the request. The receptionist page has the details.",
+    link: { href: "/receptionist", label: "Read about the receptionist" },
+  },
+  {
+    q: "Where are you based?",
+    a: "Keller, Texas. We work with businesses around Dallas–Fort Worth and can meet in person when it helps.",
+  },
+  {
+    q: "What happens after I send the form?",
+    a: "Your message is saved and you get a short confirmation by email. Luke reads it and replies from hello@mountline.dev.",
+  },
+  {
+    q: "Is Bramble a real business?",
+    a: "No. Bramble is a made-up dog groomer. We designed its website and illustrated its shopfront to show the kind of work we do, without borrowing a real business’s name.",
+  },
 ] as const
 
 /* The call demo --------------------------------------------------------------- */
@@ -65,6 +116,47 @@ export const requestFields: Array<{ key: RequestFieldKey; label: string }> = [
   { key: "callback", label: "Callback" },
   { key: "status", label: "Status" },
 ]
+
+/**
+ * The call scene: a short excerpt of the example call, and the message it leaves for the business.
+ * `line` is the index in demoCall.lines where each detail is first heard.
+ */
+export const callScene = {
+  excerpt: [0, 1, 2, 3, 6, 7, 8, 9],
+  message: [
+    { key: "caller", label: "Who called", value: "Dana · 817-555-0142", line: 9 },
+    { key: "need", label: "What they need", value: "AC is running but not cooling", line: 1 },
+    { key: "where", label: "Where", value: "Keller, TX 76244", line: 3 },
+    { key: "when", label: "When", value: "Tomorrow afternoon, if possible", line: 7 },
+  ],
+  next: "Call Dana back to confirm a time.",
+} as const
+
+/* How the receptionist fits (receptionist page) --------------------------------- */
+
+// Each layer answers one practical question: which number, who picks up, what gets written down, who follows up.
+export const receptionistLayers = [
+  {
+    label: "Your number",
+    title: "Keep the number you have.",
+    body: "No new number to put on the trucks. You choose which calls forward to Mountline: after hours, the ones nobody picks up, or both.",
+  },
+  {
+    label: "The receptionist",
+    title: "It answers when your team can’t.",
+    body: "It greets callers with your business name, tells them it’s an AI receptionist, and asks one question at a time.",
+  },
+  {
+    label: "The request",
+    title: "Instead of a voicemail, a clear request.",
+    body: "The problem, the address, how soon they need someone, and the best number to call back.",
+  },
+  {
+    label: "Your team",
+    title: "Your team takes it from there.",
+    body: "The request goes to whoever handles callbacks. Your team confirms pricing and scheduling, the same as always.",
+  },
+] as const
 
 /* Control ---------------------------------------------------------------------- */
 
@@ -225,18 +317,9 @@ export const pilotSteps = [
   { title: "We review real calls", body: "Start narrow, look at real requests together, and expand only if it’s earning its place." },
 ] as const
 
-/* Company ----------------------------------------------------------------------- */
+/* Receptionist questions -------------------------------------------------------- */
 
-export const principles = [
-  { title: "Direct support", body: "Email us and you reach someone who knows your setup, not a ticket queue." },
-  { title: "Careful setup", body: "Every receptionist is configured and tested by the people who built it." },
-  { title: "Accountability", body: "If it gets something wrong, we go through the call with you and fix it." },
-  { title: "No pretending", body: "We’re a small team, and we’d rather say so up front." },
-] as const
-
-/* Questions --------------------------------------------------------------------- */
-
-export const questions = [
+export const receptionistQuestions = [
   {
     q: "Can I keep my current number?",
     a: "Yes. Nothing about your number changes. Calls forward to Mountline only when you want them to, like after hours or when nobody picks up.",

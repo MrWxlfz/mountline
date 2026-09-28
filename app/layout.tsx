@@ -40,10 +40,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://mountline.dev'),
   title: 'Mountline',
-  description: 'AI receptionist pilots for service businesses. Call the fictional HVAC demo and discuss a setup for your business.',
+  description: 'Websites for local businesses, with original photo and video by arrangement and AI receptionists for the calls your team can’t take.',
   openGraph: {
     title: 'Mountline',
-    description: 'AI receptionist pilots with approved business information and team-owned pricing, scheduling, and follow-up.',
+    description: 'Websites for local businesses, with original photo and video by arrangement and AI receptionists for the calls your team can’t take.',
     url: 'https://mountline.dev',
     siteName: 'Mountline',
     type: 'website',
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Mountline',
-    description: 'AI receptionists for the calls your team cannot take.',
+    description: 'Websites for local businesses, with photo, video, and AI receptionists when you need them.',
   },
   icons: {
     icon: [

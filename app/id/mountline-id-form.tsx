@@ -20,7 +20,6 @@ import {
   Mail,
 } from "lucide-react"
 import { Wordmark } from "@/components/brand/wordmark"
-import { GlyphField } from "@/components/homepage/glyph-field"
 import { AppearanceSelector } from "@/components/dashboard/appearance-selector"
 
 type MountlineIdFormProps = {
@@ -69,9 +68,6 @@ export function MountlineIdForm({ redirectUrl, useCustomFlow }: MountlineIdFormP
           </section>
         </div>
       </main>
-      <div className="mountline-id__band relative h-24 border-t border-border sm:h-32" aria-hidden="true">
-        <GlyphField className="block h-full w-full font-mono" />
-      </div>
       <AuthFooter />
     </div>
   )

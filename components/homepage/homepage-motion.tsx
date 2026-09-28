@@ -4,7 +4,22 @@ import { useLayoutEffect } from "react"
 
 const revealSelector = "[data-mtl-reveal]"
 
-export function HomepageMotion() {
+/**
+ * Scroll reveals for secondary content, plus forwarding for anchors that moved to another page
+ * (old links such as /#pilot now go to /receptionist#pilot).
+ */
+export function HomepageMotion({ movedAnchors }: { movedAnchors?: Record<string, string> }) {
+  useLayoutEffect(() => {
+    if (!movedAnchors) return
+    const forward = () => {
+      const target = movedAnchors[window.location.hash.slice(1)]
+      if (target) window.location.replace(target)
+    }
+    forward()
+    window.addEventListener("hashchange", forward)
+    return () => window.removeEventListener("hashchange", forward)
+  }, [movedAnchors])
+
   useLayoutEffect(() => {
     const root = document.querySelector<HTMLElement>(".ml-site")
     if (!root) return
@@ -35,7 +50,7 @@ export function HomepageMotion() {
           observer.unobserve(entry.target)
         })
       },
-      { rootMargin: "0px 0px -10%", threshold: 0.12 },
+      { rootMargin: "0px 0px 8% 0px", threshold: 0 },
     )
 
     root.querySelectorAll<HTMLElement>(revealSelector).forEach((element) => {

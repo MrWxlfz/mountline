@@ -871,10 +871,6 @@ html {
   .ml-field-input:hover { border-color: var(--border-strong); }
   .ml-field-input:focus { outline: none; border-color: var(--muted-foreground); box-shadow: 0 0 0 3px rgb(228 168 83 / 0.2); }
 
-  /* Glyph band colours on themed pages. */
-  .mountline-id__band { --glyph-rgb: 22, 22, 20; --glyph-accent-rgb: 168, 112, 31; background: var(--surface); }
-  .dark .mountline-id__band { --glyph-rgb: 237, 235, 229; --glyph-accent-rgb: 228, 168, 83; }
-
   /* Employee dashboard: page titles share the serif display face. */
   .ml-dashboard main h1 {
     font-family: var(--font-newsreader), "Iowan Old Style", Georgia, serif;

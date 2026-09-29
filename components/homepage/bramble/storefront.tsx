@@ -43,8 +43,8 @@ export function Storefront({ framing = "wide", className }: { framing?: Framing;
  * The scene behind a camera that can move. The frame keeps its own shape (`width` × `height`);
  * changing `framing` pans and zooms to cover that crop, animated by CSS where motion is allowed.
  */
-export function StorefrontCamera({ framing, width, height, className }: { framing: Framing; width: number; height: number; className?: string }) {
-  const [x, y, w, h] = framings[framing]
+export function StorefrontCamera({ framing, rect, width, height, className }: { framing: Framing; rect?: readonly [number, number, number, number]; width: number; height: number; className?: string }) {
+  const [x, y, w, h] = rect ?? framings[framing]
   const scale = Math.max(width / w, height / h)
   const tx = width / 2 / scale - (x + w / 2)
   const ty = height / 2 / scale - (y + h / 2)

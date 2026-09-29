@@ -1,0 +1,280 @@
+{
+  "recordedAt": "2026-09-29T21:16:14.084Z",
+  "runsPerBuild": 5,
+  "machine": "Apple M5 (10 cores), darwin 25.5.0",
+  "before": {
+    "base": "http://localhost:3100",
+    "mobile": [
+      {
+        "score": 0.76,
+        "fcpMs": 1663,
+        "lcpMs": 6579,
+        "tbtMs": 47,
+        "cls": 0,
+        "speedIndexMs": 2559,
+        "totalBytes": 1048339,
+        "scriptBytes": 506692,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1658,
+        "lcpMs": 6555,
+        "tbtMs": 54,
+        "cls": 0,
+        "speedIndexMs": 2587,
+        "totalBytes": 1048325,
+        "scriptBytes": 506676,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1659,
+        "lcpMs": 6563,
+        "tbtMs": 57,
+        "cls": 0,
+        "speedIndexMs": 2560,
+        "totalBytes": 1048325,
+        "scriptBytes": 506684,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1659,
+        "lcpMs": 6563,
+        "tbtMs": 44,
+        "cls": 0,
+        "speedIndexMs": 2592,
+        "totalBytes": 1048332,
+        "scriptBytes": 506698,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1659,
+        "lcpMs": 6560,
+        "tbtMs": 64,
+        "cls": 0,
+        "speedIndexMs": 2548,
+        "totalBytes": 1048353,
+        "scriptBytes": 506688,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      }
+    ],
+    "desktop": [
+      {
+        "score": 0.97,
+        "fcpMs": 408,
+        "lcpMs": 1236,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 781,
+        "totalBytes": 1048352,
+        "scriptBytes": 506714,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 411,
+        "lcpMs": 1244,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 802,
+        "totalBytes": 1048306,
+        "scriptBytes": 506679,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 414,
+        "lcpMs": 1254,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 814,
+        "totalBytes": 1048333,
+        "scriptBytes": 506698,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 599,
+        "lcpMs": 1299,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 855,
+        "totalBytes": 1048345,
+        "scriptBytes": 506687,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 414,
+        "lcpMs": 1256,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 832,
+        "totalBytes": 1049459,
+        "scriptBytes": 506828,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0"
+      }
+    ]
+  },
+  "after": {
+    "base": "http://localhost:3200",
+    "mobile": [
+      {
+        "score": 0.79,
+        "fcpMs": 1963,
+        "lcpMs": 5227,
+        "tbtMs": 91,
+        "cls": 0,
+        "speedIndexMs": 2226,
+        "totalBytes": 821465,
+        "scriptBytes": 517782,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.79,
+        "fcpMs": 1961,
+        "lcpMs": 5224,
+        "tbtMs": 94,
+        "cls": 0,
+        "speedIndexMs": 2230,
+        "totalBytes": 822405,
+        "scriptBytes": 517769,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.79,
+        "fcpMs": 1962,
+        "lcpMs": 5225,
+        "tbtMs": 90,
+        "cls": 0,
+        "speedIndexMs": 2224,
+        "totalBytes": 821437,
+        "scriptBytes": 517785,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.78,
+        "fcpMs": 1965,
+        "lcpMs": 5231,
+        "tbtMs": 123,
+        "cls": 0,
+        "speedIndexMs": 2253,
+        "totalBytes": 821440,
+        "scriptBytes": 517789,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.79,
+        "fcpMs": 1961,
+        "lcpMs": 5224,
+        "tbtMs": 106,
+        "cls": 0,
+        "speedIndexMs": 2230,
+        "totalBytes": 821477,
+        "scriptBytes": 517802,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      }
+    ],
+    "desktop": [
+      {
+        "score": 0.98,
+        "fcpMs": 494,
+        "lcpMs": 1100,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 745,
+        "totalBytes": 822564,
+        "scriptBytes": 517926,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.98,
+        "fcpMs": 489,
+        "lcpMs": 1078,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 685,
+        "totalBytes": 822547,
+        "scriptBytes": 517908,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.98,
+        "fcpMs": 487,
+        "lcpMs": 1076,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 677,
+        "totalBytes": 821472,
+        "scriptBytes": 517787,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.98,
+        "fcpMs": 487,
+        "lcpMs": 1076,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 703,
+        "totalBytes": 822544,
+        "scriptBytes": 517914,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      },
+      {
+        "score": 0.98,
+        "fcpMs": 492,
+        "lcpMs": 1086,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 696,
+        "totalBytes": 821463,
+        "scriptBytes": 517790,
+        "fontBytes": 141720,
+        "requests": 47,
+        "lighthouseVersion": "13.5.0"
+      }
+    ]
+  },
+  "note": "Interim: the after build here is snapshot 2 (interim-3), not the final build."
+}

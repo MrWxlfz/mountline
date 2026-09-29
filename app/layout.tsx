@@ -13,17 +13,22 @@ const geist = Geist({
   variable: "--font-geist-sans",
   display: "swap",
 })
+// Small labels only, none of them in the first screen, so it loads when first used.
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
   display: "swap",
+  preload: false,
 })
+// The dashboard's display serif. Not preloaded: the public site never uses it, and preloading made
+// every visitor download both styles (about 280 KB) before the homepage could finish loading.
 const newsreader = Newsreader({
   subsets: ["latin"],
   variable: "--font-newsreader",
   style: ["normal", "italic"],
   axes: ["opsz"],
   display: "swap",
+  preload: false,
 })
 
 export const viewport: Viewport = {
@@ -32,7 +37,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f6f4ef' },
-    { media: '(prefers-color-scheme: dark)', color: '#0d0d0c' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0b0c' },
   ],
   viewportFit: 'cover',
 }

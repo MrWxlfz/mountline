@@ -83,7 +83,7 @@ export function ControlSection() {
 export function CallItSection() {
   return (
     <section className="ml-demo" id="demo" aria-labelledby="demo-title">
-      <Landscape variant="night" id="demo-scene" className="ml-demo__scene" horizon={0.16} />
+      <Landscape variant="dusk" id="demo-scene" className="ml-demo__scene" horizon={0.16} />
       <div className="ml-container ml-demo__inner">
         <div className="ml-demo__call" data-mtl-reveal>
           <h2 id="demo-title">Don’t take our word for it. <em>Call it.</em></h2>

@@ -1,0 +1,274 @@
+/*
+  Build → Test → Refine. One composition in three states, keyed on [data-chapter].
+  The canvas is drawn at a fixed size in design units and scaled to fit, so paths always meet
+  the page. Motion only runs when a chapter becomes active ([data-seen] once it's on screen).
+*/
+
+.btr { --progress: 0; position: relative; margin-top: 40px; }
+.btr__track { position: relative; }
+.btr__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: center; }
+
+/* Wide, tall screens: one short sticky stage; about 1.5 extra screens of scroll for all three chapters. */
+.btr[data-pinned] .btr__track { height: calc(100svh + 150vh); }
+.btr[data-pinned] .btr__sticky { position: sticky; top: var(--header-h); height: calc(100svh - var(--header-h)); display: flex; align-items: center; }
+.btr[data-pinned] .btr__grid { width: 100%; }
+.btr__stage { position: relative; height: min(560px, calc(100svh - var(--header-h) - 80px)); min-height: 420px; }
+.btr__canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--cw) * 1px);
+  height: calc(var(--ch) * 1px);
+  transform: translate(-50%, -50%) scale(var(--scale));
+  transform-origin: 50% 50%;
+}
+
+/* The lamp and the mark: the scene is lit from behind the page, inside the outline of the Mountline mark. */
+.btr__stage::before {
+  content: "";
+  position: absolute;
+  inset: -10% -6% -10% 18%;
+  background: radial-gradient(50% 50% at 60% 50%, rgba(220, 169, 107, 0.11), transparent 70%);
+  pointer-events: none;
+}
+.btr__mark { position: absolute; left: 50%; top: 52%; width: 96%; height: 112%; transform: translate(-50%, -50%) scale(0.92); overflow: visible; opacity: 0; transition: opacity 700ms var(--ease), transform 900ms var(--ease-out); }
+.btr:not([data-chapter="build"]) .btr__mark { opacity: 1; transform: translate(-50%, -50%); }
+.btr__mark path { fill: none; stroke: rgba(244, 240, 232, 0.06); stroke-width: 0.35; stroke-linejoin: round; }
+.btr[data-layout="narrow"] .btr__mark { width: 118%; }
+
+/* The chapter controls ---------------------------------------------------------------- */
+
+.btr__tabs { position: relative; display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--surface-1); box-shadow: 0 0 0 1px var(--rule), var(--edge); }
+.btr__tabs button { height: 40px; padding: 0 18px 0 14px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; background: transparent; color: var(--fg-2); font-size: 15px; font-weight: 560; cursor: pointer; transition: background-color 250ms var(--ease), color 250ms var(--ease); }
+.btr__tabs button span { color: var(--fg-3); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+.btr__tabs button:hover { color: var(--fg); }
+.btr__tabs button[aria-selected="true"] { background: var(--surface-3); color: var(--fg); box-shadow: var(--edge), 0 1px 2px rgba(0, 0, 0, 0.4); }
+.btr__tabs button[aria-selected="true"] span { color: var(--accent); }
+.btr__tabs button:focus-visible { outline-offset: -2px; }
+.btr__meter { position: absolute; left: 20px; right: 20px; bottom: -12px; height: 1px; background: var(--rule); display: none; }
+.btr__meter::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform: scaleX(var(--progress)); transform-origin: left; }
+.btr[data-pinned] .btr__meter { display: block; }
+
+/* The words ----------------------------------------------------------------------------- */
+
+.btr__panels { margin-top: 32px; display: grid; }
+.btr__panel { grid-area: 1 / 1; visibility: hidden; opacity: 0; transition: opacity 350ms var(--ease), visibility 0s linear 350ms; }
+.btr__panel[data-active] { visibility: visible; opacity: 1; transition-delay: 0s; }
+.btr__panel[data-active] .btr__text { animation: btr-text 520ms var(--ease-out) both; }
+.btr__title { font-size: clamp(52px, 5vw, 70px); font-weight: 600; font-stretch: 92%; line-height: 0.95; letter-spacing: -0.045em; }
+.btr__line { margin-top: 18px; max-width: 26em; color: var(--fg-2); font-size: 18px; line-height: 1.55; }
+.btr__source { margin-top: 26px; max-width: 30em; color: var(--fg-3); font-size: 13.5px; line-height: 1.5; }
+
+.btr__facts-list { margin-top: 28px; display: none; }
+
+.btr__steps { margin-top: 26px; border-bottom: 1px solid var(--rule); }
+.btr__steps li { padding: 14px 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; border-top: 1px solid var(--rule); }
+.btr__step-action { color: var(--fg); font-size: 16px; font-weight: 560; }
+.btr__step-result { grid-column: 1; color: var(--fg-2); font-size: 14.5px; line-height: 1.45; }
+.btr-status { grid-column: 2; grid-row: 1 / span 2; align-self: center; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px 0 9px; border-radius: 999px; font-size: 13px; font-weight: 560; white-space: nowrap; }
+.btr-status svg { width: 14px; height: 14px; stroke-width: 2.25; }
+.btr-status[data-value="pass"] { background: var(--accent-soft); color: var(--accent-2); }
+.btr-status[data-value="fail"] { background: rgba(232, 144, 124, 0.14); color: var(--danger); }
+.btr-status[data-value="none"] { background: rgba(244, 240, 232, 0.05); color: var(--fg-3); }
+
+.btr__fixes { margin-top: 22px; display: grid; gap: 16px; }
+.btr__retest { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.btr__retest > span { display: inline-flex; align-items: center; gap: 8px; }
+.btr__retest b { color: var(--fg-3); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+.btr__retest .btr-status { grid-column: auto; grid-row: auto; }
+.btr__fix-title { color: var(--fg); font-size: 16.5px; font-weight: 600; }
+.btr__fix-found { margin-top: 3px; color: var(--fg-2); font-size: 14px; line-height: 1.5; }
+.btr__bars { margin-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+.btr__bars em { grid-column: 2; grid-row: 1 / span 2; }
+.btr__bar { position: relative; grid-column: 1; height: 22px; display: flex; align-items: center; gap: 10px; padding-left: 10px; color: var(--fg); font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; isolation: isolate; }
+.btr__bar b { width: 6.2em; flex: none; color: var(--fg-3); font-weight: 400; white-space: nowrap; }
+.btr__bar::before { content: ""; position: absolute; inset: 0 auto 0 0; z-index: -1; width: calc(max(var(--w), 0.012) * 100%); border-radius: 6px; background: rgba(244, 240, 232, 0.07); transform-origin: left; }
+.btr__bar[data-when="after"]::before { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
+.btr__bars em { color: var(--fg-3); font-size: 12.5px; font-style: normal; }
+
+/* The canvas: facts, paths, and one screen ------------------------------------------------- */
+
+.btr-fact {
+  position: absolute;
+  padding: 11px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1c2023, #171a1d);
+  box-shadow: 0 0 0 1px var(--rule-2), inset 0 1px 0 rgba(244, 240, 232, 0.07), 0 16px 30px -18px rgba(0, 0, 0, 0.9);
+  transition: opacity 500ms var(--ease), transform 700ms var(--ease-out);
+}
+.btr-fact span { color: var(--fg-3); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; }
+.btr-fact strong { color: var(--fg); font-size: 13.5px; font-weight: 560; line-height: 1.3; }
+.btr[data-layout="narrow"] .btr-fact { padding: 9px 10px; }
+.btr[data-layout="narrow"] .btr-fact strong { font-size: 12px; }
+.btr:not([data-chapter="build"]) .btr-fact { opacity: 0; transform: translateX(-18px); pointer-events: none; }
+.btr[data-layout="narrow"]:not([data-chapter="build"]) .btr-fact { transform: translateY(-14px); }
+
+.btr__paths { position: absolute; z-index: 3; inset: 0; overflow: visible; pointer-events: none; transition: opacity 400ms var(--ease); }
+.btr:not([data-chapter="build"]) .btr__paths { opacity: 0; }
+.btr-path,
+.btr-path__halo,
+.btr-path__glint { fill: none; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+/* A dark edge under each line, so it reads cleanly where it crosses the page. */
+.btr-path__halo { stroke: rgba(10, 11, 12, 0.75); stroke-width: 5; stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+.btr-path { stroke: var(--rule-3); stroke-width: 1.25; stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+.btr-path__glint { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 0.07 1.2; stroke-dashoffset: 0.07; opacity: 0; }
+
+/*
+  The frame: one box covering both shapes. Its visible shape is a clip-path that moves between the
+  browser and the phone, so the morph never changes layout. Edges and shadows are two fixed shapes
+  that cross-fade.
+*/
+.btr-screen { position: absolute; z-index: 1; }
+.btr-screen__edge {
+  position: absolute;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px var(--rule-2), var(--shadow-2), 0 30px 90px -40px rgba(220, 169, 107, 0.25);
+  transition: opacity 600ms var(--ease);
+  pointer-events: none;
+}
+.btr-screen__edge[data-shape="phone"] { border-radius: 34px; opacity: 0; }
+.btr:not([data-chapter="build"]) .btr-screen__edge[data-shape="browser"] { opacity: 0; }
+.btr:not([data-chapter="build"]) .btr-screen__edge[data-shape="phone"] { opacity: 1; transition-delay: 250ms; }
+.btr-screen__clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #0d0f11;
+  box-shadow: inset 0 1px 0 rgba(244, 240, 232, 0.06);
+  clip-path: var(--browser);
+  transition: clip-path 850ms var(--ease-in-out);
+}
+.btr:not([data-chapter="build"]) .btr-screen__clip { clip-path: var(--phone); }
+.btr-screen__bar { position: absolute; z-index: 2; display: flex; align-items: center; gap: 5px; padding: 0 10px; border-bottom: 1px solid var(--rule); background: #121416; transition: opacity 300ms var(--ease); }
+.btr-screen__bar i { width: 6px; height: 6px; border-radius: 50%; background: rgba(244, 240, 232, 0.14); }
+.btr-screen__island { position: absolute; z-index: 3; width: 64px; height: 18px; margin-left: -32px; border-radius: 999px; background: #000; opacity: 0; transition: opacity 300ms var(--ease); }
+.btr:not([data-chapter="build"]) .btr-screen__bar { opacity: 0; }
+.btr:not([data-chapter="build"]) .btr-screen__island { opacity: 1; transition-delay: 500ms; }
+.btr[data-seen][data-chapter="refine"] .btr-screen__clip::after { content: ""; position: absolute; z-index: 4; inset: 0; background: linear-gradient(180deg, transparent 0, rgba(220, 169, 107, 0.18) 48%, var(--accent) 50%, transparent 52%); background-size: 100% 220%; animation: btr-scan 1500ms var(--ease-in-out) 350ms both; pointer-events: none; }
+
+/* The miniature of this site. */
+.btr-site { position: absolute; left: 0; color: var(--fg); transition: opacity 450ms var(--ease); }
+.btr-site--wide { padding: 0 20px; }
+.btr-site--narrow { padding: 34px 14px 0; opacity: 0; }
+.btr:not([data-chapter="build"]) .btr-site--wide { opacity: 0; }
+.btr:not([data-chapter="build"]) .btr-site--narrow { opacity: 1; transition-delay: 380ms; }
+
+.btr-site__nav { height: 34px; display: flex; align-items: center; justify-content: space-between; }
+.btr-site__links { display: flex; gap: 8px; }
+.btr-site__links i { width: 20px; height: 3px; border-radius: 2px; background: rgba(244, 240, 232, 0.16); }
+.btr-site__menu { display: grid; gap: 3px; }
+.btr-site__menu i { width: 13px; height: 1.5px; background: rgba(244, 240, 232, 0.7); }
+.btr-site__h { margin-top: 22px; max-width: 12.5em; font-size: 24px; font-weight: 600; font-stretch: 92%; line-height: 1.02; letter-spacing: -0.035em; }
+.btr-site--narrow .btr-site__h { margin-top: 14px; font-size: 17.5px; }
+.btr-site__cta { display: inline-flex; align-items: center; height: 22px; margin-top: 12px; padding: 0 10px; border-radius: 999px; background: var(--fg); color: var(--page); font-size: 9.5px; font-weight: 600; }
+
+.btr-site__slot { position: relative; margin-top: 14px; display: grid; }
+.btr-site__slot > * { grid-area: 1 / 1; }
+.btr-site__skeleton { align-self: center; height: 10px; width: 70%; border-radius: 4px; background: rgba(244, 240, 232, 0.07); transition: opacity 400ms var(--ease); }
+.btr-site__slot[data-slot="contact"] .btr-site__skeleton { height: 96px; width: 100%; border-radius: 10px; }
+.btr-site__real { transition: opacity 500ms var(--ease), transform 600ms var(--ease-out); }
+.btr-site--wide .btr-site__real { opacity: 0; transform: translateX(-6px); }
+.btr-site--narrow .btr-site__skeleton { display: none; }
+.btr-site__slot::before { content: ""; position: absolute; left: -12px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(220, 169, 107, 0.2); opacity: 0; transition: opacity 400ms var(--ease); }
+.btr-site--narrow .btr-site__slot::before { display: none; }
+
+.btr-site__services { display: flex; flex-wrap: wrap; gap: 5px; }
+.btr-site__services > span { display: inline-flex; align-items: center; gap: 6px; height: 21px; padding: 0 8px; border-radius: 999px; background: rgba(244, 240, 232, 0.07); font-size: 10px; font-weight: 520; }
+.btr-site__services b { display: none; position: relative; color: var(--accent); font-weight: 600; }
+.btr-site--narrow .btr-site__services { flex-direction: column; gap: 0; border-top: 1px solid var(--rule); }
+.btr-site--narrow .btr-site__services > span { height: 28px; padding: 0; justify-content: space-between; border-radius: 0; background: none; border-bottom: 1px solid var(--rule); font-size: 11px; }
+.btr-site--narrow .btr-site__services b { display: inline; font-size: 10px; }
+.btr-site__where { display: flex; align-items: center; gap: 6px; color: var(--fg-2); font-size: 10.5px; }
+.btr-site__where::before { content: ""; width: 5px; height: 5px; border-radius: 50%; border: 1.5px solid var(--fg-3); }
+
+.btr-site__form .btr-site__real { display: grid; gap: 6px; padding: 10px; border-radius: 10px; background: #15181b; box-shadow: 0 0 0 1px var(--rule); }
+.btr-site__field { height: 18px; padding: 0 7px; display: flex; align-items: center; border-radius: 5px; box-shadow: inset 0 0 0 1px var(--rule-2); color: var(--fg-3); font-size: 9px; }
+.btr-site__choices { display: flex; flex-wrap: wrap; gap: 5px; }
+.btr-site__choice { position: relative; display: inline-flex; align-items: center; gap: 5px; height: 18px; padding: 0 7px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--rule-2); color: var(--fg-2); font-size: 9px; }
+.btr-site__choice i { width: 8px; height: 8px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--fg-3); }
+.btr-site__send { position: relative; justify-self: start; height: 20px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: 999px; background: var(--fg); color: var(--page); font-size: 9px; font-weight: 600; }
+.btr-site__checked { display: flex; align-items: center; gap: 5px; color: var(--accent-2); font-size: 9.5px; font-weight: 560; opacity: 0; }
+.btr-site__checked::before { content: ""; width: 7px; height: 4px; margin-top: -2px; border: solid currentColor; border-width: 0 0 1.5px 1.5px; transform: rotate(-45deg); }
+
+/* A tap: a ring that grows from the thing being pressed. */
+.btr-site__services b::after,
+.btr-site__send::after { content: ""; position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--accent); opacity: 0; pointer-events: none; }
+.btr-site__tap { display: none; }
+
+/* Build: facts travel along their paths, and the page fills in where each lands. */
+@media (prefers-reduced-motion: no-preference) {
+  .btr[data-seen][data-chapter="build"] :is(.btr-path, .btr-path__halo) { animation: btr-draw 900ms var(--ease-in-out) calc(150ms + var(--i) * 170ms) both; }
+  .btr[data-seen][data-chapter="build"] .btr-path__glint { animation: btr-glint 1300ms var(--ease-in-out) calc(700ms + var(--i) * 170ms) both; }
+  .btr[data-seen][data-chapter="build"] .btr-site--wide .btr-site__slot:nth-of-type(1) { --d: 950ms; }
+  .btr[data-seen][data-chapter="build"] .btr-site--wide .btr-site__slot:nth-of-type(2) { --d: 1120ms; }
+  .btr[data-seen][data-chapter="build"] .btr-site--wide .btr-site__slot:nth-of-type(3) { --d: 1290ms; }
+  .btr[data-seen][data-chapter="build"] .btr-site--wide .btr-site__real { animation: btr-land 600ms var(--ease-out) var(--d) both; }
+  .btr[data-seen][data-chapter="build"] .btr-site--wide .btr-site__skeleton { animation: btr-leave 300ms var(--ease) var(--d) both; }
+  .btr[data-seen][data-chapter="build"] .btr-site--wide .btr-site__slot::before { animation: btr-node 1400ms var(--ease) var(--d) both; }
+
+  /* Test: tap the service, the form opens with it chosen, send, and the server checks it. */
+  .btr[data-seen][data-chapter="test"] .btr-site--narrow .btr-site__services b::after { animation: btr-tap 700ms var(--ease-out) 1000ms both; }
+  .btr[data-seen][data-chapter="test"] .btr-site--narrow [data-pick] { animation: btr-pick 900ms var(--ease) 1500ms both; }
+  .btr[data-seen][data-chapter="test"] .btr-site--narrow [data-pick] i { animation: btr-check 300ms var(--ease) 1500ms both; }
+  .btr[data-seen][data-chapter="test"] .btr-site--narrow .btr-site__send::after { animation: btr-tap 700ms var(--ease-out) 2300ms both; }
+  .btr[data-seen][data-chapter="test"] .btr-site--narrow .btr-site__checked { animation: btr-land 500ms var(--ease-out) 2800ms both; }
+  .btr[data-seen][data-chapter="test"] .btr__steps .btr-status { animation: btr-land 450ms var(--ease-out) both; animation-delay: calc(1600ms + var(--i) * 650ms); }
+
+  /* Refine: a pass over the page, and the faint text comes up to full strength. */
+  .btr[data-seen][data-chapter="refine"] .btr-site--narrow .btr-site__scroll { animation: btr-brighten 900ms var(--ease) 900ms both; }
+  .btr[data-seen][data-chapter="refine"] .btr__bar::before { animation: btr-grow 900ms var(--ease-out) calc(300ms + var(--i) * 200ms) both; }
+  .btr[data-seen][data-chapter="refine"] .btr__bar[data-when="after"]::before { animation-delay: calc(700ms + var(--i) * 200ms); }
+}
+
+/* Settled states: what each chapter looks like with motion paused or reduced. */
+.btr[data-chapter="build"] .btr-site--wide .btr-site__real { opacity: 1; transform: none; }
+.btr[data-chapter="build"] .btr-site--wide .btr-site__skeleton { opacity: 0; }
+.btr[data-chapter="build"] .btr-site--wide .btr-site__slot::before { opacity: 1; }
+.btr:not([data-chapter="build"]) .btr-site--narrow [data-pick] i { background: var(--accent); box-shadow: none; }
+.btr:not([data-chapter="build"]) .btr-site--narrow [data-pick] { color: var(--fg); box-shadow: inset 0 0 0 1px var(--accent); }
+.btr:not([data-chapter="build"]) .btr-site--narrow .btr-site__checked { opacity: 1; }
+
+@keyframes btr-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes btr-glint { 0% { opacity: 0; stroke-dashoffset: 0.07; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; stroke-dashoffset: -1.05; } }
+@keyframes btr-land { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+@keyframes btr-leave { from { opacity: 1; } to { opacity: 0; } }
+@keyframes btr-node { 0% { opacity: 0; box-shadow: 0 0 0 0 rgba(220, 169, 107, 0.6); } 30% { opacity: 1; box-shadow: 0 0 0 7px rgba(220, 169, 107, 0); } 100% { opacity: 1; box-shadow: 0 0 0 3px rgba(220, 169, 107, 0.2); } }
+@keyframes btr-tap { 0% { opacity: 0; transform: scale(0.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.6); } }
+@keyframes btr-pick { 0% { box-shadow: inset 0 0 0 1px var(--rule-2); } 30% { box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 4px rgba(220, 169, 107, 0.25); } 100% { box-shadow: inset 0 0 0 1px var(--accent); } }
+@keyframes btr-check { from { background: transparent; box-shadow: inset 0 0 0 1px var(--fg-3); } to { background: var(--accent); box-shadow: none; } }
+@keyframes btr-scan { from { background-position: 0 120%; opacity: 1; } 85% { opacity: 1; } to { background-position: 0 -20%; opacity: 0; } }
+@keyframes btr-brighten { from { opacity: 0.35; } to { opacity: 1; } }
+@keyframes btr-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes btr-text { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .btr *, .btr *::before, .btr *::after { transition-duration: 0.01ms !important; animation: none !important; }
+}
+
+/* Not pinned (tablets, phones, short screens, reduced motion): the same three chapters as tabs. */
+@media (max-width: 1023px) {
+  .btr { margin-top: 28px; }
+  .btr__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tabs" "stage" "panel"; gap: 0; }
+  .btr__copy { display: contents; }
+  .btr__tabs { grid-area: tabs; justify-self: start; }
+  .btr__stage { grid-area: stage; height: auto; min-height: 0; aspect-ratio: 360 / 470; width: 100%; max-width: 440px; margin: 28px auto 0; }
+  .btr__panels { grid-area: panel; margin-top: 28px; }
+  /* Unpinned, chapters change only when tapped, so the column can take each chapter's own height. */
+  .btr__panel:not([data-active]) { display: none; }
+  .btr__title { font-size: 44px; }
+  .btr__line { font-size: 17px; }
+}
+
+@media (max-width: 560px) {
+  .btr__tabs { display: flex; width: 100%; }
+  .btr__tabs button { flex: 1; justify-content: center; padding: 0 8px; font-size: 14.5px; }
+  .btr__tabs button span { display: none; }
+  .btr__stage { margin-top: 20px; }
+  .btr__title { font-size: 40px; }
+  .btr__steps li { grid-template-columns: minmax(0, 1fr); }
+  .btr-status { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 6px; }
+}

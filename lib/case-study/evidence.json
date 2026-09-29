@@ -1,0 +1,390 @@
+{
+  "version": 1,
+  "recordedOn": "2026-09-29",
+  "subject": "The mountline.dev homepage, before and after its September 2026 rebuild",
+  "builds": {
+    "before": {
+      "commit": "52092aa",
+      "description": "the homepage as it was live before the rebuild"
+    },
+    "after": {
+      "commit": "52092aa+tree:0cc460f7f4cf",
+      "description": "the rebuilt homepage, as a local production build"
+    }
+  },
+  "environment": {
+    "machine": "Apple M5 (10 cores), macOS",
+    "browser": "Chrome 154.0.8037.58, headless",
+    "tools": [
+      "Playwright 1.63.0",
+      "axe-core 4.13.0",
+      "Lighthouse 13.5.0",
+      "Node v26.0.0"
+    ],
+    "viewports": [
+      "Desktop 1440 × 900",
+      "Phone 390 × 844 (emulated, touch)"
+    ],
+    "network": "Both builds served locally by `next start`. Lighthouse simulates a slow 4G connection and a 4× slower processor."
+  },
+  "checks": [
+    {
+      "id": "offer-on-first-screen",
+      "label": "The offer is on the first screen",
+      "means": "The headline and a way to start a project are visible without scrolling.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "project-link-reaches-form",
+      "label": "One tap reaches the form",
+      "means": "“Talk about your project” lands on the form’s first field.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "capture-link-preselects-form",
+      "label": "Asking about a service fills it in",
+      "means": "“Ask about Capture” opens the form with Photo and video already chosen.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "receptionist-link-preselects-form",
+      "label": "The same for the receptionist",
+      "means": "“Ask about the receptionist” opens the form with it already chosen.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "form-shows-errors-and-focuses-first",
+      "label": "Mistakes are explained",
+      "means": "Sending an empty form lists what’s missing and moves to the first problem.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "form-keeps-input-after-error",
+      "label": "Nothing typed is lost",
+      "means": "After a mistake, everything already typed is still there.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "form-round-trip-without-saving",
+      "label": "The server checks every message",
+      "means": "A controlled test submission reaches the server, is checked, and is refused on purpose, so nothing is saved.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "example-starts-on-click",
+      "label": "The example starts at once",
+      "means": "Pressing play on the receptionist example starts it immediately.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "example-outcome-reachable",
+      "label": "The outcome is always in reach",
+      "means": "The example’s finished message can be read without waiting for the end.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "demo-phone-number-visible",
+      "label": "The real demo line is next to it",
+      "means": "The phone number for the live demo line is shown with the example.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "skip-link-first",
+      "label": "Keyboard users can skip ahead",
+      "means": "The first key press offers a jump straight to the content.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "visible-focus-on-every-stop",
+      "label": "You can always see where you are",
+      "means": "Every stop on the keyboard path, down to the form, is visibly highlighted.",
+      "shared": false,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "automated-accessibility-scan",
+      "label": "Automated accessibility scan",
+      "means": "axe-core finds no WCAG A/AA rule failures on the page.",
+      "shared": false,
+      "before": {
+        "desktop": "fail",
+        "phone": "fail"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "no-sideways-scroll",
+      "label": "Nothing spills off the side",
+      "means": "No sideways scrolling at 360, 390, 768, 1024, 1440, or 1920 pixels wide.",
+      "shared": true,
+      "before": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    },
+    {
+      "id": "live-demo-fails-honestly",
+      "label": "The browser demo never fakes a call",
+      "means": "With the microphone blocked, or the browser demo switched off, it says so and offers the phone line instead.",
+      "shared": false,
+      "before": {
+        "desktop": null,
+        "phone": null
+      },
+      "after": {
+        "desktop": "pass",
+        "phone": "pass"
+      },
+      "detail": null
+    }
+  ],
+  "tasks": {
+    "total": 27,
+    "passed": 27
+  },
+  "tasksBefore": {
+    "total": 25,
+    "passed": 25
+  },
+  "accessibility": {
+    "tool": "axe-core 4.13.0, WCAG 2.2 A and AA rules",
+    "before": {
+      "rules": 2,
+      "elements": 11
+    },
+    "after": {
+      "rules": 0,
+      "elements": 0
+    }
+  },
+  "performance": {
+    "tool": "Lighthouse 13.5.0",
+    "profile": "Mobile preset, runs of both builds interleaved",
+    "lcpMs": {
+      "before": {
+        "median": 6551,
+        "min": 6548,
+        "max": 6556,
+        "runs": 5
+      },
+      "after": {
+        "median": 5217,
+        "min": 5213,
+        "max": 5224,
+        "runs": 5
+      }
+    },
+    "tbtMs": {
+      "before": {
+        "median": 57,
+        "min": 49,
+        "max": 60,
+        "runs": 5
+      },
+      "after": {
+        "median": 97,
+        "min": 92,
+        "max": 108,
+        "runs": 5
+      }
+    },
+    "fontKb": {
+      "before": 411,
+      "after": 138
+    },
+    "totalKb": {
+      "before": 1024,
+      "after": 801
+    }
+  },
+  "unitTests": {
+    "before": {
+      "passed": 87,
+      "total": 87
+    },
+    "after": {
+      "passed": 121,
+      "total": 121
+    },
+    "covers": "Inquiry validation, saving through the real database function in an in-process Postgres, duplicate and rate-limit protection, email jobs, public-claim rules, and the receptionist setup and browser-demo server code."
+  },
+  "findings": [
+    {
+      "kind": "check",
+      "id": "phone-form-link",
+      "featured": true,
+      "title": "A link that missed on phones",
+      "found": "A mid-build test caught “Talk about your project” landing on the word-built mark on phones, with the form below the screen.",
+      "fix": "The form now comes right after the heading.",
+      "before": "fail",
+      "after": "pass",
+      "source": "The “One tap reaches the form” check, mid-build run and final run"
+    },
+    {
+      "kind": "count",
+      "id": "scroll-shift",
+      "featured": true,
+      "title": "Content that moved while scrolling",
+      "found": "A mid-build test caught content shifting as a desktop screen scrolled past this scene, because the frame resized itself to become a phone. The old homepage had none.",
+      "fix": "Now it changes shape without moving anything.",
+      "unit": "layout shift, desktop",
+      "beforeLabel": "Mid-build",
+      "before": 0.0646,
+      "after": 0,
+      "source": "Scripted scroll through the whole page with a 4× slower processor, mid-build run and final run"
+    },
+    {
+      "kind": "count",
+      "id": "fonts",
+      "featured": true,
+      "beforeLabel": "Before",
+      "title": "Fonts nobody saw",
+      "found": "The old homepage loaded 411 KB of fonts, including a serif only our team dashboard uses.",
+      "fix": "Now that one loads only there.",
+      "unit": "KB of fonts",
+      "before": 411,
+      "after": 138,
+      "source": "Median of the Lighthouse mobile runs"
+    },
+    {
+      "kind": "count",
+      "id": "contrast",
+      "featured": false,
+      "beforeLabel": "Before",
+      "title": "Text too faint to read",
+      "found": "A scan found 10 bits of text too faint to read, mostly faded questions in the old scrolling list.",
+      "fix": "Every line now clears the minimum.",
+      "unit": "faint elements",
+      "before": 10,
+      "after": 0,
+      "source": "axe-core color-contrast rule, desktop and phone"
+    }
+  ],
+  "notTested": [
+    "Conversations with the live AI receptionist. No test calls were approved for this build, so its answers are not scored here.",
+    "A real browser call to the demo. With placeholder settings, its error paths were exercised (6 of 6 behaved as designed), but no real call was made because the provider keys aren’t set up yet.",
+    "Email delivery to a real inbox. A provider accepting an email doesn’t prove it arrived.",
+    "Physical phones. Phone results come from an emulated phone screen in desktop Chrome."
+  ],
+  "limits": [
+    "Lab measurements from one computer on one day. Your customers’ phones and connections will differ.",
+    "Automated accessibility scans catch some problems, not all of them.",
+    "These are recorded results, not a test running in your browser now."
+  ]
+}

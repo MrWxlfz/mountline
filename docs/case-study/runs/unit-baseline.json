@@ -1,0 +1,31 @@
+{
+  "label": "baseline",
+  "recordedAt": "2026-09-29T20:24:15.921Z",
+  "cwd": "separate checkout",
+  "suites": [
+    {
+      "script": "test:inquiries",
+      "covers": "Inquiry validation, saving through the database function (in-process Postgres), duplicates, rate limits, and email jobs",
+      "tests": 59,
+      "pass": 59,
+      "fail": 0,
+      "failed": []
+    },
+    {
+      "script": "test:stabilization",
+      "covers": "Public claims, security boundaries, and commercial state",
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "failed": []
+    },
+    {
+      "script": "test:receptionist",
+      "covers": "Receptionist profiles and prompts (plus the inquiry tests again)",
+      "tests": 69,
+      "pass": 69,
+      "fail": 0,
+      "failed": []
+    }
+  ]
+}

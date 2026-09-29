@@ -14,7 +14,8 @@ test("the homepage, metadata, and footer describe the whole business, not only t
     read("app/opengraph-image.tsx"),
     read("components/homepage/site-footer.tsx"),
   ])
-  assert.match(homepage, /A better website for the business you’ve built/)
+  // The headline may be split across elements for layout; the words must stay the same.
+  assert.match(homepage.replace(/<[^>]+>/g, ""), /A better website for the business you’ve built/)
   assert.match(homepage, /id="websites"/)
   assert.match(homepage, /id="capture"/)
   assert.match(homepage, /id="receptionist"/)
@@ -55,18 +56,34 @@ test("the private notification address stays out of public site components", asy
     "components/project-inquiry-form.tsx",
     "components/homepage/site-footer.tsx",
     "components/homepage/site-header.tsx",
+    "components/homepage/evidence-panel.tsx",
+    "components/homepage/build-test-refine.tsx",
     "components/receptionist/receptionist-page.tsx",
+    "components/receptionist/call-console.tsx",
+    "components/receptionist/use-live-demo.ts",
+    "lib/receptionist/web-demo/contract.ts",
+    "lib/case-study/evidence.json",
     "lib/homepage/content.ts",
   ]) assert.doesNotMatch(await read(file), /icloud/i, file)
 })
 
 test("the word-built mark is decorative and complete without motion", async () => {
-  const [mark, css] = await Promise.all([read("components/brand/signature-mark.tsx"), read("components/brand/signature-mark.css")])
-  assert.match(mark, /aria-hidden="true"/)
-  assert.match(mark, /prefers-reduced-motion: reduce/)
-  // Without scripts, or with reduced motion, the finished mark is what shows.
-  assert.match(css, /\.ml-signature \{ --p: 1;/)
-  assert.match(css, /prefers-reduced-motion: reduce[\s\S]*--p: 1 !important/)
+  const [mark, player, css] = await Promise.all([
+    read("components/brand/signature-mark.tsx"),
+    read("components/brand/signature-player.tsx"),
+    read("components/brand/signature-mark.css"),
+  ])
+  assert.match(player, /aria-hidden="true"/)
+  assert.match(mark, /SignaturePlayer/)
+  // Reduced motion never hides it, and it plays once rather than re-forming on scroll.
+  assert.match(player, /prefers-reduced-motion: reduce/)
+  assert.match(player, /observer\.disconnect\(\)/)
+  assert.doesNotMatch(player, /addEventListener\("scroll"/)
+  // Without scripts, or with reduced motion, the finished mark is what shows: rows are only hidden
+  // or moved inside the no-preference block, while waiting to play.
+  const outside = css.replace(/@media \(prefers-reduced-motion: no-preference\) \{[\s\S]*?\n\}/, "")
+  assert.doesNotMatch(outside.replace(/@keyframes[\s\S]*$/, ""), /opacity: 0|transform: translate/)
+  assert.match(css, /\[data-state="waiting"\] \.ml-signature__row \{ opacity: 0; \}/)
 })
 
 test("the receptionist page keeps the service detail, the demo line, and its limits", async () => {
@@ -88,25 +105,35 @@ test("the receptionist page keeps the service detail, the demo line, and its lim
 })
 
 test("simulations are labeled and unsupported completion claims are absent", async () => {
-  for (const file of ["components/mountline-homepage.tsx", "components/receptionist/receptionist-page.tsx"]) {
-    const source = await read(file)
-    const illustrations = source.split("data-illustrative").length - 1
-    assert.ok(illustrations >= 1, file)
-    assert.ok(source.split("Not live customer data").length - 1 >= illustrations, file)
-  }
-  const scene = await read("components/homepage/call-scene.tsx")
-  assert.match(scene, /Scripted example · text only, no audio/)
+  const receptionist = await read("components/receptionist/receptionist-page.tsx")
+  const illustrations = receptionist.split("data-illustrative").length - 1
+  assert.ok(illustrations >= 1)
+  assert.ok(receptionist.split("Not live customer data").length - 1 >= illustrations)
+
+  const console = await read("components/receptionist/call-console.tsx")
+  // The example is labeled as text only with a made-up caller, wherever it plays.
+  assert.match(console, /Example · text only, no audio/)
+  assert.match(console, /Example request · made-up caller/)
   // No invented audio: the example has none, so there's no player, voice bars, or waveform.
-  assert.doesNotMatch(scene, /<audio|className="[^"]*(wave|voice)/i)
+  assert.doesNotMatch(console, /<audio|className="[^"]*(wave|voice|bars)/i)
   // Nothing plays until someone asks, and scrolling away pauses it.
-  assert.match(scene, /useState<Mode>\("still"\)/)
-  assert.match(scene, /setMode\("paused"\)/)
-  // The scripted example and the real demo line are told apart where both appear.
-  assert.match(await read("components/mountline-homepage.tsx"), /The real demo line · a live AI receptionist/)
+  assert.match(console, /useState<Mode>\("rest"\)/)
+  assert.match(console, /setPlay\("paused"\)/)
+  // The example and a real browser call are separate paths, and a live call's sheet never shows example data.
+  assert.match(console, /Talk to the demo/)
+  assert.match(console, /Play the example/)
+  assert.match(console, /Your demo call · not sent to any business/)
+  // With the browser demo switched off, the main action is the real phone line, never a dead button.
+  assert.match(console, /liveAvailable \? \(/)
+  assert.match(console, /Talking in the browser isn’t switched on yet/)
+  assert.match(await read("components/mountline-homepage.tsx"), /receptionistDemo\.phoneHref/)
+
   for (const file of [
     "components/mountline-homepage.tsx",
-    "components/homepage/call-scene.tsx",
+    "components/receptionist/call-console.tsx",
     "components/homepage/bramble/bramble-site.tsx",
+    "components/homepage/build-test-refine.tsx",
+    "components/homepage/evidence-panel.tsx",
     "components/receptionist/receptionist-page.tsx",
     "components/receptionist/receptionist-sections.tsx",
   ]) {
@@ -120,6 +147,7 @@ test("simulations are labeled and unsupported completion claims are absent", asy
       /sends follow-up automatically/i,
       /guaranteed?/i,
       /testimonial/i,
+      /delivered to your team/i,
     ]) assert.doesNotMatch(source, unsupported, file)
   }
 })
@@ -134,8 +162,9 @@ test("the dot-grid statistic model is gone and the one remaining figure carries 
   assert.match(sections, /not a Mountline result/)
   assert.match(sections, /doesn’t mean every missed call is a lost customer/)
   assert.doesNotMatch(await read("components/mountline-homepage.tsx"), /benchmarks|%/)
-  // No percentages anywhere the homepage draws from (the call clock's `% 60` is arithmetic, not a figure).
-  for (const file of ["components/homepage/bramble/bramble-site.tsx", "components/homepage/call-scene.tsx", "lib/homepage/content.ts"]) {
+  // No third-party percentages anywhere the homepage draws from (the call clock's `% 60` is arithmetic, not a figure).
+  // The homepage's only numbers are its own recorded test results; see the case-study test below.
+  for (const file of ["components/homepage/bramble/bramble-site.tsx", "components/receptionist/call-console.tsx", "lib/receptionist/example-call.ts", "lib/homepage/content.ts"]) {
     assert.doesNotMatch(await read(file), /benchmarks|\d\s?%|percent/i, file)
   }
 })
@@ -159,4 +188,30 @@ test("public Sentry demos are gone while monitoring remains configured", async (
   await assert.rejects(access(`${root}/app/sentry-example-page/page.tsx`))
   await assert.rejects(access(`${root}/app/api/sentry-example-api/route.ts`))
   assert.match(await read("instrumentation.ts"), /captureRequestError/)
+})
+
+test("the case study only shows recorded results, and says what wasn't tested", async () => {
+  const [evidenceSource, panel, scene, generator] = await Promise.all([
+    read("lib/case-study/evidence.json"),
+    read("components/homepage/evidence-panel.tsx"),
+    read("components/homepage/build-test-refine.tsx"),
+    read("scripts/evidence/build-evidence.mjs"),
+  ])
+  const evidence = JSON.parse(evidenceSource)
+  // Every number on the page comes from the recorded file: no figures are written into the components.
+  for (const [name, source] of [["panel", panel], ["scene", scene]]) {
+    assert.doesNotMatch(source, /\b\d+(\.\d+)?\s?(KB|ms|s\b|seconds|checks|problems|%)/, name)
+  }
+  assert.match(panel, /not a test running in your browser/)
+  // Checks carry their own before and after; missing values stay null rather than turning into a pass.
+  for (const check of evidence.checks) {
+    for (const value of [check.before.desktop, check.before.phone]) assert.ok([null, "pass", "fail"].includes(value), check.id)
+  }
+  assert.match(generator, /never fills a gap with a guess/)
+  // The live receptionist and email delivery are listed as untested until someone actually tests them.
+  assert.ok(evidence.notTested.some((item: string) => /live AI receptionist/i.test(item)))
+  assert.ok(evidence.notTested.some((item: string) => /inbox/i.test(item)))
+  // Bramble stays a design example; the case study is about this site.
+  assert.match(evidence.subject, /mountline\.dev/)
+  assert.doesNotMatch(evidenceSource, /bramble/i)
 })

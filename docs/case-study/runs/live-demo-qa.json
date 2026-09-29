@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-09-29T21:18:35.622Z",
+  "base": "http://localhost:3300",
+  "note": "Placeholder Retell settings and an unreachable Supabase URL; no real call was possible. Tests 3–6 simulate server or provider answers.",
+  "results": [
+    {
+      "id": "mic-refused",
+      "pass": true,
+      "detail": "Talk shown=true; after refusal phase=error; call requests=0"
+    },
+    {
+      "id": "server-error-shown",
+      "pass": true,
+      "detail": "\"Something went wrong on our side. Please try again in a moment, or call the demo line.\"; requests=1; phone offered=true; try again offered=true"
+    },
+    {
+      "id": "rate-limit-shown",
+      "pass": true,
+      "detail": "limit message shown; try again offered=false"
+    },
+    {
+      "id": "connect-failure-shown",
+      "pass": true,
+      "detail": "phases seen: permission → connecting → error; gateway attempts=1"
+    },
+    {
+      "id": "double-click-one-request",
+      "pass": true,
+      "detail": "requests after a double click=1"
+    },
+    {
+      "id": "cancel-while-connecting",
+      "pass": true,
+      "detail": "phase=rest; Talk back=true; end requests=1; gateway attempts=0"
+    }
+  ]
+}

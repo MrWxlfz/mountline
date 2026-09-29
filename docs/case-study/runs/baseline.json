@@ -1,0 +1,386 @@
+{
+  "label": "baseline",
+  "base": "http://localhost:3100",
+  "commit": "52092aa",
+  "startedAt": "2026-09-29T20:08:11.527Z",
+  "finishedAt": "2026-09-29T20:12:33.096Z",
+  "environment": {
+    "os": "darwin 25.5.0",
+    "cpu": "Apple M5",
+    "cores": 10,
+    "node": "v26.0.0",
+    "chrome": "154.0.8037.58",
+    "playwright": "1.63.0",
+    "axe": "4.13.0",
+    "lighthouse": "13.5.0",
+    "network": "localhost (next start); Lighthouse applies its own simulated throttling"
+  },
+  "checks": [
+    {
+      "id": "offer-on-first-screen",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "h1=\"A better website for the business you’ve built.\", headline in view=true, project link in view=true"
+    },
+    {
+      "id": "project-link-reaches-form",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "\"Your name\" field in view after one click"
+    },
+    {
+      "id": "capture-link-preselects-form",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "/ask about capture/i → /photo and video/i checked=true"
+    },
+    {
+      "id": "receptionist-link-preselects-form",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "/ask about the receptionist/i → /ai receptionist/i checked=true"
+    },
+    {
+      "id": "form-shows-errors-and-focuses-first",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "8 invalid fields, focus on \"name\", summary alert=true"
+    },
+    {
+      "id": "form-keeps-input-after-error",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "name kept=\"Test Visitor\", email invalid=true"
+    },
+    {
+      "id": "form-round-trip-without-saving",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "server answered in 51 ms with the refusal message; success shown=false"
+    },
+    {
+      "id": "example-starts-on-click",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "\"Play the example\" → pause control in 38 ms"
+    },
+    {
+      "id": "example-outcome-reachable",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "request summary text present while playing=true"
+    },
+    {
+      "id": "demo-phone-number-visible",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "tel link to the demo line visible=true"
+    },
+    {
+      "id": "skip-link-first",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "first tab stop=\"Skip to content\""
+    },
+    {
+      "id": "visible-focus-on-every-stop",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "35 stops checked, 0 without a visible change"
+    },
+    {
+      "id": "automated-accessibility-scan",
+      "viewport": "desktop",
+      "pass": false,
+      "detail": "1 rule(s) failed across 10 element(s): color-contrast×10"
+    },
+    {
+      "id": "offer-on-first-screen",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "h1=\"A better website for the business you’ve built.\", headline in view=true, project link in view=true"
+    },
+    {
+      "id": "project-link-reaches-form",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "\"Your name\" field in view after one click"
+    },
+    {
+      "id": "capture-link-preselects-form",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "/ask about capture/i → /photo and video/i checked=true"
+    },
+    {
+      "id": "receptionist-link-preselects-form",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "/ask about the receptionist/i → /ai receptionist/i checked=true"
+    },
+    {
+      "id": "form-shows-errors-and-focuses-first",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "8 invalid fields, focus on \"name\", summary alert=true"
+    },
+    {
+      "id": "form-keeps-input-after-error",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "name kept=\"Test Visitor\", email invalid=true"
+    },
+    {
+      "id": "form-round-trip-without-saving",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "server answered in 51 ms with the refusal message; success shown=false"
+    },
+    {
+      "id": "example-starts-on-click",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "\"Play the example\" → pause control in 41 ms"
+    },
+    {
+      "id": "example-outcome-reachable",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "request summary text present while playing=true"
+    },
+    {
+      "id": "demo-phone-number-visible",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "tel link to the demo line visible=true"
+    },
+    {
+      "id": "skip-link-first",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "first tab stop=\"Skip to content\""
+    },
+    {
+      "id": "visible-focus-on-every-stop",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "31 stops checked, 0 without a visible change"
+    },
+    {
+      "id": "automated-accessibility-scan",
+      "viewport": "phone",
+      "pass": false,
+      "detail": "1 rule(s) failed across 1 element(s): list×1"
+    },
+    {
+      "id": "no-sideways-scroll",
+      "viewport": "360/390/768/1024/1440/1920",
+      "pass": true,
+      "detail": "page width fits at every tested width"
+    }
+  ],
+  "measurements": {
+    "example-length-ms-desktop": 23999,
+    "tab-stops-to-project-link-desktop": 8,
+    "tab-stops-to-demo-desktop": 17,
+    "tab-stops-to-form-desktop": 35,
+    "axe-desktop": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodes": 10,
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "targets": [
+          ".hp-questions__desktop > .hp-browser > .hp-browser__bar[aria-hidden=\"true\"] > .hp-browser__address",
+          "#question-services > .hp-questions__index[aria-hidden=\"true\"]",
+          "#question-services > h3",
+          "#question-services > p",
+          "#question-hours > .hp-questions__index[aria-hidden=\"true\"]"
+        ]
+      }
+    ],
+    "page-length-viewports-desktop": 12.59,
+    "form-depth-viewports-desktop": 11.04,
+    "scroll-layout-shift-desktop": 0,
+    "scroll-long-tasks-desktop": 0,
+    "scroll-blocking-ms-desktop": 0,
+    "scroll-seconds-desktop": 5.6,
+    "example-length-ms-phone": 24028,
+    "tab-stops-to-project-link-phone": 4,
+    "tab-stops-to-demo-phone": 13,
+    "tab-stops-to-form-phone": 31,
+    "axe-phone": [
+      {
+        "id": "list",
+        "impact": "serious",
+        "nodes": 1,
+        "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
+        "targets": [
+          ".hp-questions__list"
+        ]
+      }
+    ],
+    "page-length-viewports-phone": 16.54,
+    "form-depth-viewports-phone": 13.59,
+    "scroll-layout-shift-phone": 0,
+    "scroll-long-tasks-phone": 0,
+    "scroll-blocking-ms-phone": 0,
+    "scroll-seconds-phone": 6.4
+  },
+  "lighthouse": {
+    "mobile": [
+      {
+        "score": 0.73,
+        "fcpMs": 2057,
+        "lcpMs": 7085,
+        "tbtMs": 83,
+        "cls": 0,
+        "speedIndexMs": 3332,
+        "totalBytes": 1050949,
+        "scriptBytes": 506689,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1656,
+        "lcpMs": 6548,
+        "tbtMs": 58,
+        "cls": 0,
+        "speedIndexMs": 2585,
+        "totalBytes": 1050935,
+        "scriptBytes": 506701,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1657,
+        "lcpMs": 6551,
+        "tbtMs": 59,
+        "cls": 0,
+        "speedIndexMs": 2581,
+        "totalBytes": 1052002,
+        "scriptBytes": 506814,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1654,
+        "lcpMs": 6544,
+        "tbtMs": 63,
+        "cls": 0,
+        "speedIndexMs": 2555,
+        "totalBytes": 1052081,
+        "scriptBytes": 506826,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.76,
+        "fcpMs": 1656,
+        "lcpMs": 6547,
+        "tbtMs": 61,
+        "cls": 0,
+        "speedIndexMs": 2557,
+        "totalBytes": 1050953,
+        "scriptBytes": 506700,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      }
+    ],
+    "desktop": [
+      {
+        "score": 0.97,
+        "fcpMs": 405,
+        "lcpMs": 1232,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 779,
+        "totalBytes": 1050951,
+        "scriptBytes": 506697,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 405,
+        "lcpMs": 1230,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 781,
+        "totalBytes": 1050968,
+        "scriptBytes": 506688,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 406,
+        "lcpMs": 1233,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 783,
+        "totalBytes": 1052079,
+        "scriptBytes": 506687,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 406,
+        "lcpMs": 1234,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 782,
+        "totalBytes": 1050942,
+        "scriptBytes": 506717,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      },
+      {
+        "score": 0.97,
+        "fcpMs": 407,
+        "lcpMs": 1235,
+        "tbtMs": 0,
+        "cls": 0,
+        "speedIndexMs": 783,
+        "totalBytes": 1050943,
+        "scriptBytes": 506696,
+        "fontBytes": 421232,
+        "requests": 48,
+        "lighthouseVersion": "13.5.0",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "throttling": "simulate"
+      }
+    ]
+  }
+}

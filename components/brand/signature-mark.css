@@ -1,29 +1,35 @@
 /*
-  The closing signature: the Mountline mark set in tiny words, in three depth layers.
-  --p runs 0 → 1 as it scrolls in; 1 is the finished logo, and the default.
+  The word-built Mountline mark. The finished mark is the default: no transform, full opacity.
+  [data-state="waiting"] hides the rows until it's in view; "playing" runs the arrival once.
 */
 
-.ml-signature { --p: 1; position: relative; aspect-ratio: 128 / 138; container-type: inline-size; }
-.ml-signature::before { content: ""; position: absolute; inset: -35%; z-index: -1; background: radial-gradient(closest-side, rgba(239, 180, 97, 0.13), transparent); opacity: calc(0.3 + var(--p) * 0.7); pointer-events: none; }
-.ml-signature__stage { position: absolute; inset: 0; perspective: 1100px; }
-.ml-signature__variant { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(calc((1 - var(--p)) * 26deg)) rotateY(calc((1 - var(--p)) * -18deg)); }
+.ml-signature { position: relative; aspect-ratio: 128 / 138; container-type: inline-size; }
+.ml-signature::before { content: ""; position: absolute; inset: -12% -18% -6%; z-index: -1; background: radial-gradient(closest-side, rgba(220, 169, 107, 0.09), transparent); pointer-events: none; }
+.ml-signature svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .ml-signature__coarse { display: none; }
-@container (max-width: 400px) {
+@container (max-width: 260px) {
   .ml-signature__fine { display: none; }
   .ml-signature__coarse { display: block; }
 }
-.ml-signature__layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.ml-signature__layer text { fill: var(--fg); font-family: var(--mono); font-weight: 500; user-select: none; -webkit-user-select: none; }
-.ml-signature__layer--triangle { transform: translate3d(0, calc((1 - var(--p)) * 24px), calc((1 - var(--p)) * -240px)); }
-.ml-signature__layer--stem { transform: translate3d(0, calc((1 - var(--p)) * -16px), calc((1 - var(--p)) * 60px)); }
-.ml-signature__layer--chevron { transform: translate3d(0, calc((1 - var(--p)) * -56px), calc((1 - var(--p)) * 220px)); }
-.ml-signature__row {
-  --q: clamp(0, calc((var(--p) - var(--s)) / 0.65), 1);
-  --e: calc(var(--q) * var(--q) * (3 - 2 * var(--q)));
-  transform: translate(calc(var(--dx) * (1 - var(--e)) * 1px), calc(var(--dy) * (1 - var(--e)) * 1px));
-  opacity: calc(0.25 + var(--e) * 0.75);
+.ml-signature__row { fill: var(--fg); font-family: var(--mono); font-weight: 500; user-select: none; -webkit-user-select: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ml-signature[data-state="waiting"] .ml-signature__row { opacity: 0; }
+  .ml-signature[data-state="waiting"]::before { opacity: 0; }
+  .ml-signature[data-state="playing"]::before { animation: ml-sig-lamp 1800ms var(--ease) both; }
+  .ml-signature[data-state="playing"] .ml-signature__row {
+    animation:
+      ml-sig-gather 1300ms var(--ease-out) calc(var(--s) * 1s) both,
+      ml-sig-glint 1100ms var(--ease) calc(1500ms + var(--h) * 900ms) both;
+  }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ml-signature { --p: 1 !important; }
+@keyframes ml-sig-gather {
+  from { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+  to { opacity: 1; transform: none; }
 }
+@keyframes ml-sig-glint {
+  0%, 100% { fill: var(--fg); }
+  45% { fill: var(--accent-2, #f1cc9b); }
+}
+@keyframes ml-sig-lamp { from { opacity: 0; } to { opacity: 1; } }

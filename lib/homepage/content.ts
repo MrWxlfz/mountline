@@ -8,12 +8,12 @@
 
 /* Homepage ---------------------------------------------------------------------- */
 
-// How a project goes, told in order, the way we'd explain it across a table.
-export const projectSteps = [
-  { title: "You send a few lines about the business.", body: "Use the form below, or email hello@mountline.dev. It goes straight to Luke." },
-  { title: "We talk it through.", body: "On a call, or in person around Dallas–Fort Worth. We look at what you have now and what your customers ask most." },
-  { title: "You get the plan and the price in writing.", body: "The pages, the words, the photos, and the dates, agreed before any work starts." },
-  { title: "You watch it come together.", body: "A private project page lets you check the site on your own phone as it’s built. It goes live when you say so." },
+// What happens after someone sends the form, in order. This replaced the separate process list.
+export const nextSteps = [
+  "Luke reads your message and replies by email.",
+  "We talk it through, on a call or in person around Dallas–Fort Worth.",
+  "You get the plan and the price in writing before any work starts.",
+  "You check the site on your own phone as it’s built. It goes live when you say so.",
 ] as const
 
 // Mountline Capture: what it is, and the limits that come with it.

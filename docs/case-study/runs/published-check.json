@@ -1,0 +1,219 @@
+{
+  "label": "published-check",
+  "base": "http://localhost:3200",
+  "commit": "published: measured build + its results",
+  "startedAt": "2026-09-29T21:45:45.361Z",
+  "finishedAt": "2026-09-29T21:48:08.148Z",
+  "environment": {
+    "os": "darwin 25.5.0",
+    "cpu": "Apple M5",
+    "cores": 10,
+    "node": "v26.0.0",
+    "chrome": "154.0.8037.58",
+    "playwright": "1.63.0",
+    "axe": "4.13.0",
+    "lighthouse": null,
+    "network": "localhost (next start); Lighthouse applies its own simulated throttling"
+  },
+  "checks": [
+    {
+      "id": "offer-on-first-screen",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "h1=\"A better website for the business you’ve built.\", headline in view=true, project link in view=true"
+    },
+    {
+      "id": "project-link-reaches-form",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "\"Your name\" field in view after one click"
+    },
+    {
+      "id": "capture-link-preselects-form",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "/ask about capture/i → /photo and video/i checked=true"
+    },
+    {
+      "id": "receptionist-link-preselects-form",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "/ask about the receptionist/i → /ai receptionist/i checked=true"
+    },
+    {
+      "id": "form-shows-errors-and-focuses-first",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "8 invalid fields, focus on \"name\", summary alert=true"
+    },
+    {
+      "id": "form-keeps-input-after-error",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "name kept=\"Test Visitor\", email invalid=true"
+    },
+    {
+      "id": "form-round-trip-without-saving",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "server answered in 94 ms with the refusal message; success shown=false"
+    },
+    {
+      "id": "example-starts-on-click",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "\"Play the example\n15 s\" → pause control in 87 ms"
+    },
+    {
+      "id": "example-outcome-reachable",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "request summary text present while playing=true"
+    },
+    {
+      "id": "demo-phone-number-visible",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "tel link to the demo line visible=true"
+    },
+    {
+      "id": "live-demo-fails-honestly",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "browser demo switched off: says so=true, phone line is the main action=true, call requests=0"
+    },
+    {
+      "id": "skip-link-first",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "first tab stop=\"Skip to content\""
+    },
+    {
+      "id": "visible-focus-on-every-stop",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "38 stops checked, 0 without a visible change"
+    },
+    {
+      "id": "automated-accessibility-scan",
+      "viewport": "desktop",
+      "pass": true,
+      "detail": "0 rule(s) failed across 0 element(s)"
+    },
+    {
+      "id": "offer-on-first-screen",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "h1=\"A better website for the business you’ve built.\", headline in view=true, project link in view=true"
+    },
+    {
+      "id": "project-link-reaches-form",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "\"Your name\" field in view after one click"
+    },
+    {
+      "id": "capture-link-preselects-form",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "/ask about capture/i → /photo and video/i checked=true"
+    },
+    {
+      "id": "receptionist-link-preselects-form",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "/ask about the receptionist/i → /ai receptionist/i checked=true"
+    },
+    {
+      "id": "form-shows-errors-and-focuses-first",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "8 invalid fields, focus on \"name\", summary alert=true"
+    },
+    {
+      "id": "form-keeps-input-after-error",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "name kept=\"Test Visitor\", email invalid=true"
+    },
+    {
+      "id": "form-round-trip-without-saving",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "server answered in 71 ms with the refusal message; success shown=false"
+    },
+    {
+      "id": "example-starts-on-click",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "\"Play the example\" → pause control in 84 ms"
+    },
+    {
+      "id": "example-outcome-reachable",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "request summary text present while playing=true"
+    },
+    {
+      "id": "demo-phone-number-visible",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "tel link to the demo line visible=true"
+    },
+    {
+      "id": "live-demo-fails-honestly",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "browser demo switched off: says so=true, phone line is the main action=true, call requests=0"
+    },
+    {
+      "id": "skip-link-first",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "first tab stop=\"Skip to content\""
+    },
+    {
+      "id": "visible-focus-on-every-stop",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "32 stops checked, 0 without a visible change"
+    },
+    {
+      "id": "automated-accessibility-scan",
+      "viewport": "phone",
+      "pass": true,
+      "detail": "0 rule(s) failed across 0 element(s)"
+    },
+    {
+      "id": "no-sideways-scroll",
+      "viewport": "360/390/768/1024/1440/1920",
+      "pass": true,
+      "detail": "page width fits at every tested width"
+    }
+  ],
+  "measurements": {
+    "example-length-ms-desktop": 16009,
+    "tab-stops-to-project-link-desktop": 9,
+    "tab-stops-to-demo-desktop": 21,
+    "tab-stops-to-form-desktop": 38,
+    "axe-desktop": [],
+    "page-length-viewports-desktop": 11.98,
+    "form-depth-viewports-desktop": 10.13,
+    "scroll-layout-shift-desktop": 0,
+    "scroll-long-tasks-desktop": 0,
+    "scroll-blocking-ms-desktop": 0,
+    "scroll-seconds-desktop": 6.5,
+    "example-length-ms-phone": 16004,
+    "tab-stops-to-project-link-phone": 4,
+    "tab-stops-to-demo-phone": 15,
+    "tab-stops-to-form-phone": 32,
+    "axe-phone": [],
+    "page-length-viewports-phone": 17.21,
+    "form-depth-viewports-phone": 13.78,
+    "scroll-layout-shift-phone": 0,
+    "scroll-long-tasks-phone": 1,
+    "scroll-blocking-ms-phone": 2,
+    "scroll-seconds-phone": 7.2
+  },
+  "lighthouse": null
+}

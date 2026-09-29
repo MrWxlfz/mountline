@@ -27,7 +27,7 @@ The full lint command includes legacy dashboard/Signal errors; do not suppress t
 
 ## Product paths
 
-- `/`: Mountline's websites, the optional Capture photo/video add-on, a short receptionist section with the scripted demo and the fictional North Texas Air & Heat demo line, and the project inquiry form.
+- `/`: Mountline's websites, the Build → Test → Refine section with recorded test results (`lib/case-study/evidence.json`, see [docs/case-study](docs/case-study/README.md)), the optional Capture photo/video add-on, the receptionist call console (a text-only example, the fictional North Texas Air & Heat demo line, and an optional browser call), and the project inquiry form. Design notes: [docs/design/art-direction.md](docs/design/art-direction.md).
 - `/receptionist`: the full receptionist explanation, demo line, testing, pilot, and questions. Old homepage anchors (`/#pilot`, `/#trades`, …) forward here.
 - `/dashboard/leads`: Mountline buying inquiries, full messages, contact links, explicit review states, and each inquiry's email history and follow-up controls. These are separate from customers calling a client business.
 - `/dashboard/receptionist`: team-only business-profile and prompt editor. Exports local drafts; it does not configure Retell or save profiles to the database.
@@ -35,7 +35,7 @@ The full lint command includes legacy dashboard/Signal errors; do not suppress t
 - `/id`: unified Mountline ID login. No public signup; the dashboard is team-only and portals require an active assignment.
 - `/portal/[portalId]`: assigned client's project and support view.
 
-The phone demo runs outside this repository. No live Retell, calendar, SMS, transfer, or call-ingestion integration is present. Follow [the receptionist setup guide](docs/receptionist-pilot.md) for reusable profiles and acceptance calls.
+The phone demo runs outside this repository. The only Retell integration here is the optional browser demo call (`/api/receptionist/demo-call`, off until configured; see [docs/receptionist-web-demo.md](docs/receptionist-web-demo.md)). No calendar, SMS, transfer, or call-ingestion integration is present. Follow [the receptionist setup guide](docs/receptionist-pilot.md) for reusable profiles and acceptance calls.
 
 ## Inquiry email
 

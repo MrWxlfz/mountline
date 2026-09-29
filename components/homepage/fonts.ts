@@ -12,10 +12,13 @@ export const siteSans = Instrument_Sans({
   display: "swap",
 })
 
+// Not preloaded: it only sets the example's own headings, so it shouldn't compete with Mountline's
+// headline font for the first screen.
 export const exampleSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
   style: ["normal", "italic"],
   variable: "--font-example-serif",
   display: "swap",
+  preload: false,
 })

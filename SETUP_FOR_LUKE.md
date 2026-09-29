@@ -251,3 +251,30 @@ Replies you send from iCloud (by answering the owner notification) won't pass th
 - **Where inquiries live:** Supabase table `leads`. Their emails are in `inquiry_email_jobs`, and provider events in `inquiry_email_events`. Read them at `/dashboard/leads` (Mountline team only).
 - **Code:** `app/actions/submit-inquiry.ts` (form), `lib/leads/` (validation and saving), `lib/leads/email/` (templates, worker, follow-up rules, webhook), `app/api/cron/inquiry-email`, `app/api/webhooks/resend`, `app/inquiry/stop/[token]` (opt-out page).
 - **Tests:** `pnpm test:inquiries`. The database tests run the real migration in an in-memory Postgres; nothing touches Supabase or sends mail.
+
+---
+
+# Optional: the browser voice demo
+
+The September 2026 homepage rebuild added a **Talk to the demo** button to the receptionist console. It lets a visitor talk to the fictional North Texas Air & Heat receptionist in the browser, using their microphone. It is **off** until you set it up. While it's off, the console's main button is **Call the demo line**, and the short text example still works. Nothing else in the rebuild needs new settings: the form, the emails, and the steps above are unchanged.
+
+| Piece | Status |
+| --- | --- |
+| Browser button, call states, errors, microphone handling | Implemented. Tested locally for the "switched off" and "microphone refused" cases only |
+| Server endpoints, limits (3 per visitor per hour, 40 a day, 2 at once, 3 minutes each) | Implemented and tested locally with a fake Retell and fake storage |
+| Database change (`20260929120000_receptionist_web_demo.sql`) | Tested locally in Postgres. **Needs to be applied to Supabase** |
+| Retell API key and demo agent ID | **Not set.** Needs you |
+| A real browser call | **Not verified.** No Retell credentials were available while building it |
+
+To switch it on, follow **docs/receptionist-web-demo.md**. In short:
+
+1. In Retell, use the fictional demo agent (or a copy), set its max call duration to 3 minutes and end-after-silence to about 20 seconds, publish it, and copy its agent ID and your secret API key.
+2. In Supabase's SQL editor, run `supabase/migrations/20260929120000_receptionist_web_demo.sql`. Success: "Success. No rows returned," and a new empty `receptionist_demo_calls` table.
+3. In Vercel, add `RETELL_API_KEY` and `RETELL_DEMO_AGENT_ID` (Production). `CRON_SECRET` from step 8 above also signs the demo's call links, so no extra secret is needed if it's set. Redeploy.
+4. Test it: on the homepage press **Talk to the demo**, allow the microphone, talk for a moment, end the call. Success: the status shows **Live**, you hear the receptionist, and after hanging up the transcript and summary appear; one `ended` row appears in `receptionist_demo_calls`; **no** inquiry shows up in the dashboard and no email is sent.
+
+Demo calls never become inquiries, never send email, and their transcripts aren't copied into Supabase. To switch it off, remove `RETELL_DEMO_AGENT_ID` in Vercel and redeploy.
+
+## The "we tested it" results on the homepage
+
+The homepage's test results come from `lib/case-study/evidence.json`, written by scripts from recorded runs. Nothing to set up. To re-run them after a future change, see `docs/case-study/README.md`.

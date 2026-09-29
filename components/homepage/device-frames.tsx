@@ -4,8 +4,8 @@ import type { ReactNode } from "react"
 export function BrowserFrame({ className, label = "bramble · design example", children }: { className?: string; label?: string; children: ReactNode }) {
   return (
     <div className={className ? `hp-browser ${className}` : "hp-browser"}>
-      <div className="hp-browser__bar" aria-hidden="true">
-        <span className="hp-browser__dots"><i /><i /><i /></span>
+      <div className="hp-browser__bar">
+        <span className="hp-browser__dots" aria-hidden="true"><i /><i /><i /></span>
         <span className="hp-browser__address">{label}</span>
       </div>
       <div className="hp-browser__screen">{children}</div>

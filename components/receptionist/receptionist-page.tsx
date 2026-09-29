@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { CallScene } from "@/components/homepage/call-scene"
 import { CallStack } from "@/components/homepage/call-stack"
 import { siteSans } from "@/components/homepage/fonts"
 import { HomepageMotion } from "@/components/homepage/homepage-motion"
@@ -8,9 +7,11 @@ import { SiteFooter } from "@/components/homepage/site-footer"
 import { SiteHeader } from "@/components/homepage/site-header"
 import { TradeExplorer } from "@/components/homepage/trade-explorer"
 import { ProjectInquiryForm } from "@/components/project-inquiry-form"
+import { CallConsole, FullTranscript } from "@/components/receptionist/call-console"
 import { CallItSection, ContextNote, ControlSection, PilotSection, TestingSection } from "@/components/receptionist/receptionist-sections"
 import { receptionistLayers, receptionistQuestions, trades } from "@/lib/homepage/content"
 import { receptionistDemo } from "@/lib/receptionist/demo"
+import { isWebDemoAvailable } from "@/lib/receptionist/web-demo/config"
 
 const nav = [
   { href: "#how", label: "How it works" },
@@ -63,11 +64,14 @@ export function ReceptionistPage() {
 
         <section className="ml-section ml-showcase" id="product" aria-labelledby="product-title">
           <div className="ml-container">
-            <SectionHead id="product-title" title="Watch it take a call.">
-              It’s 6:48 on a weeknight and the office is closed. A customer calls anyway. Here’s what Mountline does with it.
+            <SectionHead id="product-title" title="Try it, or watch it take a call.">
+              Talk to the demo receptionist in your browser, or play a short example: 6:48 on a weeknight, the office is
+              closed, and a customer calls anyway.
             </SectionHead>
-            <div data-illustrative>
-              <CallScene note="An example call to a fictional business, with made-up caller details. Not live customer data." />
+            <div className="ml-console" data-illustrative>
+              <CallConsole liveAvailable={isWebDemoAvailable()} />
+              <p className="ml-console__note">The example is a scripted call to a fictional business, with made-up caller details. Not live customer data.</p>
+              <FullTranscript />
             </div>
           </div>
         </section>

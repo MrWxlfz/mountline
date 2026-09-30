@@ -46,7 +46,7 @@ function Rows({ variant }: { variant: MicrotypeVariant }) {
 
 /**
  * The Mountline mark set in tiny words: TRUST, CARE, DETAIL, CLARITY, WORK. When it first comes into
- * view, each row slides along its own stroke into place, one warm highlight crosses it, and then it
+ * view, each row slides along its own stroke into place, one highlight crosses it, and then it
  * holds still for good (see signature-player.tsx; prefers-reduced-motion: reduce skips all of it).
  * Without scripts it is simply the finished mark. Decorative: aria-hidden="true" on the wrapper.
  */

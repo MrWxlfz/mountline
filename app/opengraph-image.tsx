@@ -28,13 +28,13 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px 64px",
-          background: "radial-gradient(circle at 72% 88%, rgba(239,180,97,0.22), rgba(11,11,10,0) 55%), #0b0b0a",
-          color: "#f3efe6",
+          background: "radial-gradient(circle at 72% 88%, rgba(255,255,255,0.07), rgba(9,9,10,0) 55%), #09090a",
+          color: "#ededed",
           fontFamily: "Arial, sans-serif",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 30, letterSpacing: -1, fontFamily: "Arial, sans-serif" }}>
-          <Mark size={34} color="#f3efe6" />
+          <Mark size={34} color="#ededed" />
           <span style={{ display: "flex" }}>mountline</span>
         </div>
 
@@ -44,7 +44,7 @@ export default function OpenGraphImage() {
               <span style={{ display: "flex" }}>A better website for the</span>
               <span style={{ display: "flex" }}>business you’ve built.</span>
             </div>
-            <div style={{ display: "flex", marginTop: 28, color: "#bab5aa", fontSize: 28 }}>
+            <div style={{ display: "flex", marginTop: 28, color: "#a3a3a3", fontSize: 28 }}>
               Websites for local businesses · Photo and video · AI receptionists
             </div>
           </div>
@@ -55,8 +55,8 @@ export default function OpenGraphImage() {
             display: "flex",
             justifyContent: "space-between",
             paddingTop: 24,
-            borderTop: "1px solid rgba(243,239,230,.14)",
-            color: "#8e8a81",
+            borderTop: "1px solid rgba(255,255,255,.13)",
+            color: "#8d8d8d",
             fontSize: 22,
             fontFamily: "Arial, sans-serif",
           }}

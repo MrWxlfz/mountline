@@ -1,0 +1,96 @@
+/*
+  The difference: one frame, two websites, a divider between them, and the list of what changed.
+  Desktop compares the computer pages; phones compare the phone pages. Nothing here is a figure.
+*/
+
+.df { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: 48px; align-items: start; }
+.df__stage { position: relative; min-width: 0; }
+.df__tag { margin-bottom: 14px; }
+
+.df__browser { overflow: hidden; border-radius: var(--r-lg); background: #161617; box-shadow: 0 0 0 1px var(--rule-2), var(--shadow-2); }
+.df__bar { height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-bottom: 1px solid var(--rule); }
+.df__bar i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.14); }
+.df__browser .df__frame { height: clamp(400px, 40vw, 540px); }
+.df__browser .bx { --bx-width: 1120; }
+.df__phone { display: none; }
+
+.df__frame { position: relative; overflow: hidden; isolation: isolate; touch-action: pan-y; }
+.df__layer { position: absolute; inset: 0; }
+.df__layer[data-layer="after"] { clip-path: inset(0 0 0 var(--split)); transition: clip-path 700ms var(--ease-in-out); }
+.df__frame :is(.bx-page, .bo-page) { transition: transform 1000ms var(--ease-in-out); }
+
+.df__divider { position: absolute; z-index: 3; top: 0; bottom: 0; left: var(--split); width: 0; pointer-events: none; transition: left 700ms var(--ease-in-out); }
+.df__divider::before { content: ""; position: absolute; top: 0; bottom: 0; left: -0.5px; width: 1px; background: #fff; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.25), 0 0 18px rgba(0, 0, 0, 0.35); }
+.df__handle { position: absolute; top: 50%; left: 0; width: 38px; height: 38px; margin: -19px 0 0 -19px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 50%; background: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); }
+.df__handle i { width: 6px; height: 6px; border: solid #111; border-width: 0 0 1.5px 1.5px; }
+.df__handle i:first-child { transform: rotate(45deg); }
+.df__handle i:last-child { transform: rotate(-135deg); }
+.df__frame[data-dragging] :is(.df__layer[data-layer="after"], .df__divider) { transition: none; }
+
+/* The divider is a real range input covering the frame: drag anywhere, or use the arrow keys. */
+.df__range { position: absolute; z-index: 4; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; -webkit-appearance: none; appearance: none; }
+.df__range:focus-visible ~ .df__divider .df__handle { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.df__label { position: absolute; z-index: 2; top: 12px; height: 24px; padding: 0 9px; display: inline-flex; align-items: center; border-radius: var(--r-xs); background: rgba(9, 9, 10, 0.78); color: var(--fg); font-size: 12px; font-weight: 500; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 300ms var(--ease); }
+.df__label[data-side="before"] { left: 12px; }
+.df__label[data-side="after"] { right: 12px; }
+
+/* The list of what changed. The chosen one opens to its before and after. */
+.df__side { min-width: 0; padding-top: 38px; }
+.df__list { border-top: 1px solid var(--rule); }
+.df__list li { border-bottom: 1px solid var(--rule); }
+.df__item { position: relative; width: 100%; padding: 16px 0 16px 2px; display: grid; grid-template-columns: 30px minmax(0, 1fr); border: 0; background: none; color: var(--fg-2); text-align: left; cursor: pointer; transition: color var(--t-quick) var(--ease); }
+.df__item::before { content: ""; position: absolute; left: 0; top: -1px; width: 40px; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 500ms var(--ease-out); }
+.df__item:hover,
+.df__item[aria-pressed="true"] { color: var(--fg); }
+.df__item[aria-pressed="true"]::before { transform: scaleX(1); }
+.df__item:focus-visible { outline-offset: -2px; }
+.df__index { padding-top: 4px; color: var(--fg-3); font-family: var(--mono); font-size: 11px; }
+.df__item[aria-pressed="true"] .df__index { color: var(--accent); }
+.df__title { display: block; font-size: 17px; font-weight: 500; line-height: 1.35; letter-spacing: -0.01em; }
+.df__change { grid-column: 2; display: grid; grid-template-rows: 0fr 0fr; transition: grid-template-rows 450ms var(--ease-out); }
+.df__change > span { min-height: 0; overflow: hidden; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; font-size: 14.5px; line-height: 1.5; opacity: 0; transition: opacity 300ms var(--ease); }
+.df__change b { padding-top: 2px; color: var(--fg-3); font-size: 12px; font-weight: 500; }
+.df__change [data-side="before"] { color: var(--fg-3); }
+.df__change [data-side="after"] { color: var(--fg); }
+.df__item[aria-pressed="true"] .df__change { grid-template-rows: 1fr 1fr; }
+.df__item[aria-pressed="true"] .df__change > span { opacity: 1; transition-delay: 120ms; }
+.df__item[aria-pressed="true"] .df__change [data-side="before"] { padding-top: 10px; }
+.df__item[aria-pressed="true"] .df__change [data-side="after"] { padding-top: 4px; }
+.df__calls { padding: 16px 0 0 2px; display: grid; grid-template-columns: 30px minmax(0, 1fr); color: var(--fg); }
+.df__plain { display: block; margin-top: 6px; color: var(--fg-2); font-size: 14.5px; line-height: 1.5; }
+.df__plain a { display: inline-flex; align-items: center; gap: 4px; color: var(--fg); white-space: nowrap; }
+.df__plain svg { width: 13px; height: 13px; }
+
+/* Measured client results (hidden until one is approved). */
+.cr { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--rule); }
+.cr__title { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; }
+.cr__list { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
+.cr__client { color: var(--fg); font-weight: 600; }
+.cr__label { color: var(--fg-2); font-size: 14.5px; }
+.cr__bars { margin-top: 14px; display: grid; gap: 8px; }
+.cr__bar { position: relative; padding: 6px 10px; display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; isolation: isolate; }
+.cr__bar::before { content: ""; position: absolute; inset: 0 auto 0 0; z-index: -1; width: calc(var(--w) * 100%); border-radius: var(--r-xs); background: rgba(255, 255, 255, 0.07); }
+.cr__bar[data-when="after"]::before { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
+.cr__bar dt span { color: var(--fg-3); }
+.cr__bar dd { font-variant-numeric: tabular-nums; }
+.cr__changed { margin-top: 12px; color: var(--fg-2); font-size: 14.5px; }
+.cr__method { margin-top: 8px; color: var(--fg-3); font-size: 13.5px; }
+.cr__method summary { cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .df *, .df *::before, .df *::after { transition: none !important; }
+}
+
+@media (max-width: 1023px) {
+  .df { grid-template-columns: minmax(0, 1fr); gap: 28px; margin-top: 40px; }
+  .df__side { padding-top: 0; }
+}
+
+@media (max-width: 760px) {
+  .df__browser { display: none; }
+  .df__phone { display: block; width: min(100%, 340px); margin-inline: auto; overflow: hidden; border-radius: 30px; background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 0 0 5px #0c0c0d, 0 0 0 6px rgba(255, 255, 255, 0.08), var(--shadow-2); }
+  .df__phone .df__frame { aspect-ratio: 390 / 740; border-radius: 30px; }
+  .df__tag { display: flex; width: max-content; margin-inline: auto; }
+  .df__title { font-size: 16.5px; }
+}

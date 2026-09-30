@@ -1,21 +1,15 @@
-type Variant = "dusk" | "night"
+type Variant = "night"
 
 const W = 1200
 const H = 900
 
+// Neutral graphite, so the page stays black and white.
 const palettes: Record<Variant, { sky: [string, string, string]; glow: string; glowOpacity: number; ridges: string[]; seed: number }> = {
-  dusk: {
-    sky: ["#15141a", "#2b2427", "#5b3d2a"],
-    glow: "#d08a3e",
-    glowOpacity: 0.42,
-    ridges: ["#4d3b33", "#372c28", "#261f1d", "#181615", "#0e0d0c"],
-    seed: 11,
-  },
   night: {
-    sky: ["#07090c", "#0e131a", "#1d2631"],
-    glow: "#6f86a3",
-    glowOpacity: 0.18,
-    ridges: ["#2c3540", "#1f262f", "#161b22", "#101317", "#0b0c0d"],
+    sky: ["#08080a", "#101012", "#1c1c1f"],
+    glow: "#9a9aa0",
+    glowOpacity: 0.1,
+    ridges: ["#2d2d31", "#222225", "#18181a", "#111113", "#0b0b0c"],
     seed: 29,
   },
 }
@@ -73,10 +67,7 @@ function geometry(variant: Variant, horizon: number) {
   if (cached) return cached
   const random = mulberry32(palettes[variant].seed)
   const ridges = layers.map((layer) => ridgeline(random, { ...layer, base: layer.base + horizon }))
-  const stars: Array<[number, number, number, number]> =
-    variant === "night"
-      ? Array.from({ length: 70 }, () => [random() * W, random() * H * 0.42, 0.5 + random() * 0.9, 0.15 + random() * 0.55])
-      : []
+  const stars: Array<[number, number, number, number]> = Array.from({ length: 70 }, () => [random() * W, random() * H * 0.42, 0.5 + random() * 0.9, 0.15 + random() * 0.55])
   const result = { ridges, stars }
   cache.set(key, result)
   return result

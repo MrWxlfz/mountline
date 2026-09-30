@@ -1,0 +1,131 @@
+/*
+  Capture: five photographs in two arrangements. "shoot" is an edit of the day; "site" is the same
+  pictures placed on Bramble's website, with the page drawn in around them. Every photo is a single
+  element whose box moves and re-crops (object-fit: cover), so the change reads as one movement.
+*/
+
+.cs { margin: 56px 0 0; }
+.cs__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-bottom: 16px; }
+.cs__switch { display: inline-flex; border: 1px solid var(--rule-2); border-radius: var(--r-sm); }
+.cs__switch button { height: 36px; padding: 0 14px; border: 0; background: transparent; color: var(--fg-2); font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color var(--t-quick) var(--ease), color var(--t-quick) var(--ease); }
+.cs__switch button:first-child { border-radius: 5px 0 0 5px; }
+.cs__switch button:last-child { border-left: 1px solid var(--rule-2); border-radius: 0 5px 5px 0; }
+.cs__switch button:hover { color: var(--fg); }
+.cs__switch button[aria-pressed="true"] { background: var(--surface-3); color: var(--fg); }
+.cs__switch button:focus-visible { outline-offset: -2px; }
+
+.cs__stage { position: relative; aspect-ratio: 16 / 9; container-type: inline-size; }
+
+/* The page: frame, chrome, and Bramble's words. Present only in the "site" arrangement. */
+.cs__page {
+  --b-serif: var(--font-example-serif), Georgia, serif;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: #f6f0e5;
+  color: #1f241f;
+  box-shadow: 0 0 0 1px var(--rule-2), var(--shadow-2);
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity 500ms var(--ease), transform var(--t-move) var(--ease-in-out);
+}
+.cs__page span,
+.cs__page b,
+.cs__page em,
+.cs__page small,
+.cs__page strong { display: block; font-style: normal; }
+.cs__chrome { position: absolute; inset: 0 0 auto; height: 4.2%; display: flex !important; align-items: center; gap: 0.5cqw; padding-left: 1.2cqw; background: #161617; }
+.cs__chrome i { width: 0.6cqw; height: 0.6cqw; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+.cs__nav { position: absolute; left: 4%; right: 4%; top: 7%; display: flex !important; align-items: center; gap: 2.2cqw; font-size: 1.05cqw; font-weight: 500; }
+.cs__nav b { margin-right: auto; font-family: var(--b-serif); font-size: 2.2cqw; font-style: italic; font-weight: 400; }
+.cs__nav em { padding: 0.55cqw 1.1cqw; border-radius: 999px; background: #2c4636; color: #f6f0e5; font-size: 0.95cqw; font-weight: 600; }
+.cs__copy { position: absolute; left: 4%; top: 21%; width: 39%; }
+.cs__copy small { width: max-content; padding: 0.35cqw 0.8cqw; border-radius: 999px; background: rgba(44, 70, 54, 0.08); color: #2c4636; font-size: 0.9cqw; font-weight: 600; }
+.cs__copy strong { margin-top: 1.4cqw; font-family: var(--b-serif); font-size: 4.3cqw; font-weight: 400; line-height: 0.98; letter-spacing: -0.02em; }
+.cs__copy > span { margin-top: 1.3cqw; color: #515a50; font-size: 1.15cqw; line-height: 1.5; }
+.cs__copy em { width: max-content; margin-top: 1.8cqw; padding: 0.8cqw 1.5cqw; border-radius: 999px; background: #2c4636; color: #f6f0e5; font-size: 1.05cqw; font-weight: 600; }
+.cs__inside { position: absolute; left: 4%; top: 67.5%; font-family: var(--b-serif); font-size: 1.9cqw; }
+
+/* The photographs. Positions come from the arrangement below. */
+.cs__photo {
+  position: absolute;
+  z-index: 1;
+  left: var(--l);
+  top: var(--t);
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+  border-radius: var(--r);
+  background: #1a1a1b;
+  transition:
+    left var(--t-move) var(--ease-in-out),
+    top var(--t-move) var(--ease-in-out),
+    width var(--t-move) var(--ease-in-out),
+    height var(--t-move) var(--ease-in-out),
+    border-radius var(--t-move) var(--ease-in-out);
+  transition-delay: calc(var(--i) * 45ms);
+}
+.cs__photo img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+.cs__caption { position: absolute; left: 10px; bottom: 10px; height: 24px; padding: 0 9px; display: inline-flex; align-items: center; border-radius: var(--r-xs); background: rgba(9, 9, 10, 0.72); color: #fff; font-size: 12.5px; font-weight: 500; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 300ms var(--ease); }
+
+/* The shoot: one strong frame of the work, and four details beside it. */
+.cs[data-state="shoot"] .cs__photo { --r: var(--r-md); }
+.cs[data-state="shoot"] [data-photo="work"] { --l: 0%; --t: 0%; --w: 59.4%; --h: 100%; }
+.cs[data-state="shoot"] [data-photo="room"] { --l: 60.6%; --t: 0%; --w: 19.1%; --h: 49.2%; }
+.cs[data-state="shoot"] [data-photo="door"] { --l: 80.9%; --t: 0%; --w: 19.1%; --h: 49.2%; }
+.cs[data-state="shoot"] [data-photo="dryer"] { --l: 60.6%; --t: 50.8%; --w: 19.1%; --h: 49.2%; }
+.cs[data-state="shoot"] [data-photo="result"] { --l: 80.9%; --t: 50.8%; --w: 19.1%; --h: 49.2%; }
+
+/* On the website: the work becomes the hero photo; the rest become the "Inside Bramble" row. */
+.cs[data-state="site"] .cs__page { opacity: 1; transform: none; }
+.cs[data-state="site"] .cs__caption { opacity: 0; }
+.cs[data-state="site"] .cs__photo { --r: 0.9cqw; }
+.cs[data-state="site"] [data-photo="work"] { --l: 47%; --t: 17%; --w: 49%; --h: 45%; }
+.cs[data-state="site"] [data-photo="room"] { --l: 4%; --t: 73%; --w: 22%; --h: 22%; }
+.cs[data-state="site"] [data-photo="door"] { --l: 27%; --t: 73%; --w: 22%; --h: 22%; }
+.cs[data-state="site"] [data-photo="dryer"] { --l: 50%; --t: 73%; --w: 22%; --h: 22%; }
+.cs[data-state="site"] [data-photo="result"] { --l: 73%; --t: 73%; --w: 23%; --h: 22%; }
+
+.cs__note { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 32px; color: var(--fg-3); font-size: 13.5px; line-height: 1.55; }
+.cs__note > span { max-width: 52em; }
+.cs__credits summary { color: var(--fg-2); cursor: pointer; }
+.cs__credits summary:hover { color: var(--fg); }
+.cs__credits p { max-width: 40em; margin-top: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cs__photo,
+  .cs__page,
+  .cs__caption { transition: none; }
+}
+
+/* Phones: the edit stacks, and the website is a phone page with no device drawn around it. */
+@media (max-width: 760px) {
+  .cs { margin-top: 36px; }
+  .cs__stage { aspect-ratio: 4 / 5.6; }
+  .cs__caption { left: 8px; bottom: 8px; height: 22px; font-size: 12px; }
+  .cs[data-state="shoot"] [data-photo="work"] { --l: 0%; --t: 0%; --w: 100%; --h: 49%; }
+  .cs[data-state="shoot"] [data-photo="room"] { --l: 0%; --t: 50.5%; --w: 49.2%; --h: 24%; }
+  .cs[data-state="shoot"] [data-photo="door"] { --l: 50.8%; --t: 50.5%; --w: 49.2%; --h: 24%; }
+  .cs[data-state="shoot"] [data-photo="dryer"] { --l: 0%; --t: 76%; --w: 49.2%; --h: 24%; }
+  .cs[data-state="shoot"] [data-photo="result"] { --l: 50.8%; --t: 76%; --w: 49.2%; --h: 24%; }
+
+  .cs__chrome { display: none !important; }
+  .cs__nav { top: 3.5%; left: 6%; right: 6%; font-size: 3.4cqw; }
+  .cs__nav span,
+  .cs__nav em { display: none !important; }
+  .cs__nav b { font-size: 6.4cqw; }
+  .cs__copy { left: 6%; top: 11%; width: 88%; }
+  .cs__copy small { padding: 0.9cqw 2cqw; font-size: 2.9cqw; }
+  .cs__copy strong { margin-top: 2.6cqw; font-size: 9.2cqw; }
+  .cs__copy > span,
+  .cs__copy em { display: none !important; }
+  .cs__inside { left: 6%; top: 69.5%; font-size: 5.2cqw; }
+  .cs[data-state="site"] .cs__photo { --r: 2.6cqw; }
+  .cs[data-state="site"] [data-photo="work"] { --l: 6%; --t: 34%; --w: 88%; --h: 32%; }
+  .cs[data-state="site"] [data-photo="room"] { --l: 6%; --t: 75.5%; --w: 20.5%; --h: 11%; }
+  .cs[data-state="site"] [data-photo="door"] { --l: 28.5%; --t: 75.5%; --w: 20.5%; --h: 11%; }
+  .cs[data-state="site"] [data-photo="dryer"] { --l: 51%; --t: 75.5%; --w: 20.5%; --h: 11%; }
+  .cs[data-state="site"] [data-photo="result"] { --l: 73.5%; --t: 75.5%; --w: 20.5%; --h: 11%; }
+  .cs__page::after { content: "Request a visit"; position: absolute; left: 6%; right: 6%; top: 90%; height: 6%; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #2c4636; color: #f6f0e5; font-size: 3.6cqw; font-weight: 600; }
+}

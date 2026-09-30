@@ -4,14 +4,14 @@
 */
 
 .ml-signature { position: relative; aspect-ratio: 128 / 138; container-type: inline-size; }
-.ml-signature::before { content: ""; position: absolute; inset: -12% -18% -6%; z-index: -1; background: radial-gradient(closest-side, rgba(220, 169, 107, 0.09), transparent); pointer-events: none; }
+.ml-signature::before { content: ""; position: absolute; inset: -12% -18% -6%; z-index: -1; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.05), transparent); pointer-events: none; }
 .ml-signature svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .ml-signature__coarse { display: none; }
 @container (max-width: 260px) {
   .ml-signature__fine { display: none; }
   .ml-signature__coarse { display: block; }
 }
-.ml-signature__row { fill: var(--fg); font-family: var(--mono); font-weight: 500; user-select: none; -webkit-user-select: none; }
+.ml-signature__row { fill: var(--fg-2); font-family: var(--mono); font-weight: 500; user-select: none; -webkit-user-select: none; }
 
 @media (prefers-reduced-motion: no-preference) {
   .ml-signature[data-state="waiting"] .ml-signature__row { opacity: 0; }
@@ -29,7 +29,7 @@
   to { opacity: 1; transform: none; }
 }
 @keyframes ml-sig-glint {
-  0%, 100% { fill: var(--fg); }
-  45% { fill: var(--accent-2, #f1cc9b); }
+  0%, 100% { fill: var(--fg-2); }
+  45% { fill: #fff; }
 }
 @keyframes ml-sig-lamp { from { opacity: 0; } to { opacity: 1; } }

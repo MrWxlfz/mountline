@@ -30,24 +30,41 @@ test("the homepage, metadata, and footer describe the whole business, not only t
 })
 
 test("the design example is labeled, made up, and makes no claims", async () => {
-  const [homepage, site, capture, content] = await Promise.all([
+  const [homepage, site, before, capture, btr, content, photos] = await Promise.all([
     read("components/mountline-homepage.tsx"),
     read("components/homepage/bramble/bramble-site.tsx"),
+    read("components/homepage/bramble/bramble-before.tsx"),
     read("components/homepage/capture-scene.tsx"),
+    read("components/homepage/build-test-refine.tsx"),
     read("lib/homepage/content.ts"),
+    read("lib/homepage/sample-photos.ts"),
   ])
-  assert.ok(homepage.split("Design example — not a client project").length - 1 >= 2, "labeled on the image and in the caption")
+  // One label, used wherever the example appears on the homepage, and in the process scene.
+  assert.match(homepage, /const EXAMPLE_LABEL = "Example business · Design demonstration"/)
+  assert.ok(homepage.split("EXAMPLE_LABEL}").length - 1 >= 3, "the hero frame, its caption, and the before/after")
+  assert.match(btr, /Example business · Design demonstration/)
   assert.match(homepage, /Bramble is a made-up dog groomer/)
   assert.match(capture, /Bramble isn’t a client/)
   assert.match(content, /Is Bramble a real business\?/)
-  // Only reserved fictional numbers, and nothing a real review or badge would say.
-  for (const phone of site.match(/\(\d{3}\) \d{3}-\d{4}/g) ?? []) assert.match(phone, /555-01\d\d/)
-  assert.doesNotMatch(site, /review|testimonial|award|rated|★|\d+\+? (?:happy )?(?:clients|customers|dogs)/i)
-  // It is a picture of a website: hidden from assistive tech and impossible to focus or submit.
-  assert.match(site, /aria-hidden="true" inert/)
-  assert.doesNotMatch(site, /<form|<input|<button|href=/)
+  // Only reserved fictional numbers, and nothing a real review, badge, or history would say.
+  for (const source of [site, before, btr]) {
+    for (const phone of source.match(/\(\d{3}\) \d{3}-\d{4}/g) ?? []) assert.match(phone, /555-01\d\d/)
+    assert.doesNotMatch(source, /review|testimonial|award|rated|★|since \d{4}|\d+\+? (?:happy )?(?:clients|customers|dogs)|years of/i)
+  }
+  // Pictures of websites: hidden from assistive tech and impossible to focus or submit.
+  for (const source of [site, before]) {
+    assert.match(source, /aria-hidden="true" inert/)
+    assert.doesNotMatch(source, /<form|<input|<button|href=/)
+  }
   // The /work concept sites aren't presented as Mountline's work.
   assert.doesNotMatch(homepage, /\/work\//)
+  // Sample photos are free Unsplash images with credits, never Unsplash+ or a Mountline shoot.
+  assert.match(photos, /Unsplash License/)
+  assert.doesNotMatch(photos, /plus\.unsplash/)
+  const sources = photos.match(/src: "[^"]+"/g) ?? []
+  assert.ok(sources.length >= 5)
+  for (const src of sources) assert.match(src, /^src: "https:\/\/images\.unsplash\.com\/photo-/)
+  assert.equal((photos.match(/page: "https:\/\/unsplash\.com\/photos\//g) ?? []).length, sources.length, "every photo credited")
 })
 
 test("the private notification address stays out of public site components", async () => {
@@ -56,14 +73,18 @@ test("the private notification address stays out of public site components", asy
     "components/project-inquiry-form.tsx",
     "components/homepage/site-footer.tsx",
     "components/homepage/site-header.tsx",
-    "components/homepage/evidence-panel.tsx",
     "components/homepage/build-test-refine.tsx",
+    "components/homepage/the-difference.tsx",
+    "components/homepage/capture-scene.tsx",
+    "components/homepage/client-results.tsx",
     "components/receptionist/receptionist-page.tsx",
     "components/receptionist/call-console.tsx",
     "components/receptionist/use-live-demo.ts",
     "lib/receptionist/web-demo/contract.ts",
     "lib/case-study/evidence.json",
+    "lib/case-study/client-results.ts",
     "lib/homepage/content.ts",
+    "lib/homepage/sample-photos.ts",
   ]) assert.doesNotMatch(await read(file), /icloud/i, file)
 })
 
@@ -120,8 +141,10 @@ test("simulations are labeled and unsupported completion claims are absent", asy
   assert.match(console, /useState<Mode>\("rest"\)/)
   assert.match(console, /setPlay\("paused"\)/)
   // The example and a real browser call are separate paths, and a live call's sheet never shows example data.
-  assert.match(console, /Talk to the demo/)
-  assert.match(console, /Play the example/)
+  assert.match(console, /Talk in your browser/)
+  assert.match(console, /Play a short example/)
+  // The accent light belongs to a real call; the scripted example never borrows it.
+  assert.match(await read("components/receptionist/call-console.css"), /\.cc\[data-mode="example"\] \.cc__light \{ background: var\(--fg-2\); \}/)
   assert.match(console, /Your demo call · not sent to any business/)
   // With the browser demo switched off, the main action is the real phone line, never a dead button.
   assert.match(console, /liveAvailable \? \(/)
@@ -133,7 +156,8 @@ test("simulations are labeled and unsupported completion claims are absent", asy
     "components/receptionist/call-console.tsx",
     "components/homepage/bramble/bramble-site.tsx",
     "components/homepage/build-test-refine.tsx",
-    "components/homepage/evidence-panel.tsx",
+    "components/homepage/the-difference.tsx",
+    "components/homepage/capture-scene.tsx",
     "components/receptionist/receptionist-page.tsx",
     "components/receptionist/receptionist-sections.tsx",
   ]) {
@@ -163,8 +187,8 @@ test("the dot-grid statistic model is gone and the one remaining figure carries 
   assert.match(sections, /doesn’t mean every missed call is a lost customer/)
   assert.doesNotMatch(await read("components/mountline-homepage.tsx"), /benchmarks|%/)
   // No third-party percentages anywhere the homepage draws from (the call clock's `% 60` is arithmetic, not a figure).
-  // The homepage's only numbers are its own recorded test results; see the case-study test below.
-  for (const file of ["components/homepage/bramble/bramble-site.tsx", "components/receptionist/call-console.tsx", "lib/receptionist/example-call.ts", "lib/homepage/content.ts"]) {
+  // The homepage shows no figures of its own; measured client results render only once approved (see below).
+  for (const file of ["components/homepage/bramble/bramble-site.tsx", "components/homepage/bramble/bramble-before.tsx", "components/homepage/build-test-refine.tsx", "components/homepage/capture-scene.tsx", "components/receptionist/call-console.tsx", "lib/receptionist/example-call.ts", "lib/homepage/content.ts"]) {
     assert.doesNotMatch(await read(file), /benchmarks|\d\s?%|percent/i, file)
   }
 })
@@ -176,12 +200,16 @@ test("Capture is presented as an optional, inquiry-led add-on without invented w
     read("lib/homepage/content.ts"),
   ])
   assert.match(homepage, /Mountline Capture · optional/)
-  assert.match(content, /Scoped and priced separately/)
-  assert.match(capture, /not footage we’ve shot/)
-  assert.match(capture, /Storyboard · illustration/)
+  assert.match(homepage, /optional add-on, discussed and priced with the project/)
   assert.match(homepage, /Capture is new/)
+  assert.match(content, /Scoped and priced separately/)
   assert.match(content, /Aerial shots only where the location suits it, permissions allow it, and a licensed drone pilot is available/)
-  for (const source of [homepage, capture]) assert.doesNotMatch(source, /<video|\.mp4|portfolio/i)
+  // Photographs, labeled as sample imagery; not a shoot we did, and no fake camera furniture.
+  assert.match(capture, /Sample imagery · Website concept/)
+  assert.match(capture, /Not a\s+Mountline shoot/)
+  assert.match(capture, /SamplePhoto/)
+  assert.doesNotMatch(capture, /Storefront|viewfinder|REC\b|timecode|timeline/i)
+  for (const source of [homepage, capture]) assert.doesNotMatch(source, /<video|\.mp4|portfolio|<Play\b/i)
 })
 
 test("public Sentry demos are gone while monitoring remains configured", async () => {
@@ -190,28 +218,43 @@ test("public Sentry demos are gone while monitoring remains configured", async (
   assert.match(await read("instrumentation.ts"), /captureRequestError/)
 })
 
-test("the case study only shows recorded results, and says what wasn't tested", async () => {
-  const [evidenceSource, panel, scene, generator] = await Promise.all([
-    read("lib/case-study/evidence.json"),
-    read("components/homepage/evidence-panel.tsx"),
+test("internal test reports stay off the homepage, and client results need approval to appear", async () => {
+  const [homepage, scene, difference, results, component, generator, evidenceSource] = await Promise.all([
+    read("components/mountline-homepage.tsx"),
     read("components/homepage/build-test-refine.tsx"),
+    read("components/homepage/the-difference.tsx"),
+    read("lib/case-study/client-results.ts"),
+    read("components/homepage/client-results.tsx"),
     read("scripts/evidence/build-evidence.mjs"),
+    read("lib/case-study/evidence.json"),
   ])
-  const evidence = JSON.parse(evidenceSource)
-  // Every number on the page comes from the recorded file: no figures are written into the components.
-  for (const [name, source] of [["panel", panel], ["scene", scene]]) {
-    assert.doesNotMatch(source, /\b\d+(\.\d+)?\s?(KB|ms|s\b|seconds|checks|problems|%)/, name)
+  // The engineering record is kept internally, not presented as marketing.
+  await assert.rejects(access(`${root}/components/homepage/evidence-panel.tsx`))
+  assert.doesNotMatch(homepage, /EvidencePanel|case-study\/evidence|we tested it/i)
+  // The process demo is a demonstration of the customer experience: no pass marks, no server claims.
+  for (const source of [scene, difference]) {
+    assert.doesNotMatch(source, /Passed|Failed|Checked by the server|verified|evidence\.json|Lighthouse|axe/i)
   }
-  assert.match(panel, /not a test running in your browser/)
-  // Checks carry their own before and after; missing values stay null rather than turning into a pass.
-  for (const check of evidence.checks) {
-    for (const value of [check.before.desktop, check.before.phone]) assert.ok([null, "pass", "fail"].includes(value), check.id)
+  // No numbers until a real, approved client result exists.
+  assert.match(results, /export const clientResults: ClientResult\[\] = \[\]/)
+  assert.match(component, /if \(!results\.length\) return null/)
+  const { publishable } = await import(new URL("../../case-study/client-results.ts", import.meta.url).href)
+  const approved = {
+    client: "Example Co.",
+    service: "website",
+    measure: "appointment_requests",
+    label: "Appointment requests from the website",
+    before: { from: "2026-01-01", to: "2026-03-31", count: 20 },
+    after: { from: "2026-04-01", to: "2026-06-29", count: 31 },
+    whatChanged: "New website launched in April.",
+    source: "The owner’s booking inbox",
+    permission: { approvedBy: "The owner", approvedOn: "2026-07-01", record: "Signed email" },
   }
+  assert.equal(publishable([approved]).length, 1)
+  assert.equal(publishable([{ ...approved, permission: { approvedBy: "", approvedOn: "", record: "" } }]).length, 0, "no permission, no result")
+  assert.equal(publishable([{ ...approved, after: { from: "2026-04-01", to: "2026-04-10", count: 31 } }]).length, 0, "periods must be comparable")
+  assert.equal(publishable([{ ...approved, measure: "inquiry_conversion_rate" }]).length, 0, "a rate needs its denominator")
+  // The internal record still refuses to guess.
   assert.match(generator, /never fills a gap with a guess/)
-  // The live receptionist and email delivery are listed as untested until someone actually tests them.
-  assert.ok(evidence.notTested.some((item: string) => /live AI receptionist/i.test(item)))
-  assert.ok(evidence.notTested.some((item: string) => /inbox/i.test(item)))
-  // Bramble stays a design example; the case study is about this site.
-  assert.match(evidence.subject, /mountline\.dev/)
-  assert.doesNotMatch(evidenceSource, /bramble/i)
+  assert.ok(JSON.parse(evidenceSource).notTested.some((item: string) => /live AI receptionist/i.test(item)))
 })

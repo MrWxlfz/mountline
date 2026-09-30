@@ -11,9 +11,9 @@ import "./call-console.css"
 /**
  * The receptionist call console. Two separate paths share one surface:
  *
- * - Talk to the demo: a real browser call to the demo agent (see use-live-demo.ts). Status, audio
+ * - Talk in your browser: a real browser call to the demo agent (see use-live-demo.ts). Status, audio
  *   level, and the post-call transcript and summary all come from the call itself.
- * - Play the example: a short scripted text example, with no audio and a made-up caller. It never
+ * - Play a short example: a scripted text example, with no audio and a made-up caller. It never
  *   looks like a live call, and its finished message is readable at any point.
  *
  * The console keeps its size in every state, and the controls stay in the same place.
@@ -177,7 +177,7 @@ export function CallConsole({ liveAvailable }: { liveAvailable: boolean }) {
   )
   const talkButton = liveAvailable ? (
     <button ref={primaryRef} type="button" className="ml-btn ml-btn--solid cc__btn" onClick={talk}>
-      <Mic aria-hidden="true" /> Talk to the demo
+      <Mic aria-hidden="true" /> Talk in your browser
     </button>
   ) : callButton
 
@@ -242,7 +242,7 @@ export function CallConsole({ liveAvailable }: { liveAvailable: boolean }) {
             <>
               {talkButton}
               <button type="button" className="ml-btn ml-btn--line cc__btn" onClick={startExample}>
-                <Play aria-hidden="true" /> Play the example <span className="cc__hint">{Math.floor(LENGTH / 1000)} s</span>
+                <Play aria-hidden="true" /> Play a short example <span className="cc__hint">{Math.floor(LENGTH / 1000)} s</span>
               </button>
             </>
           ) : null}

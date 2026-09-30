@@ -1,128 +1,244 @@
 "use client"
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react"
-import { Check, Minus, X } from "lucide-react"
-import { Wordmark } from "@/components/brand/wordmark"
-import { formatDate, type EvidenceCheck, type SiteEvidence } from "@/lib/case-study/evidence"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type Ref } from "react"
+import { SamplePhoto } from "@/components/homepage/sample-photo"
 import "./build-test-refine.css"
 
 /**
- * Build → Test → Refine, shown on this website itself.
+ * Build → Test → Refine, shown on Bramble, the made-up dog groomer from the design demonstration.
  *
- * One composition in three states. Build: three plain facts about Mountline travel along fine paths
- * into their places on the page. Test: the same page becomes a phone and gets used like a customer
- * would. Refine: two issues we actually found in the old homepage, with before and after values.
+ * One composition in three states, keyed on [data-chapter]:
+ * - Build: a photo, the services, the hours, and a way to get in touch travel along fine paths into
+ *   their places on Bramble's website.
+ * - Test: the same website becomes a phone, and a customer picks a service and asks for a visit.
+ * - Refine: the phone page gets clearer (a tighter photo, today's hours up top, booking one tap
+ *   away), then settles beside the finished desktop site.
  *
- * Every pass/fail mark and number comes from lib/case-study/evidence.json (recorded test runs).
- * On wide, tall screens the chapter follows the scroll inside one short sticky stage; everywhere
- * else it's three tabs. Either way the chapter buttons work immediately.
+ * It's a designed demonstration of the customer experience: nothing is submitted and nothing is
+ * measured. On wide, tall screens the chapter follows the scroll inside one short sticky stage;
+ * everywhere else it's three tabs. Either way the chapter buttons work immediately, and every
+ * chapter has a finished, still state for reduced motion or a fast scroll.
  */
 
-type Chapter = { id: "build" | "test" | "refine"; title: string; line: string }
+type ChapterId = "build" | "test" | "refine"
+type Chapter = { id: ChapterId; title: string; line: string; steps: string[] }
 
 const clock = () => performance.now()
 
 const chapters: Chapter[] = [
-  { id: "build", title: "Build.", line: "What customers ask about most, like what you do, where you are, and how to reach you, each gets a clear place on the page." },
-  { id: "test", title: "Test.", line: "Then we use it the way a customer would, on a phone: find a service, and send a request." },
-  { id: "refine", title: "Refine.", line: "Anything the checks turn up gets fixed, then checked again. These were real." },
+  {
+    id: "build",
+    title: "Build.",
+    line: "We turn the details of your business into a website customers can use.",
+    steps: ["A photo of the work", "When you’re open, and where", "One clear way to get in touch", "What you offer, and what it costs"],
+  },
+  {
+    id: "test",
+    title: "Test.",
+    line: "Then we use it the way a customer would, on a phone.",
+    steps: ["Find the service they came for", "Ask for a visit, with that service already chosen", "Know the request went through, and what happens next"],
+  },
+  {
+    id: "refine",
+    title: "Refine.",
+    line: "Whatever made that harder than it should be gets fixed.",
+    steps: ["A tighter photo that shows the work", "Today’s hours at the top", "Booking one tap away on every screen"],
+  },
 ]
 
-const facts = [
-  { id: "services", label: "What we do", value: "Websites · Photo & video · Receptionist", short: "Websites, photo & video" },
-  { id: "where", label: "Where", value: "Keller, Texas · Dallas–Fort Worth", short: "Keller, Texas" },
-  { id: "contact", label: "How to reach us", value: "A short form, or hello@mountline.dev", short: "A short form" },
+/** The ingredients, in the order they land. Each id matches a [data-slot] on the page. */
+const ingredients = [
+  { id: "photo", label: "Photo", value: "A groom in progress" },
+  { id: "hours", label: "Hours", value: "Tue–Fri 8–5 · Sat 8–2" },
+  { id: "contact", label: "Get in touch", value: "A request form, or a call" },
+  { id: "services", label: "Services", value: "Bath & tidy · Full groom · Puppy’s first groom" },
 ] as const
+type SlotId = (typeof ingredients)[number]["id"]
 
-// The customer task on a phone, and the recorded check behind each step.
-const steps = [
-  { check: "capture-link-preselects-form", action: "Tap “Ask about Capture”", result: "The form opens with Photo and video chosen" },
-  { check: "form-round-trip-without-saving", action: "Fill it in and send", result: "The server checks it (a controlled test, so nothing is saved)" },
-  { check: "form-keeps-input-after-error", action: "Make a mistake on the way", result: "Everything typed is still there" },
-] as const
+type Rect = { x: number; y: number; w: number; h: number }
 
 /** Canvas geometry, in design units. The canvas scales to fit its box; these stay fixed. */
 const LAYOUTS = {
   wide: {
-    w: 660,
-    h: 520,
-    facts: [96, 226, 356].map((y) => ({ x: 0, y, w: 232, h: 68 })),
-    browser: { x: 292, y: 30, w: 368, h: 460 },
-    phone: { x: 211, y: 6, w: 238, h: 508 },
+    w: 800,
+    h: 540,
+    cards: {
+      photo: { x: 0, y: 88, w: 196, h: 118 },
+      hours: { x: 0, y: 222, w: 196, h: 56 },
+      contact: { x: 0, y: 294, w: 196, h: 66 },
+      services: { x: 0, y: 376, w: 196, h: 66 },
+    },
+    lanes: null,
+    browser: { x: 250, y: 34, w: 550, h: 472 },
+    phone: { x: 275, y: 8, w: 250, h: 524 },
+    // Refine: the phone steps right, and the browser it came from slides left with the finished site.
+    shift: { x: 270, y: 0 },
+    desk: { x: 30, y: 34, w: 550, h: 472, scale: 1 },
   },
   narrow: {
     w: 360,
-    h: 470,
-    facts: [0, 124, 248].map((x) => ({ x, y: 0, w: 112, h: 78 })),
-    browser: { x: 0, y: 112, w: 360, h: 358 },
-    phone: { x: 82, y: 4, w: 196, h: 462 },
+    h: 640,
+    // One row. Each path runs down the phone's nearer side in its own lane, so none of them cross.
+    cards: {
+      contact: { x: 0, y: 0, w: 84, h: 56 },
+      photo: { x: 92, y: 0, w: 84, h: 56 },
+      services: { x: 184, y: 0, w: 84, h: 56 },
+      hours: { x: 276, y: 0, w: 84, h: 56 },
+    },
+    lanes: {
+      contact: { x: 14, jog: 66 },
+      photo: { x: 30, jog: 80 },
+      services: { x: 330, jog: 80 },
+      hours: { x: 346, jog: 66 },
+    },
+    browser: null,
+    phone: { x: 55, y: 128, w: 250, h: 508 },
+    shift: { x: 55, y: 0 },
+    desk: { x: 0, y: 196, w: 550, h: 472, scale: 0.52 },
   },
 } as const
 type LayoutName = keyof typeof LAYOUTS
-type Point = { x: number; y: number }
+type Layout = (typeof LAYOUTS)[LayoutName]
+
+/** Where an element sits inside the canvas, whatever it's nested in. Offsets ignore transforms. */
+function offsetWithin(node: HTMLElement, root: HTMLElement): Rect {
+  let x = 0
+  let y = 0
+  let el: HTMLElement | null = node
+  while (el && el !== root) {
+    x += el.offsetLeft
+    y += el.offsetTop
+    el = el.offsetParent as HTMLElement | null
+  }
+  return { x, y, w: node.offsetWidth, h: node.offsetHeight }
+}
 
 /**
- * A path from a fact to its place on the page: level, then a 60° run like the sides of the
- * Mountline mark, then level again (or, stacked on a phone, down and in).
+ * A path from an ingredient to its place on the page: level, then a 60° run like the sides of the
+ * Mountline mark, then level again. The photo sits across the page from its card, so its path comes
+ * over the top of the page and drops in, rather than crossing the words. On a phone the cards sit
+ * above, so each path drops and turns in from its own side.
  */
-function pathFor(layout: LayoutName, index: number, slot: Point) {
-  const fact = LAYOUTS[layout].facts[index]
-  if (layout === "wide") {
-    const x0 = fact.x + fact.w
-    const y0 = fact.y + fact.h / 2
-    const run = Math.abs(slot.y - y0) / Math.tan(Math.PI / 3)
-    const bend = x0 + 18
-    return `M${x0} ${y0} H${bend} L${bend + run} ${slot.y} H${slot.x}`
+function pathFor(geometry: Layout, id: SlotId, slot: Rect) {
+  const tan = Math.tan(Math.PI / 3)
+  const card: Rect = geometry.cards[id]
+  if (!geometry.lanes) {
+    const top = (geometry.browser?.y ?? 0) - 14
+    const x0 = card.x + card.w
+    const y0 = card.y + card.h / 2
+    if (id === "photo") {
+      const x2 = slot.x + slot.w * 0.5
+      const bend = x0 + 16
+      return `M${x0} ${y0} H${bend} L${bend + Math.abs(y0 - top) / tan} ${top} H${x2} V${slot.y - 4}`
+    }
+    const y1 = slot.y + Math.min(slot.h / 2, 14)
+    const x1 = slot.x - 5
+    const run = Math.abs(y1 - y0) / tan
+    const bend = Math.min(x0 + 16, x1 - run - 8)
+    return `M${x0} ${y0} H${bend} L${bend + run} ${y1} H${x1}`
   }
-  const x0 = fact.x + fact.w / 2
-  const y0 = fact.y + fact.h
-  const kink = 14
-  const end = { x: x0 - kink / Math.tan(Math.PI / 3), y: slot.y }
-  return `M${x0} ${y0} V${end.y - kink} L${end.x} ${end.y}`
+  const lane = geometry.lanes[id]
+  const left = lane.x < geometry.w / 2
+  const x0 = card.x + card.w / 2
+  const x1 = left ? slot.x - 4 : slot.x + slot.w + 4
+  const y1 = slot.y + Math.min(slot.h / 2, 12)
+  return `M${x0} ${card.y + card.h} V${lane.jog} H${lane.x} V${y1} H${x1}`
 }
 
-function Status({ value }: { value: "pass" | "fail" | null }) {
-  if (value === "pass") return <span className="btr-status" data-value="pass"><Check aria-hidden="true" />Passed</span>
-  if (value === "fail") return <span className="btr-status" data-value="fail"><X aria-hidden="true" />Failed</span>
-  return <span className="btr-status" data-value="none"><Minus aria-hidden="true" />Not recorded</span>
-}
-
-function MiniSite({ wide, ref, style }: { wide: boolean; ref?: React.Ref<HTMLDivElement>; style?: CSSProperties }) {
+/** Bramble's desktop page, cropped to the top: the part a customer sees first. */
+function DeskPage({ pageRef, eager = false }: { pageRef?: Ref<HTMLDivElement>; eager?: boolean }) {
   return (
-    <div ref={ref} className={wide ? "btr-site btr-site--wide" : "btr-site btr-site--narrow"} style={style}>
-      <div className="btr-site__nav">
-        <Wordmark size={wide ? 10 : 9} />
-        {wide ? <span className="btr-site__links"><i /><i /><i /><i /></span> : <span className="btr-site__menu"><i /><i /></span>}
+    <div ref={pageRef} className="bm bm--desk">
+      <div className="bm-nav">
+        <span className="bm-brand"><b>Bramble</b><small>Dog grooming</small></span>
+        <span className="bm-links"><span>Services</span><span>Hours</span><span>Visit</span></span>
+        <span className="bm-btn bm-btn--sm" data-part="contact">Request a visit</span>
       </div>
-      <div className="btr-site__scroll">
-        <p className="btr-site__h">A better website for the business you’ve built.</p>
-        <span className="btr-site__cta">Talk about your project</span>
-        <div className="btr-site__slot" data-slot="services">
-          <span className="btr-site__skeleton" />
-          <span className="btr-site__real btr-site__services">
-            <span>Websites</span>
-            <span data-capture>Photo &amp; video <b>Ask about Capture</b></span>
-            <span>Receptionist</span>
+      <div className="bm-hero">
+        <div className="bm-hero__copy">
+          <span className="bm-eyebrow">Keller, Texas · By appointment</span>
+          <span className="bm-display">Calm, careful dog grooming in Keller.</span>
+          <span className="bm-lede">One dog at a time, in a quiet room. We’ll text you when yours is ready.</span>
+          <span className="bm-slot" data-slot="hours">
+            <span className="bm-skel" />
+            <span className="bm-real bm-open"><i />Open today until 5:00 · 1120 Lantern Way</span>
+          </span>
+          <span className="bm-slot" data-slot="contact">
+            <span className="bm-skel" />
+            <span className="bm-real bm-actions"><span className="bm-btn">Request a visit</span><span className="bm-btn bm-btn--line">Call (817) 555-0164</span></span>
           </span>
         </div>
-        <div className="btr-site__slot" data-slot="where">
-          <span className="btr-site__skeleton" />
-          <span className="btr-site__real btr-site__where">Keller, Texas · Dallas–Fort Worth</span>
+        <span className="bm-slot bm-photo" data-slot="photo">
+          <span className="bm-skel" />
+          <span className="bm-real bm-photo__frame"><SamplePhoto id="work" sizes="300px" className="bm-photo__img" eager={eager} /></span>
+        </span>
+      </div>
+      <div className="bm-slot bm-services" data-slot="services">
+        <span className="bm-skel" />
+        <span className="bm-real">
+          <span className="bm-title">Services</span>
+          <span className="bm-rows">
+            <span><b>Bath &amp; tidy</b><em>1½–2 hrs</em><i>from $55</i></span>
+            <span><b>Full groom</b><em>2–3 hrs</em><i>from $75</i></span>
+            <span><b>Puppy’s first groom</b><em>About 1 hr</em><i>$40</i></span>
+          </span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/** The same site on a phone: the page, the request sheet, and the call-or-book bar. */
+function PhonePage({ pageRef }: { pageRef?: Ref<HTMLDivElement> }) {
+  return (
+    <div ref={pageRef} className="bm bm--phone">
+      <div className="bm-scroll">
+        <div className="bm-nav">
+          <span className="bm-brand"><b>Bramble</b></span>
+          <span className="bm-burger"><i /><i /></span>
         </div>
-        <div className="btr-site__slot btr-site__form" data-slot="contact">
-          <span className="btr-site__skeleton" />
-          <span className="btr-site__real">
-            <span className="btr-site__field">Your name</span>
-            <span className="btr-site__field">Email</span>
-            <span className="btr-site__choices">
-              <span className="btr-site__choice"><i />Website</span>
-              <span className="btr-site__choice" data-pick><i />Photo and video</span>
+        <span className="bm-eyebrow">Keller, Texas · By appointment</span>
+        <span className="bm-display">Calm, careful dog grooming in Keller.</span>
+        <span className="bm-today"><span className="bm-open"><i />Open today until 5:00</span></span>
+        <span className="bm-slot bm-photo" data-slot="photo">
+          <span className="bm-skel" />
+          <span className="bm-real bm-photo__frame"><SamplePhoto id="work" sizes="260px" className="bm-photo__img" /></span>
+        </span>
+        <span className="bm-slot" data-slot="contact">
+          <span className="bm-skel" />
+          <span className="bm-real bm-btn bm-btn--block">Request a visit</span>
+        </span>
+        <span className="bm-slot bm-services" data-slot="services">
+          <span className="bm-skel" />
+          <span className="bm-real">
+            <span className="bm-title">Services</span>
+            <span className="bm-rows">
+              <span><b>Bath &amp; tidy</b><i>from $55</i></span>
+              <span data-pick><b>Full groom</b><i>from $75</i><u aria-hidden="true" /></span>
+              <span><b>Puppy’s first groom</b><i>$40</i></span>
+              <span><b>Nail trim</b><i>$15</i></span>
             </span>
-            <span className="btr-site__send">Send message</span>
-            <span className="btr-site__checked">Checked by the server</span>
           </span>
-        </div>
+        </span>
+        <span className="bm-slot" data-slot="hours">
+          <span className="bm-skel" />
+          <span className="bm-real bm-hours"><b>Hours</b>Tue–Fri 8–5 · Sat 8–2</span>
+        </span>
       </div>
+
+      <span className="bm-dock"><span className="bm-btn bm-btn--line">Call</span><span className="bm-btn">Request a visit</span></span>
+
+      <span className="bm-sheet">
+        <span className="bm-sheet__grip" />
+        <span className="bm-sheet__title">Request a visit</span>
+        <span className="bm-field"><small>Service</small><span className="bm-input" data-filled>Full groom</span></span>
+        <span className="bm-field"><small>Dog’s name</small><span className="bm-input"><span className="bm-type">Biscuit</span><span className="bm-caret" /></span></span>
+        <span className="bm-field"><small>Days that work</small><span className="bm-chips"><span>Tue</span><span data-on="1">Wed</span><span>Thu</span><span data-on="2">Sat</span></span></span>
+        <span className="bm-send">
+          <span className="bm-btn bm-btn--block bm-send__btn">Send request</span>
+          <span className="bm-done"><i />Request sent. We’ll text you to confirm a time.</span>
+        </span>
+      </span>
     </div>
   )
 }
@@ -132,7 +248,7 @@ function useLayout() {
   useEffect(() => {
     const wide = window.matchMedia("(min-width: 1024px)")
     // Pinned only where every chapter's words fit beside the stage without clipping.
-    const tall = window.matchMedia("(min-height: 760px)")
+    const tall = window.matchMedia("(min-height: 720px)")
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)")
     const update = () => setLayout({ name: wide.matches ? "wide" : "narrow", pinned: wide.matches && tall.matches && !reduce.matches })
     update()
@@ -144,40 +260,38 @@ function useLayout() {
   return layout
 }
 
-export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
+export function BuildTestRefine() {
   const [chapter, setChapter] = useState(0)
   const [seen, setSeen] = useState(false)
   const layout = useLayout()
   const rootRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const deskRef = useRef<HTMLDivElement>(null)
+  const phoneRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
+  const [slots, setSlots] = useState<Rect[] | null>(null)
   // While a chapter button is scrolling the page, scroll position doesn't pick the chapter.
   const lock = useRef<{ chapter: number; until: number } | null>(null)
 
-  const geometry = LAYOUTS[layout.name]
-  const siteRef = useRef<HTMLDivElement>(null)
-  const [slots, setSlots] = useState<Point[] | null>(null)
+  const geometry: Layout = LAYOUTS[layout.name]
 
-  /* Where each fact lands: measured from the page in the Build frame, so the paths always meet it. */
+  /* Where each ingredient lands: measured from the page itself, so the paths always meet it. */
   useLayoutEffect(() => {
-    const site = siteRef.current
-    if (!site) return
+    const canvas = canvasRef.current
+    const page = layout.name === "wide" ? deskRef.current : phoneRef.current
+    if (!canvas || !page) return
     const measure = () => {
-      // The site is placed inside the frame's box, which starts at the union's corner.
-      const { union } = frames(geometry)
-      const points = facts.map((fact) => {
-        const slot = site.querySelector<HTMLElement>(`[data-slot="${fact.id}"]`)
-        if (!slot) return null
-        return layout.name === "wide"
-          ? { x: union.x + site.offsetLeft + slot.offsetLeft - 6, y: union.y + site.offsetTop + slot.offsetTop + slot.offsetHeight / 2 }
-          : { x: 0, y: union.y + site.offsetTop + slot.offsetTop - 4 }
+      const rects = ingredients.map((item) => {
+        const slot = page.querySelector<HTMLElement>(`[data-slot="${item.id}"]`)
+        return slot ? offsetWithin(slot, canvas) : null
       })
-      setSlots(points.every(Boolean) ? (points as Point[]) : null)
+      setSlots(rects.every(Boolean) ? (rects as Rect[]) : null)
     }
     measure()
     document.fonts?.ready.then(measure).catch(() => {})
-  }, [layout.name, geometry])
+  }, [layout.name])
 
   /* Fit the fixed-size canvas into its box. */
   useLayoutEffect(() => {
@@ -196,9 +310,9 @@ export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
 
   /* Start the Build animation only once it's actually on screen. */
   useEffect(() => {
-    const node = rootRef.current
+    const node = boxRef.current
     if (!node) return
-    const observer = new IntersectionObserver(([entry]) => entry.isIntersecting && setSeen(true), { threshold: 0.25 })
+    const observer = new IntersectionObserver(([entry]) => entry.isIntersecting && setSeen(true), { threshold: 0.3 })
     observer.observe(node)
     return () => observer.disconnect()
   }, [])
@@ -224,7 +338,7 @@ export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
       const held = lock.current
       if (held && clock() < held.until) return
       lock.current = null
-      const next = progress < 0.34 ? 0 : progress < 0.67 ? 1 : 2
+      const next = progress < 0.3 ? 0 : progress < 0.64 ? 1 : 2
       setChapter((current) => (current === next ? current : next))
     }
     const onScroll = () => {
@@ -234,14 +348,17 @@ export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
       lock.current = null
       onScroll()
     }
+    // A restored scroll position (back/forward, reload) lands in the right chapter straight away.
     read()
     window.addEventListener("scroll", onScroll, { passive: true })
     window.addEventListener("resize", onScroll)
     window.addEventListener("scrollend", release)
+    window.addEventListener("pageshow", onScroll)
     return () => {
       window.removeEventListener("scroll", onScroll)
       window.removeEventListener("resize", onScroll)
       window.removeEventListener("scrollend", release)
+      window.removeEventListener("pageshow", onScroll)
       cancelAnimationFrame(frame)
     }
   }, [layout.pinned, range])
@@ -252,13 +369,13 @@ export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
     if (!layout.pinned) return
     const r = range()
     if (!r) return
-    // The middle of that chapter's stretch of the track: a predictable place to land.
-    const target = r.top + ((index + 0.5) / 3) * r.distance
+    // A predictable place inside that chapter's stretch of the track.
+    const anchors = [0.12, 0.47, 0.84]
     lock.current = { chapter: index, until: clock() + 1200 }
-    window.scrollTo({ top: target, behavior: "smooth" })
+    window.scrollTo({ top: r.top + anchors[index] * r.distance, behavior: "smooth" })
   }
 
-  function onKey(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
+  function onKey(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const keys: Record<string, number> = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: 2 }
     if (!(event.key in keys)) return
     event.preventDefault()
@@ -267,74 +384,30 @@ export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
     document.getElementById(`btr-tab-${chapters[next].id}`)?.focus()
   }
 
-  const after = (id: string): EvidenceCheck | undefined => evidence.checks.find((c) => c.id === id)
-  const recorded = evidence.builds.after ? formatDate(evidence.recordedOn) : null
   const current = chapters[chapter]
-  const style = { "--scale": scale, "--cw": geometry.w, "--ch": geometry.h } as CSSProperties
-  const { union, browserInset, phoneInset } = frames(geometry)
-
-  const panel = (item: Chapter) => (
-    <div className="btr__text">
-      <h3 className="btr__title">{item.title}</h3>
-      <p className="btr__line">{item.line}</p>
-
-      {item.id === "test" ? (
-        <ol className="btr__steps">
-          {steps.map((step, index) => {
-            const check = after(step.check)
-            return (
-              <li key={step.check} style={{ "--i": index } as CSSProperties}>
-                <span className="btr__step-action">{step.action}</span>
-                <span className="btr__step-result">{step.result}</span>
-                <Status value={check?.after ? check.after.phone : null} />
-              </li>
-            )
-          })}
-        </ol>
-      ) : null}
-
-      {item.id === "refine" ? (
-        <ul className="btr__fixes">
-          {evidence.findings.filter((finding) => finding.featured).map((finding, index) => (
-            <li key={finding.id} style={{ "--i": index } as CSSProperties}>
-              <p className="btr__fix-title">{finding.title}</p>
-              <p className="btr__fix-found">{finding.found} {finding.fix}</p>
-              {finding.kind === "check" ? (
-                <div className="btr__retest">
-                  <span><b>Mid-build</b><Status value={finding.before} /></span>
-                  <span><b>Final</b><Status value={finding.after} /></span>
-                </div>
-              ) : (
-                <div className="btr__bars" aria-label={`${finding.unit}: ${finding.before ?? "not measured"} ${finding.beforeLabel.toLowerCase()}, ${finding.after ?? "not measured yet"} after`}>
-                  {(["before", "after"] as const).map((when) => {
-                    const value = finding[when]
-                    const max = Math.max(finding.before ?? 0, finding.after ?? 0) || 1
-                    return (
-                      <span key={when} className="btr__bar" data-when={when} style={{ "--w": (value ?? 0) / max } as CSSProperties}>
-                        <b>{when === "before" ? finding.beforeLabel : "Final"}</b>{value ?? (when === "before" ? "—" : "not measured yet")}
-                      </span>
-                    )
-                  })}
-                  <em>{finding.unit}</em>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      <p className="btr__source">
-        {item.id === "build"
-          ? "Shown on this website, the one we rebuilt this way."
-          : recorded
-            ? `Recorded while testing this site on ${recorded}. Phone results are from an emulated 390 px screen.`
-            : "Results appear here once the finished build has been tested."}
-      </p>
-    </div>
-  )
+  const { union, browserInset, phoneInset, shiftedInset } = frames(geometry)
+  // The desk starts where the browser was (or where it ends up, on a phone) and moves to its Refine place.
+  const deskBase = geometry.browser ?? geometry.desk
+  const style = {
+    "--scale": scale,
+    "--cw": geometry.w,
+    "--ch": geometry.h,
+    "--shift-x": `${geometry.shift.x}px`,
+    "--shift-y": `${geometry.shift.y}px`,
+    "--desk-x": `${geometry.desk.x - deskBase.x}px`,
+    "--desk-y": `${geometry.desk.y - deskBase.y}px`,
+    "--desk-scale": geometry.desk.scale,
+  } as CSSProperties
 
   return (
-    <div ref={rootRef} className="btr" data-chapter={current.id} data-layout={layout.name} data-pinned={layout.pinned || undefined} data-seen={seen || undefined}>
+    <div
+      ref={rootRef}
+      className="btr"
+      data-chapter={current.id}
+      data-layout={layout.name}
+      data-pinned={layout.pinned || undefined}
+      data-seen={seen || undefined}
+    >
       <div ref={trackRef} className="btr__track">
         <div className="btr__sticky">
           <div className="ml-container btr__grid">
@@ -373,55 +446,97 @@ export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
                       data-active={active || undefined}
                       inert={!active}
                     >
-                      {panel(item)}
+                      <h3 className="btr__title">{item.title}</h3>
+                      <p className="btr__line">{item.line}</p>
+                      <ol className="btr__steps" data-chapter={item.id}>
+                        {item.steps.map((step, index) => (
+                          <li key={step} style={{ "--i": index } as CSSProperties}>
+                            <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                            {step}
+                          </li>
+                        ))}
+                      </ol>
                     </div>
                   )
                 })}
               </div>
+              <p className="hp-tag btr__tag">Example business · Design demonstration</p>
             </div>
 
-            <div className="btr__stage" ref={boxRef} aria-hidden="true">
-              <div className="btr__canvas" style={style}>
-                <svg className="btr__mark" viewBox="26 18 128 138" preserveAspectRatio="xMidYMid meet">
-                  <path d="M90 34 145 137H35L90 34Z" />
-                </svg>
-                {facts.map((fact, index) => {
-                  const box = geometry.facts[index]
-                  return (
-                    <div key={fact.id} className="btr-fact" style={{ left: box.x, top: box.y, width: box.w, height: box.h, "--i": index } as CSSProperties}>
-                      <span>{fact.label}</span>
-                      <strong>{layout.name === "wide" ? fact.value : fact.short}</strong>
-                    </div>
-                  )
-                })}
-                <svg className="btr__paths" viewBox={`0 0 ${geometry.w} ${geometry.h}`} width={geometry.w} height={geometry.h}>
-                  {slots && facts.map((fact, index) => {
-                    const d = pathFor(layout.name, index, slots[index])
+            <div className="btr__stage">
+              <div className="btr__box" ref={boxRef} aria-hidden="true">
+                <div ref={canvasRef} className="btr__canvas" style={style}>
+                  {ingredients.map((item, index) => {
+                    const box = geometry.cards[item.id]
                     return (
-                      <g key={fact.id} style={{ "--i": index } as CSSProperties}>
-                        <path className="btr-path__halo" d={d} pathLength={1} />
-                        <path className="btr-path" d={d} pathLength={1} />
-                        <path className="btr-path__glint" d={d} pathLength={1} />
-                      </g>
+                      <div
+                        key={item.id}
+                        className="btr-card"
+                        data-card={item.id}
+                        style={{ left: box.x, top: box.y, width: box.w, height: box.h, "--i": index } as CSSProperties}
+                      >
+                        {item.id === "photo" ? <span className="btr-card__photo"><SamplePhoto id="work" sizes="200px" className="bm-photo__img" /></span> : null}
+                        <span className="btr-card__label">{item.label}</span>
+                        <strong>{item.value}</strong>
+                      </div>
                     )
                   })}
-                </svg>
-                {/*
-                  One box covering both the browser and the phone. The frame changes shape with clip-path,
-                  so nothing inside it is laid out again or shifts while the page scrolls.
-                */}
-                <div
-                  className="btr-screen"
-                  style={{ left: union.x, top: union.y, width: union.w, height: union.h, "--browser": browserInset, "--phone": phoneInset } as CSSProperties}
-                >
-                  <span className="btr-screen__edge" data-shape="browser" style={place(geometry.browser, union)} />
-                  <span className="btr-screen__edge" data-shape="phone" style={place(geometry.phone, union)} />
-                  <div className="btr-screen__clip">
-                    <span className="btr-screen__bar" style={{ ...place(geometry.browser, union), height: 22 }}><i /><i /><i /></span>
-                    <span className="btr-screen__island" style={{ left: geometry.phone.x - union.x + geometry.phone.w / 2, top: geometry.phone.y - union.y + 9 }} />
-                    <MiniSite wide ref={siteRef} style={{ left: geometry.browser.x - union.x, top: geometry.browser.y - union.y + 22, width: geometry.browser.w }} />
-                    <MiniSite wide={false} style={{ left: geometry.phone.x - union.x, top: geometry.phone.y - union.y, width: geometry.phone.w }} />
+
+                  <svg className="btr__paths" viewBox={`0 0 ${geometry.w} ${geometry.h}`} width={geometry.w} height={geometry.h}>
+                    {slots && ingredients.map((item, index) => {
+                      const d = pathFor(geometry, item.id, slots[index])
+                      return (
+                        <g key={item.id} style={{ "--i": index } as CSSProperties}>
+                          <path className="btr-path__halo" d={d} pathLength={1} />
+                          <path className="btr-path" d={d} pathLength={1} />
+                          <path className="btr-path__glint" d={d} pathLength={1} />
+                        </g>
+                      )
+                    })}
+                  </svg>
+
+                  {/* The finished desktop site, for Refine. On wide screens it's the same window the page was built in. */}
+                  <div className="btr-desk" style={place({ ...deskBase, w: geometry.desk.w, h: geometry.desk.h })}>
+                    <span className="btr-desk__bar"><i /><i /><i /></span>
+                    <DeskPage />
                   </div>
+
+                  {/*
+                    One box covering the browser and both phone positions. Its visible shape is a clip-path
+                    that moves between them, so nothing inside is laid out again while it changes.
+                  */}
+                  <div
+                    className="btr-screen"
+                    style={{ ...place(union), "--browser": browserInset, "--phone": phoneInset, "--phone-2": shiftedInset } as CSSProperties}
+                  >
+                    {geometry.browser ? <span className="btr-screen__edge" data-shape="browser" style={place(geometry.browser, union)} /> : null}
+                    <span className="btr-screen__edge" data-shape="phone" style={place(geometry.phone, union)} />
+                    <div className="btr-screen__clip">
+                      {geometry.browser ? (
+                        <>
+                          <span className="btr-screen__bar" style={{ ...place(geometry.browser, union), height: 24 }}><i /><i /><i /></span>
+                          <div className="btr-screen__desk" style={{ ...place(geometry.browser, union), top: geometry.browser.y - union.y + 24, height: geometry.browser.h - 24 }}>
+                            <DeskPage pageRef={deskRef} />
+                          </div>
+                        </>
+                      ) : null}
+                      <div className="btr-screen__phone" style={place(geometry.phone, union)}>
+                        <span className="btr-screen__island" />
+                        <PhonePage pageRef={phoneRef} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* On a phone, what's happening, where the ingredients were. */}
+                  {layout.name === "narrow" ? (
+                    <div className="btr-caption">
+                      {chapters.slice(1).map((item) => (
+                        <ol key={item.id} data-for={item.id}>
+                          {item.steps.map((step, index) => <li key={step} style={{ "--i": index } as CSSProperties}>{step}</li>)}
+                        </ol>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -432,18 +547,24 @@ export function BuildTestRefine({ evidence }: { evidence: SiteEvidence }) {
   )
 }
 
-type Rect = { x: number; y: number; w: number; h: number }
-
-function frames(geometry: (typeof LAYOUTS)[LayoutName]) {
-  const b = geometry.browser
-  const p = geometry.phone
-  const x = Math.min(b.x, p.x)
-  const y = Math.min(b.y, p.y)
-  const union = { x, y, w: Math.max(b.x + b.w, p.x + p.w) - x, h: Math.max(b.y + b.h, p.y + p.h) - y }
-  const inset = (r: Rect, radius: number) => `inset(${r.y - y}px ${union.x + union.w - (r.x + r.w)}px ${union.y + union.h - (r.y + r.h)}px ${r.x - x}px round ${radius}px)`
-  return { union, browserInset: inset(b, 14), phoneInset: inset(p, 34) }
+function place(r: Rect, origin: { x: number; y: number } = { x: 0, y: 0 }): CSSProperties {
+  return { left: r.x - origin.x, top: r.y - origin.y, width: r.w, height: r.h }
 }
 
-function place(r: Rect, union: Rect): CSSProperties {
-  return { left: r.x - union.x, top: r.y - union.y, width: r.w, height: r.h }
+function frames(geometry: Layout) {
+  const p = geometry.phone
+  const p2 = { ...p, x: p.x + geometry.shift.x, y: p.y + geometry.shift.y }
+  const shapes: Rect[] = [p, p2, ...(geometry.browser ? [geometry.browser] : [])]
+  const x = Math.min(...shapes.map((r) => r.x))
+  const y = Math.min(...shapes.map((r) => r.y))
+  const right = Math.max(...shapes.map((r) => r.x + r.w))
+  const bottom = Math.max(...shapes.map((r) => r.y + r.h))
+  const union = { x, y, w: right - x, h: bottom - y }
+  const inset = (r: Rect, radius: number) => `inset(${r.y - y}px ${right - (r.x + r.w)}px ${bottom - (r.y + r.h)}px ${r.x - x}px round ${radius}px)`
+  return {
+    union,
+    browserInset: geometry.browser ? inset(geometry.browser, 12) : inset(p, 36),
+    phoneInset: inset(p, 36),
+    shiftedInset: inset(p2, 36),
+  }
 }

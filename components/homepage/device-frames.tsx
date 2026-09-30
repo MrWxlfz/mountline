@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 
 /** A quiet browser window. The chrome stays dim so the design inside it does the talking. */
-export function BrowserFrame({ className, label = "bramble · design example", children }: { className?: string; label?: string; children: ReactNode }) {
+export function BrowserFrame({ className, label = "Example business · Design demonstration", children }: { className?: string; label?: string; children: ReactNode }) {
   return (
     <div className={className ? `hp-browser ${className}` : "hp-browser"}>
       <div className="hp-browser__bar">

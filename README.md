@@ -27,7 +27,7 @@ The full lint command includes legacy dashboard/Signal errors; do not suppress t
 
 ## Product paths
 
-- `/`: Mountline's websites, the Build → Test → Refine section with recorded test results (`lib/case-study/evidence.json`, see [docs/case-study](docs/case-study/README.md)), the optional Capture photo/video add-on, the receptionist call console (a text-only example, the fictional North Texas Air & Heat demo line, and an optional browser call), and the project inquiry form. Design notes: [docs/design/art-direction.md](docs/design/art-direction.md).
+- `/`: Mountline's websites, shown on Bramble (a made-up dog groomer with licensed sample photos): Build → Test → Refine, a before/after ("The difference"; measured client results appear only once approved, see `lib/case-study/client-results.ts`), the optional Capture photo/video add-on, the receptionist call console (a text-only example, the fictional North Texas Air & Heat demo line, and an optional browser call), and the project inquiry form. Internal QA runs live in [docs/case-study](docs/case-study/README.md). Design notes: [docs/design/art-direction.md](docs/design/art-direction.md).
 - `/receptionist`: the full receptionist explanation, demo line, testing, pilot, and questions. Old homepage anchors (`/#pilot`, `/#trades`, …) forward here.
 - `/dashboard/leads`: Mountline buying inquiries, full messages, contact links, explicit review states, and each inquiry's email history and follow-up controls. These are separate from customers calling a client business.
 - `/dashboard/receptionist`: team-only business-profile and prompt editor. Exports local drafts; it does not configure Retell or save profiles to the database.

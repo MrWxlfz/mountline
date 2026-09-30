@@ -18,7 +18,7 @@ export const nextSteps = [
 
 // Mountline Capture: what it is, and the limits that come with it.
 export const captureTerms = [
-  "Photos and short video, planned around your working day. Nobody is filmed without agreeing to it.",
+  "Photos and short video, planned around your working day. Nobody is photographed or filmed without agreeing to it.",
   "Scoped and priced separately from the website, and agreed in writing before anything is booked.",
   "Aerial shots only where the location suits it, permissions allow it, and a licensed drone pilot is available.",
 ] as const
@@ -59,7 +59,7 @@ export const questions = [
   },
   {
     q: "Is Bramble a real business?",
-    a: "No. Bramble is a made-up dog groomer. We designed its website and illustrated its shopfront to show the kind of work we do, without borrowing a real business’s name.",
+    a: "No. Bramble is a made-up dog groomer we use to show the kind of work we do, without borrowing a real business’s name. Its photos are licensed sample images from photographers on Unsplash, not a shoot we did.",
   },
 ] as const
 

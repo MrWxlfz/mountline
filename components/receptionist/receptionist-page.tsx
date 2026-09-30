@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { CallStack } from "@/components/homepage/call-stack"
-import { siteSans } from "@/components/homepage/fonts"
 import { HomepageMotion } from "@/components/homepage/homepage-motion"
 import { SiteFooter } from "@/components/homepage/site-footer"
 import { SiteHeader } from "@/components/homepage/site-header"
@@ -31,7 +30,7 @@ function SectionHead({ id, title, children }: { id: string; title: React.ReactNo
 
 export function ReceptionistPage() {
   return (
-    <div className={`mountline-marketing mountline-homepage ml-site ${siteSans.variable}`}>
+    <div className={`mountline-marketing mountline-homepage ml-site`}>
       <HomepageMotion />
       <a href="#main-content" className="ml-skip">Skip to content</a>
       <SiteHeader nav={nav} ctaHref="#contact" ctaLabel="Ask about a pilot" ctaShortLabel="Contact" />

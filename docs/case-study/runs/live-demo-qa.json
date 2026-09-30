@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-09-29T21:18:35.622Z",
+  "recordedAt": "2026-09-29T22:03:18.481Z",
   "base": "http://localhost:3300",
   "note": "Placeholder Retell settings and an unreachable Supabase URL; no real call was possible. Tests 3–6 simulate server or provider answers.",
   "results": [
@@ -21,7 +21,7 @@
     {
       "id": "connect-failure-shown",
       "pass": true,
-      "detail": "phases seen: permission → connecting → error; gateway attempts=1"
+      "detail": "phases seen: rest → permission → connecting → error; gateway attempts=1"
     },
     {
       "id": "double-click-one-request",

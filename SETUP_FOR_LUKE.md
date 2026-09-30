@@ -271,10 +271,16 @@ To switch it on, follow **docs/receptionist-web-demo.md**. In short:
 1. In Retell, use the fictional demo agent (or a copy), set its max call duration to 3 minutes and end-after-silence to about 20 seconds, publish it, and copy its agent ID and your secret API key.
 2. In Supabase's SQL editor, run `supabase/migrations/20260929120000_receptionist_web_demo.sql`. Success: "Success. No rows returned," and a new empty `receptionist_demo_calls` table.
 3. In Vercel, add `RETELL_API_KEY` and `RETELL_DEMO_AGENT_ID` (Production). `CRON_SECRET` from step 8 above also signs the demo's call links, so no extra secret is needed if it's set. Redeploy.
-4. Test it: on the homepage press **Talk to the demo**, allow the microphone, talk for a moment, end the call. Success: the status shows **Live**, you hear the receptionist, and after hanging up the transcript and summary appear; one `ended` row appears in `receptionist_demo_calls`; **no** inquiry shows up in the dashboard and no email is sent.
+4. Test it: on the homepage press **Talk in your browser**, allow the microphone, talk for a moment, end the call. Success: the status shows **Live**, you hear the receptionist, and after hanging up the transcript and summary appear; one `ended` row appears in `receptionist_demo_calls`; **no** inquiry shows up in the dashboard and no email is sent.
 
 Demo calls never become inquiries, never send email, and their transcripts aren't copied into Supabase. To switch it off, remove `RETELL_DEMO_AGENT_ID` in Vercel and redeploy.
 
-## The "we tested it" results on the homepage
+## Test results and client results
 
-The homepage's test results come from `lib/case-study/evidence.json`, written by scripts from recorded runs. Nothing to set up. To re-run them after a future change, see `docs/case-study/README.md`.
+The homepage no longer shows the site's own test results; those stay internal in `docs/case-study` (re-run them after a change with the scripts described in `docs/case-study/README.md`).
+
+"The difference" section on the homepage is a labeled design demonstration with no figures. When a real client agrees to publish measured results, add them to `lib/case-study/client-results.ts` (the rules are at the top of that file) and they appear under it. Nothing to set up until then.
+
+## Sample photos
+
+Bramble's photos are free Unsplash images, loaded from Unsplash's image service and credited under Capture on the homepage (list: `lib/homepage/sample-photos.ts`). Nothing to set up. When you have photos from a real Capture shoot and the client's permission, those should replace them.

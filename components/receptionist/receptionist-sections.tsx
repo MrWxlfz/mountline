@@ -22,6 +22,19 @@ export function DemoFinePrint({ className = "ml-demo__fine" }: { className?: str
   )
 }
 
+/** The same limits, folded into a short disclosure beside the homepage's demo line. */
+export function DemoLimits() {
+  return (
+    <details className="cc-transcript hp-limits">
+      <summary>
+        What the demo can and can’t do
+        <i aria-hidden="true" />
+      </summary>
+      <DemoFinePrint className="hp-limits__text" />
+    </details>
+  )
+}
+
 function ControlSample({ example }: { example: ControlExample }) {
   if (example.kind === "facts") {
     return (
@@ -83,7 +96,7 @@ export function ControlSection() {
 export function CallItSection() {
   return (
     <section className="ml-demo" id="demo" aria-labelledby="demo-title">
-      <Landscape variant="dusk" id="demo-scene" className="ml-demo__scene" horizon={0.16} />
+      <Landscape variant="night" id="demo-scene" className="ml-demo__scene" horizon={0.16} />
       <div className="ml-container ml-demo__inner">
         <div className="ml-demo__call" data-mtl-reveal>
           <h2 id="demo-title">Don’t take our word for it. <em>Call it.</em></h2>

@@ -1,5 +1,6 @@
 /**
- * Mountline site checks: the evidence behind the "we tested it" case study.
+ * Mountline site checks: an internal QA record of the public site (it used to feed a public
+ * "we tested it" panel; the results now stay in docs/case-study for the team).
  *
  * Runs the same customer tasks, accessibility scan, scroll measurements, and (optionally) Lighthouse
  * lab runs against any running production build, and writes one JSON file of raw results. Nothing
@@ -186,7 +187,7 @@ async function formServerRoundTrip(size) {
 async function demoControls(size) {
   const { context, page } = await open(size)
   const section = page.locator("#receptionist")
-  const button = await firstVisible(section.getByRole("button", { name: /play the example|play example/i }))
+  const button = await firstVisible(section.getByRole("button", { name: /play the example|play example|play a short example/i }))
   if (!button) throw new Error("no example play button in #receptionist")
   await button.scrollIntoViewIfNeeded()
   await page.waitForTimeout(400)
@@ -218,7 +219,7 @@ async function liveDemoHonesty(size) {
     if (request.url().includes("/api/receptionist/demo-call")) requests++
   })
   const section = page.locator("#receptionist")
-  const talk = await firstVisible(section.getByRole("button", { name: /talk to the demo/i }))
+  const talk = await firstVisible(section.getByRole("button", { name: /talk to the demo|talk in your browser/i }))
   if (!talk) {
     const off = await section.getByText(/isn.t switched on yet/i).count()
     const tel = await firstVisible(section.locator(`.cc a[href="${DEMO_TEL}"]`))
@@ -285,7 +286,7 @@ async function keyboard(size) {
   }
   const first = stops[0]?.name || ""
   const toProject = stops.findIndex((s) => /talk about your project/i.test(s.name)) + 1
-  const toDemo = stops.findIndex((s) => /play the example|talk to the demo|call the demo|817-632-6909/i.test(s.name)) + 1
+  const toDemo = stops.findIndex((s) => /play the example|play a short example|talk to the demo|talk in your browser|call the demo|817-632-6909/i.test(s.name)) + 1
   const toForm = stops.findIndex((s) => /^your name/i.test(s.name)) + 1
   measurements[`tab-stops-to-project-link-${size.name}`] = toProject || null
   measurements[`tab-stops-to-demo-${size.name}`] = toDemo || null

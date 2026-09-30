@@ -44,7 +44,7 @@ async function session({ fakeMic }) {
   await page.goto(`${BASE}/#demo`, { waitUntil: "load" })
   await page.waitForTimeout(1200)
   const console_ = page.locator(".cc").first()
-  const talk = console_.getByRole("button", { name: /talk to the demo/i })
+  const talk = console_.getByRole("button", { name: /talk to the demo|talk in your browser/i })
   return { browser, page, calls, console_, talk }
 }
 

@@ -1,6 +1,7 @@
 /*
-  Bramble, a design example for a fictional dog groomer.
-  Its own brand: cream paper, bottle green, terracotta, and Instrument Serif for display.
+  Bramble, a design demonstration for a fictional dog groomer.
+  Its own brand: cream paper, bottle green, terracotta, Instrument Serif for display, and sample
+  photography. It supplies the color on Mountline's otherwise black-and-white page.
   Every size is in design units (--u), so the page renders the same at any frame width:
   1120 units across on a laptop (or --bx-width, for a narrower window), 390 on a phone.
 */
@@ -16,7 +17,7 @@
   --b-terra: #c4613a;
   --b-line: rgba(31, 36, 31, 0.12);
   --b-serif: var(--font-example-serif), Georgia, serif;
-  --b-sans: var(--font-site-sans), ui-sans-serif, system-ui, sans-serif;
+  --b-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 
   position: relative;
   width: 100%;
@@ -75,10 +76,8 @@
 .bx-open i { width: calc(8 * var(--u)); height: calc(8 * var(--u)); border-radius: 50%; background: #3d8b5a; box-shadow: 0 0 0 calc(4 * var(--u)) rgba(61, 139, 90, 0.16); }
 .bx-open > span { display: inline; color: var(--b-ink-3); }
 
-.bx-photo { position: relative; overflow: hidden; background: #e6cfa8; }
-.bx-photo__art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.bb-camera { transition: transform 1200ms cubic-bezier(0.65, 0, 0.35, 1); }
-@media (prefers-reduced-motion: reduce) { .bb-camera { transition: none; } }
+.bx-photo { position: relative; overflow: hidden; background: #d9d2c4; }
+.bx-photo__art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
 
 /* The outline a customer's eye lands on. */
 .bx-section { position: relative; }
@@ -88,7 +87,7 @@
   inset: calc(14 * var(--u));
   border-radius: calc(20 * var(--u));
   /* Mountline's highlight, not part of Bramble's own design. */
-  box-shadow: 0 0 0 calc(3 * var(--u)) #dca96b, 0 0 0 calc(12 * var(--u)) rgba(220, 169, 107, 0.2);
+  box-shadow: 0 0 0 calc(3 * var(--u)) var(--accent, #62a6ff), 0 0 0 calc(12 * var(--u)) rgba(98, 166, 255, 0.22);
   opacity: 0;
   transition: opacity 500ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms;
 }
@@ -127,6 +126,10 @@
 .bx-menu__body { color: var(--b-ink-2); font-size: calc(16 * var(--u)); line-height: 1.5; }
 .bx-menu__time { color: var(--b-ink-3); font-size: calc(15 * var(--u)); }
 .bx-menu__price { font-size: calc(17 * var(--u)); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+.bx-gallery__row { margin-top: calc(30 * var(--u)); display: grid !important; grid-template-columns: 1.25fr 1fr 1fr; gap: calc(16 * var(--u)); }
+.bx-gallery__photo { position: relative; aspect-ratio: 4 / 3.3; overflow: hidden; border-radius: calc(18 * var(--u)); background: #d9d2c4; }
+.bx-page--desktop .bx-gallery .bx-note { max-width: 24em; text-align: right; }
 
 .bx-page--desktop .bx-visit { display: grid !important; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: calc(48 * var(--u)); }
 .bx-hours__list { margin-top: calc(26 * var(--u)); }
@@ -200,3 +203,41 @@
   -webkit-backdrop-filter: blur(12px);
 }
 .bx-dock .bx-button { height: calc(46 * var(--u)); font-size: calc(15 * var(--u)); }
+
+/*
+  The "before": a typical first website for the same made-up business. System fonts, a pale blue
+  banner, clip art instead of photos, the facts in paragraphs and a footer. Designed for a computer;
+  on a phone it is the same page shrunk to fit (data-fit="mobile").
+*/
+
+.bo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  container-type: inline-size;
+  background: #eef2f6;
+  color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+.bo * { box-sizing: border-box; }
+.bo span { display: block; }
+.bo-page { --u: calc(100cqw / 1120); position: relative; width: calc(980 * var(--u)); margin: 0 auto; padding-bottom: calc(40 * var(--u)); background: #fff; box-shadow: 0 0 0 calc(1 * var(--u)) #c9d3de; transform-origin: 0 0; }
+.bo[data-fit="mobile"] .bo-page { --u: calc(100cqw / 1000); }
+.bo-paw { display: inline-block; width: calc(34 * var(--u)); height: calc(34 * var(--u)); fill: #8fb0d3; }
+.bo-banner { padding: calc(26 * var(--u)) 0 calc(20 * var(--u)); background: linear-gradient(#dfeaf5, #cddcec); }
+.bo-name { margin-top: calc(6 * var(--u)); color: #2f5d8a; font-size: calc(40 * var(--u)); font-weight: 700; }
+.bo-tag { margin-top: calc(4 * var(--u)); color: #5b7a99; font-size: calc(16 * var(--u)); font-style: italic; }
+.bo-nav { display: flex !important; justify-content: center; gap: calc(12 * var(--u)); padding: calc(10 * var(--u)) 0; background: #2f5d8a; color: #fff; font-size: calc(15 * var(--u)); }
+.bo-nav span:nth-child(even) { opacity: 0.5; }
+.bo-main { padding: calc(30 * var(--u)) calc(70 * var(--u)) calc(20 * var(--u)); }
+.bo-h1 { color: #2f5d8a; font-size: calc(30 * var(--u)); font-weight: 700; }
+.bo-art { display: flex !important; justify-content: center; gap: calc(24 * var(--u)); margin: calc(18 * var(--u)) 0; }
+.bo-art .bo-paw { width: calc(64 * var(--u)); height: calc(64 * var(--u)); fill: #c5d6e8; }
+.bo-p { max-width: calc(720 * var(--u)); margin: 0 auto; color: #555; font-size: calc(15 * var(--u)); line-height: 1.6; }
+.bo-h2 { margin: calc(30 * var(--u)) 0 calc(8 * var(--u)); color: #2f5d8a; font-size: calc(22 * var(--u)); font-weight: 700; }
+.bo-foot { margin: calc(30 * var(--u)) calc(30 * var(--u)) 0; padding: calc(16 * var(--u)) 0; border-top: calc(1 * var(--u)) solid #ddd; color: #888; font-size: calc(12 * var(--u)); line-height: 1.7; }

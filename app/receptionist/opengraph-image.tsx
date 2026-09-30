@@ -19,16 +19,16 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px 64px",
-          background: "#0a0a09",
-          color: "#ece8e1",
+          background: "#09090a",
+          color: "#ededed",
           fontFamily: "Arial, sans-serif",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 30, letterSpacing: -1 }}>
           <svg width="34" height="34" viewBox="0 0 180 180" fill="none">
-            <path d="M90 34 145 137H35L90 34Z" stroke="#ece8e1" strokeWidth="9" strokeLinejoin="round" />
-            <path d="M90 146V29" stroke="#ece8e1" strokeWidth="12" strokeLinecap="round" />
-            <path d="m70 57 20-28 20 28" stroke="#ece8e1" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M90 34 145 137H35L90 34Z" stroke="#ededed" strokeWidth="9" strokeLinejoin="round" />
+            <path d="M90 146V29" stroke="#ededed" strokeWidth="12" strokeLinecap="round" />
+            <path d="m70 57 20-28 20 28" stroke="#ededed" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span style={{ display: "flex" }}>mountline</span>
         </div>
@@ -46,7 +46,7 @@ export default function OpenGraphImage() {
             <span style={{ display: "flex" }}>AI receptionists for</span>
             <span style={{ display: "flex" }}>service businesses.</span>
           </div>
-          <div style={{ display: "flex", marginTop: 28, color: "#a4a09a", fontSize: 28 }}>
+          <div style={{ display: "flex", marginTop: 28, color: "#a3a3a3", fontSize: 28 }}>
             Mountline answers the calls your team can’t get to.
           </div>
         </div>
@@ -56,14 +56,14 @@ export default function OpenGraphImage() {
             display: "flex",
             justifyContent: "space-between",
             paddingTop: 24,
-            borderTop: "1px solid rgba(236,232,225,.14)",
-            color: "#817e78",
+            borderTop: "1px solid rgba(255,255,255,.13)",
+            color: "#8d8d8d",
             fontSize: 22,
           }}
         >
           <span style={{ display: "flex" }}>mountline.dev</span>
           <span style={{ display: "flex", gap: 12 }}>
-            <span style={{ display: "flex", color: "#e2a24a" }}>●</span>
+            <span style={{ display: "flex", color: "#62a6ff" }}>●</span>
             Demo line {receptionistDemo.displayPhone}
           </span>
         </div>

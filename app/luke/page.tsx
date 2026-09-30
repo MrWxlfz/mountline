@@ -4,7 +4,6 @@ import Link from "next/link"
 import { ArrowUpRight, ContactRound, Mail, MessageSquareText, Phone } from "lucide-react"
 import { Wordmark } from "@/components/brand/wordmark"
 import { DemoGallery } from "@/components/demo-gallery"
-import { siteSans } from "@/components/homepage/fonts"
 import { HomepageMotion } from "@/components/homepage/homepage-motion"
 
 const contact = {
@@ -76,7 +75,7 @@ export default function LukePage() {
   const phoneHref = `tel:${contact.phoneNumber}`
 
   return (
-    <div className={`ml-site ml-card-page ${siteSans.variable}`}>
+    <div className={`ml-site ml-card-page`}>
       <HomepageMotion />
       <header className="ml-card-page__bar">
         <div className="ml-card-page__inner">

@@ -1,10 +1,12 @@
-import { StorefrontCamera, type Framing } from "./storefront"
+import { SamplePhoto } from "@/components/homepage/sample-photo"
+import type { SamplePhotoId } from "@/lib/homepage/sample-photos"
 import "./bramble.css"
 
 /**
- * Bramble: a design example Mountline made for a fictional dog groomer, to show what a finished
+ * Bramble: a design demonstration Mountline made for a fictional dog groomer, to show what a finished
  * small-business website can look like. The business, its address, prices, and phone number
- * (a 555-01xx number) are all made up. It is drawn as a picture of a website: nothing in it is
+ * (a 555-01xx number) are all made up, and its photos are licensed sample images
+ * (lib/homepage/sample-photos.ts). It is drawn as a picture of a website: nothing in it is
  * focusable, and nothing in it submits anywhere.
  *
  * Sizes are written in design pixels (`--u`), so the page lays out at any frame size exactly as
@@ -22,6 +24,8 @@ const services = [
   { name: "Puppy’s first groom", body: "A short, gentle visit for puppies under six months, to get used to the table and dryer.", time: "About 1 hr", price: "$40" },
   { name: "Nail trim", body: "Walk in Tuesday to Friday, 8 to 10 in the morning. No appointment needed.", time: "10 min", price: "$15" },
 ] as const
+
+const gallery: SamplePhotoId[] = ["room", "dryer", "result"]
 
 const hours = [
   { day: "Monday", time: "Closed" },
@@ -68,7 +72,7 @@ function Field({ label, value, wide = false, placeholder = false }: { label: str
   )
 }
 
-function Desktop({ shot, focus }: { shot: Framing; focus?: BrambleTarget }) {
+function Desktop({ photo, focus, eager }: { photo: SamplePhotoId; focus?: BrambleTarget; eager?: boolean }) {
   return (
     <div className="bx-page bx-page--desktop">
       <div className="bx-nav" data-target="top">
@@ -96,7 +100,7 @@ function Desktop({ shot, focus }: { shot: Framing; focus?: BrambleTarget }) {
           <span className="bx-open"><i />Open today until 5:00 <span>·</span> 1120 Lantern Way</span>
         </div>
         <span className="bx-photo">
-          <StorefrontCamera framing={shot} width={488} height={520} className="bx-photo__art" />
+          <SamplePhoto id={photo} sizes="(max-width: 760px) 1px, 40vw" className="bx-photo__art" eager={eager} />
         </span>
       </div>
 
@@ -113,6 +117,18 @@ function Desktop({ shot, focus }: { shot: Framing; focus?: BrambleTarget }) {
               <span className="bx-menu__time">{item.time}</span>
               <span className="bx-menu__price">{item.price}</span>
             </span>
+          ))}
+        </span>
+      </div>
+
+      <div className="bx-section bx-gallery">
+        <span className="bx-section__head">
+          <span className="bx-title">Inside Bramble</span>
+          <span className="bx-note">One quiet grooming room, and plenty of time for each dog.</span>
+        </span>
+        <span className="bx-gallery__row">
+          {gallery.map((id) => (
+            <span key={id} className="bx-gallery__photo"><SamplePhoto id={id} sizes="20vw" className="bx-photo__art" /></span>
           ))}
         </span>
       </div>
@@ -162,7 +178,7 @@ function Desktop({ shot, focus }: { shot: Framing; focus?: BrambleTarget }) {
   )
 }
 
-function Mobile({ shot, focus }: { shot: Framing; focus?: BrambleTarget }) {
+function Mobile({ photo, focus, eager }: { photo: SamplePhotoId; focus?: BrambleTarget; eager?: boolean }) {
   return (
     <div className="bx-page bx-page--mobile">
       <div className="bx-nav" data-target="top">
@@ -173,7 +189,7 @@ function Mobile({ shot, focus }: { shot: Framing; focus?: BrambleTarget }) {
         <span className="bx-eyebrow">Keller, Texas · By appointment</span>
         <span className="bx-display">Calm, careful dog grooming in Keller.</span>
         <span className="bx-photo">
-          <StorefrontCamera framing={shot} width={520} height={600} className="bx-photo__art" />
+          <SamplePhoto id={photo} sizes="(max-width: 760px) 80vw, 300px" className="bx-photo__art" eager={eager} />
         </span>
         <span className="bx-open"><i />Open today until 5:00</span>
         <span className="bx-lede">One dog at a time, in a quiet room. We’ll text you when yours is ready.</span>
@@ -227,13 +243,13 @@ function Mobile({ shot, focus }: { shot: Framing; focus?: BrambleTarget }) {
 }
 
 /**
- * One view of the Bramble site. `shot` swaps the photo; `focus` outlines the part of the page a
+ * One view of the Bramble site. `photo` picks the hero photo; `focus` outlines the part of the page a
  * customer is looking for. The phone view also carries the call-or-book bar that stays on screen.
  */
-export function BrambleSite({ view, shot, focus }: { view: BrambleView; shot?: Framing; focus?: BrambleTarget }) {
+export function BrambleSite({ view, photo = "work", focus, eager = false }: { view: BrambleView; photo?: SamplePhotoId; focus?: BrambleTarget; eager?: boolean }) {
   return (
     <div className="bx" data-view={view} data-nosnippet="" aria-hidden="true" inert>
-      {view === "desktop" ? <Desktop shot={shot ?? "front"} focus={focus} /> : <Mobile shot={shot ?? "entrance"} focus={focus} />}
+      {view === "desktop" ? <Desktop photo={photo} focus={focus} eager={eager} /> : <Mobile photo={photo} focus={focus} eager={eager} />}
       {view === "mobile" ? (
         <span className="bx-dock">
           <span className="bx-button bx-button--line">Call</span>

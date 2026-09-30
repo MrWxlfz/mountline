@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { Wordmark } from "@/components/brand/wordmark"
-import { siteSans } from "@/components/homepage/fonts"
 import { optOutByToken } from "@/lib/leads/email/server"
 
 export const dynamic = "force-dynamic"
@@ -30,7 +29,7 @@ export default async function StopFollowupsPage({ params, searchParams }: Props)
   }
 
   return (
-    <div className={`ml-site ml-card-page ${siteSans.variable}`}>
+    <div className={`ml-site ml-card-page`}>
       <header className="ml-card-page__bar">
         <div className="ml-card-page__inner">
           <Link href="/" className="ml-header__brand" aria-label="Mountline home">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { BookingProvider } from "@/components/site/booking"
 import { Footer } from "@/components/site/footer"
+import { Hero } from "@/components/site/hero"
 import { MobileBookBar } from "@/components/site/mobile-book-bar"
 import { Nav } from "@/components/site/nav"
 import { PlaceholderWarning } from "@/components/site/placeholder-warning"
@@ -20,9 +21,7 @@ export default function Home() {
         <a href="#main-content" className="mk-skip">Skip to content</a>
         <Nav />
         <main id="main-content" tabIndex={-1}>
-          <section id="hero" className="mk-section">
-            <div className="mk-container"><h1 className="mk-h2">{site.hero.titleStart} {site.hero.titleAccent}</h1></div>
-          </section>
+          <Hero />
           <section id="contact" className="mk-section">
             <div className="mk-container"><h2 className="mk-h2">{site.final.title}</h2></div>
           </section>

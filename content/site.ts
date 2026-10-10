@@ -34,7 +34,9 @@ export const site = {
   person: {
     name: "Luke Nordin",
     firstName: "Luke",
-    photo: "/luke-nordin.jpg",
+    // Resized from /luke-nordin.jpg (images aren't optimized at request time on this site).
+    avatar: "/images/luke/luke-192.webp",
+    photo: "/images/luke/luke-960.webp",
     photoAlt: "Luke Nordin, outdoors in a blue checked jacket",
   },
 
@@ -70,9 +72,10 @@ export const site = {
     demo: {
       business: "Oak & Ember Bakery",
       tagline: "Fresh bread every morning",
-      hours: "Open today · 7 AM – 3 PM",
+      hours: "Open today · 7 AM–3 PM",
       call: "Call now",
       directions: "Directions",
+      menu: ["Sourdough", "Cinnamon rolls"],
     },
   },
 

@@ -93,6 +93,10 @@ html:has(.mk-id) body {
 }
 .mk-skip:focus { transform: none; }
 
+/* The shared Wordmark is line-height 1 (for the dashboard); the reference logo uses the font's normal line height. */
+.mk .logo > span,
+.mk-id .logo > span { line-height: normal; }
+
 /*
   Tap targets. Buttons and links keep the reference's visual size; on touch screens an invisible
   ::after grows the hit area to at least 44×44 around it.

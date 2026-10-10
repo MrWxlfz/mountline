@@ -1,21 +1,12 @@
 import type { Viewport } from "next"
-import { Instrument_Serif } from "next/font/google"
+import { figtree, fraunces } from "@/app/fonts/fonts"
 import "./marketing.css"
 
-// One italic word in the hero headline, nothing else.
-const accentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  style: "italic",
-  variable: "--font-accent-serif",
-  display: "swap",
-})
-
 export const viewport: Viewport = {
-  themeColor: "#f7f8fa",
+  themeColor: "#FCFCFC",
   colorScheme: "light",
 }
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
-  return <div className={`mk ${accentSerif.variable}`}>{children}</div>
+  return <div className={`mk ${figtree.variable} ${fraunces.variable}`}>{children}</div>
 }

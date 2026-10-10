@@ -1,0 +1,895 @@
+<title>Mountline Site</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600&family=Geist:wght@400;500&family=Geist+Mono:wght@400&family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&display=swap">
+<style>
+/* Layout: Gumloop's calm system adapted to one person. Left-aligned medium-weight type, small buttons,
+   soft grey panels holding realistic UI of one example client (Oak & Ember Bakery). Light only, on purpose. */
+:root{
+  --bg:#FCFCFC;
+  --white:#FFFFFF;
+  --panel:#F4F4F5;
+  --panel-2:#ECECEE;
+  --line:#E5E6E9;
+  --line-2:#D9DADE;
+  --ink:#141518;
+  --ink-2:#575B63;
+  --ink-3:#6F737B;
+  --on-ink:#FFFFFF;
+  --green:#0F7A4A;
+  --green-soft:#E6F3EC;
+  --c-web:#4A86F0;
+  --c-map:#2E9E66;
+  --c-ads:#F0913E;
+  --c-call:#DE5B98;
+  --crust:#8A4A1E;
+  --flour:#FBF7F0;
+  --crumb:#F1E5D3;
+  --oven:#2A1A10;
+  --s-a:rgba(0,0,0,.035);
+  --s-b:rgba(0,0,0,.06);
+  --s-c:rgba(0,0,0,.14);
+  --ring:0 0 0 1px var(--line),0 1px 1px -.5px var(--s-a),0 3px 3px -1.5px var(--s-a),0 6px 6px -3px var(--s-a),0 12px 12px -6px var(--s-a);
+  --lift:0 0 0 1px var(--line),0 2px 4px -1px var(--s-b),0 16px 32px -12px var(--s-c);
+  --head:'Figtree', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sans:'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --brand:'Fraunces', Georgia, 'Times New Roman', serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-inline:16px;padding-block:0}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--c-web);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1180px;margin-inline:auto}
+section{scroll-margin-top:80px}
+
+/* ---------- type ---------- */
+h1,h2,h3{font-family:var(--head);font-weight:500;margin:0;color:var(--ink);text-wrap:balance}
+h1{font-size:clamp(34px,4.4vw,52px);line-height:1.06;letter-spacing:-.028em}
+h2{font-size:clamp(28px,3vw,38px);line-height:1.18;letter-spacing:-.025em}
+h3{font-size:19px;line-height:1.3;letter-spacing:-.012em}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-3)}
+.eyebrow svg{width:14px;height:14px}
+.lead{font-size:17px;line-height:1.6;color:var(--ink-2);max-width:46ch;margin:18px 0 0}
+.small{font-size:14px;line-height:1.5;color:var(--ink-3)}
+
+/* ---------- buttons ---------- */
+.btns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border:0;border-radius:9px;cursor:pointer;white-space:nowrap;
+  font:500 14px/1 var(--sans);letter-spacing:-.005em;transition:background-color .15s,box-shadow .15s,transform .12s var(--ease)}
+.btn:active{transform:scale(.97)}
+.btn-dark{background:var(--ink);color:var(--on-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.btn-dark:hover{background:#2A2C31}
+.btn-light{background:var(--white);color:var(--ink);box-shadow:var(--ring)}
+.btn-light:hover{background:var(--panel)}
+.btn svg{width:14px;height:14px}
+.btn-lg{height:42px;padding:0 18px;font-size:15px}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:rgba(252,252,252,.86);backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);margin-inline:-16px;padding-inline:16px;border-bottom:1px solid transparent;transition:border-color .2s}
+.nav.scrolled{border-bottom-color:var(--line)}
+.nav-in{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1180px;margin-inline:auto}
+.logo{display:flex;align-items:center;gap:8px;font:600 19px var(--head);letter-spacing:-.03em}
+.logo svg{width:22px;height:18px}
+.nav-links{display:flex;gap:28px;font-size:14px;color:var(--ink-2)}
+.nav-links a:hover{color:var(--ink)}
+
+/* ---------- the four dots (Mountline's gumballs) ---------- */
+.dots{display:flex;gap:6px;align-items:center}
+.dt{width:30px;height:30px;display:grid;place-items:center;color:var(--on-ink)}
+.dt svg{width:15px;height:15px}
+.dt.web{background:var(--c-web);border-radius:9px}
+.dt.map{background:var(--c-map);border-radius:50%}
+.dt.ads{background:var(--c-ads);border-radius:50% 50% 50% 12px}
+.dt.me{background:var(--panel-2);color:var(--ink);border-radius:50%;font:600 12px var(--head);box-shadow:inset 0 0 0 1px var(--line)}
+.dots.bob .dt{animation:bob 3.2s var(--ease) infinite}
+.dots.bob .dt:nth-child(2){animation-delay:.18s}.dots.bob .dt:nth-child(3){animation-delay:.36s}.dots.bob .dt:nth-child(4){animation-delay:.54s}
+@keyframes bob{0%,70%,100%{transform:translateY(0)}35%{transform:translateY(-4px)}}
+
+/* ---------- hero ---------- */
+.hero{padding-top:84px}
+.hero h1{margin-top:28px;max-width:17ch}
+.hero .lead{margin-top:16px}
+.hero .btns{margin-top:28px}
+.stage{position:relative;margin-top:56px;background:var(--panel);border-radius:18px;height:600px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.win{position:absolute;background:var(--white);border-radius:12px;box-shadow:var(--lift);overflow:hidden}
+.win-bar{height:34px;display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--line);background:var(--white)}
+.win-bar i{width:9px;height:9px;border-radius:50%;background:var(--line-2)}
+.win-bar i:nth-child(1){background:#F26B5B}.win-bar i:nth-child(2){background:#F5BE4F}.win-bar i:nth-child(3){background:#5CC25B}
+.win-bar span{margin-left:10px;font-size:12px;color:var(--ink-3)}
+.win-bar .url{margin:0 auto;transform:translateX(-24px);background:var(--panel);border-radius:6px;padding:3px 12px;font-size:12px;color:var(--ink-2)}
+.w-site{left:12%;top:40px;width:76%;z-index:1}
+.w-gbp{left:4%;top:330px;width:340px;z-index:2}
+.toast{position:absolute;right:5%;top:300px;z-index:3;display:flex;align-items:center;gap:10px;background:var(--white);border-radius:999px;padding:8px 14px 8px 8px;box-shadow:var(--lift);font-size:13px;white-space:nowrap}
+.toast .ti{width:26px;height:26px;border-radius:50%;background:var(--crust);color:var(--flour);display:grid;place-items:center}
+.toast .ti svg{width:13px;height:13px}
+.toast b{font-weight:500}
+.toast span{color:var(--ink-3)}
+.toast .ok{width:16px;height:16px;border-radius:50%;background:var(--green);color:var(--on-ink);display:grid;place-items:center}
+.toast .ok svg{width:10px;height:10px}
+
+/* bakery site (the example client's own brand) */
+.bk{background:var(--flour);color:var(--oven)}
+.bk-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 28px}
+.bk-logo{font:500 19px var(--brand);letter-spacing:-.01em}
+.bk-links{display:flex;gap:22px;align-items:center;font-size:13px;color:var(--crust)}
+.bk-order{background:var(--oven);color:var(--flour);padding:7px 13px;border-radius:999px;font-weight:500}
+.bk-body{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;padding:26px 28px 34px;align-items:start}
+.bk-eye{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--crust)}
+.bk h4{font:500 clamp(30px,3.6vw,48px)/1 var(--brand);letter-spacing:-.03em;margin:12px 0 0}
+.bk h4 em{font-style:italic}
+.bk p{font-size:14px;color:var(--crust);margin:14px 0 0;max-width:34ch}
+.bk-row{display:flex;gap:14px;align-items:center;margin-top:20px;font-size:13px;flex-wrap:wrap}
+.bk-row b{background:var(--crust);color:var(--flour);padding:9px 15px;border-radius:999px;font-weight:500}
+.bk-open{display:inline-flex;align-items:center;gap:7px}
+.bk-open::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+.bk-menu{background:var(--crumb);border-radius:12px;padding:16px 18px 6px}
+.bk-menu h5{margin:0 0 4px;font:500 16px var(--brand)}
+.bk-menu div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(138,74,30,.15);font-size:13px}
+.bk-menu div:last-child{border-bottom:0}
+.bk-menu span:last-child{font-variant-numeric:tabular-nums;color:var(--crust)}
+.bk-menu s{opacity:.6}
+.sold{font-size:10px;letter-spacing:.04em;color:var(--crust);border:1px solid rgba(138,74,30,.3);border-radius:999px;padding:1px 6px;margin-left:6px}
+
+/* google profile window */
+.gbp-map{height:84px;position:relative;background:
+  linear-gradient(90deg,transparent 47%,var(--white) 47%,var(--white) 52%,transparent 52%),
+  linear-gradient(0deg,transparent 42%,var(--white) 42%,var(--white) 49%,transparent 49%),
+  linear-gradient(150deg,#EFEEE9 0%,#E9EFE5 100%)}
+.gbp-map::after{content:"";position:absolute;left:49.5%;top:46%;width:14px;height:14px;border-radius:50% 50% 50% 0;background:#EA4335;transform:translate(-50%,-100%) rotate(-45deg);box-shadow:0 0 0 3px rgba(255,255,255,.85)}
+.gbp{padding:12px 14px 14px}
+.gbp b{font:500 16px var(--head);letter-spacing:-.01em;display:block}
+.gbp .meta{font-size:12px;color:var(--ink-3);margin-top:2px}
+.gbp .open{font-size:12px;margin-top:4px}
+.gbp .open em{font-style:normal;color:var(--green);font-weight:500}
+.gbp-acts{display:flex;gap:6px;margin-top:10px}
+.gbp-acts span{font-size:12px;font-weight:500;border-radius:999px;padding:5px 10px;box-shadow:inset 0 0 0 1px var(--line);color:#1A5FD0}
+.gbp-ph{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px}
+.gbp-ph i{aspect-ratio:1;border-radius:6px;background:linear-gradient(140deg,#E9D3B4,#C99766)}
+.gbp-ph i:nth-child(2){background:linear-gradient(140deg,#F3E6D2,#D9B48A)}
+.gbp-ph i:nth-child(3){background:linear-gradient(140deg,#D8C2A3,#9C6B43)}
+.gbp-ph i:nth-child(4){background:linear-gradient(140deg,#EBDDC9,#B98B5E)}
+
+/* load-in for hero visuals */
+.stage .win,.stage .toast{transition:opacity .7s var(--ease),transform .9s var(--ease)}
+.pre-stage .stage .win,.pre-stage .stage .toast{opacity:0;transform:translateY(24px)}
+.stage .w-gbp{transition-delay:.15s}.stage .toast{transition-delay:.9s}
+
+/* ---------- towns strip ---------- */
+.towns{padding-top:120px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
+.towns-grid{margin-top:36px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.town{background:var(--panel);border-radius:10px;height:84px;display:grid;place-items:center;font:500 16px var(--head);letter-spacing:-.01em;color:var(--ink-2)}
+
+/* ---------- what I do ---------- */
+.what{padding-top:140px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:start}
+.what-l{position:sticky;top:110px}
+.what-l h2{margin-top:14px}
+.what-l .btns{margin-top:26px}
+.feats{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+.feat{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--ink)}
+.feat svg{width:16px;height:16px;color:var(--ink-2);flex:none}
+.feat .soon{font-size:11px;color:var(--ink-3);margin-left:2px}
+
+.app{background:var(--white);border-radius:14px;box-shadow:var(--ring);display:grid;grid-template-columns:78px minmax(0,1fr);overflow:hidden;min-height:540px}
+.rail{border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:4px;background:var(--bg)}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border:0;background:transparent;border-radius:10px;cursor:pointer;font-size:11px;color:var(--ink-3);overflow:hidden}
+.tab .ti{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--panel-2);color:var(--ink-3);transition:all .2s}
+.tab .ti svg{width:15px;height:15px}
+.tab[aria-selected="true"]{background:var(--white);color:var(--ink);box-shadow:var(--ring)}
+.tab[aria-selected="true"] .ti{color:var(--on-ink)}
+.tab[data-k="web"][aria-selected="true"] .ti{background:var(--c-web)}
+.tab[data-k="map"][aria-selected="true"] .ti{background:var(--c-map)}
+.tab[data-k="ads"][aria-selected="true"] .ti{background:var(--c-ads)}
+.tab[data-k="call"][aria-selected="true"] .ti{background:var(--c-call)}
+.tab .prog{position:absolute;left:10px;right:10px;bottom:4px;height:2px;border-radius:2px;background:var(--line);overflow:hidden;opacity:0}
+.tab .prog i{display:block;height:100%;width:0;background:var(--ink-2)}
+.tab[aria-selected="true"] .prog{opacity:1}
+.pane{padding:22px 26px 26px;min-width:0}
+.pane-h{display:flex;align-items:flex-start;gap:12px}
+.pane-h .ti{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--on-ink);flex:none}
+.pane-h .ti svg{width:17px;height:17px}
+.pane-h h3{font-size:20px}
+.pane-h p{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
+.chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.chip{font-size:12px;padding:3px 9px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.chip.live{background:var(--green-soft);box-shadow:none;color:var(--green)}
+.chip.live::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.conv{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.who{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500}
+.av{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:600 10px var(--head);flex:none}
+.av.d{background:#F6E3CF;color:var(--crust)}
+.av.l{background:var(--ink);color:var(--on-ink)}
+.bubble{margin:8px 0 0;background:var(--panel);border-radius:10px;padding:10px 14px;font-size:14px;display:inline-block;max-width:52ch}
+.reply{margin-top:20px}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.steps li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.st-i{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--green-soft);color:var(--green)}
+.st-i svg{width:10px;height:10px}
+.steps li.wait{opacity:0;transform:translateY(4px)}
+.steps li.busy .st-i{background:transparent;border:1.5px solid var(--line-2);border-top-color:var(--ink-2);animation:spin .7s linear infinite}
+.steps li.busy .st-i svg{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result{margin-top:16px;font-size:14px;line-height:1.6;color:var(--ink);max-width:56ch;transition:opacity .4s var(--ease)}
+.result.wait{opacity:0}
+.foot-note{margin-top:10px;font-size:12px;color:var(--ink-3)}
+
+/* ---------- how it works (bento) ---------- */
+.how{padding-top:140px}
+.how-h{max-width:640px}
+.how-h .lead{max-width:52ch}
+.bento{margin-top:40px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-radius:16px;box-shadow:var(--ring);background:var(--white);overflow:hidden}
+.cell{padding:32px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:center;min-height:250px;border-top:1px solid var(--line)}
+.cell:nth-child(-n+2){border-top:0}
+.cell:nth-child(2n){border-left:1px solid var(--line)}
+.cell:first-child{background:var(--panel)}
+.cell .n{font:400 12px var(--mono);color:var(--ink-3)}
+.cell h3{margin-top:10px}
+.cell p{margin:8px 0 0;font-size:14px;color:var(--ink-2);line-height:1.55}
+.vg{display:grid;place-items:center}
+/* vignette: invite */
+.invite{width:100%;max-width:250px;background:var(--white);border-radius:12px;box-shadow:var(--lift);padding:14px}
+.invite .t{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.invite .t i{width:8px;height:8px;border-radius:2px;background:var(--c-web)}
+.invite b{display:block;font:500 15px var(--head);margin-top:8px}
+.invite .d{font-size:12px;color:var(--ink-2);margin-top:2px}
+.invite .row{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.invite .ppl{display:flex}
+.invite .ppl .av{width:22px;height:22px;border:2px solid var(--white)}
+.invite .ppl .av+.av{margin-left:-6px}
+.invite .join{font-size:12px;font-weight:500;background:#1A73E8;color:var(--on-ink);padding:5px 11px;border-radius:7px}
+/* vignette: preview link */
+.phone{width:132px;height:200px;border-radius:24px;background:var(--ink);padding:5px;box-shadow:var(--lift);position:relative}
+.phone-in{width:100%;height:100%;border-radius:19px;background:var(--flour);overflow:hidden;padding:22px 10px 10px;color:var(--oven)}
+.phone-in .pl{font:500 10px var(--brand)}
+.phone-in .ph{font:500 16px/1 var(--brand);letter-spacing:-.02em;margin-top:12px}
+.phone-in .pb{margin-top:10px;display:inline-block;background:var(--crust);color:var(--flour);font-size:8px;padding:4px 7px;border-radius:999px}
+.phone-in .pm{margin-top:10px;display:grid;gap:4px}
+.phone-in .pm i{height:6px;border-radius:3px;background:var(--crumb)}
+.phone-in .pm i:nth-child(2){width:70%}
+.ptoast{position:absolute;left:-58px;bottom:22px;background:var(--white);border-radius:10px;box-shadow:var(--lift);padding:8px 10px;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.ptoast b{font-weight:500}
+/* vignette: comments */
+.thread{width:100%;max-width:270px;display:grid;gap:10px}
+.cm{display:flex;gap:8px;align-items:flex-start}
+.cm .av{width:22px;height:22px;margin-top:2px}
+.cm p{margin:0;background:var(--white);box-shadow:var(--ring);border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.45;color:var(--ink)}
+.cm.me p{background:var(--ink);color:var(--on-ink);box-shadow:none}
+.cm .done{display:inline-flex;align-items:center;gap:4px;color:var(--green);font-weight:500}
+/* vignette: activity log */
+.log{width:100%;max-width:270px;list-style:none;margin:0;padding:0;position:relative}
+.log::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--line)}
+.log li{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;padding:7px 0;font-size:12px}
+.log li i{width:11px;height:11px;border-radius:50%;background:var(--white);box-shadow:inset 0 0 0 2px var(--line-2);position:relative}
+.log li:first-child i{box-shadow:inset 0 0 0 3px var(--green)}
+.log li span:last-child{font:400 11px var(--mono);color:var(--ink-3)}
+.log li:nth-child(3){opacity:.7}.log li:nth-child(4){opacity:.45}
+
+/* ---------- pricing ---------- */
+.pricing{padding-top:140px}
+.price-grid{margin-top:40px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.plan{background:var(--white);border-radius:14px;box-shadow:var(--ring);padding:24px;display:flex;flex-direction:column}
+.plan .dt{width:26px;height:26px}
+.plan .dt svg{width:13px;height:13px}
+.plan h3{margin-top:16px}
+.amt{margin-top:14px;font:500 28px var(--head);letter-spacing:-.02em;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.amt small{font:400 14px var(--sans);color:var(--ink-3)}
+.ph-fill{font:400 13px var(--mono);color:#9A5B12;background:#FFF6E5;border:1px dashed #E9C27A;border-radius:6px;padding:2px 8px;letter-spacing:0}
+.plan ul{list-style:none;margin:18px 0 0;padding:16px 0 0;border-top:1px solid var(--line);display:grid;gap:9px;font-size:14px;color:var(--ink-2)}
+.plan li{display:flex;gap:9px;align-items:flex-start}
+.plan li svg{width:15px;height:15px;color:var(--green);flex:none;margin-top:2px}
+.price-note{margin-top:16px;font-size:14px;color:var(--ink-3)}
+
+/* ---------- about ---------- */
+.about{padding-top:140px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}
+.portrait{background:var(--panel);border-radius:18px;aspect-ratio:5/4;position:relative;overflow:hidden;display:grid;place-items:center}
+.portrait .ph{font-size:13px;color:var(--ink-3)}
+.portrait .tag{position:absolute;left:16px;bottom:16px;background:var(--white);box-shadow:var(--lift);border-radius:12px;padding:10px 14px 10px 10px;display:flex;gap:10px;align-items:center}
+.portrait .tag .av{width:32px;height:32px;font-size:12px}
+.portrait .tag b{display:block;font:500 14px var(--head)}
+.portrait .tag span{font-size:12px;color:var(--ink-3)}
+.about .lead{max-width:48ch}
+.about .lead+.lead{margin-top:12px}
+.about .btns{margin-top:26px}
+
+/* ---------- receptionist (soon) ---------- */
+.soon-wrap{padding-top:140px}
+.soon-card{background:var(--panel);border-radius:18px;padding:40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.pill-soon{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;background:var(--white);box-shadow:var(--ring);border-radius:999px;padding:4px 10px;color:var(--ink-2)}
+.pill-soon i{width:6px;height:6px;border-radius:50%;background:var(--c-call)}
+.soon-card h2{margin-top:16px}
+.soon-card .btns{margin-top:24px}
+.call{background:var(--white);border-radius:14px;box-shadow:var(--lift);padding:16px;display:grid;gap:10px}
+.call-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-3);padding-bottom:10px;border-bottom:1px solid var(--line)}
+.call-h b{color:var(--ink);font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.call-h b i{width:7px;height:7px;border-radius:50%;background:var(--c-call)}
+.ln{font-size:13px;line-height:1.45;max-width:85%;padding:8px 11px;border-radius:10px}
+.ln.ai{background:var(--panel);justify-self:start}
+.ln.cl{background:var(--ink);color:var(--on-ink);justify-self:end}
+.sms{margin-top:4px;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);font-size:12px;color:var(--ink-2)}
+.sms b{color:var(--ink);font-weight:500;display:block}
+
+/* ---------- faq ---------- */
+.faq{padding-top:140px;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:56px}
+.qs{border-top:1px solid var(--line)}
+.qs details{border-bottom:1px solid var(--line)}
+.qs summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;font:500 17px var(--head);letter-spacing:-.01em}
+.qs summary::-webkit-details-marker{display:none}
+.qs summary svg{width:16px;height:16px;color:var(--ink-3);transition:transform .25s var(--ease);flex:none}
+.qs details[open] summary svg{transform:rotate(45deg)}
+.qs details p{margin:0 0 18px;font-size:15px;line-height:1.6;color:var(--ink-2);max-width:60ch}
+
+/* ---------- final cta + footer ---------- */
+.cta{margin-top:140px;background:var(--panel);border-radius:20px;padding:72px 24px;display:grid;justify-items:center;text-align:center}
+.cta h2{margin-top:20px;max-width:16ch}
+.cta .lead{margin-inline:auto;text-align:center}
+.cta .btns{margin-top:26px;justify-content:center}
+.cta .small{margin-top:14px}
+footer{padding:56px 0 40px;display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:32px}
+footer p{margin:10px 0 0;font-size:14px;color:var(--ink-3);max-width:36ch}
+footer h4{margin:0;font:500 13px var(--sans);color:var(--ink-3)}
+footer ul{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px;font-size:14px}
+footer a:hover{color:var(--ink-2)}
+.legal{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+
+/* ---------- scroll reveal (only for things below the first screen) ---------- */
+.rv{transition:opacity .8s var(--ease),transform .9s var(--ease)}
+.rv.hide{opacity:0;transform:translateY(18px)}
+
+/* ---------- intro ---------- */
+.intro{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;transition:background-color .5s var(--ease);animation:introFail 0s linear 2.6s forwards}
+@keyframes introFail{to{visibility:hidden;opacity:0;pointer-events:none}}
+.intro.leave{background-color:transparent;pointer-events:none}
+.intro .dots{transform-origin:0 0;transition:transform .7s cubic-bezier(.7,0,.2,1)}
+.intro .dt{transform:scale(0);transition:transform .5s cubic-bezier(.34,1.6,.64,1)}
+.intro.go .dt{transform:scale(1)}
+.intro.go .dt:nth-child(2){transition-delay:.09s}.intro.go .dt:nth-child(3){transition-delay:.18s}.intro.go .dt:nth-child(4){transition-delay:.27s}
+.intro-running .hero .dots{opacity:0}
+.intro-running .hero .ia{opacity:0;transform:translateY(10px)}
+.hero .ia{transition:opacity .7s var(--ease) calc(var(--i,0)*70ms),transform .8s var(--ease) calc(var(--i,0)*70ms)}
+
+/* ---------- polish pass ---------- */
+.announce{margin-inline:-16px;background:var(--ink);color:var(--on-ink);font-size:13px;display:flex;justify-content:center;align-items:center;gap:8px 10px;padding:9px 48px;position:relative;text-align:center;flex-wrap:wrap}
+.announce a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.4)}
+.announce a:hover{text-decoration-color:var(--on-ink)}
+.announce .pdot{width:6px;height:6px;border-radius:50%;background:var(--c-call)}
+.announce-x{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;background:transparent;color:var(--on-ink);opacity:.7;border-radius:6px;cursor:pointer;display:grid;place-items:center}
+.announce-x:hover{opacity:1;background:rgba(255,255,255,.1)}
+.announce-x svg{width:12px;height:12px}
+
+.trust{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:20px;font-size:13px;color:var(--ink-3)}
+.trust span{display:inline-flex;align-items:center;gap:6px}
+.trust svg{width:14px;height:14px;color:var(--green)}
+
+.pt{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.pt-h{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3)}
+.pt-h b{font-weight:500;color:var(--ink-2)}
+.pt-bars{display:flex;align-items:flex-end;gap:3px;height:38px;margin-top:8px}
+.pt-bars i{flex:1;background:#C9DDF8;border-radius:2px 2px 0 0;height:var(--h)}
+.pt-bars i.now{background:#1A73E8}
+.pt-x{display:flex;justify-content:space-between;font:400 9px var(--mono);color:var(--ink-3);margin-top:4px}
+
+.town{gap:4px;align-content:center}
+.town small{font:400 11px var(--mono);color:var(--ink-3);letter-spacing:.02em}
+
+.app{grid-template-rows:auto 1fr}
+.app-bar{grid-column:1/-1;height:40px;display:flex;align-items:center;gap:6px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--white);font-size:12px;color:var(--ink-3);min-width:0}
+.app-bar i{width:9px;height:9px;border-radius:50%;background:var(--line-2);flex:none}
+.app-bar .ttl{margin-left:10px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-bar .ttl b{font-weight:500;color:var(--ink)}
+.app-bar .sync{margin-left:auto;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.app-bar .sync::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+.plan ul{flex:1 0 auto}
+.plan-cta{margin-top:22px;align-self:flex-start}
+
+/* ---------- rebrand bubble ---------- */
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap}
+.rebrand{display:inline-flex;align-items:center;gap:10px;background:var(--white);border-radius:20px;padding:6px 6px 6px 14px;box-shadow:var(--ring);font-size:13px;line-height:1.35;color:var(--ink-2);
+  transform-origin:100% 50%;transition:opacity .25s var(--ease),transform .6s cubic-bezier(.34,1.56,.64,1)}
+.rebrand b{color:var(--ink);font-weight:500}
+.rebrand.rb-wait{opacity:0;transform:translateY(-6px) scale(.86);pointer-events:none}
+.rebrand.rb-out{opacity:0;transform:scale(.9);transition:opacity .2s var(--ease),transform .25s var(--ease)}
+.rb-logos{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border-radius:999px;padding:4px 9px;vertical-align:middle;margin:0 2px}
+.rb-old{display:inline-grid;color:var(--ink-3);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.rb-old svg{width:15px;height:15px}
+.rb-arrow{display:inline-grid;color:var(--ink-3);transition:opacity .25s var(--ease) .1s,transform .35s var(--ease) .1s}
+.rb-arrow svg{width:10px;height:10px}
+.rb-new{display:inline-grid;color:var(--ink);transition:transform .55s cubic-bezier(.34,1.8,.64,1) .25s,opacity .2s var(--ease) .25s}
+.rb-new svg{width:17px;height:14px}
+.rebrand.rb-pre .rb-old{opacity:1}
+.rebrand.rb-pre .rb-arrow{opacity:0;transform:translateX(-4px)}
+.rebrand.rb-pre .rb-new{opacity:0;transform:scale(.2)}
+.rebrand:not(.rb-pre) .rb-old{opacity:.55}
+.rb-x{width:26px;height:26px;border:0;border-radius:50%;background:transparent;color:var(--ink-3);cursor:pointer;display:grid;place-items:center;flex:none;transition:background-color .15s,color .15s}
+.rb-x:hover{background:var(--panel);color:var(--ink)}
+.rb-x svg{width:10px;height:10px}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  .nav-links{display:none}
+  .what,.about,.faq,.soon-card{grid-template-columns:minmax(0,1fr);gap:36px}
+  .what-l{position:static}
+  .bento{grid-template-columns:minmax(0,1fr)}
+  .cell{border-left:0!important}
+  .cell:nth-child(2){border-top:1px solid var(--line)}
+  .price-grid{grid-template-columns:minmax(0,1fr)}
+  .towns-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  footer{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  footer>div:first-child{grid-column:1/-1}
+}
+@media (max-width:760px){
+  .hero{padding-top:40px}
+  .stage{height:auto;padding:16px 12px 20px;display:flex;flex-direction:column}
+  .win,.toast{position:relative;left:auto;right:auto;top:auto;width:auto}
+  .toast{order:-1;align-self:flex-end;margin-bottom:12px;font-size:12px}
+  .toast span{display:none}
+  .w-gbp{width:84%;margin-top:-28px;margin-left:10px}
+  .bk-body{grid-template-columns:minmax(0,1fr);gap:20px;padding:16px 18px 24px}
+  .bk-nav{padding:12px 18px}
+  .bk-links>span{display:none}
+  .win-bar .url{transform:none}
+  .towns,.what,.how,.pricing,.about,.soon-wrap,.faq{padding-top:88px}
+  .towns{grid-template-columns:minmax(0,1fr)}
+  .towns-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .town{height:64px;font-size:15px}
+  .app{grid-template-columns:minmax(0,1fr);min-height:0}
+  .rail{flex-direction:row;border-right:0;border-bottom:1px solid var(--line);padding:8px}
+  .tab{flex:1}
+  .pane{padding:18px}
+  .feats{grid-template-columns:minmax(0,1fr)}
+  .cell{grid-template-columns:minmax(0,1fr);padding:24px}
+  .soon-card{padding:24px}
+  .cta{margin-top:88px;padding:56px 20px}
+  .hero .btns .btn,.cta .btns .btn{flex:1 1 auto}
+  .ptoast{left:-40px}
+}
+@media (max-width:760px){
+  .rebrand{order:-1;width:100%;transform-origin:50% 0;padding-left:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .dots.bob .dt{animation:none}
+  .rv,.stage .win,.stage .toast,.steps li,.result,.hero .ia{transition:none}
+}
+</style>
+
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="dots" id="introDots">
+    <span class="dt web"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.6"/><path d="M2.4 8h11.2M8 2.4c1.6 1.5 2.4 3.4 2.4 5.6S9.6 12.1 8 13.6C6.4 12.1 5.6 10.2 5.6 8S6.4 3.9 8 2.4Z" stroke="currentColor" stroke-width="1.4"/></svg></span>
+    <span class="dt map"><svg viewBox="0 0 16 16" fill="none"><path d="M8 14s4.6-4.1 4.6-7.6A4.6 4.6 0 0 0 3.4 6.4C3.4 9.9 8 14 8 14Z" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="6.4" r="1.6" fill="currentColor"/></svg></span>
+    <span class="dt ads"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5v3h2.2l5 3.2V3.3l-5 3.2H2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 6a2.6 2.6 0 0 1 0 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    <span class="dt me">L</span>
+  </div>
+</div>
+
+  <div class="announce" id="announce">
+    <span class="pdot" aria-hidden="true"></span>
+    <span>Early access is open for the AI receptionist.</span>
+    <a href="#early">Learn more</a>
+    <button class="announce-x" type="button" id="announceX" aria-label="Dismiss announcement"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3 3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+  </div>
+  <header class="nav" id="nav">
+    <div class="nav-in">
+      <a class="logo" href="#top"><svg viewBox="0 0 22 18" fill="none" aria-hidden="true"><path d="M1.5 16 6.8 7.6 9.6 11.2 14 2.6 20.5 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>mountline</a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#what">What I do</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#about">About</a>
+      </nav>
+      <div class="btns">
+        <button class="btn btn-dark" type="button" data-book>Book a call</button>
+      </div>
+    </div>
+  </header>
+
+<div class="wrap">
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="hero-top">
+    <div class="dots bob" id="heroDots" aria-hidden="true">
+      <span class="dt web"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.6"/><path d="M2.4 8h11.2M8 2.4c1.6 1.5 2.4 3.4 2.4 5.6S9.6 12.1 8 13.6C6.4 12.1 5.6 10.2 5.6 8S6.4 3.9 8 2.4Z" stroke="currentColor" stroke-width="1.4"/></svg></span>
+      <span class="dt map"><svg viewBox="0 0 16 16" fill="none"><path d="M8 14s4.6-4.1 4.6-7.6A4.6 4.6 0 0 0 3.4 6.4C3.4 9.9 8 14 8 14Z" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="6.4" r="1.6" fill="currentColor"/></svg></span>
+      <span class="dt ads"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5v3h2.2l5 3.2V3.3l-5 3.2H2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 6a2.6 2.6 0 0 1 0 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <span class="dt me">L</span>
+    </div>
+    <div class="rebrand rb-wait rb-pre" id="rebrand" role="status" hidden>
+      <span><b>Notice something new?</b> We changed our branding from
+        <span class="rb-logos" role="img" aria-label="the old triangle logo to the new mountain-line logo">
+          <span class="rb-old"><svg viewBox="0 0 180 180" fill="none" aria-hidden="true"><path d="M90 34 145 137H35L90 34Z" stroke="currentColor" stroke-width="11" stroke-linejoin="round"/><path d="M90 146V29" stroke="currentColor" stroke-width="14" stroke-linecap="round"/><path d="m70 57 20-28 20 28" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="rb-arrow"><svg viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 5h7M5.5 2 8.5 5l-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="rb-new"><svg viewBox="0 0 22 18" fill="none" aria-hidden="true"><path d="M1.5 16 6.8 7.6 9.6 11.2 14 2.6 20.5 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </span>!</span>
+      <button class="rb-x" type="button" id="rebrandX" aria-label="Dismiss"><svg viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2 2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+    </div>
+    <h1 class="ia" style="--i:0">Websites, Google listings &amp; ads for businesses around Keller</h1>
+    <p class="lead ia" style="--i:1">Hi, I'm Luke. I'm 15, I live in Keller, and I do all of it myself, from the first call to the day it goes live.</p>
+    <div class="btns ia" style="--i:2">
+      <button class="btn btn-dark btn-lg" type="button" data-book>Book a free 15-min call</button>
+      <a class="btn btn-light btn-lg" href="#what">See what I do</a>
+    </div>
+    <div class="trust ia" style="--i:3">
+      <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Free 15-minute call</span>
+      <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Flat price, in writing</span>
+      <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>You work with me directly</span>
+    </div>
+
+    <div class="stage" aria-label="Example: a bakery's website and Google listing made by Luke, and a new order coming in">
+      <div class="win w-site" aria-hidden="true">
+        <div class="win-bar"><i></i><i></i><i></i><span class="url">oakandember.com</span></div>
+        <div class="bk">
+          <div class="bk-nav"><span class="bk-logo">Oak &amp; Ember</span><span class="bk-links"><span>Menu</span><span>Hours</span><span>Visit</span><b class="bk-order">Order ahead</b></span></div>
+          <div class="bk-body">
+            <div>
+              <div class="bk-eye">Main St, Keller</div>
+              <h4>Fresh bread, <em>every</em> morning.</h4>
+              <p>Sourdough, rolls, and pastries, baked before sunrise. Order by 8 PM for pickup tomorrow.</p>
+              <div class="bk-row"><b>Order for pickup</b><span class="bk-open">Open today · 7 AM–3 PM</span></div>
+            </div>
+            <div class="bk-menu">
+              <h5>Today's bake</h5>
+              <div><span>Country sourdough</span><span>$9.00</span></div>
+              <div><span>Cinnamon roll</span><span>$4.50</span></div>
+              <div><span><s>Kouign-amann</s><span class="sold">Sold out</span></span><span>$5.25</span></div>
+              <div><span>Olive fougasse</span><span>$7.00</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="win w-gbp" aria-hidden="true">
+        <div class="win-bar"><i></i><i></i><i></i><span>Google Business Profile</span></div>
+        <div class="gbp-map"></div>
+        <div class="gbp">
+          <b>Oak &amp; Ember Bakery</b>
+          <div class="meta">Bakery · 214 Main St, Keller, TX</div>
+          <div class="open"><em>Open</em> · Closes 3 PM</div>
+          <div class="gbp-acts"><span>Call</span><span>Directions</span><span>Website</span><span>Order</span></div>
+          <div class="pt">
+            <div class="pt-h"><b>Popular times</b><span>Saturdays</span></div>
+            <div class="pt-bars"><i style="--h:30%"></i><i style="--h:62%"></i><i class="now" style="--h:90%"></i><i style="--h:76%"></i><i style="--h:56%"></i><i style="--h:46%"></i><i style="--h:34%"></i><i style="--h:18%"></i></div>
+            <div class="pt-x"><span>7a</span><span>9a</span><span>11a</span><span>1p</span><span>3p</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" aria-hidden="true">
+        <span class="ti"><svg viewBox="0 0 16 16" fill="none"><path d="M3 5.5h10l-.9 8H3.9Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.8 5.5V4.4a2.2 2.2 0 0 1 4.4 0v1.1" stroke="currentColor" stroke-width="1.4"/></svg></span>
+        <b>New order</b><span>Maya R. · Sat 9 AM pickup</span>
+        <span class="ok"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2 5 8.5l4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOWNS -->
+  <section class="rv" aria-labelledby="towns-h">
+    <div class="towns">
+      <h2 id="towns-h">Local work for local businesses, close enough to meet in person.</h2>
+    </div>
+    <div class="towns-grid">
+      <div class="town">Keller<small>76248</small></div><div class="town">Southlake<small>76092</small></div><div class="town">Roanoke<small>76262</small></div><div class="town">Trophy Club<small>76262</small></div><div class="town">Colleyville<small>76034</small></div><div class="town">Grapevine<small>76051</small></div>
+    </div>
+  </section>
+
+  <!-- WHAT I DO -->
+  <section class="what" id="what">
+    <div class="what-l rv">
+      <a class="eyebrow" href="#what">What I do<svg viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7.5 3.5 11 7l-3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <h2>Everything that gets you found, from one person</h2>
+      <p class="lead">You tell me what's not working. I fix it across your website, your Google listing, and your ads, and you only ever talk to me.</p>
+      <div class="btns"><button class="btn btn-dark" type="button" data-book>Book a call</button><a class="btn btn-light" href="#pricing">See pricing</a></div>
+      <div class="feats">
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none"><rect x="4.5" y="1.5" width="7" height="13" rx="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M7 12h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Built for phones first</div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none"><path d="M3 3.5h10v7H6l-3 2.5v-9.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>I write the words with you</div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none"><path d="M8 14s4.6-4.1 4.6-7.6A4.6 4.6 0 0 0 3.4 6.4C3.4 9.9 8 14 8 14Z" stroke="currentColor" stroke-width="1.3"/></svg>Google Business Profile</div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5v3h2.2l5 3.2V3.3l-5 3.2H2.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>Facebook &amp; Instagram ads</div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none"><rect x="1.8" y="4" width="12.4" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8.5" r="2.3" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 4 6.5 2.5h3L10.5 4" stroke="currentColor" stroke-width="1.3"/></svg>Photos of your place</div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none"><path d="M5.2 2.5 3.4 3a1.5 1.5 0 0 0-1 1.8c1.2 4.3 4.5 7.6 8.8 8.8a1.5 1.5 0 0 0 1.8-1l.5-1.8-2.8-1.6-1.4 1.2a8 8 0 0 1-3.7-3.7l1.2-1.4Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>AI receptionist<span class="soon">Soon</span></div>
+      </div>
+    </div>
+
+    <div class="app rv" id="app">
+      <div class="app-bar" aria-hidden="true"><i></i><i></i><i></i><span class="ttl"><b>Oak &amp; Ember</b> · Project with Luke</span><span class="sync">Up to date</span></div>
+      <div class="rail" role="tablist" aria-label="Services">
+        <button class="tab" role="tab" data-k="web" aria-selected="true" aria-controls="p-web" id="t-web"><span class="ti"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.5"/><path d="M2.4 8h11.2" stroke="currentColor" stroke-width="1.4"/></svg></span>Website<span class="prog"><i></i></span></button>
+        <button class="tab" role="tab" data-k="map" aria-selected="false" aria-controls="p-map" id="t-map"><span class="ti"><svg viewBox="0 0 16 16" fill="none"><path d="M8 14s4.6-4.1 4.6-7.6A4.6 4.6 0 0 0 3.4 6.4C3.4 9.9 8 14 8 14Z" stroke="currentColor" stroke-width="1.5"/></svg></span>Google<span class="prog"><i></i></span></button>
+        <button class="tab" role="tab" data-k="ads" aria-selected="false" aria-controls="p-ads" id="t-ads"><span class="ti"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5v3h2.2l5 3.2V3.3l-5 3.2H2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Ads<span class="prog"><i></i></span></button>
+        <button class="tab" role="tab" data-k="call" aria-selected="false" aria-controls="p-call" id="t-call"><span class="ti"><svg viewBox="0 0 16 16" fill="none"><path d="M5.2 2.5 3.4 3a1.5 1.5 0 0 0-1 1.8c1.2 4.3 4.5 7.6 8.8 8.8a1.5 1.5 0 0 0 1.8-1l.5-1.8-2.8-1.6-1.4 1.2a8 8 0 0 1-3.7-3.7l1.2-1.4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Calls<span class="prog"><i></i></span></button>
+      </div>
+
+      <div class="pane" role="tabpanel" id="p-web" aria-labelledby="t-web">
+        <div class="pane-h"><span class="ti" style="background:var(--c-web)"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.5"/><path d="M2.4 8h11.2" stroke="currentColor" stroke-width="1.4"/></svg></span><div><h3>Website</h3><p>A site that answers the questions people call to ask.</p></div></div>
+        <div class="chips"><span class="chip live">Live</span><span class="chip">oakandember.com</span><span class="chip">Example client</span></div>
+        <div class="conv">
+          <div class="who"><span class="av d">D</span>Dana · Oak &amp; Ember</div>
+          <div class="bubble">People keep calling to ask if we're open. Can the website fix that?</div>
+          <div class="reply">
+            <div class="who"><span class="av l">L</span>Luke</div>
+            <ul class="steps">
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Wrote the homepage with Dana: menu, hours, and the story</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Put today's hours at the top of every page</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Made "Order for pickup" one tap from anywhere</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Tested it on every phone in the shop</li>
+            </ul>
+            <p class="result">It's live. Hours are the first thing people see now, and pickup orders go straight to Dana's phone.</p>
+            <p class="foot-note">Dana approved every line before launch.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" role="tabpanel" id="p-map" aria-labelledby="t-map" hidden>
+        <div class="pane-h"><span class="ti" style="background:var(--c-map)"><svg viewBox="0 0 16 16" fill="none"><path d="M8 14s4.6-4.1 4.6-7.6A4.6 4.6 0 0 0 3.4 6.4C3.4 9.9 8 14 8 14Z" stroke="currentColor" stroke-width="1.5"/></svg></span><div><h3>Google listing</h3><p>What people see when they search for you on Google and Maps.</p></div></div>
+        <div class="chips"><span class="chip live">Verified</span><span class="chip">Google Business Profile</span><span class="chip">Example client</span></div>
+        <div class="conv">
+          <div class="who"><span class="av d">D</span>Dana · Oak &amp; Ember</div>
+          <div class="bubble">We don't come up when people search "bakery near me."</div>
+          <div class="reply">
+            <div class="who"><span class="av l">L</span>Luke</div>
+            <ul class="steps">
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Claimed and verified the listing</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Fixed the hours, holiday hours, and map pin</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Added photos of the shop and the bread</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Set the right categories and a weekly post</li>
+            </ul>
+            <p class="result">The listing is complete and accurate, so Google has everything it needs to show it to people nearby.</p>
+            <p class="foot-note">I keep it updated, including holiday hours.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" role="tabpanel" id="p-ads" aria-labelledby="t-ads" hidden>
+        <div class="pane-h"><span class="ti" style="background:var(--c-ads)"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5v3h2.2l5 3.2V3.3l-5 3.2H2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><div><h3>Facebook &amp; Instagram ads</h3><p>Ads that bring in orders and calls from people nearby.</p></div></div>
+        <div class="chips"><span class="chip live">Running</span><span class="chip">Thu–Sat</span><span class="chip">Example client</span></div>
+        <div class="conv">
+          <div class="who"><span class="av d">D</span>Dana · Oak &amp; Ember</div>
+          <div class="bubble">Can we get more people in on Saturdays?</div>
+          <div class="reply">
+            <div class="who"><span class="av l">L</span>Luke</div>
+            <ul class="steps">
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Made three ads from photos of the Saturday bake</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Showed them only to people within a few miles</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Kept to the weekly budget Dana picked</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Sent every order request to her phone</li>
+            </ul>
+            <p class="result">The ads run Thursday through Saturday, and Dana gets each order request as a text.</p>
+            <p class="foot-note">You set the budget. I never spend more without asking.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" role="tabpanel" id="p-call" aria-labelledby="t-call" hidden>
+        <div class="pane-h"><span class="ti" style="background:var(--c-call)"><svg viewBox="0 0 16 16" fill="none"><path d="M5.2 2.5 3.4 3a1.5 1.5 0 0 0-1 1.8c1.2 4.3 4.5 7.6 8.8 8.8a1.5 1.5 0 0 0 1.8-1l.5-1.8-2.8-1.6-1.4 1.2a8 8 0 0 1-3.7-3.7l1.2-1.4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><div><h3>AI receptionist</h3><p>Answers the calls you can't get to.</p></div></div>
+        <div class="chips"><span class="chip">Coming soon</span><span class="chip">Early access</span></div>
+        <div class="conv">
+          <div class="who"><span class="av d">D</span>Dana · Oak &amp; Ember</div>
+          <div class="bubble">I can't answer the phone with flour on my hands.</div>
+          <div class="reply">
+            <div class="who"><span class="av l">L</span>Luke</div>
+            <ul class="steps">
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Answers in the bakery's name when nobody picks up</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Takes the order or the question</li>
+              <li><span class="st-i"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5.3 4.2 7.4 8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Texts Dana a short summary</li>
+            </ul>
+            <p class="result">This one's in early access. Ask me about it on a call.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <div class="how-h rv">
+      <span class="eyebrow">How it works</span>
+      <h2 style="margin-top:14px">Four steps, and you talk to me the whole way</h2>
+    </div>
+    <div class="bento rv">
+      <div class="cell">
+        <div><span class="n">01</span><h3>We talk for 15 minutes</h3><p>On Google Meet, or I come by. You tell me what's working and what isn't.</p></div>
+        <div class="vg"><div class="invite"><div class="t"><i></i>Google Calendar</div><b>Call with Luke</b><div class="d">Tue · 4:30–4:45 PM · Google Meet</div><div class="row"><span class="ppl"><span class="av l">L</span><span class="av d">D</span></span><span class="join">Join</span></div></div></div>
+      </div>
+      <div class="cell">
+        <div><span class="n">02</span><h3>I build it, you watch on your phone</h3><p>You get a private link and see it come together as I go.</p></div>
+        <div class="vg"><div class="phone"><div class="phone-in"><div class="pl">Oak &amp; Ember</div><div class="ph">Fresh bread, every morning.</div><span class="pb">Order for pickup</span><div class="pm"><i></i><i></i></div></div><div class="ptoast"><span class="av l">L</span><span><b>Luke</b> sent a preview</span></div></div></div>
+      </div>
+      <div class="cell">
+        <div><span class="n">03</span><h3>You check every line</h3><p>Nothing goes live until you say it's right. Changes take minutes.</p></div>
+        <div class="vg"><div class="thread"><div class="cm"><span class="av d">D</span><p>Can we say we're family-owned?</p></div><div class="cm me"><span class="av l">L</span><p>Added it to the top. <span class="done">Live ✓</span></p></div></div></div>
+      </div>
+      <div class="cell">
+        <div><span class="n">04</span><h3>It goes live, and I stick around</h3><p>New hours, a new menu item, a holiday sale. Text me and it's done.</p></div>
+        <div class="vg"><ul class="log"><li><i></i><span>Added pumpkin loaf to menu</span><span>Oct 3</span></li><li><i></i><span>Updated holiday hours</span><span>Sep 28</span></li><li><i></i><span>New photos on Google</span><span>Sep 20</span></li><li><i></i><span>Site launched</span><span>Sep 12</span></li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="rv">
+      <span class="eyebrow">Pricing</span>
+      <h2 style="margin-top:14px">Simple prices, agreed before I start</h2>
+    </div>
+    <div class="price-grid rv">
+      <div class="plan"><span class="dt web"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.6"/><path d="M2.4 8h11.2" stroke="currentColor" stroke-width="1.4"/></svg></span><h3>Website</h3><div class="amt"><small>from</small><span class="ph-fill">[WEBSITE $___]</span></div>
+        <ul><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Designed and written with you</li><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Fast on every phone</li><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Changes after launch</li></ul><button class="btn btn-light plan-cta" type="button" data-book>Book a call</button></div>
+      <div class="plan"><span class="dt map"><svg viewBox="0 0 16 16" fill="none"><path d="M8 14s4.6-4.1 4.6-7.6A4.6 4.6 0 0 0 3.4 6.4C3.4 9.9 8 14 8 14Z" stroke="currentColor" stroke-width="1.6"/></svg></span><h3>Google listing</h3><div class="amt"><span class="ph-fill">[GOOGLE $___]</span><small>one time</small></div>
+        <ul><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Claimed and verified</li><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Hours, photos, and services</li><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Linked to your website</li></ul><button class="btn btn-light plan-cta" type="button" data-book>Book a call</button></div>
+      <div class="plan"><span class="dt ads"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5v3h2.2l5 3.2V3.3l-5 3.2H2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><h3>Facebook &amp; Instagram ads</h3><div class="amt"><span class="ph-fill">[ADS $___]</span><small>/ month + ad spend</small></div>
+        <ul><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Ads made from your real work</li><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Shown to people nearby</li><li><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3 6.5 11l6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>You set the budget</li></ul><button class="btn btn-light plan-cta" type="button" data-book>Book a call</button></div>
+    </div>
+    <p class="price-note rv">Every project gets a flat price in writing before anything starts.</p>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="portrait rv"><span class="ph">Your photo here</span><div class="tag"><span class="av l">L</span><span><b>Luke Nordin</b><span>Keller, Texas</span></span></div></div>
+    <div class="rv">
+      <span class="eyebrow">About</span>
+      <h2 style="margin-top:14px">You'll work with me, not a company</h2>
+      <p class="lead">I'm 15 and I live in Keller. I started building websites because most of the local places I love have sites that don't tell you if they're open.</p>
+      <p class="lead">Mountline is the studio behind the work. When you text, I'm the one who answers, and I'm the one doing the work.</p>
+      <div class="btns"><button class="btn btn-dark" type="button" data-book>Book a call</button><a class="btn btn-light" href="#">hello@mountline.dev</a></div>
+    </div>
+  </section>
+
+  <!-- RECEPTIONIST -->
+  <section class="soon-wrap" id="early">
+    <div class="soon-card rv">
+      <div>
+        <span class="pill-soon"><i></i>Coming soon</span>
+        <h2>An AI receptionist for the calls you miss</h2>
+        <p class="lead">It answers in your business's name, takes the details, and texts you a summary. It's in early access now.</p>
+        <div class="btns"><button class="btn btn-dark" type="button" data-book>Ask about early access</button></div>
+      </div>
+      <div class="call" aria-label="Example call">
+        <div class="call-h"><b><i></i>Call · 6:42 PM</b><span>After hours</span></div>
+        <div class="ln ai">Thanks for calling Oak &amp; Ember. How can I help?</div>
+        <div class="ln cl">Do you have sourdough left for tomorrow morning?</div>
+        <div class="ln ai">We do. Can I get a name for the pickup?</div>
+        <div class="sms"><span class="av d">D</span><span><b>Text to Dana</b>Maya R. wants 2 sourdough for 9 AM tomorrow. Number: (817) 555-0142</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="rv"><span class="eyebrow">Questions</span><h2 style="margin-top:14px">Things people ask me</h2></div>
+    <div class="qs rv">
+      <details open><summary>How much does it cost?<svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></summary><p>Starting prices are above. After a quick call, you get one flat price in writing before I start anything.</p></details>
+      <details><summary>How long does it take?<svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></summary><p>It depends on the project. You'll get a plan with dates on our first call.</p></details>
+      <details><summary>Do I have to write anything?<svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></summary><p>No. I ask you questions, write a draft, and you check every line.</p></details>
+      <details><summary>Can you fix my current website?<svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></summary><p>Yes. I can rebuild it or keep what's working. Send me the link and I'll take a look.</p></details>
+      <details><summary>Do you meet in person?<svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></summary><p>Around Keller, Southlake, and nearby towns, yes. Otherwise Google Meet works great.</p></details>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta rv">
+    <div class="dots bob" aria-hidden="true">
+      <span class="dt web"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.6" stroke="currentColor" stroke-width="1.6"/><path d="M2.4 8h11.2" stroke="currentColor" stroke-width="1.4"/></svg></span>
+      <span class="dt map"><svg viewBox="0 0 16 16" fill="none"><path d="M8 14s4.6-4.1 4.6-7.6A4.6 4.6 0 0 0 3.4 6.4C3.4 9.9 8 14 8 14Z" stroke="currentColor" stroke-width="1.6"/></svg></span>
+      <span class="dt ads"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5v3h2.2l5 3.2V3.3l-5 3.2H2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+      <span class="dt me">L</span>
+    </div>
+    <h2>Let's talk about your business</h2>
+    <p class="lead">Fifteen minutes, free, on Google Meet or in person. No pressure either way.</p>
+    <div class="btns"><button class="btn btn-dark btn-lg" type="button" data-book>Book a free call</button><a class="btn btn-light btn-lg" href="#">hello@mountline.dev</a></div>
+  </section>
+
+  <footer>
+    <div><a class="logo" href="#top"><svg viewBox="0 0 22 18" fill="none" aria-hidden="true"><path d="M1.5 16 6.8 7.6 9.6 11.2 14 2.6 20.5 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>mountline</a><p>Websites, Google listings, and ads for businesses around Keller. Built by Luke Nordin.</p></div>
+    <div><h4>Site</h4><ul><li><a href="#what">What I do</a></li><li><a href="#how">How it works</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#about">About</a></li></ul></div>
+    <div><h4>Contact</h4><ul><li><a href="#">hello@mountline.dev</a></li><li>Keller · Southlake · DFW</li><li><a href="#">Client login</a></li></ul></div>
+    <div class="legal"><span>© 2026 Mountline</span><span>Oak &amp; Ember is an example business.</span></div>
+  </footer>
+</div>
+
+<div class="toast-msg" id="msg" role="status" aria-live="polite" style="position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--on-ink);font-size:14px;padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:90;max-width:calc(100% - 32px)"></div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const body = document.body;
+
+  /* announcement bar */
+  const ann = $('#announce');
+  try{ if (sessionStorage.getItem('ml-ann') === '0') ann.hidden = true; }catch(e){}
+  $('#announceX').addEventListener('click', () => { ann.hidden = true; try{ sessionStorage.setItem('ml-ann','0'); }catch(e){} });
+
+  /* nav border on scroll */
+  const nav = $('#nav');
+  const onScroll = () => nav.classList.toggle('scrolled', scrollY > 8);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  /* booking stub */
+  let mt;
+  $$('[data-book]').forEach(b => b.addEventListener('click', () => {
+    const m = $('#msg'); m.textContent = 'On the live site, this opens Google Calendar booking.'; m.style.opacity = 1;
+    clearTimeout(mt); mt = setTimeout(() => m.style.opacity = 0, 2200);
+  }));
+
+  /* scroll reveal: only for things that start below the first screen */
+  const rvs = $$('.rv');
+  if (!reduce && 'IntersectionObserver' in window){
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.remove('hide'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+    rvs.forEach(el => { if (el.getBoundingClientRect().top > innerHeight){ el.classList.add('hide'); io.observe(el); } });
+  }
+
+  /* intro: the four dots pop in, then settle above the headline */
+  const intro = $('#intro'), iDots = $('#introDots'), hDots = $('#heroDots');
+  let seen = false; try{ seen = sessionStorage.getItem('ml-intro') === '1'; }catch(e){}
+  async function runIntro(){
+    body.classList.add('intro-running','pre-stage');
+    await sleep(60); intro.classList.add('go');
+    await sleep(760);
+    const a = iDots.getBoundingClientRect(), b = hDots.getBoundingClientRect();
+    iDots.style.transform = `translate(${b.left - a.left}px, ${b.top - a.top}px)`;
+    intro.classList.add('leave');
+    await sleep(420); body.classList.remove('intro-running');
+    await sleep(300); intro.hidden = true; body.classList.remove('pre-stage');
+    try{ sessionStorage.setItem('ml-intro','1'); }catch(e){}
+  }
+  intro.addEventListener('click', () => { intro.hidden = true; body.classList.remove('intro-running','pre-stage'); });
+  let introDone;
+  if (reduce || seen){ intro.hidden = true; if (!reduce){ body.classList.add('pre-stage'); requestAnimationFrame(() => requestAnimationFrame(() => body.classList.remove('pre-stage'))); } introDone = Promise.resolve(); }
+  else introDone = runIntro();
+
+  /* rebrand bubble: pops in after the intro, old mark → new mark. Prototype remembers per tab; production uses localStorage + an end date. */
+  const rb = $('#rebrand');
+  let rbSeen = false; try{ rbSeen = sessionStorage.getItem('ml-rebrand') === '1'; }catch(e){}
+  async function showRebrand(){
+    if (rbSeen) return;
+    rb.hidden = false;
+    if (reduce){ rb.classList.remove('rb-wait','rb-pre'); return; }
+    void rb.offsetWidth;
+    rb.classList.remove('rb-wait');
+    await sleep(650);
+    rb.classList.remove('rb-pre');
+  }
+  $('#rebrandX').addEventListener('click', async () => {
+    try{ sessionStorage.setItem('ml-rebrand','1'); }catch(e){}
+    if (reduce){ rb.hidden = true; return; }
+    rb.classList.add('rb-out'); await sleep(260); rb.hidden = true;
+  });
+  introDone.then(() => setTimeout(showRebrand, reduce ? 0 : 700));
+
+  /* service tabs: auto-advance, steps tick through */
+  const tabs = $$('.tab'), keys = tabs.map(t => t.dataset.k);
+  let cur = 0, timer = null, auto = true, runId = 0, inView = false;
+  const DUR = 7000;
+  async function playPane(k){
+    const id = ++runId, pane = $('#p-' + k), items = [...pane.querySelectorAll('.steps li')], res = pane.querySelector('.result');
+    if (reduce){ items.forEach(li => li.className = ''); res.classList.remove('wait'); return; }
+    items.forEach(li => li.className = 'wait'); res.classList.add('wait');
+    await sleep(350);
+    for (const li of items){ if (id !== runId) return; li.className = 'busy'; await sleep(520); if (id !== runId) return; li.className = ''; await sleep(90); }
+    if (id === runId) res.classList.remove('wait');
+  }
+  function select(i, fromUser){
+    cur = i;
+    tabs.forEach((t, j) => { t.setAttribute('aria-selected', String(j === i)); $('#p-' + keys[j]).hidden = j !== i; const bar = t.querySelector('.prog i'); bar.style.transition = 'none'; bar.style.width = '0'; });
+    if (fromUser) auto = false;
+    playPane(keys[i]);
+    clearTimeout(timer);
+    if (auto && !reduce && inView){
+      const bar = tabs[i].querySelector('.prog i');
+      requestAnimationFrame(() => { bar.style.transition = `width ${DUR}ms linear`; bar.style.width = '100%'; });
+      timer = setTimeout(() => select((cur + 1) % tabs.length), DUR);
+    }
+  }
+  tabs.forEach((t, i) => t.addEventListener('click', () => select(i, true)));
+  $('.rail').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault(); const d = (e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : -1;
+    const n = (cur + d + tabs.length) % tabs.length; select(n, true); tabs[n].focus();
+  });
+  if ('IntersectionObserver' in window){
+    new IntersectionObserver(es => { const v = es[0].isIntersecting; if (v && !inView){ inView = true; select(cur); } else if (!v){ inView = false; clearTimeout(timer); } }, { threshold: .35 }).observe($('#app'));
+  }
+})();
+</script>

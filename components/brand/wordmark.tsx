@@ -1,23 +1,41 @@
+import { figtree } from "@/app/fonts/fonts"
 import { cn } from "@/lib/utils"
 
-export function MountlineMark({ className }: { className?: string }) {
+/** The ridge mark: a five-point mountain line. Inherits color. */
+export function MountlineMark({
+  className,
+  strokeWidth = 2,
+  style,
+}: {
+  className?: string
+  strokeWidth?: number
+  style?: React.CSSProperties
+}) {
   return (
-    <svg viewBox="0 0 180 180" fill="none" aria-hidden="true" className={cn("shrink-0", className)}>
-      <path d="M90 34 145 137H35L90 34Z" stroke="currentColor" strokeWidth="9" strokeLinejoin="round" />
-      <path d="M90 146V29" stroke="currentColor" strokeWidth="12" strokeLinecap="round" />
-      <path d="m70 57 20-28 20 28" stroke="currentColor" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 22 18" fill="none" aria-hidden="true" className={cn("shrink-0", className)} style={style}>
+      <path
+        d="M1.5 16 6.8 7.6 9.6 11.2 14 2.6 20.5 16"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
 
-/** The lowercase logo lockup. Inherits color, so it works on any surface. */
-export function Wordmark({ className, size = 18 }: { className?: string; size?: number }) {
+/**
+ * The logo lockup: the mark plus live "mountline" text in Figtree 600. At the default 19px it's the
+ * spec size (mark 22×18, gap 8px, −0.03em); other sizes scale the mark and gap with the text.
+ */
+export function Wordmark({ className, size = 19 }: { className?: string; size?: number }) {
+  const scale = size / 19
   return (
     <span
-      className={cn("inline-flex items-center font-sans font-semibold leading-none", className)}
-      style={{ fontSize: size, gap: size * 0.34, letterSpacing: "-0.045em" }}
+      className={cn("inline-flex items-center leading-none", figtree.className, className)}
+      style={{ fontSize: size, fontWeight: 600, gap: 8 * scale, letterSpacing: "-0.03em" }}
     >
-      <MountlineMark className="relative -top-[0.06em] size-[1.2em]" />
+      <MountlineMark className="block" style={{ width: 22 * scale, height: 18 * scale }} />
       <span>mountline</span>
     </span>
   )

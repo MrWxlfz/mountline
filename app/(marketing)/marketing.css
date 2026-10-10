@@ -6,16 +6,58 @@
 
 /* Tokens ------------------------------------------------------------------ */
 
+/*
+  The :root block from docs/design/site-reference.html, copied verbatim apart from two things:
+  - It's scoped to the public pages (.mk, and .mk-id on /id) instead of :root, because the dashboard's
+    shadcn theme in globals.css also defines --ring (as a color) and a :root copy would override it.
+  - Font names point at the next/font variables (self-hosted files get generated family names).
+*/
+.mk,
+.mk-id {
+  --bg:#FCFCFC;
+  --white:#FFFFFF;
+  --panel:#F4F4F5;
+  --panel-2:#ECECEE;
+  --line:#E5E6E9;
+  --line-2:#D9DADE;
+  --ink:#141518;
+  --ink-2:#575B63;
+  --ink-3:#6F737B;
+  --on-ink:#FFFFFF;
+  --green:#0F7A4A;
+  --green-soft:#E6F3EC;
+  --c-web:#4A86F0;
+  --c-map:#2E9E66;
+  --c-ads:#F0913E;
+  --c-call:#DE5B98;
+  --crust:#8A4A1E;
+  --flour:#FBF7F0;
+  --crumb:#F1E5D3;
+  --oven:#2A1A10;
+  --s-a:rgba(0,0,0,.035);
+  --s-b:rgba(0,0,0,.06);
+  --s-c:rgba(0,0,0,.14);
+  --ring:0 0 0 1px var(--line),0 1px 1px -.5px var(--s-a),0 3px 3px -1.5px var(--s-a),0 6px 6px -3px var(--s-a),0 12px 12px -6px var(--s-a);
+  --lift:0 0 0 1px var(--line),0 2px 4px -1px var(--s-b),0 16px 32px -12px var(--s-c);
+  --head:var(--font-figtree), var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sans:var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --brand:var(--font-fraunces), Georgia, 'Times New Roman', serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+  color-scheme:light;
+}
+/* /id's sign-in card also uses these two (from id-reference.html). */
+.mk-id {
+  --focus:#4A86F0;
+  --err:#C2362B;
+}
+
+/* Legacy tokens for the sections not yet rebuilt. Removed with them. */
 .mk {
-  --ground: #f7f8fa;
+  --ground: #FCFCFC;
   --surface: #ffffff;
   --sunk: #eef0f3;
-  --ink: #0e0f11;
-  --ink-2: #5b616b; /* 5.9:1 on --ground */
-  --ink-3: #8a9099; /* shapes and dividers, never body text */
-  --line: rgba(0, 0, 0, 0.07);
-  --line-2: rgba(0, 0, 0, 0.12);
-  --accent: #0f7a4a; /* 5.4:1 with white text */
+  --accent: #0f7a4a;
   --accent-hover: #0c6a40;
   --accent-ink: #ffffff;
   --tint: #e7f4ec;
@@ -30,8 +72,7 @@
   --shadow-2: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -8px rgba(16, 24, 40, 0.1);
   --shadow-3: 0 1px 2px rgba(16, 24, 40, 0.05), 0 24px 56px -20px rgba(16, 24, 40, 0.22);
 
-  --sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --serif: var(--font-accent-serif), ui-serif, Georgia, serif;
+  --serif: var(--brand);
 
   --t-hero: clamp(40px, 6.2vw, 76px);
   --t-h2: clamp(32px, 4.2vw, 52px);
@@ -46,16 +87,14 @@
   --nav-h: 64px;
   --bar-h: 76px;
 
-  color-scheme: light;
   min-height: 100dvh;
-  background: var(--ground);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 @media (min-width: 640px) {
@@ -68,7 +107,7 @@
 /* The page behind the site, so iOS overscroll stays light even when the phone is in dark mode. */
 html:has(.mk),
 html:has(.mk) body {
-  background: #f7f8fa;
+  background: #FCFCFC;
   color-scheme: light;
 }
 

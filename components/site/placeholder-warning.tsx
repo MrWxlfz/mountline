@@ -5,7 +5,8 @@ import { findPlaceholders, OPTIONAL_PLACEHOLDERS } from "@/lib/placeholders"
  * before they get here (scripts/check-placeholders.mjs), so this never renders for real visitors.
  */
 export function PlaceholderWarning({ content }: { content: unknown }) {
-  if (process.env.VERCEL_ENV === "production") return null
+  // .env.local pulled from Vercel says VERCEL_ENV=production too, so `next dev` checks NODE_ENV as well.
+  if (process.env.VERCEL_ENV === "production" && process.env.NODE_ENV === "production") return null
   const missing = findPlaceholders(content).filter((item) => !OPTIONAL_PLACEHOLDERS.includes(item))
   if (!process.env.NEXT_PUBLIC_BOOKING_URL) missing.push("NEXT_PUBLIC_BOOKING_URL (env)")
   if (!missing.length) return null

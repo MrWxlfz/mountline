@@ -1,0 +1,218 @@
+<title>Mountline Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600&family=Geist:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<style>
+/* Layout: one centered column on the site's off-white ground. Mark tile, title, a single white card per step, quiet footer. Light only. */
+:root{
+  --bg:#FCFCFC;
+  --white:#FFFFFF;
+  --panel:#F4F4F5;
+  --line:#E5E6E9;
+  --line-2:#D9DADE;
+  --ink:#141518;
+  --ink-2:#575B63;
+  --ink-3:#6F737B;
+  --on-ink:#FFFFFF;
+  --green:#0F7A4A;
+  --green-soft:#E6F3EC;
+  --focus:#4A86F0;
+  --err:#C2362B;
+  --s-a:rgba(0,0,0,.035);
+  --s-b:rgba(0,0,0,.06);
+  --s-c:rgba(0,0,0,.14);
+  --ring:0 0 0 1px var(--line),0 1px 1px -.5px var(--s-a),0 3px 3px -1.5px var(--s-a),0 6px 6px -3px var(--s-a),0 12px 12px -6px var(--s-a);
+  --lift:0 0 0 1px var(--line),0 2px 4px -1px var(--s-b),0 16px 32px -12px var(--s-c);
+  --head:'Figtree', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sans:'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-inline:16px;padding-block:0}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:8px}
+
+.page{min-height:100%;max-width:1180px;margin:0 auto;display:flex;flex-direction:column}
+.top{height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:8px;font:600 19px var(--head);letter-spacing:-.03em}
+.logo svg{width:22px;height:18px}
+.top-link{font-size:14px;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.top-link:hover{color:var(--ink)}
+.top-link svg{width:13px;height:13px}
+
+main{flex:1;display:grid;place-items:center;padding-block:48px 64px}
+.col{width:100%;max-width:400px}
+.head{text-align:center;display:grid;justify-items:center}
+.tile{width:48px;height:48px;border-radius:13px;background:var(--white);box-shadow:var(--ring);display:grid;place-items:center;color:var(--ink)}
+.tile svg{width:24px;height:20px}
+h1{font:500 30px/1.15 var(--head);letter-spacing:-.025em;margin:22px 0 0;text-wrap:balance}
+.sub{margin:8px 0 0;color:var(--ink-2);font-size:15px;max-width:34ch}
+
+.card{margin-top:28px;background:var(--white);border-radius:16px;box-shadow:var(--ring);padding:24px;transition:opacity .3s var(--ease),transform .4s var(--ease)}
+.card.enter{opacity:0;transform:translateY(8px)}
+label{display:block;font-size:13px;font-weight:500;margin-bottom:8px}
+.field{position:relative}
+.field svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3);pointer-events:none}
+input[type="email"]{width:100%;height:44px;border:0;border-radius:10px;background:var(--white);box-shadow:inset 0 0 0 1px var(--line-2);padding:0 14px 0 40px;font-size:15px;transition:box-shadow .15s}
+input[type="email"]::placeholder{color:var(--ink-3)}
+input[type="email"]:hover{box-shadow:inset 0 0 0 1px var(--ink-3)}
+input[type="email"]:focus{outline:none;box-shadow:inset 0 0 0 1px var(--ink),0 0 0 4px rgba(20,21,24,.06)}
+.err{margin:8px 0 0;font-size:13px;color:var(--err)}
+.field.bad input{box-shadow:inset 0 0 0 1px var(--err)}
+
+.btn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;margin-top:14px;border:0;border-radius:10px;cursor:pointer;background:var(--ink);color:var(--on-ink);font:500 15px var(--sans);box-shadow:inset 0 1px 0 rgba(255,255,255,.12);transition:background-color .15s,transform .12s var(--ease)}
+.btn:hover{background:#2A2C31}
+.btn:active{transform:scale(.985)}
+.btn[disabled]{cursor:default;background:#2A2C31}
+.spin{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);border-top-color:var(--on-ink);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hint{margin:14px 0 0;font-size:13px;color:var(--ink-3);text-align:center}
+.alt{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:13px;color:var(--ink-2)}
+.alt button,.linkish{background:none;border:0;padding:4px 2px;cursor:pointer;color:var(--ink);font-weight:500;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}
+.alt button:hover,.linkish:hover{text-decoration-color:var(--ink)}
+
+.sent{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--ink-2)}
+.sent b{color:var(--ink);font-weight:500;word-break:break-all}
+.code{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:18px}
+.code input{width:100%;height:52px;border:0;border-radius:10px;text-align:center;font:500 20px var(--mono);box-shadow:inset 0 0 0 1px var(--line-2);background:var(--white);transition:box-shadow .15s}
+.code input:focus{outline:none;box-shadow:inset 0 0 0 1px var(--ink),0 0 0 4px rgba(20,21,24,.06)}
+.code.ok input{box-shadow:inset 0 0 0 1px var(--green);background:var(--green-soft)}
+
+.done{display:grid;justify-items:center;text-align:center;padding:8px 0 4px}
+.done .ok{width:40px;height:40px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+.done .ok svg{width:18px;height:18px}
+.done b{display:block;margin-top:12px;font:500 17px var(--head)}
+.done span{font-size:13px;color:var(--ink-3)}
+
+.below{margin-top:20px;text-align:center;font-size:13px;color:var(--ink-3)}
+.below a{color:var(--ink);font-weight:500}
+.below a:hover{text-decoration:underline;text-underline-offset:3px}
+
+footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:20px 0 28px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+footer nav{display:flex;gap:18px}
+footer a:hover{color:var(--ink)}
+
+@media (max-width:520px){
+  main{padding-block:24px 48px;place-items:start center}
+  h1{font-size:26px}
+  .card{padding:20px}
+  .code{gap:6px}
+  .code input{height:48px;font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){ .card,.btn{transition:none} .spin{animation:none} }
+</style>
+
+<div class="page">
+  <header class="top">
+    <a class="logo" href="#"><svg viewBox="0 0 22 18" fill="none" aria-hidden="true"><path d="M1.5 16 6.8 7.6 9.6 11.2 14 2.6 20.5 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>mountline</a>
+    <a class="top-link" href="#">mountline.dev<svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 9.5l5-5M5.5 4.5h4v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </header>
+
+  <main>
+    <div class="col">
+      <div class="head">
+        <span class="tile" aria-hidden="true"><svg viewBox="0 0 22 18" fill="none"><path d="M1.5 16 6.8 7.6 9.6 11.2 14 2.6 20.5 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h1 id="title">Sign in to Mountline</h1>
+        <p class="sub" id="sub">One account for your project portal and dashboard.</p>
+      </div>
+
+      <!-- step 1: email -->
+      <form class="card" id="s-email" novalidate>
+        <label for="email">Email</label>
+        <div class="field" id="emailField">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.8" y="3.2" width="12.4" height="9.6" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="m2.5 4.5 5.5 4 5.5-4" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@yourbusiness.com" value="dana@oakandember.com" aria-describedby="emailErr">
+        </div>
+        <p class="err" id="emailErr" hidden>Enter an email address like name@business.com.</p>
+        <button class="btn" type="submit" id="go">Continue</button>
+        <p class="hint">I'll email you a 6-digit code. No password needed.</p>
+        <div class="alt">Having trouble? <button type="button" id="other">Use another sign-in method</button></div>
+      </form>
+
+      <!-- step 2: code -->
+      <form class="card" id="s-code" hidden novalidate>
+        <div class="sent"><span>Code sent to <b id="sentTo">dana@oakandember.com</b></span><button class="linkish" type="button" id="edit">Edit</button></div>
+        <div class="code" id="code" role="group" aria-label="6-digit code">
+          <input inputmode="numeric" maxlength="1" aria-label="Digit 1" id="d1"><input inputmode="numeric" maxlength="1" aria-label="Digit 2" id="d2"><input inputmode="numeric" maxlength="1" aria-label="Digit 3" id="d3"><input inputmode="numeric" maxlength="1" aria-label="Digit 4" id="d4"><input inputmode="numeric" maxlength="1" aria-label="Digit 5" id="d5"><input inputmode="numeric" maxlength="1" aria-label="Digit 6" id="d6">
+        </div>
+        <button class="btn" type="submit" id="verify">Verify and sign in</button>
+        <p class="hint" id="resend">Didn't get it? You can resend in <span id="t">0:30</span>.</p>
+      </form>
+
+      <!-- step 3: signed in -->
+      <div class="card" id="s-done" hidden>
+        <div class="done"><span class="ok"><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 9.4 7.4 12.6 14 5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>You're in</b><span>Taking you to your project…</span></div>
+      </div>
+
+      <p class="below" id="below">New here? Accounts are made when we start a project. <a href="#">Book a call</a></p>
+    </div>
+  </main>
+
+  <footer>
+    <a href="#">← Back to mountline.dev</a>
+    <nav aria-label="Help"><a href="#">Privacy</a><a href="#">Support</a></nav>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const steps = { email: $('#s-email'), code: $('#s-code'), done: $('#s-done') };
+  const digits = [...document.querySelectorAll('.code input')];
+  let tick;
+
+  async function show(k){
+    Object.entries(steps).forEach(([n, el]) => { el.hidden = n !== k; });
+    const el = steps[k];
+    if (!reduce){ el.classList.add('enter'); void el.offsetWidth; el.classList.remove('enter'); }
+    $('#title').textContent = k === 'email' ? 'Sign in to Mountline' : k === 'code' ? 'Check your email' : 'Welcome back';
+    $('#sub').textContent = k === 'email' ? 'One account for your project portal and dashboard.' : k === 'code' ? 'Enter the 6-digit code I just sent you.' : 'Signing you in.';
+    $('#below').hidden = k !== 'email';
+  }
+
+  $('#s-email').addEventListener('submit', async e => {
+    e.preventDefault();
+    const v = $('#email').value.trim(), ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    $('#emailErr').style.color = ''; $('#emailErr').textContent = 'Enter an email address like name@business.com.';
+    $('#emailField').classList.toggle('bad', !ok); $('#emailErr').hidden = ok;
+    if (!ok){ $('#email').focus(); return; }
+    const b = $('#go'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Sending code';
+    await sleep(reduce ? 0 : 800);
+    b.disabled = false; b.textContent = 'Continue';
+    $('#sentTo').textContent = v;
+    show('code'); digits.forEach(d => d.value = ''); $('#code').classList.remove('ok');
+    if (matchMedia('(pointer: fine)').matches) digits[0].focus();
+    let s = 30; clearInterval(tick);
+    $('#resend').innerHTML = 'Didn’t get it? You can resend in <span id="t">0:30</span>.';
+    tick = setInterval(() => { s--; const t = $('#t'); if (t) t.textContent = '0:' + String(s).padStart(2, '0'); if (s <= 0){ clearInterval(tick); $('#resend').innerHTML = 'Didn’t get it? <button class="linkish" type="button">Resend code</button>'; } }, 1000);
+  });
+
+  digits.forEach((d, i) => {
+    d.addEventListener('input', () => { d.value = d.value.replace(/\D/g, '').slice(-1); if (d.value && digits[i + 1]) digits[i + 1].focus(); });
+    d.addEventListener('keydown', e => { if (e.key === 'Backspace' && !d.value && digits[i - 1]) digits[i - 1].focus(); });
+    d.addEventListener('paste', e => { const t = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6); if (!t) return; e.preventDefault(); t.split('').forEach((c, j) => { if (digits[j]) digits[j].value = c; }); (digits[t.length] || digits[5]).focus(); });
+  });
+
+  $('#s-code').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (digits.some(d => !d.value)){ digits.find(d => !d.value).focus(); return; }
+    const b = $('#verify'); b.disabled = true; b.innerHTML = '<span class="spin"></span>Verifying';
+    await sleep(reduce ? 0 : 700);
+    $('#code').classList.add('ok');
+    await sleep(reduce ? 0 : 350);
+    b.disabled = false; b.textContent = 'Verify and sign in';
+    clearInterval(tick); show('done');
+    await sleep(2200); show('email');
+  });
+
+  $('#edit').addEventListener('click', () => { clearInterval(tick); show('email'); $('#email').focus(); });
+  $('#other').addEventListener('click', () => { $('#emailErr').hidden = false; $('#emailErr').style.color = 'var(--ink-3)'; $('#emailErr').textContent = 'On the live site, this opens the other sign-in methods your workspace allows.'; });
+})();
+</script>

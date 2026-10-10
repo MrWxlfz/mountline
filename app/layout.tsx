@@ -58,21 +58,6 @@ export const metadata: Metadata = {
     title: 'Mountline',
     description: 'Websites for local businesses, with photo, video, and AI receptionists when you need them.',
   },
-  icons: {
-    icon: [
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: [
-      {
-        url: '/apple-icon.png',
-        sizes: '180x180',
-        type: 'image/png',
-      },
-    ],
-  },
   appleWebApp: {
     capable: true,
     title: 'Mountline',

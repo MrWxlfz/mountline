@@ -6,27 +6,29 @@ import { fileURLToPath } from "node:url"
 const root = fileURLToPath(new URL("../../../", import.meta.url))
 const read = (path: string) => readFile(new URL(path, `file://${root}/`), "utf8")
 
-test("the homepage, metadata, and footer describe the whole business, not only the receptionist", async () => {
-  const [homepage, page, layout, openGraph, footer] = await Promise.all([
-    read("components/mountline-homepage.tsx"),
-    read("app/page.tsx"),
-    read("app/layout.tsx"),
-    read("app/opengraph-image.tsx"),
-    read("components/homepage/site-footer.tsx"),
+test("the homepage describes the whole offer, labels its example, and claims nothing it can't back up", async () => {
+  const [content, page, hero, footer, css] = await Promise.all([
+    read("content/site.ts"),
+    read("app/(marketing)/page.tsx"),
+    read("components/site/home/hero.tsx"),
+    read("components/site/footer.tsx"),
+    read("app/(marketing)/marketing.css"),
   ])
-  // The headline may be split across elements for layout; the words must stay the same.
-  assert.match(homepage.replace(/<[^>]+>/g, ""), /A better website for the business you’ve built/)
-  assert.match(homepage, /id="websites"/)
-  assert.match(homepage, /id="capture"/)
-  assert.match(homepage, /id="receptionist"/)
-  assert.match(homepage, /Talk about your project/)
-  // Service links open the form with the right interest already chosen.
-  for (const interest of ["website", "capture", "receptionist"]) assert.match(homepage, new RegExp(`data-interest="${interest}"`))
-  assert.match(page, /Websites for Local Businesses/)
-  assert.match(layout, /Websites for local businesses/)
-  assert.match(openGraph, /A better website for the/)
-  assert.match(footer, /Websites for local businesses/)
-  assert.doesNotMatch(footer, /^\s*<p>AI receptionists for the calls/m)
+  assert.match(content, /Websites, Google listings & ads for businesses around Keller/)
+  for (const section of ["Hero", "Towns", "WhatIDo", "HowItWorks", "Pricing", "About", "ReceptionistSoon", "Faq", "FinalCta"]) {
+    assert.match(page, new RegExp(`<${section} />`), section)
+  }
+  // The example business is labeled once, in the footer, and every mockup chip says "Example client".
+  assert.match(content, /disclaimer: "Oak & Ember is an example business\."/)
+  assert.match(footer, /site\.example\.disclaimer/)
+  assert.equal((content.match(/\{ label: "Example client" \}/g) ?? []).length, 3)
+  // No stats, ratings, reviews, or client logos; the only numbers are prices still to be filled in.
+  assert.doesNotMatch(content, /\d\s?%|★|\brated\b|\breviews?\b|testimonial|trusted by|clients served/i)
+  // Prices are placeholders until Luke fills them in (the production build refuses to ship them).
+  assert.match(content, /\[WEBSITE \$___\]/)
+  // The headline is never hidden by the intro: it's painted under the overlay and only rises.
+  assert.match(hero, /<h1 className="ia"/)
+  assert.match(css, /html\[data-intro~=run\] \.mk-home \.hero h1\.ia\{opacity:1\}/)
 })
 
 test("the design example is labeled, made up, and makes no claims", async () => {

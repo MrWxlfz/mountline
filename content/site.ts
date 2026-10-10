@@ -1,5 +1,6 @@
 /**
- * Every word on the homepage lives here, so copy can change without touching components.
+ * Every word on the public site lives here, so copy can change without touching components.
+ * The homepage copy is taken word for word from docs/design/site-reference.html.
  *
  * Placeholders are written in square brackets in capitals, like the pricing below. While any remain,
  * previews and local dev show a banner listing them, and a production build on Vercel fails
@@ -9,22 +10,21 @@
 
 import { isPlaceholder } from "@/lib/placeholders"
 
-export type ServiceKey = "websites" | "google" | "ads" | "receptionist"
+/** The rebrand notice ("Notice something new?") stops showing for everyone after this date. */
+export const REBRAND_NOTICE_UNTIL = "2027-01-31"
 
-export type Service = {
+export type ServiceKey = "web" | "map" | "ads" | "call"
+
+export type ServicePane = {
   key: ServiceKey
-  label: string
+  tab: string
   title: string
-  body: string
-  includes: readonly string[]
-  extra?: string
-}
-
-export type WorkEntry = {
-  /** A real client, published with their permission. Never a made-up business. */
-  client: string
-  url?: string
-  summary: string
+  sub: string
+  chips: readonly { label: string; live?: boolean }[]
+  ask: string
+  steps: readonly string[]
+  result: string
+  footNote?: string
 }
 
 export const site = {
@@ -34,10 +34,10 @@ export const site = {
   person: {
     name: "Luke Nordin",
     firstName: "Luke",
-    // Resized from /luke-nordin.jpg (images aren't optimized at request time on this site).
-    avatar: "/images/luke/luke-192.webp",
-    photo: "/images/luke/luke-960.webp",
+    initial: "L",
+    photo: "/luke-nordin.jpg",
     photoAlt: "Luke Nordin, outdoors in a blue checked jacket",
+    town: "Keller, Texas",
   },
 
   contact: {
@@ -48,135 +48,319 @@ export const site = {
     bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL ?? "",
   },
 
+  // The example business in every mockup. Labeled in the footer; never presented as a client.
+  example: {
+    business: "Oak & Ember",
+    disclaimer: "Oak & Ember is an example business.",
+  },
+
+  announce: {
+    text: "Early access is open for the AI receptionist.",
+    link: "Learn more",
+    href: "#early",
+    dismiss: "Dismiss announcement",
+  },
+
+  rebrand: {
+    lead: "Notice something new?",
+    text: "We changed our branding from",
+    logosLabel: "the old triangle logo to the new mountain-line logo",
+    dismiss: "Dismiss",
+  },
+
   nav: [
-    { href: "#what-i-do", label: "What I do" },
-    { href: "#how-it-works", label: "How it works" },
+    { href: "#what", label: "What I do" },
+    { href: "#how", label: "How it works" },
     { href: "#pricing", label: "Pricing" },
     { href: "#about", label: "About" },
   ],
 
   cta: {
     book: "Book a call",
-    bookLong: "Book a free 15-min call",
-    text: "Text me",
-    email: "Email me",
   },
 
   hero: {
-    greeting: "Hey, I’m Luke. I’m 15 and I live in Keller.",
-    titleStart: "I build websites for businesses around",
-    titleAccent: "Keller.",
-    titleSecond: "And I make sure people nearby can actually find you.",
-    sub: "Websites, Google Business Profiles, and Facebook and Instagram ads for local businesses. Based in Keller, working across DFW.",
-    // The fictional business that builds itself in the hero phone. Each vignette on the page uses its own.
-    demo: {
-      business: "Oak & Ember Bakery",
-      tagline: "Fresh bread every morning",
-      hours: "Open today · 7 AM–3 PM",
-      call: "Call now",
-      directions: "Directions",
-      menu: ["Sourdough", "Cinnamon rolls"],
+    title: "Websites, Google listings & ads for businesses around Keller",
+    lead: "Hi, I'm Luke. I'm 15, I live in Keller, and I do all of it myself, from the first call to the day it goes live.",
+    book: "Book a free 15-min call",
+    secondary: { label: "See what I do", href: "#what" },
+    trust: ["Free 15-minute call", "Flat price, in writing", "You work with me directly"],
+    stageLabel: "Example: a bakery's website and Google listing made by Luke, and a new order coming in",
+    site: {
+      url: "oakandember.com",
+      logo: "Oak & Ember",
+      links: ["Menu", "Hours", "Visit"],
+      order: "Order ahead",
+      eyebrow: "Main St, Keller",
+      headlineStart: "Fresh bread, ",
+      headlineEm: "every",
+      headlineEnd: " morning.",
+      body: "Sourdough, rolls, and pastries, baked before sunrise. Order by 8 PM for pickup tomorrow.",
+      pickup: "Order for pickup",
+      open: "Open today · 7 AM–3 PM",
+      menuTitle: "Today's bake",
+      menu: [
+        { item: "Country sourdough", price: "$9.00" },
+        { item: "Cinnamon roll", price: "$4.50" },
+        { item: "Kouign-amann", price: "$5.25", soldOut: true },
+        { item: "Olive fougasse", price: "$7.00" },
+      ],
+      soldOut: "Sold out",
     },
+    google: {
+      bar: "Google Business Profile",
+      name: "Oak & Ember Bakery",
+      meta: "Bakery · 214 Main St, Keller, TX",
+      open: "Open",
+      closes: " · Closes 3 PM",
+      actions: ["Call", "Directions", "Website", "Order"],
+      popular: "Popular times",
+      day: "Saturdays",
+      bars: [
+        { h: 30 },
+        { h: 62 },
+        { h: 90, now: true },
+        { h: 76 },
+        { h: 56 },
+        { h: 46 },
+        { h: 34 },
+        { h: 18 },
+      ],
+      hours: ["7a", "9a", "11a", "1p", "3p"],
+    },
+    toast: { title: "New order", detail: "Maya R. · Sat 9 AM pickup" },
   },
 
-  services: {
-    title: "What I do",
-    intro: "Three things that help local businesses get found and get calls. You can pick one or all three.",
+  towns: {
+    title: "Local work for local businesses, close enough to meet in person.",
     items: [
+      { name: "Keller", zip: "76248" },
+      { name: "Southlake", zip: "76092" },
+      { name: "Roanoke", zip: "76262" },
+      { name: "Trophy Club", zip: "76262" },
+      { name: "Colleyville", zip: "76034" },
+      { name: "Grapevine", zip: "76051" },
+    ],
+  },
+
+  what: {
+    eyebrow: "What I do",
+    title: "Everything that gets you found, from one person",
+    lead: "You tell me what's not working. I fix it across your website, your Google listing, and your ads, and you only ever talk to me.",
+    secondary: { label: "See pricing", href: "#pricing" },
+    feats: [
+      { icon: "phone", label: "Built for phones first" },
+      { icon: "chat", label: "I write the words with you" },
+      { icon: "pin", label: "Google Business Profile" },
+      { icon: "ads", label: "Facebook & Instagram ads" },
+      { icon: "camera", label: "Photos of your place" },
+      { icon: "call", label: "AI receptionist", soon: "Soon" },
+    ],
+    app: {
+      title: "Oak & Ember",
+      subtitle: " · Project with Luke",
+      sync: "Up to date",
+      railLabel: "Services",
+      client: "Dana · Oak & Ember",
+      clientInitial: "D",
+    },
+    panes: [
       {
-        key: "websites",
-        label: "Websites",
-        title: "A website that works on a phone.",
-        body: "I design, write, and build your site from scratch. It loads fast, looks right on a phone, and makes it easy to call or book. We write the words together, so it sounds like you.",
-        includes: ["Designed and built for your business", "Written with you, in plain words", "A clear Call or Book button on every page"],
-        // TODO(luke): confirm still offered
-        extra: "I can shoot photos of your place too.",
+        key: "web",
+        tab: "Website",
+        title: "Website",
+        sub: "A site that answers the questions people call to ask.",
+        chips: [{ label: "Live", live: true }, { label: "oakandember.com" }, { label: "Example client" }],
+        ask: "People keep calling to ask if we're open. Can the website fix that?",
+        steps: [
+          "Wrote the homepage with Dana: menu, hours, and the story",
+          "Put today's hours at the top of every page",
+          "Made \"Order for pickup\" one tap from anywhere",
+          "Tested it on every phone in the shop",
+        ],
+        result: "It's live. Hours are the first thing people see now, and pickup orders go straight to Dana's phone.",
+        footNote: "Dana approved every line before launch.",
       },
       {
-        key: "google",
-        label: "Google Business Profile",
-        title: "Show up when people nearby search.",
-        body: "When someone searches “dog groomer near me,” Google shows a map and a short list of businesses. I set up or clean up your profile so the right hours, photos, and services are there when they find you.",
-        includes: ["Hours, services, and categories set right", "Photos and regular posts", "A direct link for customers to leave a review"],
+        key: "map",
+        tab: "Google",
+        title: "Google listing",
+        sub: "What people see when they search for you on Google and Maps.",
+        chips: [{ label: "Verified", live: true }, { label: "Google Business Profile" }, { label: "Example client" }],
+        ask: "We don't come up when people search \"bakery near me.\"",
+        steps: [
+          "Claimed and verified the listing",
+          "Fixed the hours, holiday hours, and map pin",
+          "Added photos of the shop and the bread",
+          "Set the right categories and a weekly post",
+        ],
+        result: "The listing is complete and accurate, so Google has everything it needs to show it to people nearby.",
+        footNote: "I keep it updated, including holiday hours.",
       },
       {
         key: "ads",
-        label: "Facebook & Instagram ads",
-        title: "Ads that bring in calls, not just likes.",
-        body: "Simple local campaigns shown to people in your area. I write and design the ads, keep an eye on them, and tell you plainly what’s working.",
-        includes: ["Shown only to people near you", "Ads I write and design for you", "A short plain-English update every month"],
+        tab: "Ads",
+        title: "Facebook & Instagram ads",
+        sub: "Ads that bring in orders and calls from people nearby.",
+        chips: [{ label: "Running", live: true }, { label: "Thu–Sat" }, { label: "Example client" }],
+        ask: "Can we get more people in on Saturdays?",
+        steps: [
+          "Made three ads from photos of the Saturday bake",
+          "Showed them only to people within a few miles",
+          "Kept to the weekly budget Dana picked",
+          "Sent every order request to her phone",
+        ],
+        result: "The ads run Thursday through Saturday, and Dana gets each order request as a text.",
+        footNote: "You set the budget. I never spend more without asking.",
       },
-    ] satisfies Service[],
-    receptionist: {
-      label: "Coming soon",
-      title: "An AI receptionist for after hours.",
-      body: "It answers when you can’t, takes down what the caller needs, and texts you the details. You never miss a call again.",
-      earlyAccess: "Ask me about early access",
-      peek: "Have the password? Take a look",
-      href: "/receptionist",
-    },
+      {
+        key: "call",
+        tab: "Calls",
+        title: "AI receptionist",
+        sub: "Answers the calls you can't get to.",
+        chips: [{ label: "Coming soon" }, { label: "Early access" }],
+        ask: "I can't answer the phone with flour on my hands.",
+        steps: [
+          "Answers in the bakery's name when nobody picks up",
+          "Takes the order or the question",
+          "Texts Dana a short summary",
+        ],
+        result: "This one's in early access. Ask me about it on a call.",
+      },
+    ] satisfies ServicePane[],
   },
 
-  steps: {
-    title: "How it works",
-    items: [
-      { title: "We talk for 15 minutes.", body: "On Google Meet, or I come by. You tell me about your business and what isn’t working." },
-      { title: "I build it. You watch it come together.", body: "You get a link to check it on your phone while I work, and you read every line before anything goes live." },
-      { title: "It goes live, and I stick around.", body: "Need a change after launch, or help with something? You reach me directly." },
+  how: {
+    eyebrow: "How it works",
+    title: "Four steps, and you talk to me the whole way",
+    steps: [
+      {
+        n: "01",
+        title: "We talk for 15 minutes",
+        body: "On Google Meet, or I come by. You tell me what's working and what isn't.",
+      },
+      {
+        n: "02",
+        title: "I build it, you watch on your phone",
+        body: "You get a private link and see it come together as I go.",
+      },
+      {
+        n: "03",
+        title: "You check every line",
+        body: "Nothing goes live until you say it's right. Changes take minutes.",
+      },
+      {
+        n: "04",
+        title: "It goes live, and I stick around",
+        body: "New hours, a new menu item, a holiday sale. Text me and it's done.",
+      },
+    ],
+    invite: { app: "Google Calendar", title: "Call with Luke", when: "Tue · 4:30–4:45 PM · Google Meet", join: "Join" },
+    preview: {
+      logo: "Oak & Ember",
+      headline: "Fresh bread, every morning.",
+      button: "Order for pickup",
+      toastName: "Luke",
+      toastText: " sent a preview",
+    },
+    thread: { ask: "Can we say we're family-owned?", reply: "Added it to the top.", done: "Live ✓" },
+    log: [
+      { what: "Added pumpkin loaf to menu", when: "Oct 3" },
+      { what: "Updated holiday hours", when: "Sep 28" },
+      { what: "New photos on Google", when: "Sep 20" },
+      { what: "Site launched", when: "Sep 12" },
     ],
   },
 
   pricing: {
-    title: "Pricing",
-    intro: "Starting prices, so you know roughly where you’ll land before we talk.",
-    items: [
-      { name: "Website", price: "[WEBSITE FROM $___]", note: "Design, writing, and build, with changes and help after launch." },
-      { name: "Google Business Profile", price: "[GOOGLE PROFILE SETUP $___]", note: "Setup or cleanup: hours, services, categories, photos, and a review link." },
-      { name: "Facebook & Instagram ads", price: "[ADS MGMT $___/mo + ad spend]", note: "I run the campaigns. Ad spend is paid straight to Meta, and you set the budget." },
-      { name: "AI receptionist", price: "[RECEPTIONIST $___/mo]", note: "Coming soon. Early access pricing for the first few businesses.", soon: true },
-    ],
-    promise: "Every project gets a flat price in writing before anything starts.",
-  },
-
-  work: {
-    title: "Recent work",
-    // Only real clients who said yes to being shown here. While this is empty, the section doesn't render.
-    items: [] as WorkEntry[],
+    eyebrow: "Pricing",
+    title: "Simple prices, agreed before I start",
+    plans: [
+      {
+        key: "web",
+        name: "Website",
+        before: "from",
+        price: "[WEBSITE $___]",
+        includes: ["Designed and written with you", "Fast on every phone", "Changes after launch"],
+      },
+      {
+        key: "map",
+        name: "Google listing",
+        price: "[GOOGLE $___]",
+        after: "one time",
+        includes: ["Claimed and verified", "Hours, photos, and services", "Linked to your website"],
+      },
+      {
+        key: "ads",
+        name: "Facebook & Instagram ads",
+        price: "[ADS $___]",
+        after: "/ month + ad spend",
+        includes: ["Ads made from your real work", "Shown to people nearby", "You set the budget"],
+      },
+    ] as readonly { key: "web" | "map" | "ads"; name: string; before?: string; price: string; after?: string; includes: readonly string[] }[],
+    note: "Every project gets a flat price in writing before anything starts.",
   },
 
   about: {
-    title: "The person you text is the person doing the work.",
-    // TODO(luke): read this through and make it sound like you.
+    eyebrow: "About",
+    title: "You'll work with me, not a company",
     body: [
-      "I’m Luke Nordin. I’m 15, I live in Keller, and I build websites for local businesses. A lot of good businesses around here are hard to find online, and fixing that is something I’m good at.",
-      "When you work with me, you talk to me directly. I design your site, write it with you, set up your Google profile, and run your ads. No hand-offs.",
+      "I'm 15 and I live in Keller. I started building websites because most of the local places I love have sites that don't tell you if they're open.",
+      "Mountline is the studio behind the work. When you text, I'm the one who answers, and I'm the one doing the work.",
     ],
-    studio: "Mountline is the studio behind the work: the systems, the invoices, and a flat price in writing, like you’d get from any business.",
+  },
+
+  receptionist: {
+    pill: "Coming soon",
+    title: "An AI receptionist for the calls you miss",
+    lead: "It answers in your business's name, takes the details, and texts you a summary. It's in early access now.",
+    cta: "Ask about early access",
+    call: {
+      label: "Example call",
+      title: "Call · 6:42 PM",
+      when: "After hours",
+      lines: [
+        { who: "ai", text: "Thanks for calling Oak & Ember. How can I help?" },
+        { who: "caller", text: "Do you have sourdough left for tomorrow morning?" },
+        { who: "ai", text: "We do. Can I get a name for the pickup?" },
+      ],
+      smsTitle: "Text to Dana",
+      sms: "Maya R. wants 2 sourdough for 9 AM tomorrow. Number: (817) 555-0142",
+    },
   },
 
   faq: {
-    title: "Questions",
+    eyebrow: "Questions",
+    title: "Things people ask me",
     items: [
-      { q: "How much does it cost?", a: "Starting prices are above. After we talk, you get one flat price in writing before I start anything." },
-      { q: "How long does it take?", a: "Most websites take [SITE TIMELINE]. A Google profile is quicker. I’ll give you a date when we agree on the price." },
-      { q: "Do I have to write the words?", a: "No. I ask you questions, write a draft, and you fix anything that doesn’t sound right. You know your business, and I know how to put it on a page." },
-      { q: "Can you redo my current site?", a: "Yes. I’ll look at what you have, keep what works, and rebuild the rest. Your domain stays yours." },
-      { q: "Do you meet in person?", a: "Yes, around Keller, Southlake, Roanoke, Trophy Club, Colleyville, and Grapevine. Otherwise we use Google Meet." },
-      { q: "What happens after I book?", a: "You get a Google Meet link by email. We talk for 15 minutes. If it’s a fit, I send a flat price in writing. If not, no hard feelings." },
+      {
+        q: "How much does it cost?",
+        a: "Starting prices are above. After a quick call, you get one flat price in writing before I start anything.",
+      },
+      { q: "How long does it take?", a: "It depends on the project. You'll get a plan with dates on our first call." },
+      { q: "Do I have to write anything?", a: "No. I ask you questions, write a draft, and you check every line." },
+      {
+        q: "Can you fix my current website?",
+        a: "Yes. I can rebuild it or keep what's working. Send me the link and I'll take a look.",
+      },
+      {
+        q: "Do you meet in person?",
+        a: "Around Keller, Southlake, and nearby towns, yes. Otherwise Google Meet works great.",
+      },
     ],
   },
 
   final: {
-    title: "Want to talk about your business?",
-    body: "Book a free 15-minute call. Google Meet, or I can come by.",
-    fallback: "Not a call person?",
-    formToggle: "Rather write it out?",
-    formIntro: "Tell me a little about your business. I’ll reply by email.",
+    title: "Let's talk about your business",
+    lead: "Fifteen minutes, free, on Google Meet or in person. No pressure either way.",
+    book: "Book a free call",
   },
 
   footer: {
-    description: "Websites, Google Business Profiles, and local ads for businesses around Keller, Texas. Built by Luke Nordin.",
-    area: ["Keller", "Southlake", "Roanoke", "Trophy Club", "Colleyville", "DFW"],
+    description: "Websites, Google listings, and ads for businesses around Keller. Built by Luke Nordin.",
+    siteTitle: "Site",
+    contactTitle: "Contact",
+    area: "Keller · Southlake · DFW",
     login: "Client login",
     loginHref: "/id",
   },
@@ -197,3 +381,8 @@ export function smsHref() {
 }
 
 export const mailtoHref = `mailto:${site.contact.email}`
+
+/** True until REBRAND_NOTICE_UNTIL has passed (the notice shows through the end of that day). */
+export function rebrandNoticeActive(now = new Date()) {
+  return now.getTime() < new Date(`${REBRAND_NOTICE_UNTIL}T23:59:59`).getTime()
+}

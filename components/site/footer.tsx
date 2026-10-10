@@ -3,27 +3,32 @@ import { Wordmark } from "@/components/brand/wordmark"
 import { mailtoHref, site } from "@/content/site"
 
 export function Footer() {
+  const { footer } = site
   return (
-    <footer className="mk-footer">
-      <div className="mk-container mk-footer__grid">
-        <div className="mk-footer__brand">
-          <Wordmark size={20} />
-          <p>{site.footer.description}</p>
-        </div>
-        <dl className="mk-footer__facts">
-          <div>
-            <dt>Email</dt>
-            <dd><a href={mailtoHref} className="mk-link">{site.contact.email}</a></dd>
-          </div>
-          <div>
-            <dt>Service area</dt>
-            <dd>{site.footer.area.join(" · ")}</dd>
-          </div>
-        </dl>
+    <footer>
+      <div>
+        <a className="logo hit" href="#top" aria-label="Mountline home"><Wordmark /></a>
+        <p>{footer.description}</p>
       </div>
-      <div className="mk-container mk-footer__bottom">
+      <div>
+        <h3>{footer.siteTitle}</h3>
+        <ul>
+          {site.nav.map((item) => (
+            <li key={item.href}><a href={item.href}>{item.label}</a></li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h3>{footer.contactTitle}</h3>
+        <ul>
+          <li><a href={mailtoHref}>{site.contact.email}</a></li>
+          <li>{footer.area}</li>
+          <li><Link href={footer.loginHref}>{footer.login}</Link></li>
+        </ul>
+      </div>
+      <div className="legal">
         <span>© {new Date().getFullYear()} {site.name}</span>
-        <Link href={site.footer.loginHref} className="mk-footer__login">{site.footer.login}</Link>
+        <span>{site.example.disclaimer}</span>
       </div>
     </footer>
   )

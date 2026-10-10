@@ -1,11 +1,20 @@
 import type { Metadata } from "next"
 import { BookingProvider } from "@/components/site/booking"
 import { Footer } from "@/components/site/footer"
-import { Hero } from "@/components/site/hero"
-import { MobileBookBar } from "@/components/site/mobile-book-bar"
+import { About } from "@/components/site/home/about"
+import { Announce } from "@/components/site/home/announce"
+import { Faq } from "@/components/site/home/faq"
+import { FinalCta } from "@/components/site/home/final-cta"
+import { Hero } from "@/components/site/home/hero"
+import { HowItWorks } from "@/components/site/home/how-it-works"
+import { Intro } from "@/components/site/home/intro"
+import { Pricing } from "@/components/site/home/pricing"
+import { ReceptionistSoon } from "@/components/site/home/receptionist-soon"
+import { Towns } from "@/components/site/home/towns"
+import { WhatIDo } from "@/components/site/home/what-i-do"
 import { Nav } from "@/components/site/nav"
 import { PlaceholderWarning } from "@/components/site/placeholder-warning"
-import { MotionRoot } from "@/components/site/reveal"
+import { RevealObserver } from "@/components/site/reveal-observer"
 import { site } from "@/content/site"
 
 export const metadata: Metadata = {
@@ -14,22 +23,32 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 }
 
+/** The homepage, section by section from docs/design/site-reference.html. */
 export default function Home() {
   return (
     <BookingProvider>
-      <MotionRoot>
+      <div className="mk-home">
+        <Intro />
         <a href="#main-content" className="mk-skip">Skip to content</a>
+        <Announce />
         <Nav />
-        <main id="main-content" tabIndex={-1}>
+        <main className="wrap" id="main-content" tabIndex={-1}>
           <Hero />
-          <section id="contact" className="mk-section">
-            <div className="mk-container"><h2 className="mk-h2">{site.final.title}</h2></div>
-          </section>
+          <Towns />
+          <WhatIDo />
+          <HowItWorks />
+          <Pricing />
+          <About />
+          <ReceptionistSoon />
+          <Faq />
+          <FinalCta />
         </main>
-        <Footer />
-        <MobileBookBar />
+        <div className="wrap">
+          <Footer />
+        </div>
+        <RevealObserver />
         <PlaceholderWarning content={site} />
-      </MotionRoot>
+      </div>
     </BookingProvider>
   )
 }

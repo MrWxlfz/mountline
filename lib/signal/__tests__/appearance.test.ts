@@ -8,7 +8,8 @@ const globals = readFileSync(join(root, "app/globals.css"), "utf8")
 const rootLayout = readFileSync(join(root, "app/layout.tsx"), "utf8")
 const dashboardLayout = readFileSync(join(root, "app/dashboard/layout.tsx"), "utf8")
 const appearanceSelector = readFileSync(join(root, "components/dashboard/appearance-selector.tsx"), "utf8")
-const homepage = readFileSync(join(root, "components/mountline-homepage.tsx"), "utf8")
+const homepage = readFileSync(join(root, "app/(marketing)/page.tsx"), "utf8")
+const marketingLayout = readFileSync(join(root, "app/(marketing)/layout.tsx"), "utf8")
 const mountlineId = readFileSync(join(root, "app/id/mountline-id-form.tsx"), "utf8")
 
 test("appearance defaults to system and uses a stable persistence key", () => {
@@ -55,10 +56,10 @@ test("authenticated preference boot runs before the dashboard shell", () => {
   assert.match(dashboardLayout, /prefers-color-scheme: dark/)
 })
 
-test("public marketing keeps its fixed design while Mountline ID offers local appearance controls", () => {
-  assert.match(homepage, /mountline-marketing/)
+test("the public site and Mountline ID are light only, with no appearance controls", () => {
+  assert.match(marketingLayout, /colorScheme: "light"/)
   assert.doesNotMatch(homepage, /AppearanceSelector/)
-  assert.match(mountlineId, /mountline-id relative/)
-  assert.match(mountlineId, /<AppearanceSelector compact syncServer=\{false\}/)
+  assert.match(mountlineId, /className="mk-id"/)
+  assert.doesNotMatch(mountlineId, /AppearanceSelector/)
   assert.match(mountlineId, /withSignUp=\{false\}/)
 })

@@ -1,6 +1,6 @@
 "use client"
 
-import { FormEvent, useMemo, useState } from "react"
+import { FormEvent, useEffect, useMemo, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react"
 import { SignIn } from "@clerk/nextjs"
 import { useSignIn } from "@clerk/nextjs/legacy"
 import type {
@@ -10,17 +10,14 @@ import type {
   SignInSecondFactor,
 } from "@clerk/nextjs/types"
 import Link from "next/link"
-import {
-  ArrowLeft,
-  ArrowRight,
-  ChevronLeft,
-  HelpCircle,
-  Loader2,
-  LockKeyhole,
-  Mail,
-} from "lucide-react"
-import { Wordmark } from "@/components/brand/wordmark"
-import { AppearanceSelector } from "@/components/dashboard/appearance-selector"
+import { MountlineMark, Wordmark } from "@/components/brand/wordmark"
+
+/*
+  Mountline ID sign-in, styled from docs/design/id-reference.html (styles in
+  app/(marketing)/marketing.css under .mk-id). The flow itself is unchanged: email first, then the
+  account's password or a one-time code, an optional second step, and Clerk's own <SignIn> as the
+  fallback for anything the custom flow can't handle.
+*/
 
 type MountlineIdFormProps = {
   redirectUrl: string
@@ -44,52 +41,45 @@ const oauthLabels: Record<string, string> = {
   oauth_x: "X",
 }
 
+const bookingHref = process.env.NEXT_PUBLIC_BOOKING_URL || "/#contact"
+
 export function MountlineIdForm({ redirectUrl, useCustomFlow }: MountlineIdFormProps) {
   return (
-    <div className="mountline-id relative flex min-h-dvh flex-col overflow-hidden bg-background text-foreground">
-      <header className="relative z-10 border-b border-border">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
-          <Link href="/" aria-label="Mountline home" className="text-foreground transition-opacity hover:opacity-75">
-            <Wordmark size={18} />
+    <div className="mk-id">
+      <div className="page">
+        <header className="top">
+          <Link href="/" aria-label="Mountline home" className="logo hit">
+            <Wordmark />
           </Link>
-          <AppearanceSelector compact syncServer={false} />
-        </div>
-      </header>
-      <main className="relative z-10 flex flex-1 items-center px-5 py-14 sm:px-8 sm:py-20">
-        <div className="mx-auto w-full max-w-[400px]">
-          <AuthIntro />
-          <section className="mt-9 rounded-lg border border-border bg-card p-5 shadow-[0_24px_60px_-24px_var(--shadow-color)] sm:p-6 motion-safe:animate-[fade-up_700ms_cubic-bezier(0.16,1,0.3,1)_120ms_both]">
-            <AuthPanelHeader />
+          <Link href="/" className="top-link hit">
+            mountline.dev
+            <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M4.5 9.5l5-5M5.5 4.5h4v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        </header>
+        <main>
+          <div className="col">
             {useCustomFlow ? (
               <CustomMountlineSignIn redirectUrl={redirectUrl} />
             ) : (
               <StableClerkSignIn redirectUrl={redirectUrl} />
             )}
-          </section>
-        </div>
-      </main>
-      <AuthFooter />
+          </div>
+        </main>
+        <AuthFooter />
+      </div>
     </div>
   )
 }
 
-function AuthIntro() {
+/** The mark tile, title, and subtitle above the card. Text swaps instantly between steps. */
+function AuthHead({ title, sub }: { title: string; sub: ReactNode }) {
   return (
-    <section className="text-center motion-safe:animate-[fade-up_700ms_cubic-bezier(0.16,1,0.3,1)_both]">
-      <p className="ml-eyebrow">Mountline ID</p>
-      <h1 className="font-display mt-4 text-balance text-[2.6rem] leading-[1.05] sm:text-5xl">Sign in to Mountline</h1>
-      <p className="mx-auto mt-4 max-w-sm text-pretty text-[15px] leading-6 text-muted-foreground">
-        One account for your team dashboard and client portal.
-      </p>
-    </section>
-  )
-}
-
-function AuthPanelHeader() {
-  return (
-    <div className="mb-5 flex items-center justify-between gap-4 border-b border-border pb-4">
-      <p className="ml-eyebrow text-foreground">Continue with email</p>
-      <LockKeyhole className="size-3.5 text-muted-foreground" aria-hidden="true" />
+    <div className="head">
+      <span className="tile" aria-hidden="true"><MountlineMark /></span>
+      <h1>{title}</h1>
+      <p className="sub">{sub}</p>
     </div>
   )
 }
@@ -106,6 +96,13 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
   const [handoffReason, setHandoffReason] = useState("")
+  // Presentation only: green code boxes, then the "You're in" card while Clerk redirects.
+  const [codeOk, setCodeOk] = useState(false)
+  const [done, setDone] = useState(false)
+  const resetPresentation = () => {
+    setCodeOk(false)
+    setDone(false)
+  }
 
   const oauthFactors = useMemo(() => {
     if (!isLoaded) return []
@@ -122,6 +119,11 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
         return false
       }
 
+      if (step === "code" || step === "secondFactor") {
+        setCodeOk(true)
+        await new Promise((resolve) => setTimeout(resolve, prefersReducedMotion() ? 0 : 350))
+      }
+      setDone(true)
       await setActive({ session: nextSignIn.createdSessionId, redirectUrl })
       return true
     }
@@ -226,6 +228,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       }
     } catch (err) {
       setError(getClerkErrorMessage(err))
+      resetPresentation()
     } finally {
       setIsSubmitting(false)
     }
@@ -249,6 +252,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       await completeIfReady(nextSignIn)
     } catch (err) {
       setError(getClerkErrorMessage(err))
+      resetPresentation()
     } finally {
       setIsSubmitting(false)
     }
@@ -272,6 +276,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       await completeIfReady(nextSignIn)
     } catch (err) {
       setError(getClerkErrorMessage(err))
+      resetPresentation()
     } finally {
       setIsSubmitting(false)
     }
@@ -295,6 +300,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       await completeIfReady(nextSignIn)
     } catch (err) {
       setError(getClerkErrorMessage(err))
+      resetPresentation()
     } finally {
       setIsSubmitting(false)
     }
@@ -312,6 +318,7 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
       })
     } catch (err) {
       setError(getClerkErrorMessage(err))
+      resetPresentation()
       setIsSubmitting(false)
     }
   }
@@ -322,25 +329,70 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
     setCode("")
     setSafeIdentifier("")
     setHandoffReason("")
+    resetPresentation()
     setStep("identifier")
   }
 
+  const destination = redirectUrl.includes("redirect_url=") ? "your project" : "Mountline"
+
   if (!isLoaded) {
     return (
-      <div className="flex min-h-[200px] items-center justify-center text-sm text-muted-foreground">
-        <Loader2 className="mr-2 size-4 animate-spin" />
-        Loading Mountline ID
-      </div>
+      <>
+        <AuthHead title="Sign in to Mountline" sub="One account for your project portal and dashboard." />
+        <div className="card" aria-busy="true">
+          <div className="loading"><span className="spin dark" aria-hidden="true" />Loading Mountline ID</div>
+        </div>
+      </>
     )
   }
 
+  if (done) {
+    return (
+      <>
+        <AuthHead title="Welcome back" sub="Signing you in." />
+        <div className="card" role="status">
+          <div className="done">
+            <span className="ok">
+              <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M4 9.4 7.4 12.6 14 5.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <b>You&apos;re in</b>
+            <span>Taking you to {destination}…</span>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const sentTo = safeIdentifier || email
+  const heads: Record<AuthStep, { title: string; sub: ReactNode }> = {
+    identifier: { title: "Sign in to Mountline", sub: "One account for your project portal and dashboard." },
+    password: { title: "Enter your password", sub: "Use the password for your Mountline account." },
+    code: {
+      title: codeStrategy === "phone_code" ? "Check your phone" : "Check your email",
+      sub: codeStrategy === "phone_code" ? "Enter the 6-digit code sent to your phone." : "Enter the 6-digit code I just sent you.",
+    },
+    secondFactor: {
+      title: "One more step",
+      sub: secondFactorStrategy === "totp"
+        ? "Enter the code from your authenticator app."
+        : secondFactorStrategy === "backup_code"
+          ? "Enter one of your backup codes."
+          : `Enter the code sent to ${sentTo}.`,
+    },
+    unsupported: { title: "Use another sign-in method", sub: "This account needs a step the quick sign-in can't do." },
+  }
+
   return (
-    <div className="space-y-5">
+    <>
+      <AuthHead {...heads[step]} />
+
       {step === "identifier" && (
-        <form onSubmit={handleIdentifierSubmit} className="space-y-4">
-          <FieldLabel htmlFor="mountline-id-email">Email</FieldLabel>
-          <div className="relative">
-            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <form className="card" key="identifier" onSubmit={handleIdentifierSubmit} noValidate>
+          <label htmlFor="mountline-id-email">Email</label>
+          <div className={error ? "field bad" : "field"}>
+            <MailIcon />
             <input
               id="mountline-id-email"
               name="email"
@@ -349,258 +401,302 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
               inputMode="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className={inputClassName("pl-10")}
-              placeholder="name@example.com"
+              placeholder="you@yourbusiness.com"
               disabled={isSubmitting}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "mountline-id-error" : undefined}
             />
           </div>
           <ErrorMessage message={error} />
-          <SubmitButton loading={isSubmitting}>Continue</SubmitButton>
+          <SubmitButton loading={isSubmitting} loadingLabel="Checking">Continue</SubmitButton>
+          <p className="hint">Next, you&apos;ll use your password or a one-time code.</p>
+          <OauthButtons factors={oauthFactors} disabled={isSubmitting} onSelect={handleOauth} />
+          <div className="alt">
+            Having trouble? <Link className="linkish hit" href={fallbackHref}>Use another sign-in method</Link>
+          </div>
         </form>
       )}
 
       {step === "password" && (
-        <form onSubmit={handlePasswordSubmit} className="space-y-4">
-          <StepBackButton onClick={goBackToIdentifier} disabled={isSubmitting} label={email} />
-          <FieldLabel htmlFor="mountline-id-password">Password</FieldLabel>
-          <input
-            id="mountline-id-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={inputClassName()}
-            disabled={isSubmitting}
-          />
+        <form className="card" key="password" onSubmit={handlePasswordSubmit} noValidate>
+          <SentTo label="Signing in as" value={email} onEdit={goBackToIdentifier} disabled={isSubmitting} />
+          <label htmlFor="mountline-id-password" className="spaced">Password</label>
+          <div className={error ? "field bad" : "field"}>
+            <input
+              id="mountline-id-password"
+              className="plain"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={isSubmitting}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "mountline-id-error" : undefined}
+            />
+          </div>
           <ErrorMessage message={error} />
-          <SubmitButton loading={isSubmitting}>Sign in</SubmitButton>
+          <SubmitButton loading={isSubmitting} loadingLabel="Signing in">Sign in</SubmitButton>
         </form>
       )}
 
       {step === "code" && (
-        <form onSubmit={handleCodeSubmit} className="space-y-4">
-          <StepBackButton onClick={goBackToIdentifier} disabled={isSubmitting} label={email} />
-          <p className="text-sm leading-6 text-muted-foreground">
-            Enter the code sent to {safeIdentifier || email}.
-          </p>
-          <FieldLabel htmlFor="mountline-id-code">Verification code</FieldLabel>
-          <input
-            id="mountline-id-code"
-            name="one-time-code"
-            type="text"
-            autoComplete="one-time-code"
-            inputMode="numeric"
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            className={inputClassName("tracking-[0.28em]")}
-            disabled={isSubmitting}
-          />
+        <form className="card" key="code" onSubmit={handleCodeSubmit} noValidate>
+          <SentTo label="Code sent to" value={sentTo} onEdit={goBackToIdentifier} disabled={isSubmitting} />
+          <CodeBoxes value={code} onChange={setCode} disabled={isSubmitting} ok={codeOk} invalid={!!error} />
           <ErrorMessage message={error} />
-          <SubmitButton loading={isSubmitting}>Verify code</SubmitButton>
+          <SubmitButton loading={isSubmitting} loadingLabel="Verifying">Verify and sign in</SubmitButton>
+          <p className="hint">Didn&apos;t get it? Check your spam folder, or edit the address above.</p>
         </form>
       )}
 
       {step === "secondFactor" && (
-        <form onSubmit={handleSecondFactorSubmit} className="space-y-4">
-          <StepBackButton onClick={goBackToIdentifier} disabled={isSubmitting} label={email} />
-          <p className="text-sm leading-6 text-muted-foreground">
-            Enter the additional verification code
-            {safeIdentifier ? ` sent to ${safeIdentifier}` : ""}.
-          </p>
-          <FieldLabel htmlFor="mountline-id-mfa-code">Security code</FieldLabel>
-          <input
-            id="mountline-id-mfa-code"
-            name="one-time-code"
-            type="text"
-            autoComplete="one-time-code"
-            inputMode="numeric"
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            className={inputClassName("tracking-[0.28em]")}
-            disabled={isSubmitting}
-          />
+        <form className="card" key="secondFactor" onSubmit={handleSecondFactorSubmit} noValidate>
+          <SentTo label="Signing in as" value={email} onEdit={goBackToIdentifier} disabled={isSubmitting} />
+          {secondFactorStrategy === "backup_code" ? (
+            <>
+              <label htmlFor="mountline-id-mfa-code" className="spaced">Backup code</label>
+              <div className={error ? "field bad" : "field"}>
+                <input
+                  id="mountline-id-mfa-code"
+                  className="plain"
+                  name="one-time-code"
+                  type="text"
+                  autoComplete="one-time-code"
+                  value={code}
+                  onChange={(event) => setCode(event.target.value)}
+                  disabled={isSubmitting}
+                  aria-invalid={error ? true : undefined}
+                />
+              </div>
+            </>
+          ) : (
+            <CodeBoxes value={code} onChange={setCode} disabled={isSubmitting} ok={codeOk} invalid={!!error} />
+          )}
           <ErrorMessage message={error} />
-          <SubmitButton loading={isSubmitting}>Continue</SubmitButton>
+          <SubmitButton loading={isSubmitting} loadingLabel="Verifying">Continue</SubmitButton>
         </form>
       )}
 
       {step === "unsupported" && (
-        <div className="space-y-4">
-          <StepBackButton onClick={goBackToIdentifier} disabled={isSubmitting} label="Try another account" />
-          <div className="rounded-md border border-border bg-surface-muted p-4">
-            <p className="text-sm font-medium text-foreground">Use the stable sign-in flow</p>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              {handoffReason || "This account requires an additional Clerk-managed step."}
-            </p>
-          </div>
-          <Link href={fallbackHref} className={buttonClassName}>
-            Continue with stable sign-in
-            <ArrowRight className="size-4" />
-          </Link>
+        <div className="card" key="unsupported">
+          <SentTo label="Signing in as" value={email || "another account"} onEdit={goBackToIdentifier} disabled={isSubmitting} />
+          <p className="note">{handoffReason || "This account requires an additional Clerk-managed step."}</p>
+          <Link href={fallbackHref} className="btn">Continue with the standard sign-in</Link>
         </div>
       )}
 
-      {oauthFactors.length > 0 && step === "identifier" && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="ml-eyebrow">Or continue with</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-          <div className="grid gap-2">
-            {oauthFactors.map((factor) => (
-              <button
-                key={factor.strategy}
-                type="button"
-                onClick={() => handleOauth(factor.strategy)}
-                disabled={isSubmitting}
-                className="ml-pill ml-pill-line w-full min-h-11"
-              >
-                {oauthLabels[factor.strategy] || factor.strategy.replace("oauth_", "")}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <p className="text-xs leading-5 text-muted-foreground">
-        Mountline ID uses the sign-in methods configured for this workspace.
-        <Link href={fallbackHref} className="ml-1 text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
-          Use another sign-in method.
-        </Link>
-      </p>
-    </div>
+      {step === "identifier" ? (
+        <p className="below">
+          New here? Accounts are made when we start a project. <a href={bookingHref}>Book a call</a>
+        </p>
+      ) : null}
+    </>
   )
 }
 
 function StableClerkSignIn({ redirectUrl }: { redirectUrl: string }) {
   return (
-    <div className="mountline-id-auth">
-      <SignIn
-        path="/id"
-        routing="path"
-        forceRedirectUrl={redirectUrl}
-        fallbackRedirectUrl={redirectUrl}
-        withSignUp={false}
-        signUpUrl={undefined}
-        appearance={{
-          variables: {
-            borderRadius: "8px",
-            colorBackground: "transparent",
-            colorDanger: "var(--error)",
-            colorPrimary: "var(--foreground)",
-            fontFamily: "var(--font-sans), system-ui, sans-serif",
-          },
-          elements: {
-            rootBox: "w-full [&_*]:font-sans",
-            card: "!w-full !bg-transparent !p-0 !shadow-none",
-            headerTitle: "!hidden",
-            headerSubtitle: "!hidden",
-            socialButtonsBlockButton:
-              "!h-11 !rounded-full !border !border-border-strong !bg-transparent !text-foreground !shadow-none transition-colors hover:!bg-hover",
-            socialButtonsBlockButtonText: "!text-sm !font-medium !text-foreground",
-            formFieldLabel:
-              "!mb-2 !font-mono !text-[11px] !font-normal !uppercase !tracking-[0.08em] !text-muted-foreground",
-            formFieldInput:
-              "!h-11 !rounded-lg !border !border-input !bg-input-background !px-3.5 !text-base !text-foreground !shadow-none placeholder:!text-muted-foreground hover:!border-border-strong focus:!border-muted-foreground focus:!ring-[3px] focus:!ring-[rgb(228_168_83/0.2)]",
-            formFieldInputGroup:
-              "!h-11 !rounded-lg !border !border-input !bg-input-background",
-            formButtonPrimary:
-              "!h-11 !rounded-full !bg-foreground !font-mono !text-[11px] !font-medium !uppercase !tracking-[0.08em] !text-background !shadow-none transition-opacity hover:!opacity-90",
-            footerAction: "!hidden",
-            footerActionLink: "!font-medium !text-foreground",
-            identityPreview:
-              "!rounded-lg !border !border-border !bg-surface-muted !text-foreground",
-            alert:
-              "!rounded-lg !border !border-error-border !bg-error-soft !text-error-foreground",
-            dividerLine: "!bg-border",
-            dividerText: "!font-mono !text-[11px] !uppercase !tracking-[0.08em] !text-muted-foreground",
-          },
-        }}
-      />
-    </div>
+    <>
+      <AuthHead title="Sign in to Mountline" sub="One account for your project portal and dashboard." />
+      <div className="card clerk-card">
+        <SignIn
+          path="/id"
+          routing="path"
+          forceRedirectUrl={redirectUrl}
+          fallbackRedirectUrl={redirectUrl}
+          withSignUp={false}
+          signUpUrl={undefined}
+          appearance={{
+            variables: {
+              borderRadius: "10px",
+              colorBackground: "#FFFFFF",
+              colorDanger: "#C2362B",
+              colorPrimary: "#141518",
+              colorForeground: "#141518",
+              colorMutedForeground: "#575B63",
+              colorInput: "#FFFFFF",
+              colorInputForeground: "#141518",
+              colorNeutral: "#141518",
+              fontFamily: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
+              fontSize: "15px",
+            },
+            elements: {
+              rootBox: "clerk-root",
+              cardBox: "clerk-cardbox",
+              card: "clerk-inner",
+              header: "clerk-header",
+              formFieldLabel: "clerk-label",
+              formFieldInput: "clerk-input",
+              formButtonPrimary: "clerk-button",
+              socialButtonsBlockButton: "clerk-social",
+              footer: "clerk-footer",
+              footerAction: "clerk-hidden",
+              identityPreview: "clerk-identity",
+              alert: "clerk-alert",
+              dividerLine: "clerk-divider",
+            },
+          }}
+        />
+      </div>
+    </>
   )
 }
 
 function AuthFooter() {
   return (
-    <footer className="relative z-10 border-t border-border">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-5 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <Link href="/" className="inline-flex items-center gap-2 transition-colors hover:text-foreground">
-          <ArrowLeft className="size-3.5" />
-          Back to mountline.dev
-        </Link>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <a href="mailto:hello@mountline.dev?subject=Privacy%20request" className="transition-colors hover:text-foreground">
-            Privacy
-          </a>
-          <a
-            href="mailto:hello@mountline.dev?subject=Mountline%20ID%20support"
-            className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
-          >
-            <HelpCircle className="size-3.5" />
-            Support
-          </a>
-        </div>
-      </div>
+    <footer>
+      <Link href="/" className="hit">← Back to mountline.dev</Link>
+      <nav aria-label="Help">
+        <a className="hit" href="mailto:hello@mountline.dev?subject=Privacy%20request">Privacy</a>
+        <a className="hit" href="mailto:hello@mountline.dev?subject=Mountline%20ID%20support">Support</a>
+      </nav>
     </footer>
   )
 }
 
-function FieldLabel({ children, htmlFor }: { children: string; htmlFor: string }) {
+function MailIcon() {
   return (
-    <label htmlFor={htmlFor} className="ml-eyebrow block">
-      {children}
-    </label>
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="1.8" y="3.2" width="12.4" height="9.6" rx="2" stroke="currentColor" strokeWidth="1.3" />
+      <path d="m2.5 4.5 5.5 4 5.5-4" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
   )
 }
 
-function SubmitButton({
-  children,
-  loading,
-}: {
-  children: string
-  loading: boolean
-}) {
+function SentTo({ label, value, onEdit, disabled }: { label: string; value: string; onEdit: () => void; disabled: boolean }) {
   return (
-    <button type="submit" disabled={loading} className={buttonClassName}>
-      {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-      {children}
-    </button>
+    <div className="sent">
+      <span>{label} <b>{value}</b></span>
+      <button className="linkish hit" type="button" onClick={onEdit} disabled={disabled}>Edit</button>
+    </div>
   )
 }
 
-function StepBackButton({
+/**
+ * Six boxes for a 6-digit code (choreography.md §6): typing advances, backspace in an empty box goes
+ * back, pasting (or the phone's one-time-code autofill) fills every box. The first box is focused
+ * only on devices with a mouse, so a phone keyboard doesn't jump up uninvited.
+ */
+function CodeBoxes({
+  value,
+  onChange,
   disabled,
-  label,
-  onClick,
+  ok,
+  invalid,
 }: {
+  value: string
+  onChange: (code: string) => void
   disabled: boolean
-  label: string
-  onClick: () => void
+  ok: boolean
+  invalid: boolean
 }) {
+  const boxes = useRef<(HTMLInputElement | null)[]>([])
+  const digits = Array.from({ length: 6 }, (_, index) => value[index] ?? "")
+
+  useEffect(() => {
+    if (window.matchMedia("(pointer: fine)").matches) boxes.current[0]?.focus()
+  }, [])
+
+  const fill = (from: number, text: string) => {
+    const incoming = text.replace(/\D/g, "")
+    if (!incoming) return
+    const next = digits.slice()
+    for (let index = 0; index < incoming.length && from + index < 6; index++) next[from + index] = incoming[index]
+    onChange(next.join(""))
+    boxes.current[Math.min(from + incoming.length, 5)]?.focus()
+  }
+
+  const onInput = (index: number, raw: string) => {
+    if (raw.replace(/\D/g, "").length > 1) return fill(index, raw)
+    const digit = raw.replace(/\D/g, "").slice(-1)
+    const next = digits.slice()
+    next[index] = digit
+    onChange(next.join(""))
+    if (digit && index < 5) boxes.current[index + 1]?.focus()
+  }
+
+  const onKeyDown = (index: number, event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Backspace" && !digits[index] && index > 0) boxes.current[index - 1]?.focus()
+  }
+
+  const onPaste = (index: number, event: ClipboardEvent<HTMLInputElement>) => {
+    const text = event.clipboardData.getData("text")
+    if (!text.replace(/\D/g, "")) return
+    event.preventDefault()
+    fill(index, text)
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="inline-flex min-h-9 max-w-full items-center gap-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-55"
-    >
-      <ChevronLeft className="size-4 shrink-0" />
-      <span className="truncate">{label}</span>
+    <div className={ok ? "code ok" : invalid ? "code bad" : "code"} role="group" aria-label="6-digit code">
+      {digits.map((digit, index) => (
+        <input
+          key={index}
+          ref={(el) => {
+            boxes.current[index] = el
+          }}
+          inputMode="numeric"
+          autoComplete={index === 0 ? "one-time-code" : "off"}
+          maxLength={index === 0 ? 6 : 1}
+          aria-label={`Digit ${index + 1}`}
+          value={digit}
+          disabled={disabled}
+          onChange={(event) => onInput(index, event.target.value)}
+          onKeyDown={(event) => onKeyDown(index, event)}
+          onPaste={(event) => onPaste(index, event)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function OauthButtons({
+  factors,
+  disabled,
+  onSelect,
+}: {
+  factors: OauthFactor[]
+  disabled: boolean
+  onSelect: (strategy: OauthFactor["strategy"]) => void
+}) {
+  if (!factors.length) return null
+  return (
+    <div className="oauth">
+      {factors.map((factor) => (
+        <button key={factor.strategy} type="button" className="btn light" disabled={disabled} onClick={() => onSelect(factor.strategy)}>
+          Continue with {oauthLabels[factor.strategy] || factor.strategy.replace("oauth_", "")}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function SubmitButton({ children, loading, loadingLabel }: { children: string; loading: boolean; loadingLabel: string }) {
+  return (
+    <button type="submit" disabled={loading} className="btn">
+      {loading ? (
+        <>
+          <span className="spin" aria-hidden="true" />
+          {loadingLabel}
+        </>
+      ) : (
+        children
+      )}
     </button>
   )
 }
 
 function ErrorMessage({ message }: { message: string }) {
   if (!message) return null
-
   return (
-    <div role="alert" className="rounded-lg border border-error-border bg-error-soft px-3.5 py-2.5 text-sm leading-5 text-error-foreground">
+    <p className="err" id="mountline-id-error" role="alert">
       {message}
-    </div>
+    </p>
   )
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
 }
 
 function pickFirstFactor(factors: SignInFirstFactor[] | null) {
@@ -629,12 +725,6 @@ function pickSecondFactor(factors: SignInSecondFactor[] | null) {
 function isOauthFactor(factor: SignInFirstFactor): factor is OauthFactor {
   return factor.strategy.startsWith("oauth_")
 }
-
-function inputClassName(extra = "") {
-  return `ml-field-input disabled:cursor-not-allowed disabled:opacity-55 ${extra}`
-}
-
-const buttonClassName = "ml-pill ml-pill-solid w-full min-h-11"
 
 function getClerkErrorMessage(error: unknown) {
   if (typeof error === "object" && error !== null && "errors" in error) {

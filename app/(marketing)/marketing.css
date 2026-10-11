@@ -728,3 +728,123 @@ html[data-ann=off] .mk-home .announce { display: none; }
 .mk-card .notice .act{display:inline-flex;padding:0 20px}
 .mk-card .link{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}
 .mk-card .link:hover{text-decoration-color:var(--ink)}
+
+/* /id sign-in (docs/design/id-reference.html) and the /receptionist gate ---- */
+
+.mk-id *{box-sizing:border-box}
+.mk-id [hidden]{display:none!important}
+.mk-id{min-height:100dvh;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-inline:16px;padding-block:0}
+/* Browser-default paragraph margins the reference relies on (Tailwind's preflight removes them). */
+.mk-id p{margin:1em 0}
+.mk-id a{color:inherit;text-decoration:none}
+.mk-id button,.mk-id input{font:inherit;color:inherit}
+.mk-id :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:8px}
+.mk-id .page{min-height:100dvh;max-width:1180px;margin:0 auto;display:flex;flex-direction:column}
+.mk-id .top{height:64px;display:flex;align-items:center;justify-content:space-between}
+.mk-id .logo{display:flex;align-items:center;gap:8px;font:600 19px var(--head);letter-spacing:-.03em}
+.mk-id .logo svg{width:22px;height:18px}
+.mk-id .top-link{font-size:14px;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.mk-id .top-link:hover{color:var(--ink)}
+.mk-id .top-link svg{width:13px;height:13px}
+.mk-id main{flex:1;display:grid;place-items:center;padding-block:48px 64px}
+.mk-id .col{width:100%;max-width:400px}
+.mk-id .head{text-align:center;display:grid;justify-items:center}
+.mk-id .tile{width:48px;height:48px;border-radius:13px;background:var(--white);box-shadow:var(--ring);display:grid;place-items:center;color:var(--ink)}
+.mk-id .tile svg{width:24px;height:20px}
+.mk-id h1{font:500 30px/1.15 var(--head);letter-spacing:-.025em;margin:22px 0 0;text-wrap:balance}
+.mk-id .sub{margin:8px 0 0;color:var(--ink-2);font-size:15px;max-width:34ch}
+.mk-id .card{margin-top:28px;background:var(--white);border-radius:16px;box-shadow:var(--ring);padding:24px;animation:mk-card-fade .3s var(--ease) both,mk-card-rise .4s var(--ease) both}
+@keyframes mk-card-fade{from{opacity:0}}
+@keyframes mk-card-rise{from{transform:translateY(8px)}}
+.mk-id label{display:block;font-size:13px;font-weight:500;margin-bottom:8px}
+.mk-id .field{position:relative}
+.mk-id .field svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3);pointer-events:none}
+.mk-id input[type="email"],.mk-id .field input.plain{width:100%;height:44px;border:0;border-radius:10px;background:var(--white);box-shadow:inset 0 0 0 1px var(--line-2);padding:0 14px 0 40px;font-size:15px;transition:box-shadow .15s}
+.mk-id input[type="email"]::placeholder{color:var(--ink-3)}
+.mk-id input[type="email"]:hover,.mk-id .field input.plain:hover{box-shadow:inset 0 0 0 1px var(--ink-3)}
+.mk-id input[type="email"]:focus,.mk-id .field input.plain:focus{outline:none;box-shadow:inset 0 0 0 1px var(--ink),0 0 0 4px rgba(20,21,24,.06)}
+.mk-id .err{margin:8px 0 0;font-size:13px;color:var(--err)}
+.mk-id .field.bad input,.mk-id .field.bad input:hover,.mk-id .code.bad input{box-shadow:inset 0 0 0 1px var(--err)}
+.mk-id .btn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;margin-top:14px;border:0;border-radius:10px;cursor:pointer;background:var(--ink);color:var(--on-ink);font:500 15px var(--sans);box-shadow:inset 0 1px 0 rgba(255,255,255,.12);transition:background-color .15s,transform .12s var(--ease)}
+.mk-id .btn:hover{background:#2A2C31}
+.mk-id .btn:active{transform:scale(.985)}
+.mk-id .btn[disabled]{cursor:default;background:#2A2C31}
+.mk-id .spin{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);border-top-color:var(--on-ink);animation:mk-spin .7s linear infinite}
+@keyframes mk-spin{to{transform:rotate(360deg)}}
+.mk-id .hint{margin:14px 0 0;font-size:13px;color:var(--ink-3);text-align:center}
+.mk-id .alt{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:13px;color:var(--ink-2)}
+.mk-id .alt button,.mk-id .linkish{background:none;border:0;padding:4px 2px;cursor:pointer;color:var(--ink);font-weight:500;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}
+.mk-id .alt button:hover,.mk-id .linkish:hover{text-decoration-color:var(--ink)}
+.mk-id .sent{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--ink-2)}
+.mk-id .sent b{color:var(--ink);font-weight:500;word-break:break-all}
+.mk-id .code{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:18px}
+.mk-id .code input{width:100%;height:52px;border:0;border-radius:10px;text-align:center;font:500 20px var(--mono);box-shadow:inset 0 0 0 1px var(--line-2);background:var(--white);transition:box-shadow .15s}
+.mk-id .code input:focus{outline:none;box-shadow:inset 0 0 0 1px var(--ink),0 0 0 4px rgba(20,21,24,.06)}
+.mk-id .code.ok input{box-shadow:inset 0 0 0 1px var(--green);background:var(--green-soft)}
+.mk-id .done{display:grid;justify-items:center;text-align:center;padding:8px 0 4px}
+.mk-id .done .ok{width:40px;height:40px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+.mk-id .done .ok svg{width:18px;height:18px}
+.mk-id .done b{display:block;margin-top:12px;font:500 17px var(--head)}
+.mk-id .done span{font-size:13px;color:var(--ink-3)}
+.mk-id .below{margin-top:20px;text-align:center;font-size:13px;color:var(--ink-3)}
+.mk-id .below a{color:var(--ink);font-weight:500}
+.mk-id .below a:hover{text-decoration:underline;text-underline-offset:3px}
+.mk-id footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:20px 0 28px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+.mk-id footer nav{display:flex;gap:18px}
+.mk-id footer a:hover{color:var(--ink)}
+@media (max-width:520px){
+  .mk-id main{padding-block:24px 48px;place-items:start center}
+  .mk-id h1{font-size:26px}
+  .mk-id .card{padding:20px}
+  .mk-id .code{gap:6px}
+  .mk-id .code input{height:48px;font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  .mk-id .card{animation:none}
+  .mk-id .btn{transition:none}
+  .mk-id .spin{animation:none}
+}
+
+/* Production additions for the steps the reference doesn't draw. */
+.mk-id .field input.plain{padding-left:14px}
+.mk-id label.spaced{margin-top:18px}
+.mk-id .btn[disabled]{opacity:1}
+.mk-id .btn.light{background:var(--white);color:var(--ink);box-shadow:var(--ring)}
+.mk-id .btn.light:hover{background:var(--panel)}
+.mk-id .oauth{display:grid;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.mk-id .oauth .btn{margin-top:0}
+.mk-id .note{margin:16px 0 0;font-size:14px;color:var(--ink-2)}
+.mk-id .loading{display:flex;align-items:center;justify-content:center;gap:10px;min-height:120px;font-size:14px;color:var(--ink-3)}
+.mk-id .spin.dark{border-color:var(--line-2);border-top-color:var(--ink-2)}
+.mk-id .linkish[disabled]{opacity:.5;cursor:default}
+/* Clerk's own <SignIn>, used only as the fallback flow, dressed in the same card, input, and button. */
+.mk-id .clerk-card{padding:24px}
+.mk-id .clerk-root,.mk-id .clerk-cardbox,.mk-id .clerk-inner{width:100%;max-width:none;box-shadow:none;border:0;background:transparent;padding:0;margin:0}
+.mk-id .clerk-header,.mk-id .clerk-hidden{display:none}
+.mk-id .clerk-label{font-size:13px;font-weight:500;color:var(--ink)}
+.mk-id .clerk-input{height:44px;border:0;border-radius:10px;background:var(--white);box-shadow:inset 0 0 0 1px var(--line-2);font-size:15px}
+.mk-id .clerk-input:focus{box-shadow:inset 0 0 0 1px var(--ink),0 0 0 4px rgba(20,21,24,.06)}
+.mk-id .clerk-button{height:42px;border-radius:10px;background:var(--ink);color:var(--on-ink);font:500 15px var(--sans);text-transform:none;letter-spacing:normal;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.mk-id .clerk-button:hover{background:#2A2C31}
+.mk-id .clerk-social{height:42px;border-radius:10px;box-shadow:var(--ring);border:0}
+.mk-id .clerk-footer{background:transparent}
+.mk-id .clerk-alert{border-radius:10px}
+.mk-id .alt a.linkish{display:inline-block}
+
+/* /receptionist password gate (same card, input, and button as /id) */
+.mk-id.gate{transition:opacity .25s var(--ease)}
+.mk-id.gate.leaving{opacity:0}
+.mk-id .field input.with-toggle{padding-right:48px}
+.mk-id .field .toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--ink-3);cursor:pointer;display:grid;place-items:center}
+.mk-id .field .toggle:hover{background:var(--panel);color:var(--ink)}
+.mk-id .field .toggle svg{position:static;transform:none;width:16px;height:16px;color:currentColor}
+.mk-id .btn .tick{width:18px;height:18px}
+.mk-id .below a{color:var(--ink);font-weight:500}
+.mk-id.gate .head .sub{max-width:30ch}
+@keyframes mk-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.mk-id .field.shake{animation:mk-shake .36s var(--ease)}
+.rx-unlocked{animation:mk-card-fade .3s var(--ease) both}
+@media (prefers-reduced-motion:reduce){
+  .mk-id .field.shake,.rx-unlocked{animation:none}
+  .mk-id.gate{transition:none}
+}

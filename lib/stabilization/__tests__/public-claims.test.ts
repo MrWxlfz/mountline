@@ -112,12 +112,13 @@ test("the word-built mark is decorative and complete without motion", async () =
   assert.match(css, /\[data-state="waiting"\] \.ml-signature__row \{ opacity: 0; \}/)
 })
 
-test("the receptionist page keeps the service detail, the demo line, and its limits", async () => {
-  const [page, sections, metadata, openGraph] = await Promise.all([
+test("the receptionist page keeps its detail and limits, behind an env-only password gate", async () => {
+  const [page, sections, route, gate, action] = await Promise.all([
     read("components/receptionist/receptionist-page.tsx"),
     read("components/receptionist/receptionist-sections.tsx"),
-    read("app/receptionist/page.tsx"),
-    read("app/receptionist/opengraph-image.tsx"),
+    read("app/(marketing)/receptionist/page.tsx"),
+    read("lib/receptionist-gate.ts"),
+    read("app/(marketing)/receptionist/actions.ts"),
   ])
   for (const section of ["CallItSection", "TestingSection", "ContextNote", "PilotSection", "ControlSection", "TradeExplorer", "CallStack"]) {
     assert.match(page, new RegExp(section))
@@ -126,8 +127,18 @@ test("the receptionist page keeps the service detail, the demo line, and its lim
   assert.match(sections, /Demo calls do not book real visits or dispatch a technician/)
   assert.match(sections, /Calendar booking, text messages, and live transfers are not verified here/)
   assert.match(await read("lib/homepage/content.ts"), /Your team confirms pricing and scheduling/)
-  assert.match(metadata, /AI Receptionist for Service Businesses/)
-  assert.match(openGraph, /AI receptionists/)
+  // Locked visitors get the gate and generic, unindexed metadata; the page renders only with a valid cookie.
+  assert.match(route, /robots: \{ index: false, follow: false \}/)
+  assert.match(route, /title: \{ absolute: "Mountline" \}/)
+  assert.doesNotMatch(route, /openGraph|AI Receptionist for Service Businesses/)
+  assert.match(route, /if \(!unlocked\) \{[\s\S]*<ReceptionistGate \/>/)
+  // The password and secret come only from the server environment; comparison is constant-time.
+  assert.match(gate, /^import "server-only"/)
+  assert.match(gate, /process\.env\.RECEPTIONIST_PASSWORD/)
+  assert.match(gate, /process\.env\.RECEPTIONIST_COOKIE_SECRET/)
+  assert.match(gate, /timingSafeEqual/)
+  assert.match(action, /httpOnly: true/)
+  assert.match(action, /await sleep\(400\)/)
 })
 
 test("simulations are labeled and unsupported completion claims are absent", async () => {

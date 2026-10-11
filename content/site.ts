@@ -393,6 +393,20 @@ export const site = {
     loginHref: "/id",
   },
 
+  // The /receptionist password gate. Shown to everyone without the cookie, so it says nothing about the page.
+  receptionistGate: {
+    title: "This one's in early access.",
+    sub: "Enter the password to take a look.",
+    label: "Password",
+    show: "Show password",
+    hide: "Hide password",
+    submit: "Unlock",
+    checking: "Checking",
+    wrong: "That's not it.",
+    noPassword: "Don't have the password?",
+    back: "← Back to mountline.dev",
+  },
+
   // /luke, the page people reach by scanning the printed card (docs/design/card-reference.html).
   card: {
     homeLink: "mountline.dev",

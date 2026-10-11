@@ -46,6 +46,8 @@ const bookingHref = process.env.NEXT_PUBLIC_BOOKING_URL || "/#contact"
 export function MountlineIdForm({ redirectUrl, useCustomFlow }: MountlineIdFormProps) {
   return (
     <div className="mk-id">
+      {/* Soft brand-color light drifting behind the page. Decorative; still under reduced motion. */}
+      <div className="aurora" aria-hidden="true"><i /><i /><i /><i /></div>
       <div className="page">
         <header className="top">
           <Link href="/" aria-label="Mountline home" className="logo hit">
@@ -411,9 +413,9 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
           <SubmitButton loading={isSubmitting} loadingLabel="Checking">Continue</SubmitButton>
           <p className="hint">Next, you&apos;ll use your password or a one-time code.</p>
           <OauthButtons factors={oauthFactors} disabled={isSubmitting} onSelect={handleOauth} />
-          <div className="alt">
-            Having trouble? <Link className="linkish hit" href={fallbackHref}>Use another sign-in method</Link>
-          </div>
+          <p className="alt">
+            New here? Accounts are made when we start a project. <a className="linkish" href={bookingHref}>Book a call</a>
+          </p>
         </form>
       )}
 
@@ -486,11 +488,6 @@ function CustomMountlineSignIn({ redirectUrl }: { redirectUrl: string }) {
         </div>
       )}
 
-      {step === "identifier" ? (
-        <p className="below">
-          New here? Accounts are made when we start a project. <a href={bookingHref}>Book a call</a>
-        </p>
-      ) : null}
     </>
   )
 }
@@ -545,11 +542,13 @@ function StableClerkSignIn({ redirectUrl }: { redirectUrl: string }) {
 
 function AuthFooter() {
   return (
-    <footer>
-      <Link href="/" className="hit">← Back to mountline.dev</Link>
+    <footer className="quiet">
       <nav aria-label="Help">
-        <a className="hit" href="mailto:hello@mountline.dev?subject=Privacy%20request">Privacy</a>
         <a className="hit" href="mailto:hello@mountline.dev?subject=Mountline%20ID%20support">Support</a>
+        <span aria-hidden="true">·</span>
+        <a className="hit" href="mailto:hello@mountline.dev?subject=Privacy%20request">Privacy</a>
+        <span aria-hidden="true">·</span>
+        <span>© {new Date().getFullYear()} Mountline</span>
       </nav>
     </footer>
   )

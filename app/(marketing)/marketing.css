@@ -848,3 +848,23 @@ html[data-ann=off] .mk-home .announce { display: none; }
   .mk-id .field.shake,.rx-unlocked{animation:none}
   .mk-id.gate{transition:none}
 }
+
+/* /id: drifting brand-color light behind the page, a tidier card bottom, and a one-line footer. */
+.mk-id{position:relative;isolation:isolate;overflow-x:clip}
+.mk-id .aurora{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.mk-id .aurora i{position:absolute;width:62vmax;height:62vmax;border-radius:50%;opacity:.5;will-change:transform}
+.mk-id .aurora i:nth-child(1){left:-18vmax;top:-26vmax;background:radial-gradient(circle,rgba(74,134,240,.42) 0%,rgba(74,134,240,0) 62%);animation:mk-drift-a 26s ease-in-out infinite alternate}
+.mk-id .aurora i:nth-child(2){right:-22vmax;top:-18vmax;background:radial-gradient(circle,rgba(222,91,152,.34) 0%,rgba(222,91,152,0) 62%);animation:mk-drift-b 31s ease-in-out infinite alternate}
+.mk-id .aurora i:nth-child(3){left:6vmax;bottom:-34vmax;background:radial-gradient(circle,rgba(46,158,102,.30) 0%,rgba(46,158,102,0) 62%);animation:mk-drift-c 29s ease-in-out infinite alternate}
+.mk-id .aurora i:nth-child(4){right:-6vmax;bottom:-30vmax;background:radial-gradient(circle,rgba(240,145,62,.30) 0%,rgba(240,145,62,0) 62%);animation:mk-drift-d 34s ease-in-out infinite alternate}
+@keyframes mk-drift-a{to{transform:translate3d(16vmax,12vmax,0) scale(1.12)}}
+@keyframes mk-drift-b{to{transform:translate3d(-14vmax,16vmax,0) scale(.92)}}
+@keyframes mk-drift-c{to{transform:translate3d(12vmax,-14vmax,0) scale(1.08)}}
+@keyframes mk-drift-d{to{transform:translate3d(-16vmax,-10vmax,0) scale(1.15)}}
+.mk-id p.alt{margin:18px 0 0}
+.mk-id p.alt .linkish{display:inline-block}
+.mk-id footer.quiet{justify-content:center;border-top:0;padding:16px 0 28px}
+.mk-id footer.quiet nav{gap:10px;align-items:center}
+@media (prefers-reduced-motion:reduce){
+  .mk-id .aurora i{animation:none}
+}

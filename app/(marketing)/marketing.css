@@ -500,9 +500,12 @@ html[data-intro~=go] .mk-home .intro .dt:nth-child(2){transition-delay:.09s}
 html[data-intro~=go] .mk-home .intro .dt:nth-child(3){transition-delay:.18s}
 html[data-intro~=go] .mk-home .intro .dt:nth-child(4){transition-delay:.27s}
 html[data-intro~=run] .mk-home .hero .dots{opacity:0}
-html[data-intro~=run] .mk-home .hero .ia{opacity:0;transform:translateY(10px)}
-/* The H1 is painted under the overlay from the first frame so the intro never delays it; it only rises. */
-html[data-intro~=run] .mk-home .hero h1.ia{opacity:1}
+/*
+  The hero text (H1, lead, buttons, trust row) is painted under the overlay from the first frame and
+  only rises 10px, so the intro never delays whichever of them is the largest paint (choreography.md,
+  "Rules"). Hiding them would push LCP past the intro.
+*/
+html[data-intro~=run] .mk-home .hero .ia{transform:translateY(10px)}
 .mk-home .hero .ia{transition:opacity .7s var(--ease) calc(var(--i,0)*70ms),transform .8s var(--ease) calc(var(--i,0)*70ms)}
 .mk-home .announce{margin-inline:-16px;background:var(--ink);color:var(--on-ink);font-size:13px;display:flex;justify-content:center;align-items:center;gap:8px 10px;padding:9px 48px;position:relative;text-align:center;flex-wrap:wrap}
 .mk-home .announce a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.4)}

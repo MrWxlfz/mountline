@@ -27,9 +27,11 @@ test("the homepage describes the whole offer, labels its example, and claims not
   assert.doesNotMatch(content, /\d\s?%|★|\brated\b|\breviews?\b|testimonial|trusted by|clients served/i)
   // Prices are plain dollar figures or placeholders (the production build refuses to ship placeholders).
   for (const [, price] of content.matchAll(/^        price: "([^"]+)",$/gm)) assert.match(price, /^(\$[\d,]+|\[[A-Z]+ \$___\])$/)
-  // The headline is never hidden by the intro: it's painted under the overlay and only rises.
+  // Hero text is never hidden by the intro (it's painted under the overlay and only rises), so the
+  // largest paint can't wait for it, whichever element that is after a copy change.
   assert.match(hero, /<h1 className="ia"/)
-  assert.match(css, /html\[data-intro~=run\] \.mk-home \.hero h1\.ia\{opacity:1\}/)
+  assert.match(css, /html\[data-intro~=run\] \.mk-home \.hero \.ia\{transform:translateY\(10px\)\}/)
+  assert.doesNotMatch(css, /data-intro~=run\][^{]*\.ia[^{]*\{[^}]*opacity:0/)
 })
 
 test("the design example is labeled, made up, and makes no claims", async () => {

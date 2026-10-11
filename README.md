@@ -43,6 +43,6 @@ The form saves to `leads` through `submit_mountline_inquiry`, which also queues 
 
 ## Deployment gates
 
-Apply outstanding migrations in order before deploying the application (including `20260928120000_project_inquiry_email.sql`, which the inquiry form requires); do not re-run applied migrations or reset a database. The existing stabilization migration adds required project/inquiry/receipt operations and closes direct public table access. The follow-up client-assignment repair fixes project creation for an assigned client. See [Supabase setup](SUPABASE_SETUP.md).
+Apply outstanding migrations in order before deploying the application (including `20260928120000_project_inquiry_email.sql`, which the inquiry pipeline requires); do not re-run applied migrations or reset a database. The existing stabilization migration adds required project/inquiry/receipt operations and closes direct public table access. The follow-up client-assignment repair fixes project creation for an assigned client. See [Supabase setup](SUPABASE_SETUP.md).
 
 Verify the target database is active, core environment settings are populated, team identities and client assignments exist, and a controlled pilot request reaches the lead inbox. A successful local build does not verify hosted database access or the external phone agent. No secret values belong in source control.

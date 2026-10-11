@@ -226,7 +226,7 @@ export const site = {
         steps: [
           "Answers in the bakery's name",
           "Takes down the question or order",
-          "Texts Dana a short summary",
+          "Writes up the request for Dana",
         ],
         result: "This one is still in early access. Ask me what's working today and what I'm still testing.",
       },
@@ -283,7 +283,7 @@ export const site = {
         key: "web",
         name: "Website",
         before: "from",
-        price: "$400",
+        price: "$230",
         includes: ["Designed and written with you", "Fast and easy to use on a phone", "Hosting and small edits: $25/month"],
       },
       {
@@ -317,7 +317,7 @@ export const site = {
   receptionist: {
     pill: "Coming soon",
     title: "For the calls you can't get to",
-    lead: "I'm building an AI receptionist that picks up when you can't, finds out what the caller needs, and texts you the details. It's in early access right now, and I'd love to show you how it works!",
+    lead: "I'm building an AI receptionist that picks up when you can't and finds out what the caller needs. It's in early access right now, and I'd love to show you how it works!",
     cta: "See the early-access demo",
     call: {
       label: "Example call",
@@ -328,7 +328,7 @@ export const site = {
         { who: "caller", text: "Do you have sourdough left for tomorrow morning?" },
         { who: "ai", text: "We do. Can I get a name for the pickup?" },
       ],
-      smsTitle: "Text to Dana",
+      smsTitle: "Request for Dana",
       sms: "Maya R. wants 2 sourdough for 9 AM tomorrow. Number: (817) 555-0142",
     },
   },
@@ -449,7 +449,7 @@ export const site = {
         { key: "web", title: "Websites", body: "Fast on a phone, written with you, and easy to book from." },
         { key: "map", title: "Google listing", body: "Hours, photos, and services set up right so people nearby find you." },
         { key: "ads", title: "Facebook & Instagram ads", body: "Local ads that bring in calls and orders, on a budget you set." },
-        { key: "call", title: "AI receptionist", soon: "SOON", body: "Answers the calls you miss and texts you the details." },
+        { key: "call", title: "AI receptionist", soon: "SOON", body: "Answers the calls you miss and writes up what each caller needs." },
       ] as readonly { key: "web" | "map" | "ads" | "call"; title: string; soon?: string; body: string }[],
     },
     fit: {

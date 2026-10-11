@@ -67,7 +67,7 @@ test("inquiry persistence stays in a server action and a transaction-backed func
 })
 
 test("delayed emails use the database queue, not in-memory timers", async () => {
-  for (const file of ["lib/leads/email/worker.ts", "lib/leads/email/server.ts", "app/actions/submit-inquiry.ts", "components/project-inquiry-form.tsx"]) {
+  for (const file of ["lib/leads/email/worker.ts", "lib/leads/email/server.ts", "app/actions/submit-inquiry.ts"]) {
     assert.doesNotMatch(await read(file), /setTimeout\(|setInterval\(/, file)
   }
   const vercel = JSON.parse(await read("vercel.json"))

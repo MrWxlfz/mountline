@@ -1,6 +1,6 @@
 # Setting up inquiry email
 
-This is the one setup for the project inquiry form: **Resend** sends the email, your existing **Zoho** mailbox keeps receiving `hello@mountline.dev`, **Supabase** stores everything, and **Vercel** runs the site and a daily worker. Resend was already used by the Scout and Signal alerts in this codebase, so nothing new is being bolted on.
+This is the one setup for inquiry emails (the public site has no contact form right now; the pipeline stays ready for when one comes back): **Resend** sends the email, your existing **Zoho** mailbox keeps receiving `hello@mountline.dev`, **Supabase** stores everything, and **Vercel** runs the site and a daily worker. Resend was already used by the Scout and Signal alerts in this codebase, so nothing new is being bolted on.
 
 Work through the steps in order. Each one says what success looks like. Nothing here needs a purchase: Resend's free plan covers this volume, and the daily worker runs on any Vercel plan.
 

@@ -16,6 +16,14 @@ export const pilotChecklist = [
   { title: "Approve the pilot and rollback", detail: "Confirm business approval, recording/privacy requirements, human coverage, the forwarding path, and how to restore the original line before routing customer calls." },
 ] as const
 
+/** The receptionist's first line for a profile (also used as the Retell agent's begin message). */
+export function receptionistGreeting(profile: Pick<ReceptionistProfile, "mode" | "business">) {
+  const name = profile.business.name
+  return profile.mode === "demo"
+    ? `Thanks for calling the Mountline demo for ${name}, a fictional business. This is an AI receptionist, and no real appointments or services are arranged here. What can we help with?`
+    : `Thanks for calling ${name}. You're speaking with the AI receptionist. How can we help?`
+}
+
 export function buildReceptionistPrompt(input: ReceptionistProfile): string {
   // Revalidate at the boundary so untyped JSON callers cannot silently enable unsupported behavior.
   const profile = receptionistProfileSchema.parse(input)
@@ -33,8 +41,8 @@ export function buildReceptionistPrompt(input: ReceptionistProfile): string {
     "## Role and voice",
     `You are the AI receptionist for ${business.name}. Be warm, direct, and brief. Use one or two short sentences per turn. Ask one useful question at a time. Let callers finish; when interrupted, follow their latest concern. Do not repeat their story or over-confirm obvious details. Avoid exaggerated enthusiasm, filler, technical jargon, and repeated 'certainly'. Never pretend to be a human.`,
     profile.mode === "demo"
-      ? `## Fictional demo boundary\nStart with: “Thanks for calling the Mountline demo for ${business.name}, a fictional business. This is an AI receptionist, and no real appointments or services are arranged here. What can we help with?” All business facts below are fictional examples. Ask callers to use made-up details and a made-up callback number; do not collect a real address or other personal information. State that no real callback, booking, technician visit, or follow-up will happen. If a caller has an actual urgent problem, stop roleplay and direct them to a real local provider or emergency services as appropriate.`
-      : `## Customer draft boundary\nStart with: “Thanks for calling ${business.name}. You're speaking with the AI receptionist. How can we help?” This draft has no connected delivery, calendar, SMS, or transfer tools. Do not route real customer calls to it until Mountline has verified how requests reach the team. During acceptance testing, explain that a callback request can be discussed but cannot be confirmed as submitted.`,
+      ? `## Fictional demo boundary\nStart with: “${receptionistGreeting(profile)}” All business facts below are fictional examples. Ask callers to use made-up details and a made-up callback number; do not collect a real address or other personal information. State that no real callback, booking, technician visit, or follow-up will happen. If a caller has an actual urgent problem, stop roleplay and direct them to a real local provider or emergency services as appropriate.`
+      : `## Customer draft boundary\nStart with: “${receptionistGreeting(profile)}” This draft has no connected delivery, calendar, SMS, or transfer tools. Do not route real customer calls to it until Mountline has verified how requests reach the team. During acceptance testing, explain that a callback request can be discussed but cannot be confirmed as submitted.`,
     "## Supported actions and truthful outcomes",
     "Answer from the approved facts below and collect a callback or appointment preference in conversation. Booking: OFF. SMS: OFF. Live transfer: OFF. No appointment lookup, email confirmation, dispatch, payment collection, or external write is connected. Never claim a request was saved, submitted, sent, delivered, booked, cancelled, or assigned; never claim someone was notified. Do not invent tools or pretend a tool succeeded. A later integration must replace these limitations only after it has passed testing. If asked to text or transfer, clearly state that this is unavailable and offer the supported request-only path.",
     "## Safety and urgent calls",

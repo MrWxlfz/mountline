@@ -1,4 +1,4 @@
-import { PageHeader, SectionPanel, StatusBadge } from "@/components/dashboard/dashboard-ui"
+import { PageHeader, PrimaryAction, SectionPanel, StatusBadge } from "@/components/dashboard/dashboard-ui"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { pilotChecklist } from "@/lib/receptionist/prompt"
 import { ReceptionistSetup } from "./receptionist-setup"
@@ -13,6 +13,7 @@ export default async function ReceptionistPage() {
         title="Prepare a receptionist pilot"
         subtitle="Turn business facts into a consistent call-handling draft. Review and export it for a provider setup; nothing here changes a live agent or phone number."
         meta={<StatusBadge tone="amber">Provider not connected</StatusBadge>}
+        actions={<PrimaryAction href="/receptionist">Open the live demo portal</PrimaryAction>}
       />
       <ReceptionistSetup />
       <SectionPanel title="Before routing real calls" description="A valid profile is a starting point. Each of these needs evidence before a customer pilot.">

@@ -54,15 +54,14 @@ test("the example business is labeled, made up, and makes no claims", async () =
 test("the private notification address stays out of shared content and public components", async () => {
   const files = [
     "content/site.ts",
-    "content/receptionist.ts",
     "app/(marketing)/page.tsx",
     "components/site/booking.tsx",
     "components/site/nav.tsx",
     "components/site/footer.tsx",
     "components/site/rebrand-notice.tsx",
     "components/site/home/service-tabs.tsx",
-    "components/receptionist-gated/content.tsx",
-    "components/receptionist-gated/call-demo.tsx",
+    "components/receptionist-portal/portal.tsx",
+    "components/receptionist-portal/tune.tsx",
     "lib/case-study/evidence.json",
     "lib/case-study/client-results.ts",
   ]
@@ -82,60 +81,43 @@ test("the old triangle logo lives only in the rebrand notice", async () => {
   assert.match(wordmark, /M1\.5 16 6\.8 7\.6 9\.6 11\.2 14 2\.6 20\.5 16/)
 })
 
-test("the receptionist page shows only what works today, behind an env-only password gate", async () => {
-  const [content, page, route, gate, action, demo] = await Promise.all([
-    read("content/receptionist.ts"),
-    read("components/receptionist-gated/content.tsx"),
+test("the receptionist demo portal is team-only, keeps Retell on the server, and limits outbound calls", async () => {
+  const [page, actions, retell, portal] = await Promise.all([
     read("app/(marketing)/receptionist/page.tsx"),
-    read("lib/receptionist-gate.ts"),
     read("app/(marketing)/receptionist/actions.ts"),
-    read("lib/receptionist/demo.ts"),
+    read("lib/receptionist/retell.ts"),
+    read("components/receptionist-portal/portal.tsx"),
   ])
-  // Gated copy is server-only, and capabilities that aren't built yet are never rendered.
-  assert.match(content, /^import "server-only"/)
-  assert.match(page, /r\.capabilities\.items\.filter\(\(item\) => item\.live\)/)
-  for (const unbuilt of ["Texts you a summary", "Transfers urgent calls", "Books appointments"]) {
-    assert.match(content, new RegExp(`label: "${unbuilt}[^"]*", live: false`), unbuilt)
-  }
-  // The demo is for a made-up company, and the page says so beside the number.
-  assert.match(demo, /fictional: true/)
-  assert.match(content, /made-up HVAC company, so use fake details/)
-  assert.match(content, /made-up business/)
-  // Locked visitors get the gate and generic, unindexed metadata; the page renders only with a valid cookie.
-  assert.match(route, /robots: \{ index: false, follow: false \}/)
-  assert.match(route, /title: \{ absolute: "Mountline" \}/)
-  assert.doesNotMatch(route, /openGraph|AI Receptionist for Service Businesses/)
-  assert.match(route, /if \(!unlocked\) \{[\s\S]*<ReceptionistGate \/>/)
-  // The password and secret come only from the server environment; comparison is constant-time.
-  assert.match(gate, /^import "server-only"/)
-  assert.match(gate, /process\.env\.RECEPTIONIST_PASSWORD/)
-  assert.match(gate, /process\.env\.RECEPTIONIST_COOKIE_SECRET/)
-  assert.match(gate, /timingSafeEqual/)
-  assert.match(action, /httpOnly: true/)
-  assert.match(action, /await sleep\(400\)/)
+  // The page requires a Mountline team sign-in and isn't indexed.
+  assert.match(page, /await requireNorthlineTeamMember\(\)/)
+  assert.match(page, /robots: \{ index: false, follow: false \}/)
+  // Every action re-checks team membership; none trusts the page that rendered it.
+  const exported = actions.match(/export async function \w+/g) ?? []
+  assert.ok(exported.length >= 5)
+  assert.equal((actions.match(/return asTeam\(/g) ?? []).length, exported.length, "each action goes through asTeam")
+  assert.match(actions, /if \(!access\.isTeamMember \|\| !access\.userId\) return \{ ok: false/)
+  // The Retell key is server-only and never public.
+  assert.match(retell, /^import "server-only"/)
+  assert.match(retell, /process\.env\.RETELL_API_KEY/)
+  assert.doesNotMatch(retell + portal, /NEXT_PUBLIC_RETELL/)
+  assert.doesNotMatch(portal, /^import (?!type)[^\n]*@\/lib\/receptionist\/retell/m)
+  // Outbound demo calls: US numbers only, with a daily cap.
+  assert.match(actions, /normalizeUsNumber\(/)
+  assert.match(actions, /OUTBOUND_DAILY_LIMIT/)
+  // Features still being built are shown as in the works, never as working.
+  assert.match(portal, /In the works/)
+  assert.match(portal, /Text confirmations/)
 })
 
-test("the example call is labeled and nothing claims more than the receptionist does", async () => {
-  const [content, page, callDemo, example] = await Promise.all([
-    read("content/receptionist.ts"),
-    read("components/receptionist-gated/content.tsx"),
-    read("components/receptionist-gated/call-demo.tsx"),
-    read("lib/receptionist/example-call.ts"),
-  ])
-  assert.match(content, /Example call · text only · made-up caller/)
-  // No invented audio: the example is text only, so there's no player or waveform.
-  assert.doesNotMatch(callDemo, /<audio|waveform/i)
-  for (const phone of example.match(/\d{3}-\d{3}-\d{4}/g) ?? []) assert.match(phone, /555-01\d\d/)
-  const liveLines = content.split("\n").filter((line) => /live: true/.test(line)).join("\n")
-  for (const source of [liveLines, page, callDemo]) {
-    for (const unsupported of [/answers every call/i, /books real appointments/i, /transfers? (?:urgent )?calls/i, /texts? you/i, /guaranteed?/i, /testimonial/i]) {
-      assert.doesNotMatch(source, unsupported)
-    }
+test("public copy doesn't promise texts, transfers, or booking from the receptionist", async () => {
+  const content = await read("content/site.ts")
+  for (const unsupported of [/texts? you (?:a summary|the details)/i, /transfers? (?:urgent )?calls/i, /books? (?:appointments|it) on your calendar/i]) {
+    assert.doesNotMatch(content, unsupported)
   }
 })
 
 test("public pages show no statistics of their own", async () => {
-  for (const file of ["content/site.ts", "content/receptionist.ts"]) {
+  for (const file of ["content/site.ts"]) {
     assert.doesNotMatch(await read(file), /\d\s?%|percent/i, file)
   }
   await assert.rejects(access(`${root}/lib/homepage/benchmarks.ts`))

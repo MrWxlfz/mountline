@@ -82,9 +82,9 @@ export const site = {
   hero: {
     title: "Your business is great in person. Let's make it look that way online.",
     lead: "I'm Luke. I build websites, set up Google listings, and run local ads for businesses around Keller. You'll work with me directly, from our first conversation to launch day and after.",
-    book: "Book a free 15-minute call",
+    book: "Book a free 30-minute call",
     secondary: { label: "See what I do", href: "#what" },
-    trust: ["Free 15-minute call", "Clear pricing up front", "You work with me, start to finish"],
+    trust: ["Free 30-minute call", "Clear pricing up front", "You work with me, start to finish"],
     stageLabel: "Example: a Keller bakery's website, Google listing, and a new order coming in",
     site: {
       url: "oakandember.com",
@@ -255,7 +255,7 @@ export const site = {
         body: "Launch day isn't the end. When your hours, menu, or plans change, I'm just a text away!",
       },
     ],
-    invite: { app: "Google Calendar", title: "Call with Luke", when: "Tue · 4:30–4:45 PM · Google Meet", join: "Join" },
+    invite: { app: "Google Calendar", title: "Call with Luke", when: "Tue · 4:30–5:00 PM · Google Meet", join: "Join" },
     preview: {
       logo: "Oak & Ember",
       headline: "Fresh bread, every morning.",
@@ -375,7 +375,7 @@ export const site = {
 
   final: {
     title: "Have something in mind? Let's talk!",
-    lead: "Tell me what's working, what's frustrating, or what you wish your website could do. It's 15 minutes, it's free, and there's no sales pitch.",
+    lead: "Tell me what's working, what's frustrating, or what you wish your website could do. It's 30 minutes, it's free, and there's no sales pitch.",
     book: "Book a free call",
   },
 

@@ -63,7 +63,7 @@ export function BookingProvider({ children, embedUrl }: { children: ReactNode; e
             }}
           >
             <div className="mk-modal__bar">
-              <Dialog.Title className="mk-modal__title">Book a 15-minute call</Dialog.Title>
+              <Dialog.Title className="mk-modal__title">Book a 30-minute call</Dialog.Title>
               <div className="mk-modal__tools">
                 <a href={url} target="_blank" rel="noopener noreferrer" className="mk-modal__tool">
                   Open in new tab <ArrowUpRight aria-hidden="true" />

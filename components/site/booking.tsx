@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ComponentProps, type ReactNode } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ComponentProps, type ReactNode } from "react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { ArrowUpRight, X } from "lucide-react"
 import { mailtoHref, site, smsHref } from "@/content/site"
@@ -8,31 +8,26 @@ import { mailtoHref, site, smsHref } from "@/content/site"
 /**
  * "Book a call" everywhere on the public site. On a computer the booking page opens in a modal;
  * on phones and tablets it's a normal link, because booking iframes are cramped on small screens.
- * Without NEXT_PUBLIC_BOOKING_URL the buttons fall back to the contact section.
+ * The modal needs an embeddable address (lib/booking-embed.ts, resolved on the server); without one
+ * the buttons are plain links. Without NEXT_PUBLIC_BOOKING_URL they fall back to the final section.
  */
 
 const BookingContext = createContext<{ open: () => void } | null>(null)
 
 const DESKTOP = "(min-width: 768px) and (pointer: fine)"
 
-/** Google appointment pages need gv=true to render inside an iframe. Cal.com links pass through. */
-export function bookingEmbedUrl(raw: string) {
-  try {
-    const url = new URL(raw)
-    if (url.hostname === "calendar.google.com" && !url.searchParams.has("gv")) url.searchParams.set("gv", "true")
-    return url.toString()
-  } catch {
-    return raw
-  }
-}
-
-export function BookingProvider({ children }: { children: ReactNode }) {
+export function BookingProvider({ children, embedUrl }: { children: ReactNode; embedUrl: string | null }) {
   const [isOpen, setOpen] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [slow, setSlow] = useState(false)
   const url = site.contact.bookingUrl
-  const open = useCallback(() => setOpen(true), [])
-  const value = useMemo(() => ({ open }), [open])
+  // Opened programmatically (not by a Radix trigger), so remember the button to hand focus back to.
+  const trigger = useRef<HTMLElement | null>(null)
+  const open = useCallback(() => {
+    trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    setOpen(true)
+  }, [])
+  const value = useMemo(() => (embedUrl ? { open } : null), [open, embedUrl])
 
   useEffect(() => {
     if (!isOpen) return
@@ -46,7 +41,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   return (
     <BookingContext.Provider value={value}>
       {children}
-      {url ? (
+      {url && embedUrl ? (
         <Dialog.Root
           open={isOpen}
           onOpenChange={(next) => {
@@ -59,7 +54,14 @@ export function BookingProvider({ children }: { children: ReactNode }) {
         >
           {/* No portal: the modal stays inside .mk so it keeps the site's tokens. */}
           <Dialog.Overlay className="mk-modal__overlay" />
-          <Dialog.Content className="mk-modal" aria-describedby={undefined}>
+          <Dialog.Content
+            className="mk-modal"
+            aria-describedby={undefined}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault()
+              trigger.current?.focus()
+            }}
+          >
             <div className="mk-modal__bar">
               <Dialog.Title className="mk-modal__title">Book a 15-minute call</Dialog.Title>
               <div className="mk-modal__tools">
@@ -88,7 +90,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
                   )}
                 </div>
               ) : null}
-              <iframe src={bookingEmbedUrl(url)} title="Booking calendar" onLoad={() => setLoaded(true)} />
+              <iframe src={embedUrl} title="Booking calendar" onLoad={() => setLoaded(true)} />
             </div>
             <p className="mk-modal__foot">
               Rather not book online?{" "}

@@ -16,6 +16,7 @@ import { Nav } from "@/components/site/nav"
 import { PlaceholderWarning } from "@/components/site/placeholder-warning"
 import { RevealObserver } from "@/components/site/reveal-observer"
 import { site } from "@/content/site"
+import { bookingEmbedUrl } from "@/lib/booking-embed"
 
 export const metadata: Metadata = {
   title: { absolute: site.metadata.title },
@@ -24,9 +25,10 @@ export const metadata: Metadata = {
 }
 
 /** The homepage, section by section from docs/design/site-reference.html. */
-export default function Home() {
+export default async function Home() {
+  const embedUrl = await bookingEmbedUrl()
   return (
-    <BookingProvider>
+    <BookingProvider embedUrl={embedUrl}>
       <div className="mk-home">
         <Intro />
         <a href="#main-content" className="mk-skip">Skip to content</a>

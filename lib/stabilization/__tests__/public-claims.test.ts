@@ -14,18 +14,19 @@ test("the homepage describes the whole offer, labels its example, and claims not
     read("components/site/footer.tsx"),
     read("app/(marketing)/marketing.css"),
   ])
-  assert.match(content, /Websites, Google listings & ads for businesses around Keller/)
+  // Copy is Luke's to change (content/site.ts); this checks structure and claims, not wording.
+  assert.match(content, /hero: \{\n    title: "[^"]+",/)
   for (const section of ["Hero", "Towns", "WhatIDo", "HowItWorks", "Pricing", "About", "ReceptionistSoon", "Faq", "FinalCta"]) {
     assert.match(page, new RegExp(`<${section} />`), section)
   }
-  // The example business is labeled once, in the footer, and every mockup chip says "Example client".
+  // The example business is labeled in the footer, and each service mockup carries an "Example …" chip.
   assert.match(content, /disclaimer: "Oak & Ember is an example business\."/)
   assert.match(footer, /site\.example\.disclaimer/)
-  assert.equal((content.match(/\{ label: "Example client" \}/g) ?? []).length, 3)
+  assert.ok((content.match(/\{ label: "Example (?:client|business)" \}/g) ?? []).length >= 3)
   // No stats, ratings, reviews, or client logos; the only numbers are prices still to be filled in.
   assert.doesNotMatch(content, /\d\s?%|★|\brated\b|\breviews?\b|testimonial|trusted by|clients served/i)
-  // Prices are placeholders until Luke fills them in (the production build refuses to ship them).
-  assert.match(content, /\[WEBSITE \$___\]/)
+  // Prices are plain dollar figures or placeholders (the production build refuses to ship placeholders).
+  for (const [, price] of content.matchAll(/^        price: "([^"]+)",$/gm)) assert.match(price, /^(\$[\d,]+|\[[A-Z]+ \$___\])$/)
   // The headline is never hidden by the intro: it's painted under the overlay and only rises.
   assert.match(hero, /<h1 className="ia"/)
   assert.match(css, /html\[data-intro~=run\] \.mk-home \.hero h1\.ia\{opacity:1\}/)

@@ -620,3 +620,111 @@ html[data-ann=off] .mk-home .announce { display: none; }
 }
 
 .mk-home main:focus{outline:none}
+
+/* /luke business-card page (docs/design/card-reference.html) -------------- */
+
+.mk-card *{box-sizing:border-box}
+.mk-card [hidden]{display:none!important}
+.mk-card{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-inline:16px;padding-block:0}
+.mk-card a{color:inherit;text-decoration:none}
+.mk-card button{font:inherit;color:inherit}
+.mk-card :focus-visible{outline:2px solid var(--c-web);outline-offset:2px;border-radius:8px}
+.mk-card .col{max-width:560px;margin:0 auto}
+.mk-card h1,.mk-card h2,.mk-card h3{font-family:var(--head);font-weight:500;margin:0;text-wrap:balance}
+.mk-card h2{font-size:22px;line-height:1.25;letter-spacing:-.02em}
+.mk-card .eyebrow{font-size:13px;color:var(--ink-3)}
+.mk-card p{margin:0}
+.mk-card .top{height:60px;display:flex;align-items:center;justify-content:space-between}
+.mk-card .logo{display:flex;align-items:center;gap:8px;font:600 18px var(--head);letter-spacing:-.03em}
+.mk-card .logo svg{width:21px;height:17px}
+.mk-card .top-link{font-size:13px;color:var(--ink-2);display:inline-flex;align-items:center;gap:5px}
+.mk-card .top-link svg{width:12px;height:12px}
+.mk-card .rebrand{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:16px;padding:7px 6px 7px 12px;box-shadow:var(--ring);font-size:13px;line-height:1.35;color:var(--ink-2);margin-top:6px;
+  transform-origin:50% 0;transition:opacity .25s var(--ease),transform .6s cubic-bezier(.34,1.56,.64,1)}
+.mk-card .rebrand>span{flex:1;min-width:0}
+.mk-card .rebrand b{color:var(--ink);font-weight:500}
+.mk-card .rebrand.rb-wait{opacity:0;transform:translateY(-6px) scale(.9);pointer-events:none}
+.mk-card .rebrand.rb-out{opacity:0;transform:scale(.94);transition:opacity .2s var(--ease),transform .25s var(--ease)}
+.mk-card .rb-logos{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border-radius:999px;padding:3px 9px;vertical-align:middle;margin:0 2px}
+.mk-card .rb-old{display:inline-grid;color:var(--ink-3);transition:opacity .3s var(--ease)}
+.mk-card .rb-old svg{width:15px;height:15px}
+.mk-card .rb-arrow{display:inline-grid;color:var(--ink-3);transition:opacity .25s var(--ease) .1s,transform .35s var(--ease) .1s}
+.mk-card .rb-arrow svg{width:10px;height:10px}
+.mk-card .rb-new{display:inline-grid;color:var(--ink);transition:transform .55s cubic-bezier(.34,1.8,.64,1) .25s,opacity .2s var(--ease) .25s}
+.mk-card .rb-new svg{width:17px;height:14px}
+.mk-card .rebrand.rb-pre .rb-arrow{opacity:0;transform:translateX(-4px)}
+.mk-card .rebrand.rb-pre .rb-new{opacity:0;transform:scale(.2)}
+.mk-card .rebrand:not(.rb-pre) .rb-old{opacity:.55}
+.mk-card .rb-x{width:26px;height:26px;border:0;border-radius:50%;background:transparent;color:var(--ink-3);cursor:pointer;display:grid;place-items:center;flex:none}
+.mk-card .rb-x:hover{background:var(--panel);color:var(--ink)}
+.mk-card .rb-x svg{width:10px;height:10px}
+.mk-card .photo{margin-top:16px;border-radius:18px;background:var(--panel);aspect-ratio:4/3;position:relative;overflow:hidden;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line)}
+.mk-card .photo .ph{font-size:13px;color:var(--ink-3)}
+.mk-card .photo .tag{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:7px;background:var(--white);border-radius:999px;padding:5px 11px 5px 8px;box-shadow:var(--lift);font-size:12px;font-weight:500}
+.mk-card .photo .tag i{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.mk-card .who{margin-top:24px}
+.mk-card .who .eyebrow{display:block}
+.mk-card h1{font-size:40px;line-height:1.05;letter-spacing:-.03em;margin-top:8px}
+.mk-card .intro{margin-top:14px;font-size:18px;line-height:1.55;color:var(--ink-2)}
+.mk-card .intro b{color:var(--ink);font-weight:500}
+.mk-card .scan{margin-top:24px;background:var(--panel);border-radius:14px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start}
+.mk-card .scan-i{width:30px;height:30px;border-radius:9px;background:var(--white);box-shadow:var(--ring);display:grid;place-items:center;flex:none;color:var(--ink)}
+.mk-card .scan-i svg{width:15px;height:15px}
+.mk-card .scan b{display:block;font:500 15px var(--head);letter-spacing:-.01em}
+.mk-card .scan p{margin-top:3px;font-size:14px;color:var(--ink-2);line-height:1.5}
+.mk-card .acts{margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mk-card .act{display:flex;align-items:center;justify-content:center;gap:8px;height:46px;border:0;border-radius:11px;cursor:pointer;font:500 15px var(--sans);background:var(--white);box-shadow:var(--ring);transition:background-color .15s,transform .12s var(--ease)}
+.mk-card .act:hover{background:var(--panel)}
+.mk-card .act:active{transform:scale(.98)}
+.mk-card .act svg{width:16px;height:16px}
+.mk-card .act.pri{grid-column:1/-1;background:var(--ink);color:var(--on-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.mk-card .act.pri:hover{background:#2A2C31}
+.mk-card section{margin-top:48px}
+.mk-card section h2{margin-top:6px}
+.mk-card .list{margin-top:16px;background:var(--white);border-radius:14px;box-shadow:var(--ring);overflow:hidden}
+.mk-card .row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);transition:background-color .15s}
+.mk-card .row:first-child{border-top:0}
+.mk-card a.row:hover{background:var(--bg)}
+.mk-card .ri{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none;font:600 12px var(--head);color:var(--ink);background:var(--panel)}
+.mk-card .rt{flex:1;min-width:0}
+.mk-card .rt b{display:block;font-size:15px;font-weight:500}
+.mk-card .rt span{font-size:12px;color:var(--ink-3)}
+.mk-card .open{font-size:13px;color:var(--ink-2);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.mk-card .open svg{width:12px;height:12px}
+.mk-card .pill{font-size:11px;font-weight:500;color:var(--ink-2);background:var(--panel);border-radius:999px;padding:3px 8px;white-space:nowrap}
+.mk-card .note{margin-top:10px;font-size:12px;color:var(--ink-3)}
+.mk-card .why{margin-top:12px;font-size:16px;line-height:1.6;color:var(--ink-2)}
+.mk-card .svcs{margin-top:16px;display:grid;gap:8px}
+.mk-card .svc{display:flex;gap:12px;align-items:flex-start;background:var(--white);border-radius:12px;box-shadow:var(--ring);padding:14px}
+.mk-card .dt{width:28px;height:28px;display:grid;place-items:center;color:var(--on-ink);flex:none}
+.mk-card .dt svg{width:14px;height:14px}
+.mk-card .dt.web{background:var(--c-web);border-radius:8px}
+.mk-card .dt.map{background:var(--c-map);border-radius:50%}
+.mk-card .dt.ads{background:var(--c-ads);border-radius:50% 50% 50% 11px}
+.mk-card .dt.call{background:var(--c-call);border-radius:8px}
+.mk-card .svc b{display:flex;align-items:center;gap:8px;font:500 16px var(--head);letter-spacing:-.01em}
+.mk-card .svc b small{font:500 10px var(--mono);letter-spacing:.06em;color:var(--ink-2);background:var(--panel);padding:2px 6px;border-radius:5px}
+.mk-card .svc p{margin-top:2px;font-size:14px;color:var(--ink-2)}
+.mk-card .chips{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.mk-card .chip{font-size:13px;padding:5px 11px;border-radius:999px;background:var(--white);box-shadow:var(--ring);color:var(--ink-2)}
+.mk-card .close{margin-top:56px;background:var(--panel);border-radius:18px;padding:28px 20px;text-align:center}
+.mk-card .close h2{font-size:26px;max-width:16ch;margin:0 auto}
+.mk-card .close p{margin-top:8px;font-size:15px;color:var(--ink-2)}
+.mk-card .close .acts{margin-top:20px}
+.mk-card footer{margin-top:40px;padding:20px 0 32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--ink-3)}
+.mk-card footer nav{display:flex;gap:16px}
+.mk-card footer a:hover{color:var(--ink)}
+.mk-card .rv{transition:opacity .7s var(--ease),transform .8s var(--ease)}
+.mk-card .rv.hide{opacity:0;transform:translateY(14px)}
+@media (prefers-reduced-motion:reduce){
+  .mk-card .rv,.mk-card .rebrand,.mk-card .act{transition:none}
+}
+
+/* Small notice pages that share the card page's column (/inquiry/stop/[token]). */
+.mk-card .notice{padding:48px 0 72px}
+.mk-card .notice h1{font-size:30px;line-height:1.15;letter-spacing:-.025em;margin-top:0}
+.mk-card .notice p{margin-top:12px;font-size:16px;line-height:1.6;color:var(--ink-2);max-width:52ch}
+.mk-card .notice form{margin-top:24px}
+.mk-card .notice .act{display:inline-flex;padding:0 20px}
+.mk-card .link{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}
+.mk-card .link:hover{text-decoration-color:var(--ink)}

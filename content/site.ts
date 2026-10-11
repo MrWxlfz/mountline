@@ -46,6 +46,11 @@ export const site = {
     textNumber: "8178801028",
     // A Google Calendar appointment schedule or a Cal.com link. Set in .env.local and on Vercel.
     bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL ?? "",
+    // The number printed on the business card and used by /luke (Text me, Call, and the vCard file
+    // public/luke-nordin.vcf, which has its own copy). TODO(luke): swap for the Google Voice number.
+    cardPhone: "+18178801028",
+    // The address /luke has always used for email (also in public/luke-nordin.vcf).
+    cardEmail: "luke.nordin@icloud.com",
   },
 
   // The example business in every mockup. Labeled in the footer; never presented as a client.
@@ -386,6 +391,73 @@ export const site = {
     area: "Keller · Southlake · DFW",
     login: "Client login",
     loginHref: "/id",
+  },
+
+  // /luke, the page people reach by scanning the printed card (docs/design/card-reference.html).
+  card: {
+    homeLink: "mountline.dev",
+    photoTag: "Keller, Texas",
+    eyebrow: "Founder of Mountline · Keller, Texas",
+    introStart: "Hey, I'm Luke. I build websites, set up Google listings, and run Facebook ads for businesses around Keller. ",
+    introBold: "I'm 15, and I do all of it myself.",
+    scanTitle: "Scanned my card? Nice to meet you.",
+    scanBody: "Text me your business name, website, or Instagram and I'll take a look. If I showed you a demo, I'll send you the link.",
+    actions: { text: "Text me", call: "Call", email: "Email", save: "Save my contact", book: "Book a call" },
+    // Prefilled email, unchanged from the original card page.
+    emailSubject: "Mountline Studio",
+    emailBody: "Hey Luke, it was great meeting you. My business is [business name].",
+    demos: {
+      eyebrow: "See what I've built",
+      title: "Concept sites for local businesses",
+      kind: "Concept site",
+      open: "Open",
+      unpublished: "Not published yet",
+      note: "These are concept previews I made, not official websites, unless the business approves them.",
+      // Same seven demo sites and addresses as before. The HVAC build isn't published yet, so its row
+      // still links to the address (to check on it) but shows the "Not published yet" pill.
+      items: [
+        { title: "Barber shop", initials: "Ba", tint: "#E8EFFD", href: "https://barber.mountline.dev" },
+        { title: "Dog grooming", initials: "Dg", tint: "#E6F3EC", href: "https://ruffscrubdemo.mountline.dev" },
+        { title: "Restaurant", initials: "Re", tint: "#FCEBDF", href: "https://slidersdemo.mountline.dev" },
+        { title: "Auto detailing", initials: "Ad", tint: "#F3E8FB", href: "https://autodemo.mountline.dev" },
+        { title: "Church", initials: "Ch", tint: "#FBEAF1", href: "https://churchdemo.mountline.dev" },
+        { title: "Commercial cleaning", initials: "Cc", tint: "#E5F4F6", href: "https://cleaningdemo.mountline.dev" },
+        { title: "HVAC", initials: "Hv", href: "https://hvacdemo.mountline.dev", unpublished: true },
+      ] as readonly { title: string; initials: string; tint?: string; href: string; unpublished?: boolean }[],
+    },
+    why: {
+      eyebrow: "Why I gave you this card",
+      title: "I think I can help",
+      body: "Something about your business stood out to me. Maybe the work is great but the website doesn't show it, or people can't find you on Google, or calls are slipping through. That's what I fix.",
+    },
+    services: {
+      eyebrow: "What I do",
+      title: "Everything that gets you found",
+      items: [
+        { key: "web", title: "Websites", body: "Fast on a phone, written with you, and easy to book from." },
+        { key: "map", title: "Google listing", body: "Hours, photos, and services set up right so people nearby find you." },
+        { key: "ads", title: "Facebook & Instagram ads", body: "Local ads that bring in calls and orders, on a budget you set." },
+        { key: "call", title: "AI receptionist", soon: "SOON", body: "Answers the calls you miss and texts you the details." },
+      ] as readonly { key: "web" | "map" | "ads" | "call"; title: string; soon?: string; body: string }[],
+    },
+    fit: {
+      eyebrow: "Best fit for",
+      title: "Local businesses that want to be easy to find",
+      chips: [
+        "Keller & nearby towns",
+        "Trades",
+        "Personal services",
+        "Restaurants",
+        "Churches",
+        "Independent shops",
+        "Owners who like straight answers",
+      ],
+    },
+    close: {
+      title: "Let's make your business easy to find",
+      body: "Text me, or book a free 30-minute call.",
+    },
+    footer: { place: "Mountline · Keller, Texas", home: "Home", email: "Email" },
   },
 
   metadata: {

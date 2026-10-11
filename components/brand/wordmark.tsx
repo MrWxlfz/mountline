@@ -28,14 +28,25 @@ export function MountlineMark({
  * The logo lockup: the mark plus live "mountline" text in Figtree 600. At the default 19px it's the
  * spec size (mark 22×18, gap 8px, −0.03em); other sizes scale the mark and gap with the text.
  */
-export function Wordmark({ className, size = 19 }: { className?: string; size?: number }) {
+export function Wordmark({
+  className,
+  size = 19,
+  mark,
+  gap,
+}: {
+  className?: string
+  size?: number
+  /** Exact mark size where a design calls for one (the /luke header uses 21×17 at 18px). */
+  mark?: { width: number; height: number }
+  gap?: number
+}) {
   const scale = size / 19
   return (
     <span
       className={cn("inline-flex items-center leading-none", figtree.className, className)}
-      style={{ fontSize: size, fontWeight: 600, gap: 8 * scale, letterSpacing: "-0.03em" }}
+      style={{ fontSize: size, fontWeight: 600, gap: gap ?? 8 * scale, letterSpacing: "-0.03em" }}
     >
-      <MountlineMark className="block" style={{ width: 22 * scale, height: 18 * scale }} />
+      <MountlineMark className="block" style={mark ?? { width: 22 * scale, height: 18 * scale }} />
       <span>mountline</span>
     </span>
   )

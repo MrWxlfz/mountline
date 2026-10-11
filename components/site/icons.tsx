@@ -196,3 +196,41 @@ export function FeatIcon({ name }: { name: "phone" | "chat" | "pin" | "ads" | "c
       return <PhoneCallIcon width={1.3} />
   }
 }
+
+/* /luke contact buttons and the "scanned my card" note (stroke 1.4 / 1.3). */
+
+export function CardIcon({ name }: { name: "text" | "call" | "email" | "save" | "scan" }) {
+  switch (name) {
+    case "text":
+      return (
+        <svg viewBox="0 0 16 16" {...svg}>
+          <path d="M3 3.5h10v7H6.5l-3.5 2.5v-9.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        </svg>
+      )
+    case "call":
+      return <PhoneCallIcon width={1.4} />
+    case "email":
+      return (
+        <svg viewBox="0 0 16 16" {...svg}>
+          <rect x="1.8" y="3.2" width="12.4" height="9.6" rx="2" stroke="currentColor" strokeWidth="1.4" />
+          <path d="m2.5 4.5 5.5 4 5.5-4" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        </svg>
+      )
+    case "save":
+      return (
+        <svg viewBox="0 0 16 16" {...svg}>
+          <circle cx="8" cy="5.5" r="2.6" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M3 13.5c.7-2.4 2.7-3.8 5-3.8s4.3 1.4 5 3.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      )
+    case "scan":
+      return (
+        <svg viewBox="0 0 16 16" {...svg}>
+          <rect x="2" y="2" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+          <rect x="9.5" y="2" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+          <rect x="2" y="9.5" width="4.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+          <path d="M9.5 9.5h1.5v1.5M14 9.5V11M9.5 14h1.5M12.5 12.5H14V14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
+      )
+  }
+}

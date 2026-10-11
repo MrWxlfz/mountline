@@ -1,3 +1,4 @@
+import { ClerkBoundary } from "@/components/auth/clerk-boundary"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
 import { getAppearancePreference, type AppearancePreference } from "@/lib/appearance"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -42,7 +43,7 @@ export default async function DashboardLayout({
     ])
 
   return (
-    <>
+    <ClerkBoundary>
       <AppearancePreferenceBoot preference={appearancePreference} />
       <DashboardShell
         supportOpenCount={supportOpenCount || 0}
@@ -51,6 +52,6 @@ export default async function DashboardLayout({
       >
         {children}
       </DashboardShell>
-    </>
+    </ClerkBoundary>
   )
 }

@@ -38,7 +38,7 @@ export type ClientResult = {
   after: MeasuredPeriod
   /** One or two plain sentences: what we changed, and anything else that changed in the same period. */
   whatChanged: string
-  /** Where the numbers come from, e.g. "Bramble's booking inbox, exported by the owner". */
+  /** Where the numbers come from, e.g. "The bakery's booking inbox, exported by the owner". */
   source: string
   permission: { approvedBy: string; approvedOn: string; record: string }
 }

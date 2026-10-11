@@ -1,10 +1,10 @@
 /**
- * The short animated example on the call console: a shortened, scripted call to the fictional
+ * The scripted example call on /receptionist (components/receptionist-gated/call-demo.tsx): a shortened, scripted call to the fictional
  * North Texas Air & Heat, with a made-up caller and a 555-01xx number. It is text only. There is no
  * recording, so the console never plays sound or draws a waveform for it.
  *
  * `at` is when each turn appears, in milliseconds. Square brackets mark the words the request is
- * built from. The whole call, including the question skipped here, is demoCall in lib/homepage/content.ts.
+ * built from.
  */
 
 export type ExampleField = "who" | "need" | "where" | "when"

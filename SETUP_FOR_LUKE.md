@@ -283,4 +283,4 @@ The homepage no longer shows the site's own test results; those stay internal in
 
 ## Sample photos
 
-Bramble's photos are free Unsplash images, loaded from Unsplash's image service and credited under Capture on the homepage (list: `lib/homepage/sample-photos.ts`). Nothing to set up. When you have photos from a real Capture shoot and the client's permission, those should replace them.
+The homepage's example business (Oak & Ember Bakery) is drawn entirely in code; there are no stock photos to credit. When you have real client work and the client's permission, add it then.

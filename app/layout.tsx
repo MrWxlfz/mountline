@@ -4,8 +4,8 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { site } from '@/content/site'
 import './globals.css'
-import './homepage.css'
 
 const geist = Geist({
   subsets: ["latin"],
@@ -44,18 +44,18 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://mountline.dev'),
   title: 'Mountline',
-  description: 'Websites for local businesses, with original photo and video by arrangement and AI receptionists for the calls your team can’t take.',
+  description: site.metadata.description,
   openGraph: {
-    title: 'Mountline',
-    description: 'Websites for local businesses, with original photo and video by arrangement and AI receptionists for the calls your team can’t take.',
+    title: site.metadata.title,
+    description: site.metadata.description,
     url: 'https://mountline.dev',
     siteName: 'Mountline',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mountline',
-    description: 'Websites for local businesses, with photo, video, and AI receptionists when you need them.',
+    title: site.metadata.title,
+    description: site.metadata.description,
   },
   appleWebApp: {
     capable: true,

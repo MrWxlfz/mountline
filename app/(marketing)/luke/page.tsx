@@ -10,6 +10,9 @@ import { site } from "@/content/site"
 import { bookingEmbedUrl } from "@/lib/booking-embed"
 
 const pageUrl = `${site.url}/luke`
+// The address the card page has always used for email (also in public/luke-nordin.vcf). Kept here, not in
+// content/site.ts, so it isn't bundled into the homepage's JavaScript.
+const cardEmail = "luke.nordin@icloud.com"
 const description = `${site.card.introStart}${site.card.introBold}`
 
 export const metadata: Metadata = {
@@ -21,14 +24,12 @@ export const metadata: Metadata = {
     description,
     url: pageUrl,
     siteName: "Mountline",
-    images: [{ url: site.person.photo, width: 1054, height: 1054, alt: site.person.photoAlt }],
     type: "profile",
   },
   twitter: {
     card: "summary_large_image",
     title: "Luke Nordin | Mountline",
     description,
-    images: [site.person.photo],
   },
 }
 
@@ -39,7 +40,7 @@ export default async function LukePage() {
   const smsHref = `sms:${contact.cardPhone}`
   const telHref = `tel:${contact.cardPhone}`
   const emailHref =
-    `mailto:${contact.cardEmail}?subject=${encodeURIComponent(card.emailSubject)}&body=` + encodeURIComponent(card.emailBody)
+    `mailto:${cardEmail}?subject=${encodeURIComponent(card.emailSubject)}&body=` + encodeURIComponent(card.emailBody)
 
   return (
     <BookingProvider embedUrl={embedUrl}>

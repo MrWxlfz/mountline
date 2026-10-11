@@ -49,7 +49,7 @@ test("the owner address and email secrets stay out of client code", async () => 
   for (const file of clientFiles) {
     const source = await read(file)
     // The founder's own contact card (/luke) already lists this address publicly; nothing else may.
-    if (file !== "app/luke/page.tsx") assert.doesNotMatch(source, /luke\.nordin@icloud\.com/, file)
+    if (file !== "app/(marketing)/luke/page.tsx") assert.doesNotMatch(source, /luke\.nordin@icloud\.com/, file)
     if (/^["']use client["']/.test(source)) {
       assert.doesNotMatch(source, /RESEND_API_KEY|RESEND_WEBHOOK_SECRET|CRON_SECRET|INQUIRY_OWNER_EMAIL|SUPABASE_SERVICE_ROLE_KEY/, file)
       assert.doesNotMatch(source, /lib\/leads\/email\/(server|config|provider|worker|webhook)/, file)

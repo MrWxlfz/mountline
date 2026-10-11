@@ -49,8 +49,6 @@ export const site = {
     // The number printed on the business card and used by /luke (Text me, Call, and the vCard file
     // public/luke-nordin.vcf, which has its own copy). TODO(luke): swap for the Google Voice number.
     cardPhone: "+18178801028",
-    // The address /luke has always used for email (also in public/luke-nordin.vcf).
-    cardEmail: "luke.nordin@icloud.com",
   },
 
   // The example business in every mockup. Labeled in the footer; never presented as a client.

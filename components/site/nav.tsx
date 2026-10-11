@@ -34,11 +34,13 @@ export function Nav({ links = site.nav, homeHref = "#top" }: { links?: readonly 
         <a className="logo hit" href={homeHref} aria-label="Mountline home">
           <Wordmark />
         </a>
-        <nav className="nav-links" aria-label="Sections">
-          {links.map((item) => (
-            <a key={item.href} href={item.href}>{item.label}</a>
-          ))}
-        </nav>
+        {links.length ? (
+          <nav className="nav-links" aria-label="Sections">
+            {links.map((item) => (
+              <a key={item.href} href={item.href}>{item.label}</a>
+            ))}
+          </nav>
+        ) : null}
         <div className="btns">
           <BookButton className="btn btn-dark hit">{site.cta.book}</BookButton>
         </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { cookies } from "next/headers"
 import { ReceptionistGate } from "@/components/receptionist-gate/gate"
-import { ReceptionistPage } from "@/components/receptionist/receptionist-page"
+import { ReceptionistContent } from "@/components/receptionist-gated/content"
 import { BookingProvider } from "@/components/site/booking"
 import { bookingEmbedUrl } from "@/lib/booking-embed"
 import { GATE_COOKIE, tokenIsValid } from "@/lib/receptionist-gate"
@@ -23,10 +23,11 @@ export default async function ReceptionistRoute() {
       </BookingProvider>
     )
   }
-  // TODO(phase E): the rebuilt receptionist page. Until then, the existing one shows once unlocked.
   return (
-    <div className="rx-unlocked">
-      <ReceptionistPage />
-    </div>
+    <BookingProvider embedUrl={await bookingEmbedUrl()}>
+      <div className="rx-unlocked">
+        <ReceptionistContent />
+      </div>
+    </BookingProvider>
   )
 }

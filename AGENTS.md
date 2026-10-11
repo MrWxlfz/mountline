@@ -3,11 +3,10 @@
 Mountline Studio is a real small-team website, client portal, and digital systems business.
 
 ## Brand and copy
-- Use "Mountline" in normal site copy.
-- The logo may remain lowercase "mountline".
-- Do not use "I", "me", or "my".
-- Use "we", "our", and "Mountline".
-- Do not mention age, school, summer, friends, or side hustle.
+- Use "Mountline" in normal site copy. The logo is lowercase "mountline": the ridge mark plus Figtree 600 (`components/brand/wordmark.tsx`). The old triangle mark is retired except inside the rebrand notice.
+- Public marketing pages (`/`, `/luke`, `/receptionist`) speak as Luke, in first person ("I", "me", "my"). Mentioning that he's 15 and lives in Keller is intentional (Luke's call); don't mention school, summer, friends, or side hustle.
+- Portal and dashboard copy keeps "we", "our", and "Mountline". Mountline ID follows docs/design/id-reference.html.
+- Public copy lives in `content/site.ts` (and the server-only `content/receptionist.ts`); Luke edits it directly.
 - Avoid corporate filler and AI-agency cringe.
 
 ## Architecture
@@ -40,7 +39,7 @@ Mountline Studio is a real small-team website, client portal, and digital system
 - Build/improve the client portal.
 - Add manual payment link support.
 - Add simple Supabase support messages.
-- Keep the design black/Vercel-like and readable.
+- Public pages follow `docs/design/` (light only, black ink, the reference HTML files are the spec). The dashboard keeps its own theme.
 
 ## Review guidelines
 - Verify auth route protection.

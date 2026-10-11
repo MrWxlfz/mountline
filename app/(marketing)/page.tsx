@@ -24,12 +24,26 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 }
 
+// What search engines read about the business. Facts only: no ratings, reviews, or prices.
+const businessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: site.name,
+  url: site.url,
+  email: site.contact.email,
+  description: site.metadata.description,
+  founder: { "@type": "Person", name: site.person.name },
+  address: { "@type": "PostalAddress", addressLocality: "Keller", addressRegion: "TX", addressCountry: "US" },
+  areaServed: [...site.towns.items.map((town) => town.name), "Dallas–Fort Worth"].map((name) => ({ "@type": "Place", name })),
+}
+
 /** The homepage, section by section from docs/design/site-reference.html. */
 export default async function Home() {
   const embedUrl = await bookingEmbedUrl()
   return (
     <BookingProvider embedUrl={embedUrl}>
       <div className="mk-home">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }} />
         <Intro />
         <a href="#main-content" className="mk-skip">Skip to content</a>
         <Announce />

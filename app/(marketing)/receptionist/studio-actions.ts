@@ -8,12 +8,14 @@ import {
   assignNumber,
   createStudioAgent,
   deleteStudioAgent,
+  isCallId,
   listAgents,
   listNumbers,
   loadOverview,
   loadStudioAgent,
   renameNumber,
   startStudioWebCall,
+  stopStudioWebCall,
   updateStudioAgent,
   type SaveResult,
   type StudioAgentDetail,
@@ -84,8 +86,16 @@ export async function startStudioTestCall(agentId: string): Promise<Result<WebCa
 
 export async function readStudioCall(callId: string): Promise<Result<CallDetail>> {
   return team(() => {
-    if (!/^[A-Za-z0-9_-]{1,128}$/.test(String(callId))) throw new StudioError("That call ID doesn't look right.")
+    if (!isCallId(String(callId))) throw new StudioError("That call ID doesn't look right.")
     return getCall(String(callId))
+  })
+}
+
+/** Ends a browser test call on Retell's side too, so its post-call analysis can run. */
+export async function stopStudioTestCall(callId: string): Promise<Result<null>> {
+  return team(async () => {
+    await stopStudioWebCall(retellApi, String(callId))
+    return null
   })
 }
 

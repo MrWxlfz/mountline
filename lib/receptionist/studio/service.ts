@@ -333,6 +333,23 @@ export async function startStudioWebCall(api: RetellApi, agentId: string, starte
   }
 }
 
+export const isCallId = (value: string) => /^[A-Za-z0-9_.:-]{1,200}$/.test(value)
+
+/**
+ * Ends a browser test call on Retell's side. The browser SDK's own hang-up is fire-and-forget; if it
+ * doesn't land, Retell keeps the call open until its time limit and never runs the post-call analysis.
+ * A call that's already over is not an error.
+ */
+export async function stopStudioWebCall(api: RetellApi, callId: string) {
+  if (!isCallId(callId)) throw new StudioError("That call ID doesn't look right.")
+  try {
+    await api(`/v2/stop-call/${encodeURIComponent(callId)}`, { method: "POST" })
+  } catch (error) {
+    const status = (error as { status?: number | null }).status
+    if (status !== 400 && status !== 404 && status !== 422) throw error
+  }
+}
+
 /* Phone numbers ------------------------------------------------------------------------- */
 
 type RawNumber = {

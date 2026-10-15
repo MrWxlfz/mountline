@@ -13,6 +13,7 @@ import {
   createStudioAgent,
   deleteStudioAgent,
   startStudioWebCall,
+  stopStudioWebCall,
   updateStudioAgent,
   type RetellApi,
 } from "../studio/service.ts"
@@ -288,6 +289,19 @@ test("browser test calls ask Retell for a web call and return only the call's to
   assert.equal(body.agent_id, "agent_s")
   assert.equal(body.agent_version, "latest")
   assert.equal(body.metadata.source, "mountline-studio")
+})
+
+test("ending a test call also stops it at Retell, and an already-ended call is fine", async () => {
+  const ended = fakeRetell({ "/v2/stop-call/": () => { throw new FakeHttpError(404, "call not found") } })
+  await stopStudioWebCall(ended.api, "call_abc123")
+  assert.deepEqual(ended.calls.map((call) => `${call.method} ${call.path}`), ["POST /v2/stop-call/call_abc123"])
+
+  const down = fakeRetell({ "/v2/stop-call/": () => { throw new FakeHttpError(500, "boom") } })
+  await assert.rejects(stopStudioWebCall(down.api, "call_abc123"), /boom/)
+
+  const none = fakeRetell({})
+  await assert.rejects(stopStudioWebCall(none.api, "call/../x"), StudioError)
+  assert.equal(none.calls.length, 0)
 })
 
 test("phone numbers point at Studio drafts or at another agent's published version", async () => {

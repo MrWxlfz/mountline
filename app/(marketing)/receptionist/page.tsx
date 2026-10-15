@@ -1,7 +1,9 @@
 import type { Metadata } from "next"
 import { ReceptionistPortal, type PortalState } from "@/components/receptionist-portal/portal"
+import { Studio } from "@/components/receptionist-portal/studio/studio"
 import { requireNorthlineTeamMember } from "@/lib/auth/team"
-import { getAgent, getDemoLine, getLlm, listCalls, retellConfig, RetellError } from "@/lib/receptionist/retell"
+import { getAgent, getDemoLine, getLlm, listCalls, retellApi, retellConfig, RetellError } from "@/lib/receptionist/retell"
+import { loadOverview, type StudioOverview } from "@/lib/receptionist/studio/service"
 
 export const metadata: Metadata = {
   title: { absolute: "Receptionist demo · Mountline" },
@@ -10,11 +12,29 @@ export const metadata: Metadata = {
 
 /**
  * The team-only live-demo portal for the AI receptionist (not a public page yet). Signed-out visitors
- * go to /id; signed-in non-team accounts go to /access-restricted.
+ * go to /id; signed-in non-team accounts go to /access-restricted. ?view=studio opens Receptionist
+ * Studio, which builds a demo receptionist for any business.
  */
-export default async function ReceptionistPortalPage() {
+export default async function ReceptionistPortalPage({ searchParams }: { searchParams: Promise<{ view?: string | string[] }> }) {
   await requireNorthlineTeamMember()
-  return <ReceptionistPortal initial={await loadState()} />
+  const { view } = await searchParams
+  if (view === "studio") {
+    return (
+      <ReceptionistPortal view="studio">
+        <Studio initial={await loadStudioState()} />
+      </ReceptionistPortal>
+    )
+  }
+  return <ReceptionistPortal view="line" initial={await loadState()} />
+}
+
+async function loadStudioState(): Promise<{ ok: true; data: StudioOverview } | { ok: false; error: string }> {
+  if (!retellConfig().ready) return { ok: false, error: "RETELL_API_KEY isn't set. Add it to .env.local (and Vercel), then reload." }
+  try {
+    return { ok: true, data: await loadOverview(retellApi) }
+  } catch (error) {
+    return { ok: false, error: error instanceof RetellError ? error.message : "Couldn't load Studio from Retell." }
+  }
 }
 
 async function loadState(): Promise<PortalState> {
@@ -23,7 +43,7 @@ async function loadState(): Promise<PortalState> {
   try {
     const line = await getDemoLine()
     const agentId = line.inbound[0]?.agent_id ?? line.outbound[0]?.agent_id
-    if (!agentId) return { status: "error", phoneNumber: config.phoneNumber, error: "No agent answers the demo number yet. Assign one in Retell." }
+    if (!agentId) return { status: "error", phoneNumber: config.phoneNumber, error: "No agent answers the demo number yet. Assign one in Studio or in Retell." }
     const agent = await getAgent(agentId)
     const [llm, recent] = await Promise.all([agent.llmId ? getLlm(agent.llmId) : Promise.resolve(null), listCalls(agentId)])
     const binding = line.inbound.find((ref) => ref.agent_id === agentId) ?? line.inbound[0]

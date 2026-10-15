@@ -61,6 +61,9 @@ async function retell<T>(path: string, init: { method?: string; body?: unknown }
   return (text ? JSON.parse(text) : undefined) as T
 }
 
+/** The same authenticated request, for Receptionist Studio (lib/receptionist/studio/service.ts). */
+export const retellApi = retell
+
 /* Types: only the fields the portal uses. */
 
 type AgentRef = { agent_id: string; agent_version?: number | string | null; weight?: number }

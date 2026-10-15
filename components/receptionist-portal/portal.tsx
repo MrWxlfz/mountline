@@ -29,22 +29,29 @@ export type PortalState =
     }
 
 /** Early-access price shown to prospects during a demo. TODO(luke): change here if it moves. */
-const EARLY_ACCESS = "Early access · $99/mo, setup included"
+const EARLY_ACCESS = "Early access · $74.99/mo, setup included"
 
-export function ReceptionistPortal({ initial }: { initial: PortalState }) {
+export type PortalView = "line" | "studio"
+
+/** The portal shell. "line" is the live demo line; "studio" builds demo receptionists (passed in as children). */
+export function ReceptionistPortal({ view, initial, children }: { view: PortalView; initial?: PortalState; children?: React.ReactNode }) {
   return (
     <div className="mk-portal">
       <header className="pt-top">
         <div className="pt-top-in">
           <Link href="/" className="logo hit" aria-label="Mountline home"><Wordmark /></Link>
           <span className="pt-title">Receptionist demo</span>
+          <nav className="pt-views" aria-label="Portal sections">
+            <Link href="/receptionist" className="pt-view" aria-current={view === "line" ? "page" : undefined}>Demo line</Link>
+            <Link href="/receptionist?view=studio" className="pt-view" aria-current={view === "studio" ? "page" : undefined}>Studio</Link>
+          </nav>
           <div className="pt-top-right">
             <span className="pt-pill">{EARLY_ACCESS}</span>
             <Link href="/dashboard" className="pt-link hit">Dashboard</Link>
           </div>
         </div>
       </header>
-      {initial.status === "ready" ? <ReadyPortal state={initial} /> : <NotReady state={initial} />}
+      {view === "studio" ? children : initial?.status === "ready" ? <ReadyPortal state={initial} /> : initial ? <NotReady state={initial} /> : null}
     </div>
   )
 }

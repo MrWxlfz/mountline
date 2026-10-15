@@ -136,11 +136,12 @@ export async function isNorthlineTeamMember(): Promise<boolean> {
   return access.isTeamMember
 }
 
-export async function requireNorthlineTeamMember() {
+/** For team-only pages. `returnTo` (a /receptionist path) brings a team member back after sign-in. */
+export async function requireNorthlineTeamMember(returnTo?: string) {
   const access = await getNorthlineTeamAccess()
 
   if (access.status === "unauthenticated") {
-    redirect("/id")
+    redirect(returnTo ? `/id?redirect_url=${encodeURIComponent(returnTo)}` : "/id")
   }
 
   if (access.status === "forbidden" || access.status === "error") {

@@ -1,25 +1,25 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { RetellWebClient } from "retell-client-js-sdk"
-import { readStudioCall, startStudioTestCall, stopStudioTestCall } from "@/app/(marketing)/receptionist/studio-actions"
-import type { CallDetail } from "@/lib/receptionist/retell"
+import { startStudioTestCall, stopStudioTestCall } from "@/app/(marketing)/receptionist/studio-actions"
 
 type Phase = "idle" | "mic" | "connecting" | "live" | "ended" | "error"
 type Turn = { role: string; content: string }
 
-const ANALYSIS_WAIT_MS = 4 * 60_000
-const OPEN = new Set(["registered", "ongoing"])
-
-/** What the post-call wait looks like: still polling, gave up, and the last thing Retell said. */
-export type AnalysisWait = { state: "waiting" | "timeout"; status: string | null; error: string | null }
+/** Where the owner's side of a call lives: Studio opens it the moment a test call ends. */
+export const ownerHref = (agentId: string, callId?: string | null) =>
+  `/receptionist/owner?agent=${encodeURIComponent(agentId)}${callId ? `&call=${encodeURIComponent(callId)}` : ""}`
 
 /**
  * A real Retell web call in the browser. The server mints a short-lived access token for a Studio
  * agent (the API key never leaves the server); the Retell browser SDK joins with the microphone.
- * Ending, unmounting, or switching receptionists always stops the call and releases the mic.
+ * Ending, unmounting, or switching receptionists always stops the call and releases the mic. When a
+ * connected call ends, it goes straight to the owner view, where the call's details arrive.
  */
-export function TestCall({ agentId, demo, blockedReason }: { agentId: string; demo: boolean; blockedReason: string | null }) {
+export function TestCall({ agentId, blockedReason }: { agentId: string; blockedReason: string | null }) {
+  const router = useRouter()
   const [phase, setPhase] = useState<Phase>("idle")
   const [error, setError] = useState<string | null>(null)
   const [muted, setMuted] = useState(false)
@@ -28,9 +28,6 @@ export function TestCall({ agentId, demo, blockedReason }: { agentId: string; de
   const [startedAt, setStartedAt] = useState<number | null>(null)
   const [now, setNow] = useState(() => Date.now())
   const [callId, setCallId] = useState<string | null>(null)
-  const [result, setResult] = useState<CallDetail | null>(null)
-  const [wait, setWait] = useState<AnalysisWait>({ state: "waiting", status: null, error: null })
-  const [pollRound, setPollRound] = useState(0)
   const client = useRef<RetellWebClient | null>(null)
   // The call to stop on Retell's side if this component goes away mid-call.
   const openCall = useRef<string | null>(null)
@@ -69,45 +66,17 @@ export function TestCall({ agentId, demo, blockedReason }: { agentId: string; de
     transcript.current?.scrollTo({ top: transcript.current.scrollHeight, behavior: "smooth" })
   }, [turns])
 
-  // After the call, wait for Retell's post-call analysis (the booking details). Shows what Retell
-  // reports while waiting, and ends the call server-side if Retell still has it open.
+  // The call is over: show it from the owner's side.
   useEffect(() => {
-    if (phase !== "ended" || !callId) return
-    let stopped = false
-    let timer = 0
-    let nudged = false
-    const began = Date.now()
-    const tick = async () => {
-      const read = await readStudioCall(callId)
-      if (stopped) return
-      if (read.ok) {
-        setResult(read.data)
-        setWait((current) => ({ ...current, status: read.data.status, error: null }))
-        if (read.data.analyzed) return
-        if (OPEN.has(read.data.status) && !nudged) {
-          nudged = true
-          const stop = await stopStudioTestCall(callId)
-          if (!stopped && !stop.ok) setWait((current) => ({ ...current, error: stop.error }))
-        }
-      } else {
-        setWait((current) => ({ ...current, error: read.error }))
-      }
-      if (Date.now() - began < ANALYSIS_WAIT_MS) timer = window.setTimeout(tick, 3000)
-      else setWait((current) => ({ ...current, state: "timeout" }))
-    }
-    timer = window.setTimeout(tick, 1500)
-    return () => {
-      stopped = true
-      window.clearTimeout(timer)
-    }
-  }, [phase, callId, pollRound])
+    // startedAt is only set once the call connected; calls that never connected stay here.
+    if (phase === "ended" && callId && startedAt) router.push(ownerHref(agentId, callId))
+  }, [phase, callId, startedAt, agentId, router])
 
   async function start() {
     hangUp()
     setError(null)
     setTurns([])
-    setResult(null)
-    setWait({ state: "waiting", status: null, error: null })
+    setStartedAt(null)
     setMuted(false)
     setTalking(false)
     setCallId(null)
@@ -238,91 +207,9 @@ export function TestCall({ agentId, demo, blockedReason }: { agentId: string; de
         </div>
       ) : null}
 
-      {phase === "ended" && callId ? <CallOutcome result={result} demo={demo} wait={wait} onRetry={() => {
-            setWait((current) => ({ ...current, state: "waiting", error: null }))
-            setPollRound((round) => round + 1)
-          }} /> : null}
-    </div>
-  )
-}
-
-const OUTCOMES: Record<string, string> = {
-  booked: "Booked",
-  rescheduled: "Rescheduled",
-  cancelled: "Cancelled",
-  request_taken: "Request taken",
-  quote_requested: "Quote requested",
-  callback_requested: "Callback requested",
-  question_answered: "Questions answered",
-  urgent_referred: "Urgent: referred",
-  no_outcome: "No outcome",
-}
-
-const FIELD_LABELS: Array<[string, string]> = [
-  ["booked_for", "When"],
-  ["service", "Service"],
-  ["staff_preference", "With"],
-  ["caller_name", "Name"],
-  ["callback_number", "Number"],
-  ["details", "Details"],
-  ["reason", "Reason"],
-]
-
-/** What the call produced, from Retell's post-call analysis. A booking here is always simulated. */
-export function CallOutcome({ result, demo, wait, onRetry }: { result: CallDetail | null; demo: boolean; wait: AnalysisWait; onRetry: () => void }) {
-  if (!result?.analyzed) {
-    const open = wait.status ? OPEN.has(wait.status) : false
-    const message =
-      wait.state === "timeout"
-        ? open
-          ? "Retell still has this call open, so it hasn't analyzed it. It closes on its own at the 15-minute limit."
-          : "Retell hasn't sent the analysis yet. It sometimes takes a few minutes."
-        : open
-          ? "Ending the call on Retell's side…"
-          : wait.status === "ended"
-            ? "Call closed. Waiting for Retell's analysis (usually under a minute)…"
-            : wait.status === "error" || wait.status === "not_connected"
-              ? `Retell marked this call "${wait.status.replace("_", " ")}", so there's nothing to analyze.`
-              : "Checking the call with Retell…"
-    const done = wait.state === "timeout" || wait.status === "error" || wait.status === "not_connected"
-    return (
-      <div className="st-outcome">
-        <p className="pt-muted small">{done ? null : <span className="pt-spin dark" aria-hidden="true" />}{message}</p>
-        {wait.error ? <p className="pt-error">{wait.error}</p> : null}
-        {wait.state === "timeout" ? (
-          <div className="pt-actions">
-            <button type="button" className="pt-btn light small" onClick={onRetry}>Check again</button>
-            {result?.id ? <span className="pt-chip pt-mono">{result.id}</span> : null}
-          </div>
-        ) : null}
-      </div>
-    )
-  }
-  const data = new Map(result.collected.map((field) => [field.key, field.value]))
-  const outcome = data.get("outcome") ?? ""
-  const booked = outcome === "booked" || outcome === "rescheduled"
-  const rows = FIELD_LABELS.filter(([key]) => data.get(key) && data.get(key) !== "null")
-  return (
-    <div className={booked ? "st-outcome booked" : "st-outcome"}>
-      <div className="st-outcome-h">
-        <h3>{booked && demo ? "Demo booking" : "What it captured"}</h3>
-        {outcome ? <span className={booked ? "pt-chip good" : "pt-chip"}>{OUTCOMES[outcome] ?? outcome}</span> : null}
-        {booked && demo ? <span className="pt-chip">Simulated · not on any calendar</span> : null}
-      </div>
-      {rows.length ? (
-        <dl className="pt-dl">
-          {rows.map(([key, labelText]) => (
-            <div key={key}><dt>{labelText}</dt><dd>{data.get(key)}</dd></div>
-          ))}
-        </dl>
+      {phase === "ended" && callId && startedAt ? (
+        <p className="pt-muted small st-gap"><span className="pt-spin dark" aria-hidden="true" />Opening the owner&apos;s view…</p>
       ) : null}
-      {result.summary ? <p className="st-summary">{result.summary}</p> : null}
-      {result.recordingUrl ? <audio controls preload="none" src={result.recordingUrl} className="st-audio" /> : null}
-      <div className="pt-chips">
-        {result.durationMs ? <span className="pt-chip">{formatClock(result.durationMs)}</span> : null}
-        {result.costCents !== null ? <span className="pt-chip">Cost ${(result.costCents / 100).toFixed(2)}</span> : null}
-        <span className="pt-chip pt-mono">{result.id}</span>
-      </div>
     </div>
   )
 }

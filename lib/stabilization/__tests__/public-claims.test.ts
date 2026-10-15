@@ -82,15 +82,23 @@ test("the old triangle logo lives only in the rebrand notice", async () => {
 })
 
 test("the receptionist demo portal is team-only, keeps Retell on the server, and limits outbound calls", async () => {
-  const [page, actions, retell, portal] = await Promise.all([
+  const [page, ownerPage, actions, studioActions, retell, portal] = await Promise.all([
     read("app/(marketing)/receptionist/page.tsx"),
+    read("app/(marketing)/receptionist/owner/page.tsx"),
     read("app/(marketing)/receptionist/actions.ts"),
+    read("app/(marketing)/receptionist/studio-actions.ts"),
     read("lib/receptionist/retell.ts"),
     read("components/receptionist-portal/portal.tsx"),
   ])
-  // The page requires a Mountline team sign-in and isn't indexed.
-  assert.match(page, /await requireNorthlineTeamMember\(\)/)
-  assert.match(page, /robots: \{ index: false, follow: false \}/)
+  // The pages require a Mountline team sign-in and aren't indexed.
+  for (const source of [page, ownerPage]) {
+    assert.match(source, /await requireNorthlineTeamMember\(/)
+    assert.match(source, /robots: \{ index: false, follow: false \}/)
+  }
+  // Every Studio action goes through the team check too.
+  const studioExported = studioActions.match(/export async function \w+/g) ?? []
+  assert.ok(studioExported.length >= 8)
+  assert.equal((studioActions.match(/return team\(/g) ?? []).length, studioExported.length, "each Studio action goes through team()")
   // Every action re-checks team membership; none trusts the page that rendered it.
   const exported = actions.match(/export async function \w+/g) ?? []
   assert.ok(exported.length >= 5)

@@ -1,5 +1,6 @@
 import { voiceCapabilityIds, type VoiceCapabilityId } from "./capabilities.ts"
 import { getIndustry, type Industry } from "./industries.ts"
+import { commonOwnerFields, ownerFieldLibrary, type OwnerField } from "./owner.ts"
 import { personalities, type Personality } from "./personalities.ts"
 import { studioConfigSchema, type StudioConfig } from "./schema.ts"
 
@@ -364,26 +365,24 @@ function closing({ config }: Context) {
 
 /* After the call ----------------------------------------------------------------------- */
 
-function postCallFields({ industry, on, scheduling: strategy }: Context): PostCallField[] {
+function postCallFields({ industry, scheduling: strategy }: Context): PostCallField[] {
+  const field = (name: string, spec: OwnerField): PostCallField =>
+    spec.type === "enum" ? { type: "enum", name, description: spec.description, choices: [...(spec.choices ?? [])] } : { type: spec.type, name, description: spec.description }
+  const common = commonOwnerFields
   const fields: PostCallField[] = [
-    { type: "string", name: "caller_name", description: "The caller's name, if they gave one." },
-    { type: "string", name: "callback_number", description: "The callback number the caller gave or confirmed, if any." },
-    { type: "string", name: "reason", description: "Why they called, in one short sentence." },
-    { type: "string", name: "details", description: `${industry.keyDetails}, if mentioned.` },
+    field("caller_name", common.caller_name),
+    field("callback_number", common.callback_number),
+    field("reason", common.reason),
+    field("outcome", {
+      ...common.outcome,
+      description: strategy === "simulated" ? "What the call ended with. Bookings on this line are simulated demo bookings; still report them as booked." : common.outcome.description,
+    }),
+    field("booked_for", common.booked_for),
+    field("service", { ...common.service, description: `The service or ${industry.visit} type agreed on, if any.` }),
   ]
-  if (on.has("scheduling") || on.has("changes") || on.has("quotes")) {
-    fields.push(
-      {
-        type: "enum",
-        name: "outcome",
-        description: strategy === "simulated" ? "What the call ended with. Bookings on this line are simulated demo bookings." : "What the call ended with.",
-        choices: ["booked", "rescheduled", "cancelled", "request_taken", "quote_requested", "callback_requested", "question_answered", "urgent_referred", "no_outcome"],
-      },
-      { type: "string", name: "booked_for", description: `The day and time of the ${industry.visit} that was booked, moved, or requested, if any (for example "Thursday, Oct 16 at 2:30 PM").` },
-      { type: "string", name: "service", description: `The service or ${industry.visit} type agreed on, if any.` },
-    )
-  }
-  if (industry.staff) fields.push({ type: "string", name: "staff_preference", description: `The ${industry.staff} the caller asked for, if any.` })
-  if (on.has("urgent")) fields.push({ type: "boolean", name: "urgent", description: "True if the caller described an urgent or emergency situation." })
+  if (industry.staff) fields.push(field("staff_preference", { ...common.staff_preference, description: `The ${industry.staff} the caller asked for, if any.` }))
+  fields.push(field("urgent", common.urgent))
+  for (const id of industry.owner) fields.push(field(id, ownerFieldLibrary[id]))
+  fields.push({ type: "string", name: "details", description: `Anything else the business should know (${industry.keyDetails.toLowerCase()}), if mentioned.` })
   return fields
 }

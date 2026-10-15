@@ -6,6 +6,7 @@ import {
   getPortalIdFromRedirect,
   getSafePortalRedirect,
 } from "@/lib/auth/mountline-id"
+import { getSafeTeamRedirect } from "@/lib/auth/identity-rules"
 
 type AuthRedirectPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -14,11 +15,14 @@ type AuthRedirectPageProps = {
 export default async function AuthRedirectPage({ searchParams }: AuthRedirectPageProps) {
   const params = searchParams ? await searchParams : {}
   const requestedPortalPath = getSafePortalRedirect(params.redirect_url)
+  // Team-only pages (/receptionist) a team member was sent to sign in from; ignored for everyone else.
+  const requestedTeamPath = getSafeTeamRedirect(params.redirect_url)
   const identity = await getServerIdentity()
 
   if (!identity) {
-    const loginPath = requestedPortalPath
-      ? `/id?redirect_url=${encodeURIComponent(requestedPortalPath)}`
+    const returnTo = requestedPortalPath ?? requestedTeamPath
+    const loginPath = returnTo
+      ? `/id?redirect_url=${encodeURIComponent(returnTo)}`
       : "/id"
     redirect(loginPath)
   }
@@ -28,7 +32,7 @@ export default async function AuthRedirectPage({ searchParams }: AuthRedirectPag
     throw new Error("Mountline ID authorization could not be verified.")
   }
   if (teamAccess.isTeamMember) {
-    redirect("/dashboard")
+    redirect(requestedTeamPath ?? "/dashboard")
   }
 
   const portalResult = await getAccessiblePortalDestinations({ identity })

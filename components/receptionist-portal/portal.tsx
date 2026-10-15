@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { Wordmark } from "@/components/brand/wordmark"
+import { Account } from "@/components/receptionist-portal/account"
 import { DemoQr } from "@/components/receptionist-portal/demo-qr"
 import { hangUp, placeDemoCall, publishToAgent, readCall, recentCalls, pointDemoLineAtLatest } from "@/app/(marketing)/receptionist/actions"
 import { receptionistDemo } from "@/lib/receptionist/demo"
@@ -48,6 +49,7 @@ export function ReceptionistPortal({ view, initial, children }: { view: PortalVi
           <div className="pt-top-right">
             <span className="pt-pill">{EARLY_ACCESS}</span>
             <Link href="/dashboard" className="pt-link hit">Dashboard</Link>
+            <Account />
           </div>
         </div>
       </header>

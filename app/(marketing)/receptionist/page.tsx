@@ -16,8 +16,8 @@ export const metadata: Metadata = {
  * Studio, which builds a demo receptionist for any business.
  */
 export default async function ReceptionistPortalPage({ searchParams }: { searchParams: Promise<{ view?: string | string[] }> }) {
-  await requireNorthlineTeamMember()
   const { view } = await searchParams
+  await requireNorthlineTeamMember(view === "studio" ? "/receptionist?view=studio" : "/receptionist")
   if (view === "studio") {
     return (
       <ReceptionistPortal view="studio">

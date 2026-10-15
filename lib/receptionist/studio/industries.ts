@@ -1,4 +1,5 @@
 import type { VoiceCapabilityId } from "./capabilities.ts"
+import type { OwnerFieldId } from "./owner.ts"
 import type { PersonalityId } from "./personalities.ts"
 
 /*
@@ -59,6 +60,8 @@ export type Industry = {
   desk?: string
   /** Post-call field: the industry-specific details worth seeing after a call. */
   keyDetails: string
+  /** What the owner dashboard shows for this industry, most important first (see owner.ts). */
+  owner: readonly OwnerFieldId[]
 }
 
 const HEALTH_RULES = [
@@ -95,6 +98,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "pricing"],
     personality: "casual",
     keyDetails: "Service (cut style, beard, etc.) and barber preference",
+    owner: [],
   },
   {
     id: "hair_salon",
@@ -121,6 +125,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "pricing"],
     personality: "warm",
     keyDetails: "Service, hair length for color, and stylist preference",
+    owner: ["client_status"],
   },
   {
     id: "nail_salon",
@@ -146,6 +151,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "pricing"],
     personality: "warm",
     keyDetails: "Services, removal needed, and group size",
+    owner: ["group_size"],
   },
   {
     id: "med_spa",
@@ -175,6 +181,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "pricing"],
     personality: "polished",
     keyDetails: "Treatment of interest and whether they're a first-time client",
+    owner: ["client_status"],
   },
 
   /* Health care ---------------------------------------------------------------------- */
@@ -206,6 +213,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "urgent"],
     personality: "polished",
     keyDetails: "New or existing patient, visit reason, and insurance carrier if given",
+    owner: ["patient_status", "visit_reason", "insurance_carrier"],
   },
   {
     id: "orthodontist",
@@ -231,6 +239,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake"],
     personality: "warm",
     keyDetails: "Patient age, new or existing, and braces vs aligners interest",
+    owner: ["patient_status", "visit_reason"],
   },
   {
     id: "family_medicine",
@@ -259,6 +268,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "urgent", "messages"],
     personality: "polished",
     keyDetails: "Visit type, new or existing patient, and provider preference",
+    owner: ["patient_status", "visit_reason"],
   },
   {
     id: "urgent_care",
@@ -286,6 +296,7 @@ export const industries = [
     defaults: ["faq", "intake", "urgent", "after_hours", "scheduling"],
     personality: "polished",
     keyDetails: "Reason for visit and planned arrival time",
+    owner: ["visit_reason", "patient_status"],
   },
   {
     id: "chiro_pt",
@@ -312,6 +323,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake"],
     personality: "warm",
     keyDetails: "New or existing patient, area of concern, and accident-related or not",
+    owner: ["patient_status", "visit_reason"],
   },
 
   /* Hospitality & food ---------------------------------------------------------------- */
@@ -344,6 +356,7 @@ export const industries = [
     personality: "polished",
     desk: "front desk",
     keyDetails: "Dates, nights, guests, room type, and special requests",
+    owner: ["check_in", "check_out", "guests", "room_type", "email"],
   },
   {
     id: "restaurant",
@@ -370,6 +383,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "after_hours"],
     personality: "warm",
     keyDetails: "Party size, date and time, and occasion or allergy notes",
+    owner: ["party_size", "occasion"],
   },
   {
     id: "catering",
@@ -396,6 +410,7 @@ export const industries = [
     defaults: ["quotes", "intake", "faq", "callback", "scheduling"],
     personality: "warm",
     keyDetails: "Event date, head count, location, service style, dietary needs, and budget",
+    owner: ["event_date", "headcount", "event_location", "service_style", "dietary_needs", "budget", "email"],
   },
 
   /* Home services --------------------------------------------------------------------- */
@@ -427,6 +442,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "quotes", "urgent", "after_hours", "callback"],
     personality: "casual",
     keyDetails: "Problem, active leak or not, location, and own or rent",
+    owner: ["issue", "urgency", "service_address", "own_or_rent", "preferred_window"],
   },
   {
     id: "hvac",
@@ -456,6 +472,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "quotes", "urgent", "after_hours", "callback"],
     personality: "casual",
     keyDetails: "System symptom, which system, urgency, and location",
+    owner: ["issue", "urgency", "service_address", "equipment", "own_or_rent", "preferred_window"],
   },
   {
     id: "electrical",
@@ -484,6 +501,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "quotes", "urgent", "callback"],
     personality: "casual",
     keyDetails: "Problem or install type, safety concern, and location",
+    owner: ["issue", "urgency", "service_address", "preferred_window"],
   },
   {
     id: "roofing",
@@ -509,6 +527,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "quotes", "urgent", "callback"],
     personality: "warm",
     keyDetails: "Issue, active leak, insurance claim status, and roof details",
+    owner: ["issue", "urgency", "service_address", "insurance_claim", "preferred_window"],
   },
   {
     id: "landscaping",
@@ -534,6 +553,7 @@ export const industries = [
     defaults: ["quotes", "intake", "scheduling", "faq", "callback"],
     personality: "casual",
     keyDetails: "Maintenance vs project, scope, lot size, and frequency",
+    owner: ["issue", "service_address", "frequency", "preferred_window"],
   },
   {
     id: "pool",
@@ -559,6 +579,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "quotes", "faq", "pricing"],
     personality: "casual",
     keyDetails: "Service type, issue, pool type and size",
+    owner: ["issue", "service_address", "equipment", "preferred_window"],
   },
   {
     id: "pest_control",
@@ -585,6 +606,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "quotes", "faq", "urgent"],
     personality: "casual",
     keyDetails: "Pest, location in the home, kids and pets, deadline",
+    owner: ["pest_type", "kids_pets", "service_address", "deadline", "preferred_window"],
   },
   {
     id: "cleaning",
@@ -610,6 +632,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "intake", "quotes", "pricing"],
     personality: "warm",
     keyDetails: "Clean type, home size, frequency, and pets",
+    owner: ["home_size", "frequency", "kids_pets", "service_address"],
   },
   {
     id: "garage_door",
@@ -635,6 +658,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "urgent", "quotes", "pricing"],
     personality: "casual",
     keyDetails: "Door symptom, car trapped or door stuck open, location",
+    owner: ["issue", "urgency", "service_address", "preferred_window"],
   },
 
   /* Automotive ------------------------------------------------------------------------ */
@@ -663,6 +687,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "intake", "quotes", "faq"],
     personality: "casual",
     keyDetails: "Vehicle, problem, drivable or not, wait vs drop-off",
+    owner: ["vehicle", "issue", "drivable"],
   },
   {
     id: "auto_detailing",
@@ -688,6 +713,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "intake", "pricing", "faq"],
     personality: "casual",
     keyDetails: "Vehicle type, package, condition, and location",
+    owner: ["vehicle", "service_address"],
   },
   {
     id: "tire_shop",
@@ -713,6 +739,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "quotes", "pricing", "faq"],
     personality: "casual",
     keyDetails: "Service, vehicle or tire size, and quantity",
+    owner: ["vehicle", "tire_size"],
   },
 
   /* Pets ------------------------------------------------------------------------------ */
@@ -742,6 +769,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "intake", "urgent", "faq"],
     personality: "warm",
     keyDetails: "Pet name, species, age, and reason for visit",
+    owner: ["pet", "client_status", "visit_reason", "urgency"],
   },
   {
     id: "pet_grooming",
@@ -767,6 +795,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "intake", "pricing", "faq"],
     personality: "warm",
     keyDetails: "Pet name, breed, size, service, coat condition",
+    owner: ["pet", "vaccines_current"],
   },
   {
     id: "pet_boarding",
@@ -792,6 +821,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "intake", "faq", "pricing"],
     personality: "warm",
     keyDetails: "Dates, pets, vaccines, and special needs",
+    owner: ["pet", "check_in", "check_out", "vaccines_current"],
   },
 
   /* Real estate & property ------------------------------------------------------------ */
@@ -822,6 +852,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "callback", "messages", "faq"],
     personality: "warm",
     keyDetails: "Buy or sell, property or area, timeline, financing",
+    owner: ["buy_or_sell", "property", "timeline", "financing", "email"],
   },
   {
     id: "property_management",
@@ -854,6 +885,7 @@ export const industries = [
     defaults: ["intake", "urgent", "after_hours", "messages", "scheduling"],
     personality: "polished",
     keyDetails: "Caller type, property and unit, issue, emergency or routine",
+    owner: ["caller_type", "property", "issue", "urgency"],
   },
 
   /* Professional, fitness & learning --------------------------------------------------- */
@@ -884,6 +916,7 @@ export const industries = [
     defaults: ["intake", "scheduling", "callback", "messages", "faq"],
     personality: "polished",
     keyDetails: "Matter type, other parties, deadlines, new or existing client",
+    owner: ["matter_type", "other_parties", "deadline", "client_status", "email"],
   },
   {
     id: "fitness_studio",
@@ -909,6 +942,7 @@ export const industries = [
     defaults: ["scheduling", "changes", "faq", "intake", "pricing"],
     personality: "casual",
     keyDetails: "New or member, interest, experience level",
+    owner: ["client_status", "experience"],
   },
   {
     id: "tutoring",
@@ -934,6 +968,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "faq", "pricing", "callback"],
     personality: "warm",
     keyDetails: "Grade, subject or test, goal, format",
+    owner: ["student", "deadline", "schedule_needed"],
   },
   {
     id: "daycare",
@@ -962,6 +997,7 @@ export const industries = [
     defaults: ["scheduling", "intake", "faq", "messages", "pricing"],
     personality: "warm",
     keyDetails: "Child's age, start date, schedule needed",
+    owner: ["child_age", "timeline", "schedule_needed"],
   },
 ] as const satisfies readonly Industry[]
 

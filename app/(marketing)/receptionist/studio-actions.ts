@@ -1,7 +1,7 @@
 "use server"
 
 import { getNorthlineTeamAccess } from "@/lib/auth/team"
-import { RetellError, getCall, retellApi, retellConfig, type CallDetail } from "@/lib/receptionist/retell"
+import { RetellError, getCall, listCalls, retellApi, retellConfig, type CallDetail, type CallSummary } from "@/lib/receptionist/retell"
 import { asTeamMember, createRateLimit, type Result } from "@/lib/receptionist/studio/guard"
 import {
   StudioError,
@@ -96,6 +96,14 @@ export async function stopStudioTestCall(callId: string): Promise<Result<null>> 
   return team(async () => {
     await stopStudioWebCall(retellApi, String(callId))
     return null
+  })
+}
+
+/** The owner dashboard's call list: this receptionist's recent calls (browser and phone). */
+export async function ownerRecentCalls(agentId: string): Promise<Result<CallSummary[]>> {
+  return team(() => {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(String(agentId))) throw new StudioError("That agent ID doesn't look right.")
+    return listCalls(String(agentId), 25)
   })
 }
 

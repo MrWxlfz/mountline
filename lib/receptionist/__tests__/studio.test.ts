@@ -3,6 +3,8 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { normalizeCapabilities, plannedSmsCapabilities, voiceCapabilityIds } from "../studio/capabilities.ts"
 import { asTeamMember, createRateLimit, NOT_TEAM } from "../studio/guard.ts"
+import { ownerEvent, ownerFieldLibrary, readField } from "../studio/owner.ts"
+import { getSafeTeamRedirect } from "../../auth/identity-rules.ts"
 import { getIndustry, industries, searchIndustries } from "../studio/industries.ts"
 import { buildStudioReceptionist, firstMessageFor } from "../studio/prompt.ts"
 import { validateStudioConfig, type StudioConfig } from "../studio/schema.ts"
@@ -131,12 +133,21 @@ test("every prompt keeps the honesty rules and the live date", () => {
   }
 })
 
-test("post-call fields follow capabilities and industry", () => {
-  const booking = buildStudioReceptionist(barber).postCallFields.map((field) => field.name)
-  assert.ok(booking.includes("outcome") && booking.includes("booked_for") && booking.includes("staff_preference"))
-  const faqOnly = buildStudioReceptionist(config({ industry: "hotel", capabilities: ["faq"] })).postCallFields.map((field) => field.name)
-  assert.ok(!faqOnly.includes("booked_for"))
-  assert.ok(!faqOnly.includes("staff_preference"))
+test("post-call fields are what that industry's owner needs, and nothing else", () => {
+  const names = (changes: Partial<StudioConfig>) => buildStudioReceptionist(config(changes)).postCallFields.map((field) => field.name)
+  const dental = names({ industry: "dental" })
+  const hvac = names({ industry: "hvac" })
+  const barbershop = names({})
+  for (const field of ["patient_status", "visit_reason", "insurance_carrier", "booked_for"]) assert.ok(dental.includes(field), `dental: ${field}`)
+  for (const field of ["service_address", "urgency", "equipment"]) assert.ok(!dental.includes(field), `dental shouldn't ask for ${field}`)
+  for (const field of ["issue", "urgency", "service_address", "equipment", "own_or_rent", "preferred_window"]) assert.ok(hvac.includes(field), `hvac: ${field}`)
+  assert.ok(!hvac.includes("patient_status"))
+  assert.ok(barbershop.includes("staff_preference") && !barbershop.includes("service_address"))
+  for (const industry of industries) {
+    const fields = buildStudioReceptionist(config({ industry: industry.id })).postCallFields
+    assert.equal(new Set(fields.map((field) => field.name)).size, fields.length, `${industry.id} repeats a field`)
+    for (const field of fields) if (field.type === "enum") assert.ok(field.choices.length > 0)
+  }
 })
 
 /* Validation ---------------------------------------------------------------------------- */
@@ -355,4 +366,56 @@ test("the per-person rate limit blocks bursts and recovers after the window", ()
 
 test("industry lookups fail loudly for unknown ids", () => {
   assert.throws(() => getIndustry("nope"))
+})
+
+/* Owner view ---------------------------------------------------------------------------- */
+
+test("owners only get notifications for priority events", () => {
+  const dental = getIndustry("dental")
+  const hvac = getIndustry("hvac")
+  const hotel = getIndustry("hotel")
+
+  const booked = ownerEvent(dental, { outcome: "booked", booked_for: "Thursday, Oct 16 at 2:30 PM", caller_name: "Maria Lopez", service: "Cleaning" })
+  assert.equal(booked.priority, true)
+  assert.equal(booked.title, "New appointment")
+  assert.match(booked.line, /Thursday, Oct 16 at 2:30 PM · Cleaning · Maria Lopez/)
+
+  assert.equal(ownerEvent(hotel, { outcome: "booked" }).title, "New reservation")
+  const urgent = ownerEvent(hvac, { outcome: "request_taken", urgent: "true", issue: "No AC, 98 inside", service_address: "123 Main St, Keller" })
+  assert.equal(urgent.kind, "urgent")
+  assert.match(urgent.line, /No AC, 98 inside · 123 Main St, Keller/)
+  assert.equal(ownerEvent(hvac, { outcome: "quote_requested" }).priority, true)
+  assert.equal(ownerEvent(hvac, { outcome: "callback_requested" }).priority, true)
+
+  for (const quiet of [{ outcome: "question_answered" }, { outcome: "no_outcome" }, {}] as Array<Record<string, string>>) {
+    assert.equal(ownerEvent(dental, quiet).priority, false, JSON.stringify(quiet))
+  }
+  assert.equal(ownerEvent(dental, { outcome: "booked", urgent: "false" }).kind, "appointment")
+})
+
+test("analysis values are cleaned before the owner sees them", () => {
+  assert.equal(readField({ a: " null " }, "a"), null)
+  assert.equal(readField({ a: "N/A" }, "a"), null)
+  assert.equal(readField({ a: "\"123 Main St\"" }, "a"), "123 Main St")
+  assert.equal(readField({}, "a"), null)
+})
+
+test("a dentist's owner view stays minimal; trades get the job details", () => {
+  const dental = getIndustry("dental").owner
+  const hvac = getIndustry("hvac").owner
+  assert.ok(dental.length <= 3)
+  assert.ok(!dental.some((id) => (ownerFieldLibrary[id] as { kind?: string }).kind === "address"))
+  for (const id of ["issue", "urgency", "service_address"] as const) assert.ok(hvac.includes(id))
+  for (const industry of industries) {
+    assert.equal(new Set(industry.owner).size, industry.owner.length, `${industry.id} repeats an owner field`)
+    for (const id of industry.owner) assert.ok(id in ownerFieldLibrary)
+  }
+})
+
+test("sign-in only returns to /receptionist pages on this site", () => {
+  assert.equal(getSafeTeamRedirect("/receptionist?view=studio"), "/receptionist?view=studio")
+  assert.equal(getSafeTeamRedirect("/receptionist/owner?agent=agent_1"), "/receptionist/owner?agent=agent_1")
+  for (const bad of ["https://evil.example/receptionist", "//evil.example/receptionist", "/dashboard", "/receptionistx", "receptionist", "", null, undefined]) {
+    assert.equal(getSafeTeamRedirect(bad), null, String(bad))
+  }
 })

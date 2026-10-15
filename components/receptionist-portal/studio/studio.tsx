@@ -1,10 +1,11 @@
 "use client"
 
+import Link from "next/link"
 import { useMemo, useRef, useState } from "react"
 import { loadStudio, openStudioAgent, removeStudioAgent, saveStudioAgent } from "@/app/(marketing)/receptionist/studio-actions"
 import { IndustryPicker } from "@/components/receptionist-portal/studio/industry-picker"
 import { NumbersPanel } from "@/components/receptionist-portal/studio/numbers"
-import { TestCall } from "@/components/receptionist-portal/studio/test-call"
+import { TestCall, ownerHref } from "@/components/receptionist-portal/studio/test-call"
 import { plannedSmsCapabilities, voiceCapabilities, voiceCapabilityIds, type VoiceCapabilityId } from "@/lib/receptionist/studio/capabilities"
 import { getIndustry } from "@/lib/receptionist/studio/industries"
 import { personalities, personalityIds, type PersonalityId } from "@/lib/receptionist/studio/personalities"
@@ -375,7 +376,10 @@ function StudioReady({ initial }: { initial: StudioOverview }) {
               {saved ? <code className="st-id" title="Retell agent ID">{saved.id}</code> : null}
             </div>
             {saved ? (
-              <TestCall key={saved.id} agentId={saved.id} demo={(saved.config ?? form).mode === "demo"} blockedReason={blocked} />
+              <>
+                <TestCall key={saved.id} agentId={saved.id} blockedReason={blocked} />
+                <Link href={ownerHref(saved.id)} className="pt-linkbtn st-owner-link">Open the owner&apos;s view</Link>
+              </>
             ) : (
               <p className="pt-muted">Create a receptionist and you can call it right here from the browser, then put it on a number for the owner to call.</p>
             )}

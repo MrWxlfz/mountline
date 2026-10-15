@@ -8,15 +8,15 @@ import { startStudioTestCall, stopStudioTestCall } from "@/app/(marketing)/recep
 type Phase = "idle" | "mic" | "connecting" | "live" | "ended" | "error"
 type Turn = { role: string; content: string }
 
-/** Where the owner's side of a call lives: Studio opens it the moment a test call ends. */
-export const ownerHref = (agentId: string, callId?: string | null) =>
-  `/receptionist/owner?agent=${encodeURIComponent(agentId)}${callId ? `&call=${encodeURIComponent(callId)}` : ""}`
+/** The staff app (the business's side of a call): Studio opens it the moment a test call ends. */
+export const staffHref = (agentId: string, callId?: string | null) =>
+  `/receptionist/staff?agent=${encodeURIComponent(agentId)}${callId ? `&call=${encodeURIComponent(callId)}` : ""}`
 
 /**
  * A real Retell web call in the browser. The server mints a short-lived access token for a Studio
  * agent (the API key never leaves the server); the Retell browser SDK joins with the microphone.
  * Ending, unmounting, or switching receptionists always stops the call and releases the mic. When a
- * connected call ends, it goes straight to the owner view, where the call's details arrive.
+ * connected call ends, it goes straight to the staff app, where the call's details arrive.
  */
 export function TestCall({ agentId, blockedReason }: { agentId: string; blockedReason: string | null }) {
   const router = useRouter()
@@ -66,10 +66,10 @@ export function TestCall({ agentId, blockedReason }: { agentId: string; blockedR
     transcript.current?.scrollTo({ top: transcript.current.scrollHeight, behavior: "smooth" })
   }, [turns])
 
-  // The call is over: show it from the owner's side.
+  // The call is over: show it the way the business's staff would see it.
   useEffect(() => {
     // startedAt is only set once the call connected; calls that never connected stay here.
-    if (phase === "ended" && callId && startedAt) router.push(ownerHref(agentId, callId))
+    if (phase === "ended" && callId && startedAt) router.push(staffHref(agentId, callId))
   }, [phase, callId, startedAt, agentId, router])
 
   async function start() {
@@ -208,7 +208,7 @@ export function TestCall({ agentId, blockedReason }: { agentId: string; blockedR
       ) : null}
 
       {phase === "ended" && callId && startedAt ? (
-        <p className="pt-muted small st-gap"><span className="pt-spin dark" aria-hidden="true" />Opening the owner&apos;s view…</p>
+        <p className="pt-muted small st-gap"><span className="pt-spin dark" aria-hidden="true" />Opening the staff app…</p>
       ) : null}
     </div>
   )

@@ -84,7 +84,7 @@ test("the old triangle logo lives only in the rebrand notice", async () => {
 test("the receptionist demo portal is team-only, keeps Retell on the server, and limits outbound calls", async () => {
   const [page, ownerPage, actions, studioActions, retell, portal] = await Promise.all([
     read("app/(marketing)/receptionist/page.tsx"),
-    read("app/(marketing)/receptionist/owner/page.tsx"),
+    read("app/(marketing)/receptionist/staff/page.tsx"),
     read("app/(marketing)/receptionist/actions.ts"),
     read("app/(marketing)/receptionist/studio-actions.ts"),
     read("lib/receptionist/retell.ts"),

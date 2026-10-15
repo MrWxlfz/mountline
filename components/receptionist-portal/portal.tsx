@@ -32,9 +32,12 @@ export type PortalState =
 /** Early-access price shown to prospects during a demo. TODO(luke): change here if it moves. */
 const EARLY_ACCESS = "Early access · $74.99/mo, setup included"
 
-export type PortalView = "line" | "studio"
+export type PortalView = "line" | "studio" | "staff"
 
-/** The portal shell. "line" is the live demo line; "studio" builds demo receptionists (passed in as children). */
+/**
+ * The portal shell. "line" is the live demo line; "studio" builds demo receptionists and "staff" is the
+ * simulated staff app (both passed in as children).
+ */
 export function ReceptionistPortal({ view, initial, children }: { view: PortalView; initial?: PortalState; children?: React.ReactNode }) {
   return (
     <div className="mk-portal">
@@ -45,6 +48,7 @@ export function ReceptionistPortal({ view, initial, children }: { view: PortalVi
           <nav className="pt-views" aria-label="Portal sections">
             <Link href="/receptionist" className="pt-view" aria-current={view === "line" ? "page" : undefined}>Demo line</Link>
             <Link href="/receptionist?view=studio" className="pt-view" aria-current={view === "studio" ? "page" : undefined}>Studio</Link>
+            <Link href="/receptionist/staff" className="pt-view" aria-current={view === "staff" ? "page" : undefined}>Staff app</Link>
           </nav>
           <div className="pt-top-right">
             <span className="pt-pill">{EARLY_ACCESS}</span>
@@ -53,7 +57,7 @@ export function ReceptionistPortal({ view, initial, children }: { view: PortalVi
           </div>
         </div>
       </header>
-      {view === "studio" ? children : initial?.status === "ready" ? <ReadyPortal state={initial} /> : initial ? <NotReady state={initial} /> : null}
+      {view !== "line" ? children : initial?.status === "ready" ? <ReadyPortal state={initial} /> : initial ? <NotReady state={initial} /> : null}
     </div>
   )
 }

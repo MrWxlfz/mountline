@@ -32,7 +32,6 @@ export function useCallFeed(input: { agentId: string; industry: Industry; calls:
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [banners, setBanners] = useState<Notice[]>([])
   const [inbox, setInbox] = useState<Notice[]>([])
-  const [unread, setUnread] = useState(0)
   // Calls watched until Retell finishes analyzing them, and when each started being watched.
   const watching = useRef(new Map<string, number>(focusCallId ? [[focusCallId, loadedAt]] : []))
   const [watched, setWatched] = useState<string[]>(focusCallId ? [focusCallId] : [])
@@ -50,7 +49,6 @@ export function useCallFeed(input: { agentId: string; industry: Industry; calls:
     const notice: Notice = { id: `${callId}-${Date.now()}`, callId, event, caller: readField(data, "caller_name"), at: Date.now() }
     setBanners((current) => [notice, ...current].slice(0, 2))
     setInbox((current) => [notice, ...current].slice(0, 20))
-    setUnread((count) => count + 1)
     window.setTimeout(() => setBanners((current) => current.filter((entry) => entry.id !== notice.id)), BANNER_MS)
   }, [industry])
 
@@ -131,10 +129,8 @@ export function useCallFeed(input: { agentId: string; industry: Industry; calls:
     watched,
     banners,
     inbox,
-    unread,
     ensure,
     dismissBanner: (id: string) => setBanners((current) => current.filter((entry) => entry.id !== id)),
-    markRead: () => setUnread(0),
   }
 }
 

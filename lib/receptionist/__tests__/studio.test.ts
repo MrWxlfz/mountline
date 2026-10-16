@@ -4,6 +4,7 @@ import test from "node:test"
 import { normalizeCapabilities, plannedSmsCapabilities, voiceCapabilityIds } from "../studio/capabilities.ts"
 import { asTeamMember, createRateLimit, NOT_TEAM } from "../studio/guard.ts"
 import { ownerEvent, ownerFieldLibrary, readField } from "../studio/owner.ts"
+import { integrations } from "../studio/integrations.ts"
 import { getSafeTeamRedirect } from "../../auth/identity-rules.ts"
 import { getIndustry, industries, searchIndustries } from "../studio/industries.ts"
 import { buildStudioReceptionist, firstMessageFor } from "../studio/prompt.ts"
@@ -417,5 +418,19 @@ test("sign-in only returns to /receptionist pages on this site", () => {
   assert.equal(getSafeTeamRedirect("/receptionist/owner?agent=agent_1"), "/receptionist/owner?agent=agent_1")
   for (const bad of ["https://evil.example/receptionist", "//evil.example/receptionist", "/dashboard", "/receptionistx", "receptionist", "", null, undefined]) {
     assert.equal(getSafeTeamRedirect(bad), null, String(bad))
+  }
+})
+
+test("demo integrations never reach the voice prompt, and say they're demos", async () => {
+  const { readFile } = await import("node:fs/promises")
+  const promptSource = await readFile(new URL("../studio/prompt.ts", import.meta.url), "utf8")
+  assert.doesNotMatch(promptSource, /integrations/)
+  for (const industry of industries) {
+    const prompt = promptFor({ industry: industry.id, capabilities: [...industry.defaults] })
+    for (const integration of integrations) assert.ok(!prompt.includes(integration.name), `${integration.name} leaked into ${industry.id}`)
+  }
+  for (const integration of integrations) {
+    assert.ok(integration.permissions.length > 0 && integration.options.length > 0)
+    assert.match(integration.effect, /^Would /, "linked effects are phrased as what would happen")
   }
 })
